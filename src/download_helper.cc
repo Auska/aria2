@@ -471,8 +471,8 @@ public:
         A2_LOG_ERROR(fmt(MSG_UNRECOGNIZED_URI, uri.c_str()));
       }
     }
-  }
 #endif // ENABLE_CONTROL_FILE
+  }
 };
 } // namespace
 
