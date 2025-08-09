@@ -644,6 +644,8 @@ AM_CONDITIONAL([HAVE_SQLITE3], [test "x$have_sqlite3" = "xyes"])
 # Set conditional for libssh2
 AM_CONDITIONAL([HAVE_LIBSSH2], [test "x$have_libssh2" = "xyes"])
 
+AM_CONDITIONAL([ENABLE_CONTROL_FILE], true)
+
 case "$host" in
   *solaris*)
     save_LIBS=$LIBS
