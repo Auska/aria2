@@ -808,8 +808,14 @@
 #define TEXT_BT_EXCLUDE_CLIENT_IDS                                      \
   _(" --bt-exclude-client-ids=CLIENTID[,...] Comma separated list of BitTorrent client\n" \
     "                              ID prefixes to exclude. If a client ID starts with\n" \
-    "                              the prefix, the peer is excluded. Example:\n" \
-    "                              aria2c --bt-exclude-client-ids=-SD,-XF")
+    "                              the prefix, the peer is excluded. This option has\n" \
+    "                              the highest priority and overrides --bt-include-client-ids.\n" \
+    "                              Example: aria2c --bt-exclude-client-ids=-SD,-XF")
+#define TEXT_BT_INCLUDE_CLIENT_IDS                                      \
+  _(" --bt-include-client-ids=CLIENTID[,...] Comma separated list of BitTorrent client\n" \
+    "                              ID prefixes to include. If this option is used, only\n" \
+    "                              peers with client IDs matching the prefixes will be\n" \
+    "                              allowed to connect. Example: aria2c --bt-include-client-ids=-TR,-UT")
 #define TEXT_MAX_DOWNLOAD_RESULT                \
   _(" --max-download-result=NUM    Set maximum number of download result kept in\n" \
     "                              memory. The download results are completed/error/\n" \

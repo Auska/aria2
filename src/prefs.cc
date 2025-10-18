@@ -563,6 +563,8 @@ PrefPtr PREF_BT_TRACKER = makePref("bt-tracker");
 PrefPtr PREF_BT_EXCLUDE_TRACKER = makePref("bt-exclude-tracker");
 // values: string
 PrefPtr PREF_BT_EXCLUDE_CLIENT_IDS = makePref("bt-exclude-client-ids");
+// values: string
+PrefPtr PREF_BT_INCLUDE_CLIENT_IDS = makePref("bt-include-client-ids");
 // values: true | false
 PrefPtr PREF_BT_REMOVE_UNSELECTED_FILE = makePref("bt-remove-unselected-file");
 PrefPtr PREF_BT_DETACH_SEED_ONLY = makePref("bt-detach-seed-only");
