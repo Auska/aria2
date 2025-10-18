@@ -81,6 +81,7 @@
 #include "UTMetadataRequestFactory.h"
 #include "UTMetadataRequestTracker.h"
 #include "wallclock.h"
+#include "Option.h"
 
 namespace aria2 {
 
@@ -131,6 +132,31 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
     throw DL_ABORT_EX(
         fmt("CUID#%" PRId64 " - Drop connection from the same Peer ID", cuid_));
   }
+
+  std::string_view peerStr(reinterpret_cast<const char*>(message->getPeerId()), 8);
+
+  bool banned = false;
+  
+  // Check user-defined excluded client IDs
+  const std::string& excludeClientIds = 
+      downloadContext_->getOwnerRequestGroup()->getOption()->get(PREF_BT_EXCLUDE_CLIENT_IDS);
+  if (!excludeClientIds.empty()) {
+    std::vector<std::string> excludedIds;
+    util::split(excludeClientIds.begin(), excludeClientIds.end(), 
+                std::back_inserter(excludedIds), ',', true);
+    for (const std::string& excludedId : excludedIds) {
+      if (peerStr.length() >= excludedId.length() &&
+          peerStr.substr(0, excludedId.length()) == excludedId) {
+        banned = true;
+        break;
+      }
+    }
+  }
+
+  if (banned) {
+    throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
+  }
+
   for (auto& peer : peerStorage_->getUsedPeers()) {
     if (peer->isActive() &&
         memcmp(peer->getPeerId(), message->getPeerId(), PEER_ID_LENGTH) == 0) {

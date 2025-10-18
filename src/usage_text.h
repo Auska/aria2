@@ -805,6 +805,11 @@
     "                              announce URIs. When specifying '*' in shell\n" \
     "                              command-line, don't forget to escape or quote it.\n" \
     "                              See also --bt-tracker option.")
+#define TEXT_BT_EXCLUDE_CLIENT_IDS                                      \
+  _(" --bt-exclude-client-ids=CLIENTID[,...] Comma separated list of BitTorrent client\n" \
+    "                              ID prefixes to exclude. If a client ID starts with\n" \
+    "                              the prefix, the peer is excluded. Example:\n" \
+    "                              aria2c --bt-exclude-client-ids=-SD,-XF")
 #define TEXT_MAX_DOWNLOAD_RESULT                \
   _(" --max-download-result=NUM    Set maximum number of download result kept in\n" \
     "                              memory. The download results are completed/error/\n" \

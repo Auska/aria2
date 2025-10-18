@@ -1499,6 +1499,16 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
+    OptionHandler* op(new DefaultOptionHandler(
+        PREF_BT_EXCLUDE_CLIENT_IDS, TEXT_BT_EXCLUDE_CLIENT_IDS, NO_DEFAULT_VALUE,
+        "CLIENTID,..."));
+    op->addTag(TAG_BITTORRENT);
+    op->setInitialOption(true);
+    op->setChangeGlobalOption(true);
+    op->setChangeOptionForReserved(true);
+    handlers.push_back(op);
+  }
+  {
     OptionHandler* op(
         new DefaultOptionHandler(PREF_BT_EXTERNAL_IP, TEXT_BT_EXTERNAL_IP,
                                  NO_DEFAULT_VALUE, "a numeric IP address"));
