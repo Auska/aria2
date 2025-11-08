@@ -241,6 +241,13 @@ public:
   void enableMetadataGetMode() { metadataGetMode_ = true; }
 
   void setTcpPort(uint16_t port) { tcpPort_ = port; }
+  
+private:
+  // Flag to indicate if this peer should be choked due to client ID filtering
+  bool chokedByClientIdFilter_;
+  
+  // Check if peer should be choked due to client ID filtering
+  bool shouldChokeDueToClientIdFilter();
 };
 
 } // namespace aria2

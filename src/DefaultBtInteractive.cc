@@ -107,7 +107,8 @@ DefaultBtInteractive::DefaultBtInteractive(
       numReceivedMessage_(0),
       maxOutstandingRequest_(DEFAULT_MAX_OUTSTANDING_REQUEST),
       requestGroupMan_(nullptr),
-      tcpPort_(0)
+      tcpPort_(0),
+      chokedByClientIdFilter_(false)
 {
 }
 
@@ -134,29 +135,22 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
         fmt("CUID#%" PRId64 " - Drop connection from the same Peer ID", cuid_));
   }
 
-  // Check if peer should be excluded based on client ID
-  if (BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_)) {
+  // Check if peer should be excluded or not included based on client ID
+  bool isExcluded = BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_);
+  bool isIncluded = BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_);
+  
+  if (isExcluded || !isIncluded) {
     std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
     if (mode == "choke") {
-      // In choke mode, we choke the peer instead of disconnecting
-      peer_->amChoking(true);
-      A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer with banned client ID.", cuid_));
+      // In choke mode, mark the peer as chokingRequired to prevent sending data
+      if (peer_->isActive()) {
+        peer_->chokingRequired(true);
+        chokedByClientIdFilter_ = true;
+      }
+      A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer with unwanted client ID.", cuid_));
     } else {
       // Default disconnect mode
-      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
-    }
-  }
-
-  // Check if peer should be included based on client ID
-  if (!BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_)) {
-    std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
-    if (mode == "choke") {
-      // In choke mode, we choke the peer instead of disconnecting
-      peer_->amChoking(true);
-      A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer not in include list.", cuid_));
-    } else {
-      // Default disconnect mode
-      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Client not in include list.", cuid_));
+      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Unwanted client ID detected.", cuid_));
     }
   }
 
@@ -276,7 +270,9 @@ void DefaultBtInteractive::addAllowedFastMessageToQueue()
 
 void DefaultBtInteractive::decideChoking()
 {
-  if (peer_->shouldBeChoking()) {
+  bool shouldChoke = chokedByClientIdFilter_ || peer_->shouldBeChoking();
+  
+  if (shouldChoke) {
     if (!peer_->amChoking()) {
       peer_->amChoking(true);
       dispatcher_->doChokingAction();
@@ -598,6 +594,16 @@ void DefaultBtInteractive::doInteractionProcessing()
     }
     numReceivedMessage_ = receiveMessages();
     detectMessageFlooding();
+    
+    // Check if this peer should be choked due to client ID filtering
+    // and ensure the choking state is maintained
+    if (shouldChokeDueToClientIdFilter()) {
+      chokedByClientIdFilter_ = true;
+      if (peer_->isActive()) {
+        peer_->chokingRequired(true);
+      }
+    }
+    
     decideChoking();
     decideInterest();
     checkHave();
@@ -722,6 +728,19 @@ void DefaultBtInteractive::setUTMetadataRequestFactory(
     std::unique_ptr<UTMetadataRequestFactory> factory)
 {
   utMetadataRequestFactory_ = std::move(factory);
+}
+
+bool DefaultBtInteractive::shouldChokeDueToClientIdFilter()
+{
+  // Check if bt-client-ids-mode is set to "choke"
+  std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
+  if (mode != "choke") {
+    return false;  // Not in choke mode, so don't choke based on client ID
+  }
+  
+  // Check if peer should be excluded or not included based on client ID
+  return BtClientFilter::isPeerExcluded(peer_->getPeerId(), downloadContext_) ||
+         !BtClientFilter::isPeerIncluded(peer_->getPeerId(), downloadContext_);
 }
 
 } // namespace aria2
