@@ -1519,6 +1519,16 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
+    OptionHandler* op(new DefaultOptionHandler(
+        PREF_BT_CLIENT_IDS_MODE, TEXT_BT_CLIENT_IDS_MODE, "disconnect",
+        "choke|disconnect"));
+    op->addTag(TAG_BITTORRENT);
+    op->setInitialOption(true);
+    op->setChangeGlobalOption(true);
+    op->setChangeOptionForReserved(true);
+    handlers.push_back(op);
+  }
+  {
     OptionHandler* op(
         new DefaultOptionHandler(PREF_BT_EXTERNAL_IP, TEXT_BT_EXTERNAL_IP,
                                  NO_DEFAULT_VALUE, "a numeric IP address"));

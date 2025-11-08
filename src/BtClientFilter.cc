@@ -113,4 +113,9 @@ bool BtClientFilter::isPeerIncluded(const unsigned char* peerId,
   return false;  // Peer is not included
 }
 
+std::string BtClientFilter::getClientIdsMode(const std::shared_ptr<DownloadContext>& downloadContext)
+{
+  return downloadContext->getOwnerRequestGroup()->getOption()->get(PREF_BT_CLIENT_IDS_MODE);
+}
+
 } // namespace aria2

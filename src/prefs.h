@@ -515,6 +515,8 @@ extern PrefPtr PREF_BT_EXCLUDE_TRACKER;
 extern PrefPtr PREF_BT_EXCLUDE_CLIENT_IDS;
 // values: string
 extern PrefPtr PREF_BT_INCLUDE_CLIENT_IDS;
+// values: choke | disconnect
+extern PrefPtr PREF_BT_CLIENT_IDS_MODE;
 // values: true | false
 extern PrefPtr PREF_BT_REMOVE_UNSELECTED_FILE;
 // values: true |false

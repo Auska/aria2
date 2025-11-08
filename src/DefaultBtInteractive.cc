@@ -82,6 +82,7 @@
 #include "UTMetadataRequestTracker.h"
 #include "wallclock.h"
 #include "BtClientFilter.h"
+#include "Peer.h"
 
 namespace aria2 {
 
@@ -135,12 +136,28 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
 
   // Check if peer should be excluded based on client ID
   if (BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_)) {
-    throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
+    std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
+    if (mode == "choke") {
+      // In choke mode, we choke the peer instead of disconnecting
+      peer_->amChoking(true);
+      A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer with banned client ID.", cuid_));
+    } else {
+      // Default disconnect mode
+      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
+    }
   }
 
   // Check if peer should be included based on client ID
   if (!BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_)) {
-    throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Client not in include list.", cuid_));
+    std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
+    if (mode == "choke") {
+      // In choke mode, we choke the peer instead of disconnecting
+      peer_->amChoking(true);
+      A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer not in include list.", cuid_));
+    } else {
+      // Default disconnect mode
+      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Client not in include list.", cuid_));
+    }
   }
 
   for (auto& peer : peerStorage_->getUsedPeers()) {

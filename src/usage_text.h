@@ -816,6 +816,13 @@
     "                              ID prefixes to include. If this option is used, only\n" \
     "                              peers with client IDs matching the prefixes will be\n" \
     "                              allowed to connect. Example: aria2c --bt-include-client-ids=-TR,-UT")
+
+#define TEXT_BT_CLIENT_IDS_MODE                                         \
+  _(" --bt-client-ids-mode=MODE    Set how to handle peers with unwanted client IDs.\n" \
+    "                              There are two modes: 'choke' and 'disconnect'.\n" \
+    "                              In 'choke' mode, unwanted peers are choked (not allowed\n" \
+    "                              to download from us). In 'disconnect' mode, unwanted\n" \
+    "                              peers are immediately disconnected. Default: disconnect")
 #define TEXT_MAX_DOWNLOAD_RESULT                \
   _(" --max-download-result=NUM    Set maximum number of download result kept in\n" \
     "                              memory. The download results are completed/error/\n" \

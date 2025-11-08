@@ -66,6 +66,13 @@ public:
   static bool isPeerIncluded(const unsigned char* peerId,
                              const std::shared_ptr<DownloadContext>& downloadContext);
 
+  /**
+   * Gets the client ID filtering mode (choke or disconnect).
+   * @param downloadContext The download context containing options
+   * @return "choke" or "disconnect"
+   */
+  static std::string getClientIdsMode(const std::shared_ptr<DownloadContext>& downloadContext);
+
 private:
   /**
    * Gets the list of excluded client IDs from options.
