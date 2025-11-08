@@ -81,7 +81,7 @@
 #include "UTMetadataRequestFactory.h"
 #include "UTMetadataRequestTracker.h"
 #include "wallclock.h"
-#include "Option.h"
+#include "BtClientFilter.h"
 
 namespace aria2 {
 
@@ -133,40 +133,14 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
         fmt("CUID#%" PRId64 " - Drop connection from the same Peer ID", cuid_));
   }
 
-  std::string_view peerStr(reinterpret_cast<const char*>(message->getPeerId()), 8);
-
-  const std::string& excludeClientIds = 
-      downloadContext_->getOwnerRequestGroup()->getOption()->get(PREF_BT_EXCLUDE_CLIENT_IDS);
-  if (!excludeClientIds.empty()) {
-    std::vector<std::string> excludedIds;
-    util::split(excludeClientIds.begin(), excludeClientIds.end(), 
-                std::back_inserter(excludedIds), ',', true);
-    for (const std::string& excludedId : excludedIds) {
-      if (peerStr.length() >= excludedId.length() &&
-          peerStr.substr(0, excludedId.length()) == excludedId) {
-        throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
-        break;
-      }
-    }
+  // Check if peer should be excluded based on client ID
+  if (BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_)) {
+    throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Banned substring in peer ID detected.", cuid_));
   }
 
-  const std::string& includeClientIds = 
-      downloadContext_->getOwnerRequestGroup()->getOption()->get(PREF_BT_INCLUDE_CLIENT_IDS);
-  if (!includeClientIds.empty()) {
-    std::vector<std::string> includedIds;
-    util::split(includeClientIds.begin(), includeClientIds.end(), 
-                std::back_inserter(includedIds), ',', true);
-    bool isIncluded = false;
-    for (const std::string& includedId : includedIds) {
-      if (peerStr.length() >= includedId.length() &&
-          peerStr.substr(0, includedId.length()) == includedId) {
-        isIncluded = true;
-        break;
-      }
-    }
-    if (!isIncluded) {
-      throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Client not in include list.", cuid_));
-    }
+  // Check if peer should be included based on client ID
+  if (!BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_)) {
+    throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Client not in include list.", cuid_));
   }
 
   for (auto& peer : peerStorage_->getUsedPeers()) {

@@ -62,6 +62,7 @@ class DHTNode;
 class RequestGroupMan;
 class UTMetadataRequestFactory;
 class UTMetadataRequestTracker;
+class Option;
 
 class FloodingStat {
 private:
