@@ -82,7 +82,6 @@
 #include "UTMetadataRequestTracker.h"
 #include "wallclock.h"
 #include "BtClientFilter.h"
-#include "Peer.h"
 
 namespace aria2 {
 
@@ -110,6 +109,10 @@ DefaultBtInteractive::DefaultBtInteractive(
       tcpPort_(0),
       chokedByClientIdFilter_(false)
 {
+  // Parse client ID filter lists once at construction time
+  excludedClientIds_ = BtClientFilter::getExcludedClientIds(downloadContext_);
+  includedClientIds_ = BtClientFilter::getIncludedClientIds(downloadContext_);
+  clientIdsMode_ = BtClientFilter::getClientIdsMode(downloadContext_);
 }
 
 DefaultBtInteractive::~DefaultBtInteractive() = default;
@@ -138,12 +141,11 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
   // Check if peer should be excluded or not included based on client ID
   // Skip the check if the peer is already a seeder (has 100% progress)
   if (!peer_->isSeeder()) {
-    bool isExcluded = BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_);
-    bool isIncluded = BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_);
+    bool isExcluded = BtClientFilter::isPeerExcluded(message->getPeerId(), excludedClientIds_);
+    bool isIncluded = BtClientFilter::isPeerIncluded(message->getPeerId(), includedClientIds_);
 
     if (isExcluded || !isIncluded) {
-      std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
-      if (mode == "choke") {
+      if (clientIdsMode_ == "choke") {
         // In choke mode, mark the peer as chokingRequired to prevent sending data
         if (peer_->isActive()) {
           peer_->chokingRequired(true);
@@ -746,14 +748,13 @@ bool DefaultBtInteractive::shouldChokeDueToClientIdFilter()
   }
 
   // Check if bt-client-ids-mode is set to "choke"
-  std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
-  if (mode != "choke") {
+  if (clientIdsMode_ != "choke") {
     return false;  // Not in choke mode, so don't choke based on client ID
   }
 
   // Check if peer should be excluded or not included based on client ID
-  return BtClientFilter::isPeerExcluded(peer_->getPeerId(), downloadContext_) ||
-         !BtClientFilter::isPeerIncluded(peer_->getPeerId(), downloadContext_);
+  return BtClientFilter::isPeerExcluded(peer_->getPeerId(), excludedClientIds_) ||
+         !BtClientFilter::isPeerIncluded(peer_->getPeerId(), includedClientIds_);
 }
 
 } // namespace aria2

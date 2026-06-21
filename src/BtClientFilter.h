@@ -44,7 +44,6 @@
 namespace aria2 {
 
 class DownloadContext;
-class Option;
 
 class BtClientFilter {
 public:
@@ -67,13 +66,31 @@ public:
                              const std::shared_ptr<DownloadContext>& downloadContext);
 
   /**
+   * Checks if a peer's client ID matches any prefix in the given list.
+   * @param peerId The peer ID to check
+   * @param clientIds The list of client ID prefixes to match against
+   * @return true if the peer ID starts with any prefix in the list
+   */
+  static bool isPeerExcluded(const unsigned char* peerId,
+                             const std::vector<std::string>& excludedIds);
+
+  /**
+   * Checks if a peer's client ID matches any prefix in the given list.
+   * @param peerId The peer ID to check
+   * @param clientIds The list of client ID prefixes to match against
+   * @return true if the peer ID starts with any prefix in the list,
+   *         or if the list is empty (all peers included)
+   */
+  static bool isPeerIncluded(const unsigned char* peerId,
+                             const std::vector<std::string>& includedIds);
+
+  /**
    * Gets the client ID filtering mode (choke or disconnect).
    * @param downloadContext The download context containing options
    * @return "choke" or "disconnect"
    */
   static std::string getClientIdsMode(const std::shared_ptr<DownloadContext>& downloadContext);
 
-private:
   /**
    * Gets the list of excluded client IDs from options.
    * @param downloadContext The download context containing options
@@ -89,6 +106,16 @@ private:
    */
   static std::vector<std::string> getIncludedClientIds(
       const std::shared_ptr<DownloadContext>& downloadContext);
+
+private:
+  /**
+   * Checks if a peer's client ID matches any prefix in the given list.
+   * @param peerId The peer ID to check
+   * @param clientIds The list of client ID prefixes to match against
+   * @return true if the peer ID starts with any prefix in the list
+   */
+  static bool matchClientId(const unsigned char* peerId,
+                            const std::vector<std::string>& clientIds);
 };
 
 } // namespace aria2

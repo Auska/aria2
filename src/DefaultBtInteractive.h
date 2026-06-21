@@ -62,7 +62,6 @@ class DHTNode;
 class RequestGroupMan;
 class UTMetadataRequestFactory;
 class UTMetadataRequestTracker;
-class Option;
 
 class FloodingStat {
 private:
@@ -245,7 +244,12 @@ public:
 private:
   // Flag to indicate if this peer should be choked due to client ID filtering
   bool chokedByClientIdFilter_;
-  
+
+  // Cached client ID filter lists parsed once at construction time
+  std::vector<std::string> excludedClientIds_;
+  std::vector<std::string> includedClientIds_;
+  std::string clientIdsMode_;
+
   // Check if peer should be choked due to client ID filtering
   bool shouldChokeDueToClientIdFilter();
 };

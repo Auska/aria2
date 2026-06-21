@@ -49,68 +49,74 @@ namespace aria2 {
 std::vector<std::string> BtClientFilter::getExcludedClientIds(
     const std::shared_ptr<DownloadContext>& downloadContext)
 {
-  const std::string& excludeClientIds = 
+  const std::string& excludeClientIds =
       downloadContext->getOwnerRequestGroup()->getOption()->get(PREF_BT_EXCLUDE_CLIENT_IDS);
-  
+
   std::vector<std::string> excludedIds;
   if (!excludeClientIds.empty()) {
-    util::split(excludeClientIds.begin(), excludeClientIds.end(), 
+    util::split(excludeClientIds.begin(), excludeClientIds.end(),
                 std::back_inserter(excludedIds), ',', true);
   }
-  
+
   return excludedIds;
 }
 
 std::vector<std::string> BtClientFilter::getIncludedClientIds(
     const std::shared_ptr<DownloadContext>& downloadContext)
 {
-  const std::string& includeClientIds = 
+  const std::string& includeClientIds =
       downloadContext->getOwnerRequestGroup()->getOption()->get(PREF_BT_INCLUDE_CLIENT_IDS);
-  
+
   std::vector<std::string> includedIds;
   if (!includeClientIds.empty()) {
-    util::split(includeClientIds.begin(), includeClientIds.end(), 
+    util::split(includeClientIds.begin(), includeClientIds.end(),
                 std::back_inserter(includedIds), ',', true);
   }
-  
+
   return includedIds;
+}
+
+bool BtClientFilter::matchClientId(const unsigned char* peerId,
+                                   const std::vector<std::string>& clientIds)
+{
+  std::string_view peerStr(reinterpret_cast<const char*>(peerId), 8);
+
+  for (const auto& clientId : clientIds) {
+    if (peerStr.substr(0, clientId.length()) == clientId) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 bool BtClientFilter::isPeerExcluded(const unsigned char* peerId,
                                     const std::shared_ptr<DownloadContext>& downloadContext)
 {
-  std::string_view peerStr(reinterpret_cast<const char*>(peerId), 8);
-  std::vector<std::string> excludedIds = getExcludedClientIds(downloadContext);
+  return isPeerExcluded(peerId, getExcludedClientIds(downloadContext));
+}
 
-  for (const std::string& excludedId : excludedIds) {
-    if (peerStr.length() >= excludedId.length() &&
-        peerStr.substr(0, excludedId.length()) == excludedId) {
-      return true;  // Peer is excluded
-    }
-  }
-
-  return false;  // Peer is not excluded
+bool BtClientFilter::isPeerExcluded(const unsigned char* peerId,
+                                    const std::vector<std::string>& excludedIds)
+{
+  return matchClientId(peerId, excludedIds);
 }
 
 bool BtClientFilter::isPeerIncluded(const unsigned char* peerId,
                                     const std::shared_ptr<DownloadContext>& downloadContext)
 {
-  std::string_view peerStr(reinterpret_cast<const char*>(peerId), 8);
-  std::vector<std::string> includedIds = getIncludedClientIds(downloadContext);
+  return isPeerIncluded(peerId, getIncludedClientIds(downloadContext));
+}
 
+bool BtClientFilter::isPeerIncluded(const unsigned char* peerId,
+                                    const std::vector<std::string>& includedIds)
+{
   // If no include list is specified, all peers are considered included
   if (includedIds.empty()) {
     return true;
   }
 
-  for (const std::string& includedId : includedIds) {
-    if (peerStr.length() >= includedId.length() &&
-        peerStr.substr(0, includedId.length()) == includedId) {
-      return true;  // Peer is included
-    }
-  }
-
-  return false;  // Peer is not included
+  return matchClientId(peerId, includedIds);
 }
 
 std::string BtClientFilter::getClientIdsMode(const std::shared_ptr<DownloadContext>& downloadContext)
