@@ -805,6 +805,24 @@
     "                              announce URIs. When specifying '*' in shell\n" \
     "                              command-line, don't forget to escape or quote it.\n" \
     "                              See also --bt-tracker option.")
+#define TEXT_BT_EXCLUDE_CLIENT_IDS                                      \
+  _(" --bt-exclude-client-ids=CLIENTID[,...] Comma separated list of BitTorrent client\n" \
+    "                              ID prefixes to exclude. If a client ID starts with\n" \
+    "                              the prefix, the peer is excluded. This option has\n" \
+    "                              the highest priority and overrides --bt-include-client-ids.\n" \
+    "                              Example: aria2c --bt-exclude-client-ids=-SD,-XF")
+#define TEXT_BT_INCLUDE_CLIENT_IDS                                      \
+  _(" --bt-include-client-ids=CLIENTID[,...] Comma separated list of BitTorrent client\n" \
+    "                              ID prefixes to include. If this option is used, only\n" \
+    "                              peers with client IDs matching the prefixes will be\n" \
+    "                              allowed to connect. Example: aria2c --bt-include-client-ids=-TR,-UT")
+
+#define TEXT_BT_CLIENT_IDS_MODE                                         \
+  _(" --bt-client-ids-mode=MODE    Set how to handle peers with unwanted client IDs.\n" \
+    "                              There are two modes: 'choke' and 'disconnect'.\n" \
+    "                              In 'choke' mode, unwanted peers are choked (not allowed\n" \
+    "                              to download from us). In 'disconnect' mode, unwanted\n" \
+    "                              peers are immediately disconnected. Default: disconnect")
 #define TEXT_MAX_DOWNLOAD_RESULT                \
   _(" --max-download-result=NUM    Set maximum number of download result kept in\n" \
     "                              memory. The download results are completed/error/\n" \

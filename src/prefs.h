@@ -511,6 +511,12 @@ extern PrefPtr PREF_ON_BT_DOWNLOAD_COMPLETE;
 extern PrefPtr PREF_BT_TRACKER;
 // values: string
 extern PrefPtr PREF_BT_EXCLUDE_TRACKER;
+// values: string
+extern PrefPtr PREF_BT_EXCLUDE_CLIENT_IDS;
+// values: string
+extern PrefPtr PREF_BT_INCLUDE_CLIENT_IDS;
+// values: choke | disconnect
+extern PrefPtr PREF_BT_CLIENT_IDS_MODE;
 // values: true | false
 extern PrefPtr PREF_BT_REMOVE_UNSELECTED_FILE;
 // values: true |false

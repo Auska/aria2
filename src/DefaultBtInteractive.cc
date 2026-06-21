@@ -81,6 +81,8 @@
 #include "UTMetadataRequestFactory.h"
 #include "UTMetadataRequestTracker.h"
 #include "wallclock.h"
+#include "BtClientFilter.h"
+#include "Peer.h"
 
 namespace aria2 {
 
@@ -105,7 +107,8 @@ DefaultBtInteractive::DefaultBtInteractive(
       numReceivedMessage_(0),
       maxOutstandingRequest_(DEFAULT_MAX_OUTSTANDING_REQUEST),
       requestGroupMan_(nullptr),
-      tcpPort_(0)
+      tcpPort_(0),
+      chokedByClientIdFilter_(false)
 {
 }
 
@@ -131,6 +134,29 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
     throw DL_ABORT_EX(
         fmt("CUID#%" PRId64 " - Drop connection from the same Peer ID", cuid_));
   }
+
+  // Check if peer should be excluded or not included based on client ID
+  // Skip the check if the peer is already a seeder (has 100% progress)
+  if (!peer_->isSeeder()) {
+    bool isExcluded = BtClientFilter::isPeerExcluded(message->getPeerId(), downloadContext_);
+    bool isIncluded = BtClientFilter::isPeerIncluded(message->getPeerId(), downloadContext_);
+
+    if (isExcluded || !isIncluded) {
+      std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
+      if (mode == "choke") {
+        // In choke mode, mark the peer as chokingRequired to prevent sending data
+        if (peer_->isActive()) {
+          peer_->chokingRequired(true);
+          chokedByClientIdFilter_ = true;
+        }
+        A2_LOG_INFO(fmt("CUID#%" PRId64 " - Choking peer with unwanted client ID.", cuid_));
+      } else {
+        // Default disconnect mode
+        throw DL_ABORT_EX(fmt("CUID#%" PRId64 " - Unwanted client ID detected.", cuid_));
+      }
+    }
+  }
+
   for (auto& peer : peerStorage_->getUsedPeers()) {
     if (peer->isActive() &&
         memcmp(peer->getPeerId(), message->getPeerId(), PEER_ID_LENGTH) == 0) {
@@ -247,7 +273,9 @@ void DefaultBtInteractive::addAllowedFastMessageToQueue()
 
 void DefaultBtInteractive::decideChoking()
 {
-  if (peer_->shouldBeChoking()) {
+  bool shouldChoke = chokedByClientIdFilter_ || peer_->shouldBeChoking();
+  
+  if (shouldChoke) {
     if (!peer_->amChoking()) {
       peer_->amChoking(true);
       dispatcher_->doChokingAction();
@@ -569,6 +597,21 @@ void DefaultBtInteractive::doInteractionProcessing()
     }
     numReceivedMessage_ = receiveMessages();
     detectMessageFlooding();
+    
+    // Check if this peer should be choked due to client ID filtering
+    // and ensure the choking state is maintained
+    if (shouldChokeDueToClientIdFilter()) {
+      chokedByClientIdFilter_ = true;
+      if (peer_->isActive()) {
+        peer_->chokingRequired(true);
+      }
+    }
+    else {
+      // Peer no longer needs to be choked by client ID filter
+      // (e.g., became a seeder with 100% progress)
+      chokedByClientIdFilter_ = false;
+    }
+    
     decideChoking();
     decideInterest();
     checkHave();
@@ -693,6 +736,24 @@ void DefaultBtInteractive::setUTMetadataRequestFactory(
     std::unique_ptr<UTMetadataRequestFactory> factory)
 {
   utMetadataRequestFactory_ = std::move(factory);
+}
+
+bool DefaultBtInteractive::shouldChokeDueToClientIdFilter()
+{
+  // If the peer is a seeder (has 100% progress), no need for client ID filtering
+  if (peer_->isSeeder()) {
+    return false;
+  }
+
+  // Check if bt-client-ids-mode is set to "choke"
+  std::string mode = BtClientFilter::getClientIdsMode(downloadContext_);
+  if (mode != "choke") {
+    return false;  // Not in choke mode, so don't choke based on client ID
+  }
+
+  // Check if peer should be excluded or not included based on client ID
+  return BtClientFilter::isPeerExcluded(peer_->getPeerId(), downloadContext_) ||
+         !BtClientFilter::isPeerIncluded(peer_->getPeerId(), downloadContext_);
 }
 
 } // namespace aria2

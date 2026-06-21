@@ -444,6 +444,7 @@ SRCS += \
 	BtAllowedFastMessage.cc BtAllowedFastMessage.h\
 	BtAnnounce.cc BtAnnounce.h\
 	BtBitfieldMessage.cc BtBitfieldMessage.h\
+	BtClientFilter.cc BtClientFilter.h\
 	BtBitfieldMessageValidator.cc BtBitfieldMessageValidator.h\
 	BtCancelMessage.cc BtCancelMessage.h\
 	BtCancelSendingPieceEvent.h\
