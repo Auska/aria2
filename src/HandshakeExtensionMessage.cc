@@ -96,6 +96,9 @@ std::string HandshakeExtensionMessage::toString() const
 
 void HandshakeExtensionMessage::doReceivedAction()
 {
+  if (peer_ && !clientVersion_.empty()) {
+    peer_->setPeerAgent(clientVersion_);
+  }
   if (tcpPort_ > 0) {
     peer_->setPort(tcpPort_);
     peer_->setIncomingPeer(false);

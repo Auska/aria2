@@ -146,6 +146,11 @@ private:
 
   uint16_t tcpPort_;
 
+  std::string excludeClientIds_;
+  std::string excludePeerAgents_;
+  bool peerAgentFiltered_;
+  PeerStorage* banPeerStorage_;
+
   void addBitfieldMessageToQueue();
   void addAllowedFastMessageToQueue();
   void addHandshakeExtendedMessageToQueue();
@@ -240,6 +245,18 @@ public:
   void enableMetadataGetMode() { metadataGetMode_ = true; }
 
   void setTcpPort(uint16_t port) { tcpPort_ = port; }
+
+  void setExcludeClientIds(const std::string& ids)
+  {
+    excludeClientIds_ = ids;
+  }
+
+  void setExcludePeerAgents(const std::string& agents)
+  {
+    excludePeerAgents_ = agents;
+  }
+
+  void setBanPeerStorage(PeerStorage* ps) { banPeerStorage_ = ps; }
 };
 
 } // namespace aria2

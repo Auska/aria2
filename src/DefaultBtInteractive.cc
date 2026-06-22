@@ -105,7 +105,9 @@ DefaultBtInteractive::DefaultBtInteractive(
       numReceivedMessage_(0),
       maxOutstandingRequest_(DEFAULT_MAX_OUTSTANDING_REQUEST),
       requestGroupMan_(nullptr),
-      tcpPort_(0)
+      tcpPort_(0),
+      peerAgentFiltered_(false),
+      banPeerStorage_(nullptr)
 {
 }
 
@@ -140,6 +142,41 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
   }
 
   peer_->setPeerId(message->getPeerId());
+
+  // Filter by client ID blacklist — substring match, block on ban
+  if (!excludeClientIds_.empty()) {
+    const unsigned char* peerId = message->getPeerId();
+    // Extract readable portion of peer ID (20 bytes, treat as ASCII prefix)
+    std::string peerIdHex = util::toHex(peerId, PEER_ID_LENGTH);
+    std::string peerIdStr(reinterpret_cast<const char*>(peerId),
+                          PEER_ID_LENGTH);
+    A2_LOG_INFO(fmt("CUID#%" PRId64
+                    " - Client ID filter: peerId=%s, exclude=%s",
+                    cuid_, peerIdHex.c_str(), excludeClientIds_.c_str()));
+    std::vector<std::string> excludes;
+    util::split(excludeClientIds_.begin(), excludeClientIds_.end(),
+                std::back_inserter(excludes), ',', true);
+    for (auto& sub : excludes) {
+      if (sub.empty()) {
+        continue;
+      }
+      if (peerIdStr.find(sub) != std::string::npos) {
+        A2_LOG_INFO(fmt("CUID#%" PRId64
+                        " - Peer blocked by bt-exclude-client-ids, "
+                        "peerId=%s, match=%s, IP=%s",
+                        cuid_, peerIdHex.c_str(), sub.c_str(),
+                        peer_->getIPAddress().c_str()));
+        if (banPeerStorage_) {
+          banPeerStorage_->addBadPeer(peer_->getIPAddress());
+        }
+        throw DL_ABORT_EX(
+            fmt("CUID#%" PRId64
+                " - Peer blocked by bt-exclude-client-ids, "
+                "peerId=%s, match=%s",
+                cuid_, peerIdHex.c_str(), sub.c_str()));
+      }
+    }
+  }
 
   if (message->isFastExtensionSupported()) {
     peer_->setFastExtensionEnabled(true);
@@ -316,6 +353,41 @@ size_t DefaultBtInteractive::receiveMessages()
                     peer_->getIPAddress().c_str(), peer_->getPort(),
                     message->toString().c_str()));
     message->doReceivedAction();
+
+    // Filter by peer agent blacklist — substring match, block on ban
+    if (peer_ && !peerAgentFiltered_ && !peer_->getPeerAgent().empty()) {
+      peerAgentFiltered_ = true;
+      const std::string& agent = peer_->getPeerAgent();
+      A2_LOG_INFO(fmt("CUID#%" PRId64
+                      " - Peer agent filter: agent=%s, exclude=%s",
+                      cuid_, util::percentEncode(agent).c_str(),
+                      excludePeerAgents_.c_str()));
+      if (!excludePeerAgents_.empty()) {
+        std::vector<std::string> excludes;
+        util::split(excludePeerAgents_.begin(), excludePeerAgents_.end(),
+                    std::back_inserter(excludes), ',', true);
+        for (auto& sub : excludes) {
+          if (sub.empty()) {
+            continue;
+          }
+          if (agent.find(sub) != std::string::npos) {
+            A2_LOG_INFO(fmt("CUID#%" PRId64
+                            " - Peer blocked by bt-exclude-peer-agents, "
+                            "agent=%s, match=%s, IP=%s",
+                            cuid_, util::percentEncode(agent).c_str(),
+                            sub.c_str(), peer_->getIPAddress().c_str()));
+            if (banPeerStorage_) {
+              banPeerStorage_->addBadPeer(peer_->getIPAddress());
+            }
+            throw DL_ABORT_EX(
+                fmt("CUID#%" PRId64
+                    " - Peer blocked by bt-exclude-peer-agents, "
+                    "agent=%s, match=%s",
+                    cuid_, util::percentEncode(agent).c_str(), sub.c_str()));
+          }
+        }
+      }
+    }
 
     switch (message->getId()) {
     case BtChokeMessage::ID:

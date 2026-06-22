@@ -1129,5 +1129,19 @@
     "                              file saved by --bt-save-metadata option. If it is\n" \
     "                              successful, then skip downloading metadata from\n" \
     "                              DHT.")
+#define TEXT_BT_EXCLUDE_CLIENT_IDS                                       \
+  _(" --bt-exclude-client-ids=CLIENT_IDS\n" \
+    "                              Comma-separated list of BitTorrent peer client ID\n" \
+    "                              substrings to exclude. Peers whose client ID\n" \
+    "                              contains any of the specified substrings will be\n" \
+    "                              disconnected after the BitTorrent handshake and\n" \
+    "                              added to the block list to prevent reconnection.")
+#define TEXT_BT_EXCLUDE_PEER_AGENTS                                       \
+  _(" --bt-exclude-peer-agents=PEER_AGENTS\n" \
+    "                              Comma-separated list of peer agent (client version)\n" \
+    "                              substrings to exclude. Peers whose reported client\n" \
+    "                              version contains any of the specified substrings\n" \
+    "                              will be disconnected after the extended BitTorrent\n" \
+    "                              handshake and added to the block list.")
 
 // clang-format on

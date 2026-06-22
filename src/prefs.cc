@@ -568,6 +568,10 @@ PrefPtr PREF_BT_ENABLE_HOOK_AFTER_HASH_CHECK =
     makePref("bt-enable-hook-after-hash-check");
 // values: true | false
 PrefPtr PREF_BT_LOAD_SAVED_METADATA = makePref("bt-load-saved-metadata");
+// values: a string, comma-separated list of client ID substrings to exclude
+PrefPtr PREF_BT_EXCLUDE_CLIENT_IDS = makePref("bt-exclude-client-ids");
+// values: a string, comma-separated list of peer agent substrings to exclude
+PrefPtr PREF_BT_EXCLUDE_PEER_AGENTS = makePref("bt-exclude-peer-agents");
 
 /**
  * Metalink related preferences

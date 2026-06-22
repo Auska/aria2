@@ -1892,6 +1892,27 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     op->addTag(TAG_BITTORRENT);
     handlers.push_back(op);
   }
+  {
+    OptionHandler* op(new DefaultOptionHandler(PREF_BT_EXCLUDE_CLIENT_IDS,
+                                               TEXT_BT_EXCLUDE_CLIENT_IDS,
+                                               NO_DEFAULT_VALUE, "CLIENT_ID,..."));
+    op->addTag(TAG_BITTORRENT);
+    op->setInitialOption(true);
+    op->setChangeGlobalOption(true);
+    op->setChangeOptionForReserved(true);
+    handlers.push_back(op);
+  }
+  {
+    OptionHandler* op(new DefaultOptionHandler(PREF_BT_EXCLUDE_PEER_AGENTS,
+                                               TEXT_BT_EXCLUDE_PEER_AGENTS,
+                                               NO_DEFAULT_VALUE,
+                                               "PEER_AGENT,..."));
+    op->addTag(TAG_BITTORRENT);
+    op->setInitialOption(true);
+    op->setChangeGlobalOption(true);
+    op->setChangeOptionForReserved(true);
+    handlers.push_back(op);
+  }
 #endif // ENABLE_BITTORRENT
 // Metalink Specific Options
 #ifdef ENABLE_METALINK

@@ -68,6 +68,8 @@ private:
 
   unsigned char peerId_[PEER_ID_LENGTH];
 
+  std::string peerAgent_;
+
   Timer firstContactTime_;
 
   Timer dropStartTime_;
@@ -115,6 +117,10 @@ public:
   void setPeerId(const unsigned char* peerId);
 
   const unsigned char* getPeerId() const { return peerId_; }
+
+  void setPeerAgent(const std::string& agent) { peerAgent_ = agent; }
+
+  const std::string& getPeerAgent() const { return peerAgent_; }
 
   bool isSeeder() const { return seeder_; }
 
