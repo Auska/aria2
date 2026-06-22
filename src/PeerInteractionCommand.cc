@@ -40,7 +40,6 @@
 #include "PeerInitiateConnectionCommand.h"
 #include "DefaultBtInteractive.h"
 #include "DlAbortEx.h"
-#include "LogFactory.h"
 #include "message.h"
 #include "prefs.h"
 #include "SocketCore.h"
@@ -274,14 +273,10 @@ PeerInteractionCommand::PeerInteractionCommand(
   }
 
   btInteractive->setTcpPort(e->getBtRegistry()->getTcpPort());
-  const auto& excludeIds = getOption()->get(PREF_BT_EXCLUDE_CLIENT_IDS);
-  const auto& excludeAgents = getOption()->get(PREF_BT_EXCLUDE_PEER_AGENTS);
-  A2_LOG_INFO(fmt("CUID#%" PRId64
-                  " - Peer filters loaded: excludeClientIds=[%s], "
-                  "excludePeerAgents=[%s]",
-                  cuid, excludeIds.c_str(), excludeAgents.c_str()));
-  btInteractive->setExcludeClientIds(excludeIds);
-  btInteractive->setExcludePeerAgents(excludeAgents);
+  btInteractive->setExcludeClientIds(
+      getOption()->get(PREF_BT_EXCLUDE_CLIENT_IDS));
+  btInteractive->setExcludePeerAgents(
+      getOption()->get(PREF_BT_EXCLUDE_PEER_AGENTS));
   btInteractive->setBanPeerStorage(peerStorage.get());
   if (metadataGetMode) {
     btInteractive->enableMetadataGetMode();

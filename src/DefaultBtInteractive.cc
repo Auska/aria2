@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "DefaultBtInteractive.h"
 
+#include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <vector>
 
@@ -113,6 +115,33 @@ DefaultBtInteractive::DefaultBtInteractive(
 
 DefaultBtInteractive::~DefaultBtInteractive() = default;
 
+void DefaultBtInteractive::parseExcludeList(const std::string& s,
+                                            std::vector<std::string>& dst) const
+{
+  util::split(s.begin(), s.end(), std::back_inserter(dst), ',', true);
+  dst.erase(std::remove_if(dst.begin(), dst.end(),
+                           [](const std::string& v) { return v.empty(); }),
+            dst.end());
+}
+
+void DefaultBtInteractive::setExcludeClientIds(const std::string& ids)
+{
+  parseExcludeList(ids, excludeClientIds_);
+  if (!excludeClientIds_.empty()) {
+    A2_LOG_DEBUG(fmt("bt-exclude-client-ids: %zu pattern(s) loaded",
+                     excludeClientIds_.size()));
+  }
+}
+
+void DefaultBtInteractive::setExcludePeerAgents(const std::string& agents)
+{
+  parseExcludeList(agents, excludePeerAgents_);
+  if (!excludePeerAgents_.empty()) {
+    A2_LOG_DEBUG(fmt("bt-exclude-peer-agents: %zu pattern(s) loaded",
+                     excludePeerAgents_.size()));
+  }
+}
+
 void DefaultBtInteractive::initiateHandshake()
 {
   dispatcher_->addMessageToQueue(messageFactory_->createHandshakeMessage(
@@ -146,20 +175,17 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
   // Filter by client ID blacklist — substring match, block on ban
   if (!excludeClientIds_.empty()) {
     const unsigned char* peerId = message->getPeerId();
-    // Extract readable portion of peer ID (20 bytes, treat as ASCII prefix)
+    // Truncate at first non-printable byte (BT peer ID prefix is ASCII)
+    auto end = std::find_if(
+        reinterpret_cast<const char*>(peerId),
+        reinterpret_cast<const char*>(peerId) + PEER_ID_LENGTH,
+        [](char c) { return !std::isprint(static_cast<unsigned char>(c)); });
+    std::string peerIdStr(reinterpret_cast<const char*>(peerId), end);
     std::string peerIdHex = util::toHex(peerId, PEER_ID_LENGTH);
-    std::string peerIdStr(reinterpret_cast<const char*>(peerId),
-                          PEER_ID_LENGTH);
     A2_LOG_INFO(fmt("CUID#%" PRId64
-                    " - Client ID filter: peerId=%s, exclude=%s",
-                    cuid_, peerIdHex.c_str(), excludeClientIds_.c_str()));
-    std::vector<std::string> excludes;
-    util::split(excludeClientIds_.begin(), excludeClientIds_.end(),
-                std::back_inserter(excludes), ',', true);
-    for (auto& sub : excludes) {
-      if (sub.empty()) {
-        continue;
-      }
+                    " - Client ID filter: peerId=%s, exclude count=%zu",
+                    cuid_, peerIdHex.c_str(), excludeClientIds_.size()));
+    for (auto& sub : excludeClientIds_) {
       if (peerIdStr.find(sub) != std::string::npos) {
         A2_LOG_INFO(fmt("CUID#%" PRId64
                         " - Peer blocked by bt-exclude-client-ids, "
@@ -357,19 +383,13 @@ size_t DefaultBtInteractive::receiveMessages()
     // Filter by peer agent blacklist — substring match, block on ban
     if (peer_ && !peerAgentFiltered_ && !peer_->getPeerAgent().empty()) {
       peerAgentFiltered_ = true;
-      const std::string& agent = peer_->getPeerAgent();
-      A2_LOG_INFO(fmt("CUID#%" PRId64
-                      " - Peer agent filter: agent=%s, exclude=%s",
-                      cuid_, util::percentEncode(agent).c_str(),
-                      excludePeerAgents_.c_str()));
       if (!excludePeerAgents_.empty()) {
-        std::vector<std::string> excludes;
-        util::split(excludePeerAgents_.begin(), excludePeerAgents_.end(),
-                    std::back_inserter(excludes), ',', true);
-        for (auto& sub : excludes) {
-          if (sub.empty()) {
-            continue;
-          }
+        const std::string& agent = peer_->getPeerAgent();
+        A2_LOG_INFO(fmt("CUID#%" PRId64
+                        " - Peer agent filter: agent=%s, exclude count=%zu",
+                        cuid_, util::percentEncode(agent).c_str(),
+                        excludePeerAgents_.size()));
+        for (auto& sub : excludePeerAgents_) {
           if (agent.find(sub) != std::string::npos) {
             A2_LOG_INFO(fmt("CUID#%" PRId64
                             " - Peer blocked by bt-exclude-peer-agents, "

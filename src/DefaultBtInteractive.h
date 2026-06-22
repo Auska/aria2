@@ -146,8 +146,8 @@ private:
 
   uint16_t tcpPort_;
 
-  std::string excludeClientIds_;
-  std::string excludePeerAgents_;
+  std::vector<std::string> excludeClientIds_;
+  std::vector<std::string> excludePeerAgents_;
   bool peerAgentFiltered_;
   PeerStorage* banPeerStorage_;
 
@@ -164,6 +164,9 @@ private:
   void checkActiveInteraction();
   void addPeerExchangeMessage();
   void addPortMessageToQueue();
+
+  void parseExcludeList(const std::string& s,
+                        std::vector<std::string>& dst) const;
 
 public:
   DefaultBtInteractive(const std::shared_ptr<DownloadContext>& downloadContext,
@@ -246,16 +249,8 @@ public:
 
   void setTcpPort(uint16_t port) { tcpPort_ = port; }
 
-  void setExcludeClientIds(const std::string& ids)
-  {
-    excludeClientIds_ = ids;
-  }
-
-  void setExcludePeerAgents(const std::string& agents)
-  {
-    excludePeerAgents_ = agents;
-  }
-
+  void setExcludeClientIds(const std::string& ids);
+  void setExcludePeerAgents(const std::string& agents);
   void setBanPeerStorage(PeerStorage* ps) { banPeerStorage_ = ps; }
 };
 
