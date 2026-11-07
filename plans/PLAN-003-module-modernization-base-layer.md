@@ -1,6 +1,6 @@
 # 任务：按模块推进现代化 —— 基础层（util / 解析器 / 摘要 / 磁盘IO / 网络 / 流）
 
-> 状态：📝 待执行（计划已写，等用户授权）
+> 状态：✅ 已完成（2026-11-07）
 
 ## 目标
 
@@ -455,7 +455,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
    - 门禁：同上；`git grep -nE 'void\s*\*[^)]*size_t' -- 'src/SocketCore.h'
      'src/TLSSession.h' 'src/LibsslTLSSession.h'` 只剩 `setSockOpt` 一处。
 
-6. [ ] **阶段 6：流簇（20 文件 / 2 006 行）+ 最终验收**
+6. [x] **阶段 6：流簇（20 文件 / 2 006 行）+ 最终验收**
    - span 化：`StreamFilter::transform`（`StreamFilter.h:62`）的
      `const unsigned char* inbuf, size_t inlen` → `std::span<const std::byte>`；
      `IOFile::read/write` + `onRead/onWrite`（`IOFile.h:59,61,90,91`），
@@ -809,3 +809,45 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
   不是 PLAN-002 文档里「558 是 werror 块」的说法（那是删掉 34 行探测代码前
   的旧行号；现在 558 是 `-Wall` 那行）。文档不引用该行号，只引用
   `WARNCXXFLAGS` 变量名，避免行号漂移。
+
+## 实际偏差
+
+计划执行完毕，6 次提交（`132bb4ad`、`91c5ea99`、`520d2038`、`75504527`、
+`4fc6bd03`、`9cc4e690`），最终干净副本
+`autoreconf -i && ./configure --enable-werror && make -j"$(nproc)" check`
+rc=0，`src/Makefile` 中 `CXX = g++ -std=c++20`、
+`WARNCXXFLAGS = -Wall -Werror -Wformat-security`，`test/aria2c.log` 为
+`OK (913)`、无 `Failures !!!`，`git hash-object src/includes/aria2/aria2.h`
+仍是 `2216641161b15acb3c3ddf2600dc19e3decd59d5`（公开头未破）。
+
+执行中偏离计划的项：
+
+1. **`BitfieldMan` 的 14 处 `new[]`/`delete[]` 未 vector 化**（计划阶段 1
+   明确要求）。`bitfield_`/`useBitfield_`/`filterBitfield_` 保持
+   `unsigned char*`：`bitfield::` 算法族与 `expr::array()` 全部收裸指针，
+   vector 化需要改整族签名，超出本阶段闭环。属计划允许的「可解释残余」之外，
+   需后续专项处理。
+2. **`src/prefs.cc` 的 3 处裸 new/delete 保留**（阶段 2）。`PrefPtr`
+   是 `const Pref*`，整个 option 层按裸指针消费。
+3. **`LibuvEventPoll.cc:119,221` 的裸 new 保留**（阶段 5）。
+   `close_callback<T>` 由 libuv 回调 `delete`，map 侧不删指针，改
+   `unique_ptr` 会双重释放；且本机 `HAVE_LIBUV` 未定义，该文件不参与编译，
+   改动无法验证。
+4. **`SinkStreamFilter` 的 `dataCopy` 保持 `std::unique_ptr<unsigned char[]>`**
+   （计划写的是 `std::vector`）。阶段 4 已 RAII 化，`Piece::updateWrCache`
+   接口收 `unique_ptr<unsigned char[]>`，改 vector 需连 `WrDiskCacheEntry::DataCell`
+   一起改，收益为零。
+5. **`TLSSession::writeData/readData` 的 span 化在阶段 5 补做**（计划阶段 5
+   写的是「保持 ssize_t」但未明写 span 化，执行时按计划总目标一并 span 化，
+   `ssize_t` 返回语义不变）。
+6. **`SelectEventPoll` 的 `CommandEvent::events_` 改 `EventPoll::EventType`
+   时连带改了 `SocketEntry`/`accumulateEvent` 的签名**（计划未列）。这是
+   `EventType` 改 `enum class` 的必要闭环，同一次提交内完成。
+7. **`DownloadCommand.cc`/`HttpSkipResponseCommand.cc` 的 `transform` 调用点**
+   在阶段 6 改（计划把它列在阶段 6 的调用点清单里，但 `SocketRecvBuffer::getBuffer()`
+   保持返回 `const unsigned char*` 是执行中的决定：试过改 `const std::byte*`，
+   `DownloadCommand.cc:184/192` 两处编译失败，已回退）。
+8. **`GZipEncoder`/`GZipDecodingStreamFilter` 的 `z_stream` 用
+   `z_stream strm_ + bool initialized_`**（计划写「成员对象」）—— 用
+   `initialized_` 而不是判 `zalloc != nullptr`，因为 `z_stream{}` 清零后
+   `zalloc` 也是 null，与「未 init」不可区分。
