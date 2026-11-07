@@ -1346,11 +1346,9 @@ Advanced Options
 .. option:: --event-poll=<POLL>
 
   Specify the method for polling events.  The possible values are
-  ``epoll``, ``kqueue``, ``port``, ``poll`` and ``select``.  For each ``epoll``,
-  ``kqueue``, ``port`` and ``poll``, it is available if system supports it.
-  ``epoll`` is available on recent Linux. ``kqueue`` is available on
-  various \*BSD systems including Mac OS X. ``port`` is available on Open
-  Solaris. The default value may vary depending on the system you use.
+  ``epoll``, ``poll`` and ``select``.  ``epoll`` and ``poll`` are available
+  if the system supports them.  ``epoll`` is available on recent Linux.
+  The default value may vary depending on the system you use.
 
 .. option:: --file-allocation=<METHOD>
 
@@ -1359,7 +1357,7 @@ Advanced Options
   before download begins. This may take some time depending on the size of the
   file.
   If you are using newer file systems such as ext4
-  (with extents support), btrfs, xfs or NTFS(MinGW build only), ``falloc`` is
+  (with extents support), btrfs or xfs, ``falloc`` is
   your best choice. It allocates large(few GiB)
   files almost instantly. Don't use ``falloc`` with
   legacy file systems such as ext3 and FAT32 because it takes

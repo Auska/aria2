@@ -34,12 +34,6 @@
  */
 /* copyright --> */
 
-#ifdef __MINGW32__
-#  ifdef _WIN32_WINNT
-#    undef _WIN32_WINNT
-#  endif // _WIN32_WINNT
-#  define _WIN32_WINNT 0x0600
-#endif // __MINGW32__
 
 #include "LibuvEventPoll.h"
 

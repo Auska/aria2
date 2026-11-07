@@ -57,12 +57,6 @@
 #include "Logger.h"
 #include "fmt.h"
 
-#ifdef __APPLE__
-#  import <sys/types.h>
-#  import <sys/sysctl.h>
-#  define MIBSIZE 4
-#endif
-
 namespace aria2 {
 
 WatchProcessCommand::WatchProcessCommand(cuid_t cuid, DownloadEngine* e,
@@ -85,32 +79,9 @@ void WatchProcessCommand::process()
   // aria2.
   A2_LOG_DEBUG(fmt("Checking proess %u", pid_));
   bool waiting = true;
-#ifdef _WIN32
-  HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, pid_);
-  DWORD ret = WaitForSingleObject(process, 0);
-  CloseHandle(process);
-  if (ret != WAIT_TIMEOUT) {
-    waiting = false;
-  }
-#elif __APPLE__
-  int mib[MIBSIZE];
-  struct kinfo_proc kp;
-  size_t len = sizeof(kp);
-
-  mib[0] = CTL_KERN;
-  mib[1] = KERN_PROC;
-  mib[2] = KERN_PROC_PID;
-  mib[3] = pid_;
-
-  int ret = sysctl(mib, MIBSIZE, &kp, &len, nullptr, 0);
-  if (ret == -1 || len <= 0) {
-    waiting = false;
-  }
-#else
   if (access(fmt("/proc/%u", pid_).c_str(), F_OK) == -1) {
     waiting = false;
   }
-#endif
   if (!waiting) {
     A2_LOG_INFO(fmt("CUID#%" PRId64
                     " - Process %u is not running. Commencing shutdown.",

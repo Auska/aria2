@@ -40,17 +40,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef __MINGW32__
-
-char* basename(char* path);
-char* dirname(char* path);
-
-#else
-
 char* basename(const char* path);
 char* dirname(const char* path);
-
-#endif // __MINGW32__
 
 #ifdef __cplusplus
 }

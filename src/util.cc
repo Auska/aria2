@@ -34,19 +34,9 @@
 /* copyright --> */
 #include "util.h"
 
-#ifdef __sun
-// For opensolaris, just include signal.h which includes sys/signal.h
-#  ifdef HAVE_SIGNAL_H
-#    include <signal.h>
-#  endif // HAVE_SIGNAL_H
-#else    // !__sun
-#  ifdef HAVE_SYS_SIGNAL_H
-#    include <sys/signal.h>
-#  endif // HAVE_SYS_SIGNAL_H
-#  ifdef HAVE_SIGNAL_H
-#    include <signal.h>
-#  endif // HAVE_SIGNAL_H
-#endif   // !__sun
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif // HAVE_SIGNAL_H
 
 #include <sys/types.h>
 #ifdef HAVE_PWD_H
@@ -95,69 +85,6 @@
 #endif // ULLONG_MAX
 
 namespace aria2 {
-
-#ifdef __MINGW32__
-namespace {
-int utf8ToWChar(wchar_t* out, size_t outLength, const char* src)
-{
-  return MultiByteToWideChar(CP_UTF8, 0, src, -1, out, outLength);
-}
-} // namespace
-
-namespace {
-int wCharToUtf8(char* out, size_t outLength, const wchar_t* src)
-{
-  return WideCharToMultiByte(CP_UTF8, 0, src, -1, out, outLength, nullptr,
-                             nullptr);
-}
-} // namespace
-
-std::wstring utf8ToWChar(const char* src)
-{
-  int len = utf8ToWChar(nullptr, 0, src);
-  if (len <= 0) {
-    abort();
-  }
-  auto buf = make_unique<wchar_t[]>((size_t)len);
-  len = utf8ToWChar(buf.get(), len, src);
-  if (len <= 0) {
-    abort();
-  }
-  else {
-    return buf.get();
-  }
-}
-
-std::wstring utf8ToWChar(const std::string& src)
-{
-  return utf8ToWChar(src.c_str());
-}
-
-std::string wCharToUtf8(const std::wstring& wsrc)
-{
-  int len = wCharToUtf8(nullptr, 0, wsrc.c_str());
-  if (len <= 0) {
-    abort();
-  }
-  auto buf = make_unique<char[]>((size_t)len);
-  len = wCharToUtf8(buf.get(), len, wsrc.c_str());
-  if (len <= 0) {
-    abort();
-  }
-  else {
-    return buf.get();
-  }
-}
-
-std::string toForwardSlash(const std::string& src)
-{
-  auto dst = src;
-  std::transform(std::begin(dst), std::end(dst), std::begin(dst),
-                 [](char c) { return c == '\\' ? '/' : c; });
-  return dst;
-}
-
-#endif // __MINGW32__
 
 namespace util {
 
@@ -1646,83 +1573,9 @@ bool isNumericHost(const std::string& name)
   return true;
 }
 
-#if _WIN32
-namespace {
-static Lock win_signal_lock;
-
-static signal_handler_t win_int_handler = nullptr;
-static signal_handler_t win_term_handler = nullptr;
-
-static void win_ign_handler(int) {}
-
-static BOOL WINAPI HandlerRoutine(DWORD ctrlType)
-{
-  void (*handler)(int) = nullptr;
-  switch (ctrlType) {
-  case CTRL_C_EVENT:
-  case CTRL_BREAK_EVENT: {
-    // Handler will be called on a new/different thread.
-    LockGuard lg(win_signal_lock);
-    handler = win_int_handler;
-  }
-
-    if (handler) {
-      handler(SIGINT);
-      return TRUE;
-    }
-    return FALSE;
-
-  case CTRL_LOGOFF_EVENT:
-  case CTRL_CLOSE_EVENT:
-  case CTRL_SHUTDOWN_EVENT: {
-    // Handler will be called on a new/different thread.
-    LockGuard lg(win_signal_lock);
-    handler = win_term_handler;
-    ;
-  }
-    if (handler) {
-      handler(SIGTERM);
-      return TRUE;
-    }
-    return FALSE;
-  }
-  return FALSE;
-}
-} // namespace
-#endif
-
 void setGlobalSignalHandler(int sig, sigset_t* mask, signal_handler_t handler,
                             int flags)
 {
-#if _WIN32
-  if (sig == SIGINT || sig == SIGTERM) {
-    // Handler will be called on a new/different thread.
-    LockGuard lg(win_signal_lock);
-
-    if (handler == SIG_DFL) {
-      handler = nullptr;
-    }
-    else if (handler == SIG_IGN) {
-      handler = win_ign_handler;
-    }
-    // Not yet in use: add console handler.
-    if (handler && !win_int_handler && !win_term_handler) {
-      ::SetConsoleCtrlHandler(HandlerRoutine, TRUE);
-    }
-    if (sig == SIGINT) {
-      win_int_handler = handler;
-    }
-    else {
-      win_term_handler = handler;
-    }
-    // No handlers set: remove.
-    if (!win_int_handler && !win_term_handler) {
-      ::SetConsoleCtrlHandler(HandlerRoutine, FALSE);
-    }
-    return;
-  }
-#endif
-
 #ifdef HAVE_SIGACTION
   struct sigaction sigact;
   sigact.sa_handler = handler;
@@ -1742,59 +1595,27 @@ void setGlobalSignalHandler(int sig, sigset_t* mask, signal_handler_t handler,
 #endif // HAVE_SIGACTION
 }
 
-#ifndef __MINGW32__
 std::string getHomeDir()
 {
   const char* p = getenv("HOME");
   if (p) {
     return p;
   }
-#  ifdef HAVE_PWD_H
+#ifdef HAVE_PWD_H
   auto pw = getpwuid(geteuid());
   if (pw && pw->pw_dir) {
     return pw->pw_dir;
   }
-#  endif // HAVE_PWD_H
+#endif // HAVE_PWD_H
   return A2STR::NIL;
 }
-
-#else  // __MINGW32__
-
-std::string getHomeDir()
-{
-  auto p = _wgetenv(L"HOME");
-  if (p) {
-    return toForwardSlash(wCharToUtf8(p));
-  }
-  p = _wgetenv(L"USERPROFILE");
-  if (p) {
-    return toForwardSlash(wCharToUtf8(p));
-  }
-  p = _wgetenv(L"HOMEDRIVE");
-  if (p) {
-    std::wstring homeDir = p;
-    p = _wgetenv(L"HOMEPATH");
-    if (p) {
-      homeDir += p;
-      return toForwardSlash(wCharToUtf8(homeDir));
-    }
-  }
-  return A2STR::NIL;
-}
-#endif // __MINGW32__
 
 std::string getXDGDir(const std::string& environmentVariable,
                       const std::string& fallbackDirectory)
 {
   std::string filename;
   const char* p = getenv(environmentVariable.c_str());
-  if (p &&
-#ifndef __MINGW32__
-      p[0] == '/'
-#else  // __MINGW32__
-      p[0] && p[1] == ':'
-#endif // __MINGW32__
-  ) {
+  if (p && p[0] == '/') {
     filename = p;
   }
   else {
@@ -1887,9 +1708,7 @@ std::string abbrevSize(int64_t size)
 
 void sleep(long seconds)
 {
-#if defined(HAVE_WINSOCK2_H)
-  ::Sleep(seconds * 1000);
-#elif HAVE_SLEEP
+#if HAVE_SLEEP
   ::sleep(seconds);
 #elif defined(HAVE_USLEEP)
   ::usleep(seconds * 1000000);
@@ -1902,38 +1721,6 @@ void usleep(long microseconds)
 {
 #ifdef HAVE_USLEEP
   ::usleep(microseconds);
-#elif defined(HAVE_WINSOCK2_H)
-
-  LARGE_INTEGER current, freq, end;
-
-  static enum {
-    GET_FREQUENCY,
-    GET_MICROSECONDS,
-    SKIP_MICROSECONDS
-  } state = GET_FREQUENCY;
-
-  if (state == GET_FREQUENCY) {
-    if (QueryPerformanceFrequency(&freq))
-      state = GET_MICROSECONDS;
-    else
-      state = SKIP_MICROSECONDS;
-  }
-
-  long msec = microseconds / 1000;
-  microseconds %= 1000;
-
-  if (state == GET_MICROSECONDS && microseconds) {
-    QueryPerformanceCounter(&end);
-
-    end.QuadPart += (freq.QuadPart * microseconds) / 1000000;
-
-    while (QueryPerformanceCounter(&current) &&
-           (current.QuadPart <= end.QuadPart))
-      /* noop */;
-  }
-
-  if (msec)
-    Sleep(msec);
 #else
 #  error no usleep function is available (nanosleep?)
 #endif
@@ -2112,13 +1899,6 @@ std::string applyDir(const std::string& dir, const std::string& relPath)
       s += relPath;
     }
   }
-#ifdef __MINGW32__
-  for (std::string::iterator i = s.begin(), eoi = s.end(); i != eoi; ++i) {
-    if (*i == '\\') {
-      *i = '/';
-    }
-  }
-#endif // __MINGW32__
   return s;
 }
 
@@ -2178,21 +1958,11 @@ bool detectDirTraversal(const std::string& s)
 
 std::string escapePath(const std::string& s)
 {
-// We don't escape '/' because we use it as a path separator.
-#ifdef __MINGW32__
-  static const char WIN_INVALID_PATH_CHARS[] = {'"', '*', ':',  '<',
-                                                '>', '?', '\\', '|'};
-#endif // __MINGW32__
+  // We don't escape '/' because we use it as a path separator.
   std::string d;
   for (auto cc : s) {
     unsigned char c = cc;
-    if (in(c, 0x00u, 0x1fu) || c == 0x7fu
-#ifdef __MINGW32__
-        || std::find(std::begin(WIN_INVALID_PATH_CHARS),
-                     std::end(WIN_INVALID_PATH_CHARS),
-                     c) != std::end(WIN_INVALID_PATH_CHARS)
-#endif // __MINGW32__
-    ) {
+    if (in(c, 0x00u, 0x1fu) || c == 0x7fu) {
       d += fmt("%%%02X", c);
     }
     else {
@@ -2234,7 +2004,6 @@ void executeHook(const std::string& command, a2_gid_t gid, size_t numFiles,
 {
   const std::string gidStr = GroupId::toHex(gid);
   const std::string numFilesStr = util::uitos(numFiles);
-#ifndef __MINGW32__
   A2_LOG_INFO(fmt("Executing user command: %s %s %s %s", command.c_str(),
                   gidStr.c_str(), numFilesStr.c_str(), firstFilename.c_str()));
   pid_t cpid = fork();
@@ -2252,64 +2021,7 @@ void executeHook(const std::string& command, a2_gid_t gid, size_t numFiles,
     A2_LOG_ERROR("fork() failed. Cannot execute user command.");
   }
   return;
-
-#else // __MINGW32__
-  PROCESS_INFORMATION pi;
-  STARTUPINFOW si;
-
-  memset(&si, 0, sizeof(si));
-  si.cb = sizeof(STARTUPINFO);
-  memset(&pi, 0, sizeof(pi));
-  bool batch = util::iendsWith(command, ".bat");
-  std::string cmdline;
-  std::string cmdexe;
-
-  // XXX batch handling, in particular quoting, correct?
-  if (batch) {
-    const char* p = getenv("windir");
-    if (p) {
-      cmdexe = p;
-      cmdexe += "\\system32\\cmd.exe";
-    }
-    else {
-      A2_LOG_INFO("Failed to get windir environment variable."
-                  " Executing batch file will fail.");
-      // TODO Might be useless.
-      cmdexe = "cmd.exe";
-    }
-    cmdline += "/C \"";
-  }
-  cmdline += "\"";
-  cmdline += command;
-  cmdline += "\"";
-  cmdline += " ";
-  cmdline += gidStr;
-  cmdline += " ";
-  cmdline += numFilesStr;
-  cmdline += " \"";
-  cmdline += firstFilename;
-  cmdline += "\"";
-  if (batch) {
-    cmdline += "\"";
-  }
-  int cmdlineLen = utf8ToWChar(nullptr, 0, cmdline.c_str());
-  assert(cmdlineLen > 0);
-  auto wcharCmdline = make_unique<wchar_t[]>(cmdlineLen);
-  cmdlineLen = utf8ToWChar(wcharCmdline.get(), cmdlineLen, cmdline.c_str());
-  assert(cmdlineLen > 0);
-  A2_LOG_INFO(fmt("Executing user command: %s", cmdline.c_str()));
-  DWORD rc = CreateProcessW(batch ? utf8ToWChar(cmdexe).c_str() : nullptr,
-                            wcharCmdline.get(), nullptr, nullptr, false, 0,
-                            nullptr, 0, &si, &pi);
-
-  if (!rc) {
-    A2_LOG_ERROR("CreateProcess() failed. Cannot execute user command.");
-  }
-  return;
-
-#endif
 }
-
 } // namespace
 
 void executeHookByOptName(const std::shared_ptr<RequestGroup>& group,
@@ -2483,26 +2195,8 @@ TLSVersion toTLSVersion(const std::string& ver)
 }
 #endif // ENABLE_SSL
 
-#ifdef __MINGW32__
-std::string formatLastError(int errNum)
-{
-  std::array<char, 4_k> buf;
-  if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                    nullptr, errNum,
-                    // Default language
-                    MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-                    static_cast<LPTSTR>(buf.data()), buf.size(),
-                    nullptr) == 0) {
-    return "";
-  }
-
-  return buf.data();
-}
-#endif // __MINGW32__
-
 void make_fd_cloexec(int fd)
 {
-#ifndef __MINGW32__
   int flags;
 
   // TODO from linux man page, fcntl() with F_GETFD or F_SETFD does
@@ -2516,79 +2210,7 @@ void make_fd_cloexec(int fd)
 
   while (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1 && errno == EINTR)
     ;
-#endif // !__MINGW32__
 }
-
-#ifdef __MINGW32__
-bool gainPrivilege(LPCTSTR privName)
-{
-  LUID luid;
-  TOKEN_PRIVILEGES tp;
-
-  if (!LookupPrivilegeValue(nullptr, privName, &luid)) {
-    auto errNum = GetLastError();
-    A2_LOG_WARN(fmt("Lookup for privilege name %s failed. cause: %s", privName,
-                    util::formatLastError(errNum).c_str()));
-    return false;
-  }
-
-  tp.PrivilegeCount = 1;
-  tp.Privileges[0].Luid = luid;
-  tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-  HANDLE token;
-  if (!OpenProcessToken(GetCurrentProcess(),
-                        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
-    auto errNum = GetLastError();
-    A2_LOG_WARN(fmt("Getting process token failed. cause: %s",
-                    util::formatLastError(errNum).c_str()));
-    return false;
-  }
-
-  auto tokenCloser = defer(token, CloseHandle);
-
-  if (!AdjustTokenPrivileges(token, FALSE, &tp, 0, NULL, NULL)) {
-    auto errNum = GetLastError();
-    A2_LOG_WARN(fmt("Gaining privilege %s failed. cause: %s", privName,
-                    util::formatLastError(errNum).c_str()));
-    return false;
-  }
-
-  // Check privilege was really gained
-  DWORD bufsize = 0;
-  GetTokenInformation(token, TokenPrivileges, nullptr, 0, &bufsize);
-  if (bufsize == 0) {
-    A2_LOG_WARN("Checking privilege failed.");
-    return false;
-  }
-
-  auto buf = make_unique<char[]>(bufsize);
-  if (!GetTokenInformation(token, TokenPrivileges, buf.get(), bufsize,
-                           &bufsize)) {
-    auto errNum = GetLastError();
-    A2_LOG_WARN(fmt("Checking privilege failed. cause: %s",
-                    util::formatLastError(errNum).c_str()));
-    return false;
-  }
-
-  auto privs = reinterpret_cast<TOKEN_PRIVILEGES*>(buf.get());
-  for (size_t i = 0; i < privs->PrivilegeCount; ++i) {
-    auto& priv = privs->Privileges[i];
-    if (memcmp(&priv.Luid, &luid, sizeof(luid)) != 0) {
-      continue;
-    }
-    if (priv.Attributes == SE_PRIVILEGE_ENABLED) {
-      return true;
-    }
-
-    break;
-  }
-
-  A2_LOG_WARN(fmt("Gaining privilege %s failed.", privName));
-
-  return false;
-}
-#endif // __MINGW32__
 
 } // namespace util
 

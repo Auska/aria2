@@ -87,10 +87,6 @@ extern volatile sig_atomic_t globalHaltRequested;
 
 namespace {
 
-#ifdef _WIN32
-static const DWORD mainThread = GetCurrentThreadId();
-#endif
-
 static void handler(int signal)
 {
   if (
@@ -101,16 +97,6 @@ static void handler(int signal)
     if (global::globalHaltRequested <= 2) {
       global::globalHaltRequested = 3;
     }
-#ifdef _WIN32
-    if (::GetCurrentThreadId() != mainThread) {
-      // SIGTERM may arrive on another thread (via SetConsoleCtrlHandler), and
-      // the process will be forcefully terminated as soon as that thread is
-      // done. So better make sure it isn't done prematurely. ;)
-      while (global::globalHaltRequested != 5) {
-        ::Sleep(100); // Yeah, semi-busy waiting for now.
-      }
-    }
-#endif
     return;
   }
 
@@ -231,12 +217,7 @@ int MultiUrlRequestInfo::prepare()
     auto authConfigFactory = make_unique<AuthConfigFactory>();
     File netrccf(option_->get(PREF_NETRC_PATH));
     if (!option_->getAsBool(PREF_NO_NETRC) && netrccf.isFile()) {
-#ifdef __MINGW32__
-      // Windows OS does not have permission, so set it to 0.
-      mode_t mode = 0;
-#else  // !__MINGW32__
       mode_t mode = netrccf.mode();
-#endif // !__MINGW32__
       if (mode & (S_IRWXG | S_IRWXO)) {
         A2_LOG_NOTICE(fmt(MSG_INCORRECT_NETRC_PERMISSION,
                           option_->get(PREF_NETRC_PATH).c_str()));

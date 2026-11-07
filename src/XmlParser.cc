@@ -50,7 +50,7 @@ bool parseFile(const std::string& filename, ParserStateMachine* psm)
     fd = STDIN_FILENO;
   }
   else {
-    while ((fd = a2open(utf8ToWChar(filename).c_str(), O_BINARY | O_RDONLY,
+    while ((fd = a2open(filename.c_str(), O_BINARY | O_RDONLY,
                         OPEN_MODE)) == -1 &&
            errno == EINTR)
       ;

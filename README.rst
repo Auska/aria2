@@ -112,13 +112,13 @@ Dependency
 ======================== ========================================
 features                  dependency
 ======================== ========================================
-HTTPS                    OSX or GnuTLS or OpenSSL or Windows
+HTTPS                    GnuTLS or OpenSSL
 SFTP                     libssh2
 BitTorrent               None. Optional: libnettle+libgmp or libgcrypt
                          or OpenSSL (see note)
 Metalink                 libxml2 or Expat.
-Checksum                 None. Optional: OSX or libnettle or libgcrypt
-                         or OpenSSL or Windows (see note)
+Checksum                 None. Optional: libnettle or libgcrypt
+                         or OpenSSL (see note)
 gzip, deflate in HTTP    zlib
 Async DNS                C-Ares
 Firefox3/Chromium cookie libsqlite3
@@ -134,25 +134,11 @@ JSON-RPC over WebSocket  libnettle or libgcrypt or OpenSSL
 
 .. note::
 
-  On Apple OSX, OS-level SSL/TLS support will be preferred. Hence
-  neither GnuTLS nor OpenSSL is required on that platform. If you'd
-  like to disable this behavior, run configure with
-  ``--without-appletls``.
-
   GnuTLS has precedence over OpenSSL if both libraries are installed.
   If you prefer OpenSSL, run configure with ``--without-gnutls``
   ``--with-openssl``.
 
-  On Windows, there is SSL implementation available that is based on
-  the native Windows SSL capabilities (Schannel) and it will be
-  preferred.  Hence neither GnuTLS nor OpenSSL is required on that
-  platform.  If you'd like to disable this behavior, run configure
-  with ``--without-wintls``.
-
 .. note::
-
-  On Apple OSX, the OS-level checksum support will be preferred,
-  unless aria2 is configured with ``--without-appletls``.
 
   libnettle has precedence over libgcrypt if both libraries are
   installed.  If you prefer libgcrypt, run configure with
@@ -162,18 +148,12 @@ JSON-RPC over WebSocket  libnettle or libgcrypt or OpenSSL
   If none of the optional dependencies are installed, an internal
   implementation that only supports md5 and sha1 will be used.
 
-  On Windows, there is SSL implementation available that is based on
-  the native Windows capabilities and it will be preferred, unless
-  aria2 is configured with ``--without-wintls``.
-
 A user can have one of the following configurations for SSL and crypto
 libraries:
 
 * OpenSSL
 * GnuTLS + libgcrypt
 * GnuTLS + libnettle
-* Apple TLS (OSX only)
-* Windows TLS (Windows only)
 
 You can disable BitTorrent and Metalink support by providing
 ``--disable-bittorrent`` and ``--disable-metalink`` to the configure
@@ -240,9 +220,6 @@ necessary to build the program::
 
 Also, you need `Sphinx <http://sphinx-doc.org/>`_ to build the man page.
 
-If you are building aria2 for Mac OS X, take a look at
-the makerelease-osx.mk GNU Make makefile.
-
 The quickest way to build aria2 is first to run configure script::
 
     $ ./configure
@@ -255,9 +232,6 @@ command-line option::
 After configuration is done, run ``make`` to compile the program::
 
     $ make
-
-See `Cross-compiling Windows binary`_ to create a Windows binary.
-See `Cross-compiling Android binary`_ to create an Android binary.
 
 The configure script checks available libraries and enables as many
 features as possible except for experimental features not enabled by
@@ -284,11 +258,6 @@ using aria2's ``--ca-certificate`` option.  If you don't have the CA bundle
 file installed, then the last resort is to disable the certificate
 validation using ``--check-certificate=false``.
 
-Using the native OSX (AppleTLS) and/or Windows (WinTLS) implementation
-will automatically use the system certificate store, so
-``--with-ca-bundle`` is not necessary and will be ignored when using
-these implementations.
-
 By default, the bash_completion file named ``aria2c`` is installed to
 the directory ``$prefix/share/doc/aria2/bash_completion``.  To change
 the install directory of the file, use ``--with-bashcompletiondir``
@@ -299,93 +268,6 @@ After a ``make``, the executable is located at ``src/aria2c``.
 aria2 uses CppUnit for automated unit testing. To run the unit test::
 
     $ make check
-
-Cross-compiling Windows binary
-------------------------------
-
-In this section, we describe how to build a Windows binary using a
-mingw-w64 (http://mingw-w64.org/doku.php) cross-compiler on Debian
-Linux. The MinGW (http://www.mingw.org/) may not be able to build
-aria2.
-
-The easiest way to build Windows binary is using Dockerfile.mingw.  See
-Dockerfile.mingw how to build a binary.  If you cannot use Dockerfile,
-then continue to read the following paragraphs.
-
-Basically, after compiling and installing depended libraries, you can
-do cross-compile just passing appropriate ``--host`` option and
-specifying ``CPPFLAGS``, ``LDFLAGS``, and ``PKG_CONFIG_LIBDIR``
-variables to configure. For convenience and to lower our own
-development cost, we provide an easier way to configure the build
-settings.
-
-``mingw-config`` script is a configure script wrapper for mingw-w64.
-We use it to create official Windows build.  This script assumes
-the following libraries have been built for cross-compile:
-
-* c-ares
-* expat
-* sqlite3
-* zlib
-* libssh2
-* cppunit
-
-Some environment variables can be adjusted to change build settings:
-
-``HOST``
-  cross-compile to build programs to run on ``HOST``. It defaults to
-  ``i686-w64-mingw32``. To build a 64bit binary, specify
-  ``x86_64-w64-mingw32``.
-
-``PREFIX``
-  Prefix to the directory where dependent libraries are installed.  It
-  defaults to ``/usr/local/$HOST``. ``-I$PREFIX/include`` will be
-  added to ``CPPFLAGS``. ``-L$PREFIX/lib`` will be added to
-  ``LDFLAGS``. ``$PREFIX/lib/pkgconfig`` will be set to
-  ``PKG_CONFIG_LIBDIR``.
-
-For example, to build a 64bit binary do this::
-
-    $ HOST=x86_64-w64-mingw32 ./mingw-config
-
-If you want libaria2 dll with ``--enable-libaria2``, then don't use
-``ARIA2_STATIC=yes`` and prepare the DLL version of external
-libraries.
-
-Cross-compiling Android binary
-------------------------------
-
-In this section, we describe how to build Android binary using Android
-NDK cross-compiler on Debian Linux.
-
-At the time of this writing, Android NDK r21e should compile aria2
-without errors.
-
-``android-config`` script is a configure script wrapper for Android
-build.  We use it to create an official Android build.  This script
-assumes the following libraries have been built for cross-compile:
-
-* c-ares
-* openssl
-* expat
-* zlib
-* libssh2
-
-When building the above libraries, make sure that disable shared
-library and enable only static library. We are going to link those
-libraries statically.
-
-``android-config`` assumes that ``$ANDROID_HOME`` and ``$NDK``
-environment variables are defined.
-
-We currently use Android NDK r21e.  ``$NDK`` should point to the
-directory to Android NDK.  The build tools will be found under
-``$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/``.
-
-All the dependent libraries must be installed under
-``$ANDROID_HOME/usr/local``.
-
-After ``android-config``, run ``make`` to compile sources.
 
 Building documentation
 ----------------------

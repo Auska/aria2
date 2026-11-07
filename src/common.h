@@ -39,33 +39,6 @@
 #  include "config.h"
 #endif
 
-#ifdef __MINGW32__
-#  ifdef malloc
-#    undef malloc
-#  endif
-#  ifdef realloc
-#    undef realloc
-#  endif
-#endif // __MINGW32__
-
-#ifdef __MINGW32__
-#  define WIN32_LEAN_AND_MEAN
-#  ifndef WINVER
-#    define WINVER 0x501
-#  endif // !WINVER
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x501
-#  endif // _WIN32_WINNT
-#  ifdef HAVE_WINSOCK2_H
-#    ifndef FD_SETSIZE
-#      define FD_SETSIZE 32768
-#    endif // !FD_SETSIZE
-#    include <winsock2.h>
-#    undef ERROR
-#  endif // HAVE_WINSOCK2_H
-#  include <windows.h>
-#endif // __MINGW32__
-
 // Internationalization has been removed; _() is kept as an identity
 // macro so message string literals stay untouched.
 #define _(String) String

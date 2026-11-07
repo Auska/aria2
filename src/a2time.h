@@ -40,14 +40,6 @@
 
 #include <chrono>
 
-#ifndef HAVE_LOCALTIME_R
-#  include "localtime_r.h"
-#endif // HAVE_LOCALTIME_R
-
-#ifndef HAVE_GETTIMEOFDAY
-#  include "gettimeofday.h"
-#endif // HAVE_GETTIMEOFDAY
-
 #ifndef HAVE_STRPTIME
 #  include "strptime.h"
 #endif // HAVE_STRPTIME
@@ -55,14 +47,6 @@
 #ifndef HAVE_TIMEGM
 #  include "timegm.h"
 #endif // HAVE_TIMEGM
-
-#ifndef HAVE_ASCTIME_R
-#  include "asctime_r.h"
-#endif // HAVE_ASCTIME_R
-
-#ifdef __MINGW32__
-#  define suseconds_t uint64_t
-#endif
 
 #ifndef HAVE_A2_STRUCT_TIMESPEC
 #  include "timespec.h"

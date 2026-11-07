@@ -79,12 +79,6 @@
 #  include "config.h"
 #endif
 
-#ifdef __MINGW32__
-#  include <winsock2.h>
-#  undef ERROR
-#  include <ws2tcpip.h>
-#endif
-
 #ifdef HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif

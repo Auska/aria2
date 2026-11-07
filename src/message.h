@@ -153,7 +153,6 @@
 #define MSG_MISSING_BT_INFO _("Missing %s in torrent metainfo.")
 #define MSG_NEGATIVE_LENGTH_BT_INFO _("%s does not allow negative integer %" PRId64 "")
 #define MSG_NULL_TRACKER_RESPONSE _("Tracker returned null data.")
-#define MSG_WINSOCK_INIT_FAILD _("Windows socket library initialization failed")
 #define MSG_TIME_HAS_PASSED _("%ld second(s) has passed. Stopping application.")
 #define MSG_SIGNATURE_SAVED _("Saved signature as %s. Please note that aria2" \
                               " doesn't verify signatures.")

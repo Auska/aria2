@@ -41,10 +41,6 @@
 #include <cstring>
 #include <iostream>
 
-#ifdef __APPLE__
-#  include <Security/SecRandom.h>
-#endif // __APPLE__
-
 #ifdef HAVE_LIBGNUTLS
 #  include <gnutls/crypto.h>
 #endif // HAVE_LIBGNUTLS
@@ -74,23 +70,9 @@ namespace {
 std::random_device rd;
 } // namespace
 
-#ifdef __MINGW32__
-SimpleRandomizer::SimpleRandomizer()
-{
-  BOOL r = ::CryptAcquireContext(&provider_, 0, 0, PROV_RSA_FULL,
-                                 CRYPT_VERIFYCONTEXT | CRYPT_SILENT);
-  assert(r);
-}
-#else  // !__MINGW32__
 SimpleRandomizer::SimpleRandomizer() : gen_(rd()) {}
-#endif // !__MINGW32__
 
-SimpleRandomizer::~SimpleRandomizer()
-{
-#ifdef __MINGW32__
-  CryptReleaseContext(provider_, 0);
-#endif
-}
+SimpleRandomizer::~SimpleRandomizer() = default;
 
 long int SimpleRandomizer::getRandomNumber(long int to)
 {
@@ -100,16 +82,7 @@ long int SimpleRandomizer::getRandomNumber(long int to)
 
 void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
 {
-#ifdef __MINGW32__
-  BOOL r = CryptGenRandom(provider_, len, reinterpret_cast<BYTE*>(buf));
-  if (!r) {
-    assert(r);
-    abort();
-  }
-#elif defined(__APPLE__)
-  auto rv = SecRandomCopyBytes(kSecRandomDefault, len, buf);
-  assert(errSecSuccess == rv);
-#elif defined(HAVE_LIBGNUTLS)
+#if defined(HAVE_LIBGNUTLS)
   auto rv = gnutls_rnd(GNUTLS_RND_RANDOM, buf, len);
   if (rv != 0) {
     assert(0 == rv);
@@ -148,7 +121,7 @@ void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
     assert(0);
     abort();
   }
-#endif // !__MINGW32__ && !__APPLE__ && !HAVE_OPENSSL && !HAVE_LIBGNUTLS
+#endif // !HAVE_OPENSSL && !HAVE_LIBGNUTLS
 }
 
 } // namespace aria2

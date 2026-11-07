@@ -37,11 +37,7 @@
 #include <string.h>
 #include <libgen.h>
 
-#if defined(__CYGWIN__) || defined(__DJGPP__) || defined(__MINGW32__)
-#  define IS_PATH_SEPARATOR(c) (((c) == '/') || ((c) == '\\'))
-#else
-#  define IS_PATH_SEPARATOR(c) ((c) == '/')
-#endif
+#define IS_PATH_SEPARATOR(c) ((c) == '/')
 
 /* per http://www.scit.wlv.ac.uk/cgi-bin/mansec?3C+basename */
 char* basename(char* s)

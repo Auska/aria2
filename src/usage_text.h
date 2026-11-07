@@ -137,9 +137,8 @@
     "                              This may take some time depending on the size of\n" \
     "                              the file.\n"                         \
     "                              If you are using newer file systems such as ext4\n" \
-    "                              (with extents support), btrfs, xfs or NTFS\n" \
-    "                              (MinGW build only), 'falloc' is your best\n"   \
-    "                              choice. It allocates large(few GiB) files\n" \
+    "                              (with extents support), btrfs or xfs, 'falloc'\n" \
+    "                              is your best choice. It allocates large(few GiB) files\n" \
     "                              almost instantly. Don't use 'falloc' with legacy\n" \
     "                              file systems such as ext3 and FAT32 because it\n" \
     "                              takes almost the same time as 'prealloc' and it\n" \

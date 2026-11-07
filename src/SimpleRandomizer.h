@@ -40,10 +40,6 @@
 #include <memory>
 #include <random>
 
-#ifdef __MINGW32__
-#  include <wincrypt.h>
-#endif
-
 namespace aria2 {
 
 class SimpleRandomizer : public Randomizer {
@@ -52,11 +48,7 @@ private:
   SimpleRandomizer();
 
 private:
-#ifdef __MINGW32__
-  HCRYPTPROV provider_;
-#else
   std::mt19937 gen_;
-#endif // ! __MINGW32__
 
 public:
   typedef std::mt19937::result_type result_type;

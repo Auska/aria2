@@ -44,11 +44,7 @@ void LpdMessageDispatcherTest::testCreateLpdRequest()
 void LpdMessageDispatcherTest::testSendMessage()
 {
   std::shared_ptr<SocketCore> recvsock(new SocketCore(SOCK_DGRAM));
-#ifdef __MINGW32__
-  recvsock->bindWithFamily(LPD_MULTICAST_PORT, AF_INET);
-#else  // !__MINGW32__
   recvsock->bind(LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT, AF_INET);
-#endif // !__MINGW32__
   recvsock->joinMulticastGroup(LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT, "");
   recvsock->setNonBlockingMode();
 

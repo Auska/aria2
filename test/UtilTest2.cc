@@ -789,11 +789,7 @@ void UtilTest2::testApplyDir()
 void UtilTest2::testFixTaintedBasename()
 {
   CPPUNIT_ASSERT_EQUAL(std::string("a%2Fb"), util::fixTaintedBasename("a/b"));
-#ifdef __MINGW32__
-  CPPUNIT_ASSERT_EQUAL(std::string("a%5Cb"), util::fixTaintedBasename("a\\b"));
-#else  // !__MINGW32__
   CPPUNIT_ASSERT_EQUAL(std::string("a\\b"), util::fixTaintedBasename("a\\b"));
-#endif // !__MINGW32__
 }
 
 void UtilTest2::testIsNumericHost()
@@ -827,11 +823,7 @@ void UtilTest2::testEscapePath()
                        util::escapePath(std::string("foo") + (char)0x00 +
                                         std::string("bar") + (char)0x00 +
                                         (char)0x01));
-#ifdef __MINGW32__
-  CPPUNIT_ASSERT_EQUAL(std::string("foo%5Cbar"), util::escapePath("foo\\bar"));
-#else  // !__MINGW32__
   CPPUNIT_ASSERT_EQUAL(std::string("foo\\bar"), util::escapePath("foo\\bar"));
-#endif // !__MINGW32__
 }
 
 void UtilTest2::testInSameCidrBlock()

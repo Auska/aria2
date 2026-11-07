@@ -33,22 +33,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef __MINGW32__
-#  undef SIZE_MAX
-#endif // __MINGW32__
-
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif // HAVE_CONFIG_H
-
-#ifdef __MINGW32__
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x501
-#  endif // _WIN32_WINNT
-#  include <winsock2.h>
-#  undef ERROR
-#  include <ws2tcpip.h>
-#endif // __MINGW32__
 
 #ifdef HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>
@@ -239,9 +226,6 @@ extern "C" {
 #  define PF_UNSPEC PF_INET
 #endif
 
-/* Nexenta OS(GNU/Solaris OS) defines `struct addrinfo' in netdb.h */
-#if !defined(__MINGW32__) && !defined(__sun)
-
 /*
  * struct addrinfo.
  */
@@ -255,8 +239,6 @@ struct addrinfo {
   struct sockaddr* ai_addr;
   struct addrinfo* ai_next;
 };
-
-#endif // !__MINGW32__ && !__sun
 
 /*
  * Functions.

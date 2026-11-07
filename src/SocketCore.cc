@@ -34,11 +34,10 @@
 /* copyright --> */
 #include "SocketCore.h"
 
-#ifdef HAVE_IPHLPAPI_H
-#  include <iphlpapi.h>
-#endif // HAVE_IPHLPAPI_H
-
 #include <unistd.h>
+#ifdef HAVE_POLL_H
+#  include <poll.h>
+#endif // HAVE_POLL_H
 #ifdef HAVE_IFADDRS_H
 #  include <ifaddrs.h>
 #endif // HAVE_IFADDRS_H
@@ -68,51 +67,26 @@
 
 namespace aria2 {
 
-#ifndef __MINGW32__
-#  define SOCKET_ERRNO (errno)
-#else
-#  define SOCKET_ERRNO (WSAGetLastError())
-#endif // __MINGW32__
+#define SOCKET_ERRNO (errno)
 
-#ifdef __MINGW32__
-#  define A2_EINPROGRESS WSAEWOULDBLOCK
-#  define A2_EWOULDBLOCK WSAEWOULDBLOCK
-#  define A2_EINTR WSAEINTR
-#  define A2_WOULDBLOCK(e) (e == WSAEWOULDBLOCK)
-#else // !__MINGW32__
-#  define A2_EINPROGRESS EINPROGRESS
-#  ifndef EWOULDBLOCK
-#    define EWOULDBLOCK EAGAIN
-#  endif // EWOULDBLOCK
-#  define A2_EWOULDBLOCK EWOULDBLOCK
-#  define A2_EINTR EINTR
-#  if EWOULDBLOCK == EAGAIN
-#    define A2_WOULDBLOCK(e) (e == EWOULDBLOCK)
-#  else // EWOULDBLOCK != EAGAIN
-#    define A2_WOULDBLOCK(e) (e == EWOULDBLOCK || e == EAGAIN)
-#  endif // EWOULDBLOCK != EAGAIN
-#endif   // !__MINGW32__
+#define A2_EINPROGRESS EINPROGRESS
+#ifndef EWOULDBLOCK
+#  define EWOULDBLOCK EAGAIN
+#endif // EWOULDBLOCK
+#define A2_EWOULDBLOCK EWOULDBLOCK
+#define A2_EINTR EINTR
+#if EWOULDBLOCK == EAGAIN
+#  define A2_WOULDBLOCK(e) (e == EWOULDBLOCK)
+#else // EWOULDBLOCK != EAGAIN
+#  define A2_WOULDBLOCK(e) (e == EWOULDBLOCK || e == EAGAIN)
+#endif // EWOULDBLOCK != EAGAIN
 
-#ifdef __MINGW32__
-#  define CLOSE(X) ::closesocket(X)
-#else
-#  define CLOSE(X) close(X)
-#endif // __MINGW32__
+#define CLOSE(X) close(X)
 
 namespace {
 std::string errorMsg(int errNum)
 {
-#ifndef __MINGW32__
   return util::safeStrerror(errNum);
-#else
-  auto msg = util::formatLastError(errNum);
-  if (msg.empty()) {
-    char buf[256];
-    snprintf(buf, sizeof(buf), EX_SOCKET_UNKNOWN_ERROR, errNum, errNum);
-    return buf;
-  }
-  return msg;
-#endif // __MINGW32__
 }
 } // namespace
 
@@ -595,39 +569,23 @@ void SocketCore::applyIpDscp()
 
 void SocketCore::setNonBlockingMode()
 {
-#ifdef __MINGW32__
-  static u_long flag = 1;
-  if (::ioctlsocket(sockfd_, FIONBIO, &flag) == -1) {
-    int errNum = SOCKET_ERRNO;
-    throw DL_ABORT_EX(fmt(EX_SOCKET_NONBLOCKING, errorMsg(errNum).c_str()));
-  }
-#else
   int flags;
   while ((flags = fcntl(sockfd_, F_GETFL, 0)) == -1 && errno == EINTR)
     ;
   // TODO add error handling
   while (fcntl(sockfd_, F_SETFL, flags | O_NONBLOCK) == -1 && errno == EINTR)
     ;
-#endif // __MINGW32__
   blocking_ = false;
 }
 
 void SocketCore::setBlockingMode()
 {
-#ifdef __MINGW32__
-  static u_long flag = 0;
-  if (::ioctlsocket(sockfd_, FIONBIO, &flag) == -1) {
-    int errNum = SOCKET_ERRNO;
-    throw DL_ABORT_EX(fmt(EX_SOCKET_BLOCKING, errorMsg(errNum).c_str()));
-  }
-#else
   int flags;
   while ((flags = fcntl(sockfd_, F_GETFL, 0)) == -1 && errno == EINTR)
     ;
   // TODO add error handling
   while (fcntl(sockfd_, F_SETFL, flags & (~O_NONBLOCK)) == -1 && errno == EINTR)
     ;
-#endif // __MINGW32__
   blocking_ = true;
 }
 
@@ -654,14 +612,12 @@ void SocketCore::closeConnection()
   }
 }
 
-#ifndef __MINGW32__
-#  define CHECK_FD(fd)                                                         \
-    if (fd < 0 || FD_SETSIZE <= fd) {                                          \
-      logger_->warn("Detected file descriptor >= FD_SETSIZE or < 0. "          \
-                    "Download may slow down or fail.");                        \
-      return false;                                                            \
-    }
-#endif // !__MINGW32__
+#define CHECK_FD(fd)                                                           \
+  if (fd < 0 || FD_SETSIZE <= fd) {                                            \
+    logger_->warn("Detected file descriptor >= FD_SETSIZE or < 0. "            \
+                  "Download may slow down or fail.");                          \
+    return false;                                                              \
+  }
 
 bool SocketCore::isWritable(time_t timeout)
 {
@@ -681,9 +637,7 @@ bool SocketCore::isWritable(time_t timeout)
   }
   throw DL_RETRY_EX(fmt(EX_SOCKET_CHECK_WRITABLE, errorMsg(errNum).c_str()));
 #else // !HAVE_POLL
-#  ifndef __MINGW32__
   CHECK_FD(sockfd_);
-#  endif // !__MINGW32__
   fd_set fds;
   FD_ZERO(&fds);
   FD_SET(sockfd_, &fds);
@@ -726,9 +680,7 @@ bool SocketCore::isReadable(time_t timeout)
   }
   throw DL_RETRY_EX(fmt(EX_SOCKET_CHECK_READABLE, errorMsg(errNum).c_str()));
 #else // !HAVE_POLL
-#  ifndef __MINGW32__
   CHECK_FD(sockfd_);
-#  endif // !__MINGW32__
   fd_set fds;
   FD_ZERO(&fds);
   FD_SET(sockfd_, &fds);
@@ -759,20 +711,9 @@ ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
   wantRead_ = false;
   wantWrite_ = false;
   if (!secure_) {
-#ifdef __MINGW32__
-    DWORD nsent;
-    int rv = WSASend(sockfd_, iov, iovcnt, &nsent, 0, 0, 0);
-    if (rv == 0) {
-      ret = nsent;
-    }
-    else {
-      ret = -1;
-    }
-#else  // !__MINGW32__
     while ((ret = writev(sockfd_, iov, iovcnt)) == -1 &&
            SOCKET_ERRNO == A2_EINTR)
       ;
-#endif // !__MINGW32__
     int errNum = SOCKET_ERRNO;
     if (ret == -1) {
       if (!A2_WOULDBLOCK(errNum)) {
@@ -1573,90 +1514,9 @@ bool ipv4AddrConfigured = true;
 bool ipv6AddrConfigured = true;
 } // namespace
 
-#ifdef __MINGW32__
-namespace {
-const uint32_t APIPA_IPV4_BEGIN = 2851995649u; // 169.254.0.1
-const uint32_t APIPA_IPV4_END = 2852061183u;   // 169.254.255.255
-} // namespace
-#endif // __MINGW32__
-
 void checkAddrconfig()
 {
-#ifdef HAVE_IPHLPAPI_H
-  A2_LOG_INFO("Checking configured addresses");
-  ULONG bufsize = 15_k;
-  ULONG retval = 0;
-  IP_ADAPTER_ADDRESSES* buf = 0;
-  int numTry = 0;
-  const int MAX_TRY = 3;
-  do {
-    buf = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(malloc(bufsize));
-    retval = GetAdaptersAddresses(AF_UNSPEC, 0, 0, buf, &bufsize);
-    if (retval != ERROR_BUFFER_OVERFLOW) {
-      break;
-    }
-    free(buf);
-    buf = 0;
-  } while (retval == ERROR_BUFFER_OVERFLOW && numTry < MAX_TRY);
-  if (retval != NO_ERROR) {
-    A2_LOG_INFO("GetAdaptersAddresses failed. Assume both IPv4 and IPv6 "
-                " addresses are configured.");
-    return;
-  }
-  ipv4AddrConfigured = false;
-  ipv6AddrConfigured = false;
-  char host[NI_MAXHOST];
-  sockaddr_union ad;
-  int rv;
-  for (IP_ADAPTER_ADDRESSES* p = buf; p; p = p->Next) {
-    if (p->IfType == IF_TYPE_TUNNEL) {
-      // Skip tunnel interface because Windows7 automatically setup
-      // this for IPv6.
-      continue;
-    }
-    PIP_ADAPTER_UNICAST_ADDRESS ucaddr = p->FirstUnicastAddress;
-    if (!ucaddr) {
-      continue;
-    }
-    for (PIP_ADAPTER_UNICAST_ADDRESS i = ucaddr; i; i = i->Next) {
-      bool found = false;
-      switch (i->Address.iSockaddrLength) {
-      case sizeof(sockaddr_in): {
-        memcpy(&ad.storage, i->Address.lpSockaddr, i->Address.iSockaddrLength);
-        uint32_t haddr = ntohl(ad.in.sin_addr.s_addr);
-        if (haddr != INADDR_LOOPBACK &&
-            (haddr < APIPA_IPV4_BEGIN || APIPA_IPV4_END <= haddr)) {
-          ipv4AddrConfigured = true;
-          found = true;
-        }
-        break;
-      }
-      case sizeof(sockaddr_in6):
-        memcpy(&ad.storage, i->Address.lpSockaddr, i->Address.iSockaddrLength);
-        if (!IN6_IS_ADDR_LOOPBACK(&ad.in6.sin6_addr) &&
-            !IN6_IS_ADDR_LINKLOCAL(&ad.in6.sin6_addr)) {
-          ipv6AddrConfigured = true;
-          found = true;
-        }
-        break;
-      }
-      rv = getnameinfo(i->Address.lpSockaddr, i->Address.iSockaddrLength, host,
-                       NI_MAXHOST, 0, 0, NI_NUMERICHOST);
-      if (rv == 0) {
-        if (found) {
-          A2_LOG_INFO(fmt("Found configured address: %s", host));
-        }
-        else {
-          A2_LOG_INFO(fmt("Not considered: %s", host));
-        }
-      }
-    }
-  }
-  free(buf);
-
-  A2_LOG_INFO(fmt("IPv4 configured=%d, IPv6 configured=%d", ipv4AddrConfigured,
-                  ipv6AddrConfigured));
-#elif defined(HAVE_GETIFADDRS)
+#ifdef HAVE_GETIFADDRS
   A2_LOG_INFO("Checking configured addresses");
   ipv4AddrConfigured = false;
   ipv6AddrConfigured = false;

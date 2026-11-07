@@ -485,17 +485,6 @@ void DefaultPieceStorage::completePiece(const std::shared_ptr<Piece>& piece)
 #ifdef ENABLE_BITTORRENT
     if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
       if (!bittorrent::getTorrentAttrs(downloadContext_)->metadata.empty()) {
-#  ifdef __MINGW32__
-        // On Windows, if aria2 opens files with GENERIC_WRITE access
-        // right, some programs cannot open them aria2 is seeding. To
-        // avoid this situation, re-open the files with read-only
-        // enabled.
-        A2_LOG_INFO("Closing files and re-open them with read-only mode"
-                    " enabled.");
-        diskAdaptor_->closeFile();
-        diskAdaptor_->enableReadOnly();
-        diskAdaptor_->openFile();
-#  endif // __MINGW32__
         auto group = downloadContext_->getOwnerRequestGroup();
 
         util::executeHookByOptName(group, option_,

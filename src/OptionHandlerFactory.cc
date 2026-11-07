@@ -87,11 +87,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
 #ifdef ENABLE_ASYNC_DNS
   {
     OptionHandler* op(new BooleanOptionHandler(PREF_ASYNC_DNS, TEXT_ASYNC_DNS,
-#  if defined(__ANDROID__) || defined(ANDROID)
-                                               A2_V_FALSE,
-#  else  // !__ANDROID__ && !ANDROID
                                                A2_V_TRUE,
-#  endif // !__ANDROID__ && !ANDROID
                                                OptionHandler::OPT_ARG));
     op->addTag(TAG_ADVANCED);
     op->setInitialOption(true);
@@ -212,17 +208,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
   {
     OptionHandler* op(new BooleanOptionHandler(PREF_DISABLE_IPV6,
                                                TEXT_DISABLE_IPV6,
-#if defined(__MINGW32__) && !defined(__MINGW64__)
-                                               // Disable IPv6 by default for
-                                               // MinGW build.  This is because
-                                               // numerous IPv6 routines are
-                                               // available from Vista. Checking
-                                               // getaddrinfo failed in
-                                               // configure.
-                                               A2_V_TRUE,
-#else  // !defined(__MINGW32__) || defined(__MINGW64__)
                                                A2_V_FALSE,
-#endif // !defined(__MINGW32__) || defined(__MINGW64__)
                                                OptionHandler::OPT_ARG));
     op->addTag(TAG_ADVANCED);
     handlers.push_back(op);
@@ -261,7 +247,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     op->addTag(TAG_ADVANCED);
     handlers.push_back(op);
   }
-#if defined(HAVE_MMAP) || defined(__MINGW32__)
+#ifdef HAVE_MMAP
   {
     OptionHandler* op(new BooleanOptionHandler(PREF_ENABLE_MMAP,
                                                TEXT_ENABLE_MMAP, A2_V_FALSE,
@@ -273,7 +259,7 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     op->setChangeOptionForReserved(true);
     handlers.push_back(op);
   }
-#endif // HAVE_MMAP || __MINGW32__
+#endif // HAVE_MMAP
   {
     OptionHandler* op(new BooleanOptionHandler(
         PREF_ENABLE_RPC, TEXT_ENABLE_RPC, A2_V_FALSE, OptionHandler::OPT_ARG));
@@ -285,10 +271,6 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
                                                  TEXT_EVENT_POLL,
 #if defined(HAVE_EPOLL)
                                                  V_EPOLL,
-#elif defined(HAVE_KQUEUE)
-                                                 V_KQUEUE,
-#elif defined(HAVE_PORT_ASSOCIATE)
-                                                 V_PORT,
 #elif defined(HAVE_LIBUV)
                                                  V_LIBUV,
 #elif defined(HAVE_POLL)
@@ -300,12 +282,6 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
 #ifdef HAVE_EPOLL
                                                      V_EPOLL,
 #endif // HAVE_EPOLL
-#ifdef HAVE_KQUEUE
-                                                     V_KQUEUE,
-#endif // HAVE_KQUEUE
-#ifdef HAVE_PORT_ASSOCIATE
-                                                     V_PORT,
-#endif // HAVE_PORT_ASSOCIATE
 #ifdef HAVE_LIBUV
                                                      V_LIBUV,
 #endif // HAVE_LIBUV
@@ -744,16 +720,8 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
-    OptionHandler* op(
-#ifdef HAVE_APPLETLS
-        new LocalFilePathOptionHandler(
-            PREF_RPC_CERTIFICATE, TEXT_RPC_CERTIFICATE, NO_DEFAULT_VALUE,
-            /* acceptStdin = */ false, 0, /* mustExist = */ false)
-#else  // HAVE_APPLETLS
-        new LocalFilePathOptionHandler(
-            PREF_RPC_CERTIFICATE, TEXT_RPC_CERTIFICATE, NO_DEFAULT_VALUE, false)
-#endif // HAVE_APPLETLS
-    );
+    OptionHandler* op(new LocalFilePathOptionHandler(
+        PREF_RPC_CERTIFICATE, TEXT_RPC_CERTIFICATE, NO_DEFAULT_VALUE, false));
     op->addTag(TAG_RPC);
     handlers.push_back(op);
   }
@@ -1031,15 +999,8 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
-    OptionHandler* op(
-#ifdef HAVE_APPLETLS
-        new DefaultOptionHandler(PREF_CERTIFICATE, TEXT_CERTIFICATE,
-                                 NO_DEFAULT_VALUE)
-#else  // HAVE_APPLETLS
-        new LocalFilePathOptionHandler(PREF_CERTIFICATE, TEXT_CERTIFICATE,
-                                       NO_DEFAULT_VALUE, false)
-#endif // HAVE_APPLETLS
-    );
+    OptionHandler* op(new LocalFilePathOptionHandler(
+        PREF_CERTIFICATE, TEXT_CERTIFICATE, NO_DEFAULT_VALUE, false));
     op->addTag(TAG_HTTP);
     op->addTag(TAG_HTTPS);
     handlers.push_back(op);

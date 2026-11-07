@@ -35,69 +35,31 @@
 #ifndef D_LOCK_H
 #define D_LOCK_H
 
-#if defined(_WIN32)
-#  include <windows.h>
-#elif defined(ENABLE_PTHREAD)
-#  include <pthread.h>
-#endif
+#include <pthread.h>
 
 namespace aria2 {
 
 class Lock {
 private:
-#if defined(_WIN32)
-  ::CRITICAL_SECTION section_;
-#elif defined(ENABLE_PTHREAD)
   ::pthread_mutex_t mutex_;
-#endif
 
 public:
   Lock()
   {
-#if defined(_WIN32)
-    ::InitializeCriticalSection(&section_);
-#elif defined(ENABLE_PTHREAD)
-    mutex_ = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
-#endif
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&mutex_, &attr);
+    pthread_mutexattr_destroy(&attr);
   }
 
-  ~Lock()
-  {
-#if defined(_WIN32)
-    ::DeleteCriticalSection(&section_);
-#elif defined(ENABLE_PTHREAD)
-    ::pthread_mutex_destroy(&mutex_);
-#endif
-  }
+  ~Lock() { ::pthread_mutex_destroy(&mutex_); }
 
-  inline void aquire()
-  {
-#if defined(_WIN32)
-    ::EnterCriticalSection(&section_);
-#elif defined(ENABLE_PTHREAD)
-    ::pthread_mutex_lock(&mutex_);
-#endif
-  }
+  inline void aquire() { ::pthread_mutex_lock(&mutex_); }
 
-  inline bool tryAquire()
-  {
-#if defined(_WIN32)
-    return ::TryEnterCriticalSection(&section_) == TRUE;
-#elif defined(ENABLE_PTHREAD)
-    return ::pthread_mutex_trylock(&mutex_) == 0;
-#else
-    return true;
-#endif
-  }
+  inline bool tryAquire() { return ::pthread_mutex_trylock(&mutex_) == 0; }
 
-  inline void release()
-  {
-#if defined(_WIN32)
-    ::LeaveCriticalSection(&section_);
-#elif defined(ENABLE_PTHREAD)
-    ::pthread_mutex_unlock(&mutex_);
-#endif
-  }
+  inline void release() { ::pthread_mutex_unlock(&mutex_); }
 };
 
 class LockGuard {

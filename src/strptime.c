@@ -34,10 +34,6 @@
 #  include "config.h"
 #endif // HAVE_CONFIG_H
 
-#ifndef HAVE_LOCALTIME_R
-#  include "localtime_r.h"
-#endif // HAVE_LOCALTIME_R
-
 #ifndef HAVE_TIMEGM
 #  include "timegm.h"
 #endif // HAVE_TIMEGM

@@ -31,29 +31,12 @@ EXTRACPPFLAGS=
 EXTRALDFLAGS=
 EXTRALIBS=
 
-case "$host" in
-  *mingw*)
-    win_build=yes
-    EXTRALIBS="-lws2_32 -lwsock32 -lgdi32 -lwinmm -liphlpapi -lpsapi $EXTRALIBS"
-    # Define _POSIX_C_SOURCE to 1. This makes {asc,local}time_r
-    # available from <time.h> even without (un)helpful interference
-    # from <pthread.h>, and also defines __USE_MINGW_ANSI_STDIO.
-    EXTRACPPFLAGS="$EXTRACPPFLAGS -D_POSIX_C_SOURCE=1"
-    # Build with ASLR (dynamicbase) and NX compatibility (nxcompat)
-    # Enable pie once upstream/binutils gets fixed to produce correct
-    # binaries with it.
-    EXTRALDFLAGS="$EXTRALDFLAGS -Wl,--dynamicbase -Wl,--nxcompat"
-    ;;
-esac
-
 AC_DEFINE_UNQUOTED([BUILD], ["$build"], [Define build-type])
 AC_DEFINE_UNQUOTED([HOST], ["$host"], [Define build-type])
 AC_DEFINE_UNQUOTED([TARGET], ["$target"], [Define target-type])
 
 # Checks for arguments.
 ARIA2_ARG_WITH([libuv])
-ARIA2_ARG_WITHOUT([appletls])
-ARIA2_ARG_WITHOUT([wintls])
 ARIA2_ARG_WITHOUT([gnutls])
 ARIA2_ARG_WITHOUT([libnettle])
 ARIA2_ARG_WITHOUT([libgmp])
@@ -160,9 +143,7 @@ int *a = nullptr;
 [],
 [AC_MSG_FAILURE([C++ compiler does not understand nullptr, perhaps C++ compiler is too old.  Try again with new one (gcc >= 4.8.3 or clang >= 3.4)])])
 
-# i686-w64-mingw32-g++ 4.6 does not support override keyword. For
-# those compilers, define CXX11_OVERRIDE to empty string. Otherwise
-# define it as override. Use CXX11_OVERRIDE instead of override.
+# Check whether the C++ compiler supports `override` keyword.
 AC_MSG_CHECKING([whether the C++ compiler supports `override` keyword])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 struct Base {
@@ -185,13 +166,6 @@ CXXFLAGS=$save_CXXFLAGS
 
 # Check static build is requested
 if test "x$ARIA2_STATIC" = "xyes"; then
-  case "$host" in
-    i686*mingw*)
-      dnl Define _USE_32BIT_TIME_T because 32bit library of MinGW-w64
-      dnl does not implement many 64bit version functions.
-      EXTRACPPFLAGS="$EXTRACPPFLAGS -D_USE_32BIT_TIME_T"
-    ;;
-  esac
   # Make pkg-config produce static linking variables
   PKG_CONFIG="$PKG_CONFIG --static"
 else
@@ -285,100 +259,11 @@ if test "x$with_sqlite3" = "xyes"; then
   fi
 fi
 
-case "$host" in
-  *darwin*)
-    have_osx="yes"
-  ;;
-  *mingw*)
-    AC_CHECK_HEADERS([windows.h \
-                      winsock2.h \
-                      ws2tcpip.h \
-                      mmsystem.h \
-                      io.h \
-                      iphlpapi.h\
-                      winioctl.h \
-                      share.h], [], [],
-                      [[
-#ifdef HAVE_WS2TCPIP_H
-# include <ws2tcpip.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-# include <winsock2.h>
-#endif
-#ifdef HAVE_WINDOWS_H
-# include <windows.h>
-#endif
-                      ]])
-  ;;
-esac
-
-
 if test "x$enable_ssl" != "xyes"; then
-  with_appletls=no
-  with_wintls=no
   with_libnettle=no
   with_libgcrypt=no
   with_gnutls=no
   with_openssl=no
-fi
-
-have_appletls=no
-if test "x$with_appletls" = "xyes"; then
-  AC_MSG_CHECKING([whether to enable Mac OS X native SSL/TLS])
-  if test "x$have_osx" = "xyes"; then
-    AC_DEFINE([HAVE_APPLETLS], [1], [Define to 1 if you have Apple TLS])
-    APPLETLS_LDFLAGS="-framework CoreFoundation -framework Security"
-    AC_SUBST([APPLETLS_LDFLAGS])
-    have_appletls="yes"
-    have_ssl=yes
-    have_nativetls=yes
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-    if test "x$with_appletls_requested" = "xyes"; then
-      ARIA2_DEP_NOT_MET([appletls])
-    fi
-  fi
-fi
-
-have_wintls=no
-if test "x$with_wintls" = "xyes"; then
-  AC_CHECK_LIB([crypt32],[main],[have_wintls_libs=yes],[have_wintls_libs=no],[])ac_cv_lib_crypt32=ac_cv_lib_crypt32_main
-
-  AC_CHECK_LIB([secur32],[main],[have_wintls_libs=$have_wintls_libs],[have_wintls_libs=no],[])ac_cv_lib_secur32=ac_cv_lib_secur32_main
-
-  AC_CHECK_LIB([advapi32],[main],[have_wintls_libs=$have_wintls_libs],[have_wintls_libs=no],[])ac_cv_lib_advapi32=ac_cv_lib_advapi32_main
-
-  AC_CHECK_HEADER([wincrypt.h], [have_wintls_headers=yes], [have_wintls_headers=no], [[
-#ifdef HAVE_WINDOWS_H
-# include <windows.h>
-#endif
-  ]])
-  AC_CHECK_HEADER([security.h], [have_wintls_headers=$have_wintls_headers], [have_wintls_headers=no], [[
-#ifdef HAVE_WINDOWS_H
-# include <windows.h>
-#endif
-#ifndef SECURITY_WIN32
-#define SECURITY_WIN32 1
-#endif
-  ]])
-
-  if test "x$have_wintls_libs" = "xyes" &&
-     test "x$have_wintls_headers" = "xyes"; then
-    AC_DEFINE([SECURITY_WIN32], [1], [Use security.h in WIN32 mode])
-    WINTLS_LIBS="-lcrypt32 -lsecur32 -ladvapi32"
-    AC_SUBST([WINTLS_LIBS])
-    have_wintls=yes
-    have_ssl=yes
-    have_nativetls=yes
-  else
-    have_wintls=no
-  fi
-  if test "x$have_wintls" != "xyes"; then
-    if test "x$with_wintls_requested" = "xyes"; then
-      ARIA2_DEP_NOT_MET([wintls])
-    fi
-  fi
 fi
 
 have_libgnutls=no
@@ -518,25 +403,20 @@ if test "x$with_libcares" = "xyes"; then
 fi
 
 use_md=""
-if test "x$have_appletls" = "xyes"; then
-  use_md="apple"
-  AC_DEFINE([USE_APPLE_MD], [1], [What message digest implementation to use])
+if test "x$have_libnettle" = "xyes"; then
+  AC_DEFINE([USE_LIBNETTLE_MD], [1], [What message digest implementation to use])
+  use_md="libnettle"
 else
-  if test "x$have_libnettle" = "xyes"; then
-    AC_DEFINE([USE_LIBNETTLE_MD], [1], [What message digest implementation to use])
-    use_md="libnettle"
+  if test "x$have_libgcrypt" = "xyes"; then
+    AC_DEFINE([USE_LIBGCRYPT_MD], [1], [What message digest implementation to use])
+    use_md="libgcrypt"
   else
-    if test "x$have_libgcrypt" = "xyes"; then
-      AC_DEFINE([USE_LIBGCRYPT_MD], [1], [What message digest implementation to use])
-      use_md="libgcrypt"
+    if test "x$have_openssl" = "xyes"; then
+      AC_DEFINE([USE_OPENSSL_MD], [1], [What message digest implementation to use])
+      use_md="openssl"
     else
-      if test "x$have_openssl" = "xyes"; then
-        AC_DEFINE([USE_OPENSSL_MD], [1], [What message digest implementation to use])
-        use_md="openssl"
-      else
-        AC_DEFINE([USE_INTERNAL_MD], [1], [What message digest implementation to use])
-        use_md="internal"
-      fi
+      AC_DEFINE([USE_INTERNAL_MD], [1], [What message digest implementation to use])
+      use_md="internal"
     fi
   fi
 fi
@@ -551,11 +431,6 @@ else
 fi
 
 
-AM_CONDITIONAL([HAVE_OSX], [ test "x$have_osx" = "xyes" ])
-AM_CONDITIONAL([HAVE_APPLETLS], [ test "x$have_appletls" = "xyes" ])
-AM_CONDITIONAL([HAVE_WINTLS], [ test "x$have_wintls" = "xyes" ])
-AM_CONDITIONAL([USE_APPLE_MD], [ test "x$use_md" = "xapple" ])
-AM_CONDITIONAL([USE_WINDOWS_MD], [ test "x$use_md" = "xwindows" ])
 AM_CONDITIONAL([HAVE_LIBGNUTLS], [ test "x$have_libgnutls" = "xyes" ])
 AM_CONDITIONAL([HAVE_LIBNETTLE], [ test "x$have_libnettle" = "xyes" ])
 AM_CONDITIONAL([USE_LIBNETTLE_MD], [ test "x$use_md" = "xlibnettle"])
@@ -644,16 +519,6 @@ AM_CONDITIONAL([HAVE_SQLITE3], [test "x$have_sqlite3" = "xyes"])
 # Set conditional for libssh2
 AM_CONDITIONAL([HAVE_LIBSSH2], [test "x$have_libssh2" = "xyes"])
 
-case "$host" in
-  *solaris*)
-    save_LIBS=$LIBS
-    LIBS=
-    AC_SEARCH_LIBS([getaddrinfo], [nsl socket], [], [$save_LIBS])
-    EXTRALIBS="$LIBS $EXTRALIBS"
-    LIBS=$save_LIBS
-    ;;
-esac
-
 # Checks for header files.
 AC_FUNC_ALLOCA
 AC_PROG_EGREP
@@ -671,7 +536,6 @@ AC_CHECK_HEADERS([argz.h \
                   netinet/in.h \
                   netinet/tcp.h \
                   poll.h \
-                  port.h \
                   signal.h \
                   stddef.h \
                   stdint.h \
@@ -788,9 +652,9 @@ AC_CHECK_FUNCS([__argz_count \
                 utimes])
 
 dnl Put tcmalloc/jemalloc checks after the posix_memalign check.
-dnl These libraries may implement posix_memalign, while the usual CRT may not
-dnl (e.g. mingw). Since we aren't including the corresponding library headers
-dnl this will lead to undefined posix_memalign() errors when compiling
+dnl These libraries may implement posix_memalign while the usual CRT may not.
+dnl Since we aren't including the corresponding library headers this will lead
+dnl to undefined posix_memalign() errors when compiling.
 if test "x$with_tcmalloc_requested" = "xyes" &&
    test "x$with_jemalloc_requested" = "xyes"; then
   AC_MSG_FAILURE([Cannot use both, tcmalloc and jemalloc!])
@@ -849,45 +713,12 @@ AM_CONDITIONAL([HAVE_EPOLL], [test "x$have_epoll" = "xyes"])
 AC_CHECK_FUNCS([posix_fallocate],[have_posix_fallocate=yes])
 ARIA2_CHECK_FALLOCATE
 if test "x$have_posix_fallocate" = "xyes" ||
-   test "x$have_fallocate" = "xyes" ||
-   test "x$have_osx" = "xyes" ||
-   test "x$win_build" = "xyes"; then
+   test "x$have_fallocate" = "xyes"; then
   AC_DEFINE([HAVE_SOME_FALLOCATE], [1],
             [Define to 1 if *_fallocate is available.])
 fi
 AM_CONDITIONAL([HAVE_SOME_FALLOCATE],
-  [test "x$have_posix_fallocate" = "xyes" || test "x$have_fallocate" = "xyes" \
-  || test "x$have_osx" = "xyes" || test "x$win_build" = "xyes"])
-
-# mingw needs this
-save_CPPFLAGS=$CPPFLAGS
-CPPFLAGS="$CPPFLAGS $EXTRACPPFLAGS"
-AC_MSG_CHECKING([for asctime_r])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    #include <time.h>
-  ]], [[
-    struct tm r; char *c;
-    asctime_r(&r, c);
-  ]])],
-  [AM_CONDITIONAL([HAVE_ASCTIME_R], true)
-   AC_MSG_RESULT([yes])
-   AC_DEFINE([HAVE_ASCTIME_R], [1], [Define to 1 if you have the `asctime_r' function or macro.])],
-  [AC_MSG_RESULT([no])
-   AM_CONDITIONAL([HAVE_ASCTIME_R], false)])
-
-AC_MSG_CHECKING([for localtime_r])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    #include <time.h>
-  ]], [[
-    time_t t; struct tm r;
-    localtime_r(&t, &r);
-  ]])],
-  [AM_CONDITIONAL([HAVE_LOCALTIME_R], true)
-   AC_MSG_RESULT([yes])
-   AC_DEFINE([HAVE_LOCALTIME_R], [1], [Define to 1 if you have the `localtime_r' function or macro.])],
-  [AC_MSG_RESULT([no])
-   AM_CONDITIONAL([HAVE_LOCALTIME_R], false)])
-CPPFLAGS=$save_CPPFLAGS
+  [test "x$have_posix_fallocate" = "xyes" || test "x$have_fallocate" = "xyes"])
 
 AC_CHECK_FUNCS([basename],
         [AM_CONDITIONAL([HAVE_BASENAME], true)],
@@ -898,9 +729,6 @@ AC_CHECK_FUNCS([gai_strerror],
 AC_CHECK_FUNCS([getaddrinfo],
         [AM_CONDITIONAL([HAVE_GETADDRINFO], true)],
         [AM_CONDITIONAL([HAVE_GETADDRINFO], false)])
-AC_CHECK_FUNCS([gettimeofday],
-        [AM_CONDITIONAL([HAVE_GETTIMEOFDAY], true)],
-        [AM_CONDITIONAL([HAVE_GETTIMEOFDAY], false)])
 AC_CHECK_FUNCS([strptime],
         [AM_CONDITIONAL([HAVE_STRPTIME], true)],
         [AM_CONDITIONAL([HAVE_STRPTIME], false)])
@@ -910,45 +738,9 @@ AM_CONDITIONAL([HAVE_DAEMON], [test "x$have_daemon" = "xyes"])
 AC_CHECK_FUNCS([poll], [have_poll=yes])
 AM_CONDITIONAL([HAVE_POLL], [test "x$have_poll" = "xyes"])
 
-case "$host" in
-  *mingw*)
-    AM_CONDITIONAL([MINGW_BUILD], true)
-    dnl defined in ws2tcpip.h, but only if _WIN32_WINNT >= 0x0501
-    AM_CONDITIONAL([HAVE_GETADDRINFO], true)
-    dnl defined in ws2tcpip.h, but missing in C:\mingw\lib\libws2_32.a
-    AM_CONDITIONAL([HAVE_GAI_STRERROR], false)
-    ;;
-  *)
-    AM_CONDITIONAL([MINGW_BUILD], false)
-    ;;
-esac
-
 AC_CHECK_FUNCS([timegm],
     [AM_CONDITIONAL([HAVE_TIMEGM], true)],
     [AM_CONDITIONAL([HAVE_TIMEGM], false)])
-
-AC_CHECK_FUNCS([port_associate], [have_port_associate=yes])
-AM_CONDITIONAL([HAVE_PORT_ASSOCIATE], [test "x$have_port_associate" = "xyes"])
-
-AC_CHECK_FUNCS([kqueue], [have_kqueue=yes])
-AM_CONDITIONAL([HAVE_KQUEUE], [test "x$have_kqueue" = "xyes"])
-if test "x$have_kqueue" = "xyes"; then
-    AC_MSG_CHECKING([whether struct kevent.udata is intptr_t])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/event.h>
-#include <sys/time.h>
-]],
-[[
-struct kevent event;
-event.udata = reinterpret_cast<intptr_t>(&event);
-]])],
-    [kevent_udata_intptr_t=yes], [kevent_udata_intptr_t=no])
-    AC_MSG_RESULT([$kevent_udata_intptr_t])
-    if test "x$kevent_udata_intptr_t" = "xyes"; then
-       AC_DEFINE([KEVENT_UDATA_INTPTR_T], [1], [Define to 1 if struct kevent.udata is intptr_t])
-    fi
-fi
 
 AC_CHECK_MEMBER([struct sockaddr_in.sin_len],
                 [AC_DEFINE([HAVE_SOCKADDR_IN_SIN_LEN],[1],
@@ -970,9 +762,7 @@ AC_CHECK_MEMBER([struct sockaddr_in6.sin6_len],
 #include <netinet/in.h>
 ]])
 
-# Check struct option.name is assignable from const char*.  struct
-# option.name in opensolaris is of type char*. In Linux, it is const
-# char*
+# Check struct option.name is assignable from const char*.
 AC_MSG_CHECKING([whether struct option.name is assignable from const char*])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <unistd.h>
@@ -1010,20 +800,8 @@ if test "x$ARIA2_STATIC" = "xyes"; then
   # -static-libgcc and -static-libstdc++ are linker flags and not for
   # libtool.
   EXTRALDFLAGS="$EXTRALDFLAGS -all-static"
-  dnl For non-MinGW build, we need additional libs for static build.
-  case "$host" in
-    *mingw*|*msvc*|*darwin*)
-    ;;
-
-    *)
-      EXTRALIBS="$EXTRALIBS -lpthread -ldl -lrt"
-    ;;
-  esac
-fi
-
-if test "x$win_build" = "xyes" && test "x$enable_libaria2" = "xyes"; then
-  # Creating dll needs this
-  EXTRALDFLAGS="$EXTRALDFLAGS -no-undefined"
+  dnl we need additional libs for static build.
+  EXTRALIBS="$EXTRALIBS -lpthread -ldl -lrt"
 fi
 
 AC_SUBST([EXTRACFLAGS])
@@ -1087,8 +865,6 @@ WARNCXXFLAGS:   $WARNCXXFLAGS
 LibUV:          $have_libuv (CFLAGS='$LIBUV_CFLAGS' LIBS='$LIBUV_LIBS')
 SQLite3:        $have_sqlite3 (CFLAGS='$SQLITE3_CFLAGS' LIBS='$SQLITE3_LIBS')
 SSL Support:    $have_ssl
-AppleTLS:       $have_appletls (LDFLAGS='$APPLETLS_LDFLAGS')
-WinTLS:         $have_wintls (LIBS='$WINTLS_LIBS')
 GnuTLS:         $have_libgnutls (CFLAGS='$LIBGNUTLS_CFLAGS' LIBS='$LIBGNUTLS_LIBS')
 OpenSSL:        $have_openssl (CFLAGS='$OPENSSL_CFLAGS' LIBS='$OPENSSL_LIBS')
 CA Bundle:      $ca_bundle

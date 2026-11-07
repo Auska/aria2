@@ -273,10 +273,6 @@ SRCS =  \
 	EvictSocketPoolCommand.cc EvictSocketPoolCommand.h\
 	libssl_compat.h
 
-if MINGW_BUILD
-SRCS += WinConsoleFile.cc WinConsoleFile.h
-endif # MINGW_BUILD
-
 if ENABLE_WEBSOCKET
 SRCS += \
 	WebSocketInteractionCommand.cc WebSocketInteractionCommand.h\
@@ -325,22 +321,6 @@ if ENABLE_SSL
 SRCS += TLSContext.h TLSSession.h
 endif # ENABLE_SSL
 
-if USE_APPLE_MD
-SRCS += AppleMessageDigestImpl.cc
-endif # USE_APPLE_MD
-
-if HAVE_APPLETLS
-SRCS += \
-	AppleTLSContext.cc AppleTLSContext.h \
-	AppleTLSSession.cc AppleTLSSession.h
-endif # HAVE_APPLETLS
-
-if HAVE_WINTLS
-SRCS += \
-	WinTLSContext.cc WinTLSContext.h \
-	WinTLSSession.cc WinTLSSession.h
-endif # HAVE_WINTLS
-
 if USE_INTERNAL_BIGNUM
 SRCS += \
 	bignum.h\
@@ -355,7 +335,7 @@ if USE_INTERNAL_MD
 SRCS += \
 	InternalMessageDigestImpl.cc\
 	crypto_hash.cc crypto_hash.h
-endif # USE_WINDOWS_MD
+endif # USE_INTERNAL_MD
 
 if HAVE_LIBGNUTLS
 SRCS += \
@@ -389,11 +369,9 @@ if HAVE_OPENSSL
 SRCS += \
 	LibsslARC4Encryptor.cc LibsslARC4Encryptor.h \
         LibsslDHKeyExchange.cc LibsslDHKeyExchange.h
-if !HAVE_APPLETLS
 SRCS += \
 	LibsslTLSContext.cc LibsslTLSContext.h \
         LibsslTLSSession.cc LibsslTLSSession.h
-endif # !HAVE_APPLETLS
 if USE_OPENSSL_MD
 SRCS += LibsslMessageDigestImpl.cc
 endif
@@ -625,10 +603,6 @@ SRCS += \
 
 endif # ENABLE_METALINK
 
-if !HAVE_ASCTIME_R
-SRCS += asctime_r.c asctime_r.h
-endif # !HAVE_ASCTIME_R
-
 if !HAVE_BASENAME
 SRCS += libgen.c libgen.h
 endif # !HAVE_BASENAME
@@ -640,14 +614,6 @@ endif # !HAVE_GETADDRINFO
 if !HAVE_GAI_STRERROR
 SRCS += gai_strerror.c gai_strerror.h
 endif # !HAVE_GAI_STRERROR
-
-if !HAVE_GETTIMEOFDAY
-SRCS += gettimeofday.c gettimeofday.h
-endif # !HAVE_GETTIMEOFDAY
-
-if !HAVE_LOCALTIME_R
-SRCS += localtime_r.c localtime_r.h
-endif # !HAVE_LOCALTIME_R
 
 if !HAVE_STRPTIME
 SRCS += strptime.c strptime.h
@@ -664,14 +630,6 @@ endif # !HAVE_DAEMON
 if HAVE_POLL
 SRCS += PollEventPoll.cc PollEventPoll.h
 endif # HAVE_POLL
-
-if HAVE_PORT_ASSOCIATE
-SRCS += PortEventPoll.cc PortEventPoll.h
-endif # HAVE_PORT_ASSOCIATE
-
-if HAVE_KQUEUE
-SRCS += KqueueEventPoll.cc KqueueEventPoll.h
-endif # HAVE_KQUEUE
 
 if HAVE_LIBUV
 SRCS += LibuvEventPoll.cc LibuvEventPoll.h
@@ -717,8 +675,7 @@ AM_CPPFLAGS = \
 	@JEMALLOC_CFLAGS@
 
 AM_LDFLAGS = \
-	@EXTRALDFLAGS@ \
-	@APPLETLS_LDFLAGS@
+	@EXTRALDFLAGS@
 
 EXTLDADD = @ALLOCA@ \
 	@EXTRALIBS@ \
@@ -727,7 +684,6 @@ EXTLDADD = @ALLOCA@ \
 	@LIBXML2_LIBS@ \
 	@EXPAT_LIBS@ \
 	@SQLITE3_LIBS@ \
-	@WINTLS_LIBS@ \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
 	@LIBNETTLE_LIBS@ \

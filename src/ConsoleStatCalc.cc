@@ -272,11 +272,7 @@ ConsoleStatCalc::ConsoleStatCalc(std::chrono::seconds summaryInterval,
     : summaryInterval_(std::move(summaryInterval)),
       readoutVisibility_(true),
       truncate_(true),
-#ifdef __MINGW32__
-      isTTY_(true),
-#else  // !__MINGW32__
       isTTY_(isatty(STDOUT_FILENO) == 1),
-#endif // !__MINGW32__
       colorOutput_(colorOutput)
 {
   if (humanReadable) {
@@ -301,20 +297,12 @@ void ConsoleStatCalc::calculateStat(const DownloadEngine* e)
   unsigned short int cols = 79;
 
   if (isTTY_) {
-#ifndef __MINGW32__
-#  ifdef HAVE_TERMIOS_H
+#ifdef HAVE_TERMIOS_H
     struct winsize size;
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0) {
       cols = std::max(0, (int)size.ws_col - 1);
     }
-#  endif // HAVE_TERMIOS_H
-#else    // __MINGW32__
-    CONSOLE_SCREEN_BUFFER_INFO info;
-    if (::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE),
-                                     &info)) {
-      cols = std::max(0, info.dwSize.X - 2);
-    }
-#endif   // !__MINGW32__
+#endif // HAVE_TERMIOS_H
     std::string line(cols, ' ');
     global::cout()->printf("\r%s\r", line.c_str());
   }

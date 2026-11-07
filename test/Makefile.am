@@ -249,7 +249,6 @@ aria2c_LDADD = \
 	@LIBXML2_LIBS@ \
 	@EXPAT_LIBS@ \
 	@SQLITE3_LIBS@ \
-	@WINTLS_LIBS@ \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
 	@LIBNETTLE_LIBS@ \
@@ -287,8 +286,7 @@ AM_CPPFLAGS = \
 	@JEMALLOC_CFLAGS@
 
 AM_LDFLAGS = \
-	@EXTRALDFLAGS@ \
-	@APPLETLS_LDFLAGS@
+	@EXTRALDFLAGS@
 
 AM_CFLAGS = @EXTRACFLAGS@
 
@@ -325,7 +323,6 @@ EXTRA_DIST = 4096chunk.txt\
 	metalink3-dirtraversal.xml\
 	metalink4-groupbymetaurl.xml\
 	serialize_session.meta4\
-	metalink4-dosdirtraversal.xml\
 	base_uri.xml\
 	local-metaurl.meta4
 

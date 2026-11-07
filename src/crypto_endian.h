@@ -27,16 +27,9 @@ namespace crypto {
  *   - where BYTE_ORDER == LITTLE_ENDIAN or BYTE_ORDER == BIG_ENDIAN
  * Failing to conform will render this implementation utterly incorrect.
  */
-#if defined(_WIN32) || defined(__INTEL_COMPILER) || defined(_MSC_VER)
-// Itanium is dead!
-#  define LITTLE_ENDIAN 1234
-#  define BIG_ENDIAN 4321
-#  define BYTE_ORDER LITTLE_ENDIAN
-#else // !  defined(_WIN32) || defined(__INTEL_COMPILER) || defined (_MSC_VER)
-#  ifdef HAVE_SYS_PARAM_H
-#    include <sys/param.h>
-#  endif // HAVE_SYS_PARAM_H
-#endif // !  defined(_WIN32) || defined(__INTEL_COMPILER) || defined (_MSC_VER)
+#ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+#endif // HAVE_SYS_PARAM_H
 
 #if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || \
     (LITTLE_ENDIAN != BYTE_ORDER && BIG_ENDIAN != BYTE_ORDER)

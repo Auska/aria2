@@ -37,22 +37,7 @@
 
 #include "a2io.h"
 
-#ifdef __MINGW32__
-#  ifdef HAVE_WS2TCPIP_H
-#    include <ws2tcpip.h>
-#  endif // HAVE_WS2TCPIP_H
-#endif   // __MINGW32__
-
-#ifdef __MINGW32__
-#  define a2_sockopt_t char*
-#  ifndef HAVE_GETADDRINFO
-#    define HAVE_GETADDRINFO
-#  endif // !HAVE_GETADDRINFO
-#  undef HAVE_GAI_STRERROR
-#  undef gai_strerror
-#else
-#  define a2_sockopt_t void*
-#endif // __MINGW32__
+#define a2_sockopt_t void*
 
 #ifdef HAVE_NETDB_H
 #  include <netdb.h>
@@ -93,23 +78,13 @@
 
 #include <string>
 
-#ifdef HAVE_WINSOCK2_H
-#  define sock_t SOCKET
-#else
-#  define sock_t int
-#endif
+#define sock_t int
 
 #ifndef AI_ADDRCONFIG
 #  define AI_ADDRCONFIG 0
 #endif // !AI_ADDRCONFIG
 
 #define DEFAULT_AI_FLAGS AI_ADDRCONFIG
-
-#ifdef __MINGW32__
-#  ifndef SHUT_WR
-#    define SHUT_WR SD_SEND
-#  endif // !SHUT_WR
-#endif   // __MINGW32__
 
 union sockaddr_union {
   sockaddr sa;
@@ -141,14 +116,8 @@ struct Endpoint {
 #  define A2_IOV_MAX A2_DEFAULT_IOV_MAX
 #endif
 
-#ifdef __MINGW32__
-typedef WSABUF a2iovec;
-#  define A2IOVEC_BASE buf
-#  define A2IOVEC_LEN len
-#else // !__MINGW32__
 typedef struct iovec a2iovec;
-#  define A2IOVEC_BASE iov_base
-#  define A2IOVEC_LEN iov_len
-#endif // !__MINGW32__
+#define A2IOVEC_BASE iov_base
+#define A2IOVEC_LEN iov_len
 
 #endif // D_A2NETCOMPAT_H

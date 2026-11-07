@@ -47,15 +47,7 @@ GZipFile::GZipFile(const char* filename, const char* mode)
     : fp_(nullptr), buflen_(1_k), buf_(reinterpret_cast<char*>(malloc(buflen_)))
 {
   auto fp =
-      strcmp(DEV_STDIN, filename) == 0
-          ? stdin
-          :
-#ifdef __MINGW32__
-          a2fopen(utf8ToWChar(filename).c_str(), utf8ToWChar(mode).c_str())
-#else  // !__MINGW32__
-          a2fopen(filename, mode)
-#endif // !__MINGW32__
-      ;
+      strcmp(DEV_STDIN, filename) == 0 ? stdin : a2fopen(filename, mode);
   if (fp) {
     int fd = dup(fileno(fp));
     if (fd != -1) {

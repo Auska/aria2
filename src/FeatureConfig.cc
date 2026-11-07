@@ -204,12 +204,6 @@ std::string usedLibs()
 #ifdef HAVE_SQLITE3
   res += "sqlite3/" SQLITE_VERSION " ";
 #endif // HAVE_SQLITE3
-#ifdef HAVE_APPLETLS
-  res += "AppleTLS ";
-#endif // HAVE_APPLETLS
-#ifdef HAVE_WINTLS
-  res += "WinTLS ";
-#endif // HAVE_WINTLS
 #ifdef HAVE_LIBGNUTLS
   res += "GnuTLS/" GNUTLS_VERSION " ";
 #endif // HAVE_LIBGNUTLS
@@ -263,26 +257,8 @@ std::string usedCompilerAndPlatform()
 
   rv << "Intel ICC " << __VERSION__;
 
-#elif defined(__MINGW64_VERSION_STR)
-
-  rv << "mingw-w64 " << __MINGW64_VERSION_STR;
-#  ifdef __MINGW64_VERSION_STATE
-  rv << " (" << __MINGW64_VERSION_STATE << ")";
-#  endif // __MINGW64_VERSION_STATE
-  rv << " / gcc " << __VERSION__;
-
 #elif defined(__GNUG__)
 
-#  ifdef __MINGW32__
-  rv << "mingw ";
-#    ifdef __MINGW32_MAJOR_VERSION
-  rv << (int)__MINGW32_MAJOR_VERSION;
-#    endif // __MINGW32_MAJOR_VERSION
-#    ifdef __MINGW32_MINOR_VERSION
-  rv << "." << (int)__MINGW32_MINOR_VERSION;
-#    endif // __MINGW32_MINOR_VERSION
-  rv << " / ";
-#  endif   // __MINGW32__
   rv << "gcc " << __VERSION__;
 
 #else // !defined(__GNUG__)
@@ -302,59 +278,7 @@ std::string usedCompilerAndPlatform()
 
 std::string getOperatingSystemInfo()
 {
-#ifdef _WIN32
-  std::stringstream rv;
-  rv << "Windows ";
-  OSVERSIONINFOEX ovi = {sizeof(OSVERSIONINFOEX)};
-  if (!GetVersionEx((LPOSVERSIONINFO)&ovi)) {
-    rv << "Unknown";
-    return rv.str();
-  }
-  if (ovi.dwMajorVersion < 6) {
-    rv << "Legacy, probably XP";
-    return rv.str();
-  }
-  switch (ovi.dwMinorVersion) {
-  case 0:
-    if (ovi.wProductType == VER_NT_WORKSTATION) {
-      rv << "Vista";
-    }
-    else {
-      rv << "Server 2008";
-    }
-    break;
-
-  case 1:
-    if (ovi.wProductType == VER_NT_WORKSTATION) {
-      rv << "7";
-    }
-    else {
-      rv << "Server 2008 R2";
-    }
-    break;
-
-  default:
-    // Windows above 6.2 does not actually say so. :p
-
-    rv << ovi.dwMajorVersion;
-    if (ovi.dwMinorVersion) {
-      rv << "." << ovi.dwMinorVersion;
-    }
-    if (ovi.wProductType != VER_NT_WORKSTATION) {
-      rv << " Server";
-    }
-    break;
-  }
-  if (ovi.szCSDVersion[0]) {
-    rv << " (" << ovi.szCSDVersion << ")";
-  }
-#  ifdef _WIN64
-  rv << " (x86_64)";
-#  endif // _WIN64
-  rv << " (" << ovi.dwMajorVersion << "." << ovi.dwMinorVersion << ")";
-  return rv.str();
-#else //! _WIN32
-#  ifdef HAVE_SYS_UTSNAME_H
+#ifdef HAVE_SYS_UTSNAME_H
   struct utsname name;
   if (!uname(&name)) {
     if (!strstr(name.version, name.sysname) ||
@@ -367,9 +291,9 @@ std::string getOperatingSystemInfo()
     }
     return name.version;
   }
-#  endif // HAVE_SYS_UTSNAME_H
+#endif // HAVE_SYS_UTSNAME_H
   return "Unknown system";
-#endif   // !_WIN32
 }
+
 
 } // namespace aria2
