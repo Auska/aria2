@@ -314,9 +314,9 @@ void SecurityTest::testHMAC()
       auto resultlen = SELECT(resultlength);
 #undef SELECT
 
-      auto h = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, keylen}));
-      auto h2 = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, keylen - 1}));
-      auto r = h->getResult(std::as_bytes(std::span{data, datalen}));
+      auto h = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, static_cast<size_t>(keylen)}));
+      auto h2 = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, static_cast<size_t>(keylen - 1)}));
+      auto r = h->getResult(std::as_bytes(std::span{data, static_cast<size_t>(datalen)}));
       auto hr = util::toUpper(util::toHex(r.getBytes()));
       // Compare only the first |resultlen| bytes, as the original
       // compare(hr.data(), result, resultlen) did.
@@ -326,7 +326,7 @@ void SecurityTest::testHMAC()
       CPPUNIT_ASSERT(r == r);
       auto r2 = r;
       CPPUNIT_ASSERT(r == r2);
-      CPPUNIT_ASSERT(r != h2->getResult(std::as_bytes(std::span{data, datalen})));
+      CPPUNIT_ASSERT(r != h2->getResult(std::as_bytes(std::span{data, static_cast<size_t>(datalen)})));
     }
   }
 }

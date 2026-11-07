@@ -290,7 +290,8 @@ void DefaultBtAnnounce::processAnnounceResponse(
     const unsigned char* trackerResponse, size_t trackerResponseLength)
 {
   A2_LOG_DEBUG("Now processing tracker response.");
-  auto decodedValue = bencode2::decode(trackerResponse, trackerResponseLength);
+  auto decodedValue = bencode2::decode(
+      std::as_bytes(std::span{trackerResponse, trackerResponseLength}));
   const Dict* dict = downcast<Dict>(decodedValue);
   if (!dict) {
     throw DL_ABORT_EX(MSG_NULL_TRACKER_RESPONSE);

@@ -201,7 +201,7 @@ UTPexExtensionMessage::create(const unsigned char* data, size_t len)
   }
   auto msg = make_unique<UTPexExtensionMessage>(*data);
 
-  auto decoded = bencode2::decode(data + 1, len - 1);
+  auto decoded = bencode2::decode(std::as_bytes(std::span{data + 1, len - 1}));
   const Dict* dict = downcast<Dict>(decoded);
   if (dict) {
     const String* added = downcast<String>(dict->get("added"));

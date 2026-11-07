@@ -1,5 +1,7 @@
 # 任务：用 std::span 替换叶子工具层的「裸指针 + 长度」接口
 
+> 状态：✅ 已完成（2026-11-07）
+
 ## 目标
 
 在 PLAN-001（C++11→C++20，已完成）基础上，把 3 个核心工具簇里的
@@ -209,7 +211,7 @@
      `src/DownloadEngine.cc` / `src/HttpServer.cc` 里
      `make_unique<HMACResult>(...)` 的调用核对。
    - 门禁：同上；`git grep` 确认 `util_security.h` 里不再有 ptr+len 声明。
-3. [ ] **阶段 3：bencode2 簇 + 最终验收**
+3. [x] **阶段 3：bencode2 簇 + 最终验收**
    - `src/bencode2.h` / `.cc`：2 个 ptr+len `decode` 改
      `span<const std::byte>`，string 重载转发；`bencode2.cc:68` 处
      `reinterpret_cast<const char*>(data.data())` 保留（解析链不在范围内）。
@@ -403,3 +405,33 @@
 - 执行前仓库检查：`git rev-parse --is-inside-work-tree` 已确认为 true；
   `.gitignore` 已覆盖构建产物与生成文件，无需补充；`plans/` 为项目
   已有约定，`PLAN-002` 序号未被占用。
+
+## 执行记录（2026-11-07）
+
+三次提交：`2e359ab6`（阶段 1）、`d7bcfa63`（阶段 2）、阶段 3 提交。
+
+- 每阶段均在 `git worktree` 干净副本上 `autoreconf -i && ./configure && make -j check`
+  通过；阶段 3 加 `--enable-werror`。最终 `OK (911)`、`# PASS: 1`、无 `Failures !!!`。
+- 实际改动文件：阶段 1 54 个、阶段 2 3 个、阶段 3 9 个；共 69 个文件，与计划一致。
+- 范围外的解析链 / 消息层 / 磁盘虚接口 / C 源码 / CI 均未动；
+  `src/includes/aria2/aria2.h` 哈希仍为 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+
+### 实际偏差
+
+1. **DFA 实现方式**：计划写「改为 span 迭代器/下标 + 逐处 `std::to_integer`」。
+   实际改为**接口换 span、函数体保留原有 `const char*` 指针算法**：入口从
+   `in.data()` / `dest.data()` 派生 `p/eop/dp`，`*charsetp` 用
+   `in.subspan(...)` 表达。317 行状态机逐字节未改，语义风险显著低于逐处改写。
+   这比计划描述更保守，且同样达成「接口不再暴露裸指针 + 长度」。
+2. **`compare` 长度不等时返回 false**：原 API 要求调用方保证等长；改成 span 后
+   长度自带，故新增不等长返回 false 的保护 + 3 条边界断言。
+   `test/UtilSecurityTest.cc` 原有的 `compare(hr.data(), result, resultlen)`
+   语义是「只比前 resultlen 字节」，已用等长子 span 精确保留。
+3. **测试里的 2 处 int→size_t 窄化**：`-Werror=narrowing` 报出
+   `keylen` / `datalen` / `resultlen` 为 `int`，已加 `static_cast<size_t>`。
+   这是 `--enable-werror` 带来的额外发现，非计划遗漏。
+4. **`bittorrent_helper.cc` 的 `generateRandomData` 调用**：`len` 为 `int`，
+   同样加了 `static_cast<size_t>`。
+5. 阶段 1 的机械转换用了一次性 codemod 脚本（不入库），其中把
+   `test/UtilTest2.cc` 的字符串字面量误改成带 NUL 的 span，被测试当场拓出并
+   修正为 `sizeof(literal) - 1`——这正是计划「风险与权衡」里预警的 NUL 陷阱。

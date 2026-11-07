@@ -68,7 +68,7 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
 {
   try {
     bool isReply = false;
-    auto decoded = bencode2::decode(data, length);
+    auto decoded = bencode2::decode(std::as_bytes(std::span{data, length}));
     const Dict* dict = downcast<Dict>(decoded);
     if (dict) {
       const String* y = downcast<String>(dict->get(DHTMessage::Y));

@@ -554,8 +554,10 @@ void loadFromMemory(const unsigned char* content, size_t length,
                     const std::string& defaultName,
                     const std::string& overrideName)
 {
-  processRootDictionary(ctx, bencode2::decode(content, length).get(), option,
-                        defaultName, overrideName, std::vector<std::string>());
+  processRootDictionary(
+      ctx,
+      bencode2::decode(std::as_bytes(std::span{content, length})).get(), option,
+      defaultName, overrideName, std::vector<std::string>());
 }
 
 void loadFromMemory(const unsigned char* content, size_t length,
@@ -565,8 +567,10 @@ void loadFromMemory(const unsigned char* content, size_t length,
                     const std::string& defaultName,
                     const std::string& overrideName)
 {
-  processRootDictionary(ctx, bencode2::decode(content, length).get(), option,
-                        defaultName, overrideName, uris);
+  processRootDictionary(
+      ctx,
+      bencode2::decode(std::as_bytes(std::span{content, length})).get(), option,
+      defaultName, overrideName, uris);
 }
 
 void loadFromMemory(const std::string& context,
@@ -685,7 +689,8 @@ std::string generatePeerId(const std::string& peerIdPrefix)
   unsigned char buf[20];
   int len = 20 - peerIdPrefix.size();
   if (len > 0) {
-    util::generateRandomData(std::as_writable_bytes(std::span{buf, len}));
+    util::generateRandomData(
+        std::as_writable_bytes(std::span{buf, static_cast<size_t>(len)}));
     peerId.append(&buf[0], &buf[len]);
   }
   if (peerId.size() > 20) {
