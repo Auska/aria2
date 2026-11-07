@@ -43,16 +43,18 @@
 namespace aria2 {
 
 namespace {
-auto valueState = new ValueValueBaseStructParserState();
-auto dictState = new DictValueBaseStructParserState();
-auto dictKeyState = new DictKeyValueBaseStructParserState();
-auto dictDataState = new DictDataValueBaseStructParserState();
-auto arrayState = new ArrayValueBaseStructParserState();
-auto arrayDataState = new ArrayDataValueBaseStructParserState();
-auto stringState = new StringValueBaseStructParserState();
-auto numberState = new NumberValueBaseStructParserState();
-auto boolState = new BoolValueBaseStructParserState();
-auto nullState = new NullValueBaseStructParserState();
+// The parser states are stateless and shared by every parser instance, so
+// they are function-local statics instead of leaked heap objects.
+ValueValueBaseStructParserState valueState;
+DictValueBaseStructParserState dictState;
+DictKeyValueBaseStructParserState dictKeyState;
+DictDataValueBaseStructParserState dictDataState;
+ArrayValueBaseStructParserState arrayState;
+ArrayDataValueBaseStructParserState arrayDataState;
+StringValueBaseStructParserState stringState;
+NumberValueBaseStructParserState numberState;
+BoolValueBaseStructParserState boolState;
+NullValueBaseStructParserState nullState;
 } // namespace
 
 std::unique_ptr<ValueBase> ValueBaseStructParserStateMachine::noResult()
@@ -63,7 +65,7 @@ std::unique_ptr<ValueBase> ValueBaseStructParserStateMachine::noResult()
 ValueBaseStructParserStateMachine::ValueBaseStructParserStateMachine()
     : ctrl_{make_unique<rpc::ValueBaseParserController>()}
 {
-  stateStack_.push(valueState);
+  stateStack_.push(&valueState);
 }
 
 ValueBaseStructParserStateMachine::~ValueBaseStructParserStateMachine() =
@@ -74,16 +76,18 @@ void ValueBaseStructParserStateMachine::reset()
   while (!stateStack_.empty()) {
     stateStack_.pop();
   }
-  stateStack_.push(valueState);
+  stateStack_.push(&valueState);
   ctrl_->reset();
 }
 
-void ValueBaseStructParserStateMachine::beginElement(int elementType)
+void ValueBaseStructParserStateMachine::beginElement(
+    StructElementType elementType)
 {
   stateStack_.top()->beginElement(this, elementType);
 }
 
-void ValueBaseStructParserStateMachine::endElement(int elementType)
+void ValueBaseStructParserStateMachine::endElement(
+    StructElementType elementType)
 {
   stateStack_.top()->endElement(this, elementType);
   stateStack_.pop();
@@ -94,10 +98,11 @@ std::unique_ptr<ValueBase> ValueBaseStructParserStateMachine::getResult()
   return popCurrentFrameValue();
 }
 
-void ValueBaseStructParserStateMachine::charactersCallback(const char* data,
-                                                           size_t len)
+void ValueBaseStructParserStateMachine::charactersCallback(
+    std::span<const std::byte> data)
 {
-  sessionData_.str.append(data, len);
+  sessionData_.str.append(reinterpret_cast<const char*>(data.data()),
+                          data.size());
 }
 
 void ValueBaseStructParserStateMachine::numberCallback(int64_t number, int frac,
@@ -166,51 +171,51 @@ void ValueBaseStructParserStateMachine::setCurrentFrameName(std::string name)
 
 void ValueBaseStructParserStateMachine::pushDictState()
 {
-  stateStack_.push(dictState);
+  stateStack_.push(&dictState);
 }
 
 void ValueBaseStructParserStateMachine::pushDictKeyState()
 {
   sessionData_.str.clear();
-  stateStack_.push(dictKeyState);
+  stateStack_.push(&dictKeyState);
 }
 
 void ValueBaseStructParserStateMachine::pushDictDataState()
 {
-  stateStack_.push(dictDataState);
+  stateStack_.push(&dictDataState);
 }
 
 void ValueBaseStructParserStateMachine::pushArrayState()
 {
-  stateStack_.push(arrayState);
+  stateStack_.push(&arrayState);
 }
 
 void ValueBaseStructParserStateMachine::pushArrayDataState()
 {
-  stateStack_.push(arrayDataState);
+  stateStack_.push(&arrayDataState);
 }
 
 void ValueBaseStructParserStateMachine::pushStringState()
 {
   sessionData_.str.clear();
-  stateStack_.push(stringState);
+  stateStack_.push(&stringState);
 }
 
 void ValueBaseStructParserStateMachine::pushNumberState()
 {
   memset(&sessionData_.number, 0, sizeof(sessionData_.number));
-  stateStack_.push(numberState);
+  stateStack_.push(&numberState);
 }
 
 void ValueBaseStructParserStateMachine::pushBoolState()
 {
   sessionData_.bval = false;
-  stateStack_.push(boolState);
+  stateStack_.push(&boolState);
 }
 
 void ValueBaseStructParserStateMachine::pushNullState()
 {
-  stateStack_.push(nullState);
+  stateStack_.push(&nullState);
 }
 
 void ValueBaseStructParserStateMachine::setAllowEmptyMemberName(bool b)

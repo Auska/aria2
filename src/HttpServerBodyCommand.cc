@@ -33,6 +33,8 @@
  */
 /* copyright --> */
 #include "HttpServerBodyCommand.h"
+
+#include <span>
 #include "SocketCore.h"
 #include "DownloadEngine.h"
 #include "HttpServer.h"
@@ -225,7 +227,7 @@ bool HttpServerBodyCommand::execute()
             callback = param.callback;
             ssize_t error = 0;
             json = json::ValueBaseJsonParser().parseFinal(
-                param.request.c_str(), param.request.size(), error);
+                std::as_bytes(std::span{param.request}), error);
           }
           else {
             auto dw =

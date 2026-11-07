@@ -1,3 +1,5 @@
+#include <span>
+
 #include "ValueBaseJsonParser.h"
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -30,35 +32,35 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // empty object
     std::string src = "{}";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto dict = downcast<Dict>(r);
     CPPUNIT_ASSERT(dict);
   }
   {
     // empty object
     std::string src = "{  }";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto dict = downcast<Dict>(r);
     CPPUNIT_ASSERT(dict);
   }
   {
     // empty array
     std::string src = "[]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
   }
   {
     // empty array
     std::string src = "[ ]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
   }
   {
     // empty string
     std::string src = "[\"\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -67,7 +69,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string
     std::string src = "[\"foobar\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -76,7 +78,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string with escape
     std::string src = "[\"\\\\foo\\\"\\\"bar\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -85,7 +87,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string with escape
     std::string src = "[\"foo\\\"\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -94,7 +96,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string: utf-8 1 to 3 bytes.
     std::string src = "[\"\\u0024\\u00A2\\u20AC\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -103,7 +105,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string: utf-8 4 bytes
     std::string src = "[\"\\uD852\\uDF62\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -113,7 +115,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // null
     std::string src = "[null]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     const Null* s = downcast<Null>(list->get(0));
@@ -122,7 +124,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // true, false
     std::string src = "[true, false]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     const Bool* trueValue = downcast<Bool>(list->get(0));
@@ -135,7 +137,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // object: 1 member
     std::string src = "{\"foo\":[\"bar\"]}";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     const Dict* dict = downcast<Dict>(r);
     CPPUNIT_ASSERT(dict);
     auto list = downcast<List>(dict->get("foo"));
@@ -147,7 +149,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
     // object: 2 members
     // TODO ValueBaseJsonParser does not allow empty dict key
     std::string src = "{\"foo\":[\"bar\"], \"alpha\" : \"bravo\"}";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     const Dict* dict = downcast<Dict>(r);
     CPPUNIT_ASSERT(dict);
     auto list = downcast<List>(dict->get("foo"));
@@ -160,7 +162,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // array: 2 values
     std::string src = "[\"foo\", {}]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -171,7 +173,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // Number: currently we ignore frac and exp
     std::string src = "[0,-1,1.2,-1.2e-10,-1e10]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     const Integer* i = downcast<Integer>(list->get(0));
@@ -188,7 +190,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // escape chars: ", \, /, \b, \f, \n, \r, \t
     std::string src = "[\"\\\"\\\\\\/\\b\\f\\n\\r\\t\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     auto s = downcast<String>(list->get(0));
     CPPUNIT_ASSERT_EQUAL(std::string("\"\\/\b\f\n\r\t"), s->s());
@@ -196,7 +198,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // string: literal + escaped chars.
     std::string src = "[\"foo\\u0024b\\u00A2\\u20ACbaz\"]";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     auto s = downcast<String>(list->get(0));
@@ -205,7 +207,7 @@ void ValueBaseJsonParserTest::testParseUpdate()
   {
     // ignore garbage at the end of the input.
     std::string src = "[]trail";
-    auto r = parser.parseFinal(src.c_str(), src.size(), error);
+    auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
     auto list = downcast<List>(r);
     CPPUNIT_ASSERT(list);
     CPPUNIT_ASSERT_EQUAL((ssize_t)2, error);
@@ -217,7 +219,7 @@ void checkDecodeError(const std::string& src)
 {
   json::ValueBaseJsonParser parser;
   ssize_t error;
-  auto r = parser.parseFinal(src.c_str(), src.size(), error);
+  auto r = parser.parseFinal(std::as_bytes(std::span{src}), error);
   CPPUNIT_ASSERT(!r);
   CPPUNIT_ASSERT(error < 0);
 }

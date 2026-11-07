@@ -97,8 +97,10 @@ namespace {
 bool isSpace(char c) { return util::isLws(c) || util::isCRLF(c); }
 } // namespace
 
-ssize_t JsonParser::parseUpdate(const char* data, size_t size)
+ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
 {
+  const char* data = reinterpret_cast<const char*>(dataIn.data());
+  size_t size = dataIn.size();
   size_t i;
   if (currentState_ == JSON_FINISH) {
     return 0;
@@ -123,44 +125,44 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
           return rv;
         }
         currentState_ = JSON_VALUE;
-        runBeginCallback(STRUCT_ARRAY_DATA_T);
+        runBeginCallback(StructElementType::ARRAY_DATA);
       }
     // Fall through
     case JSON_VALUE:
       switch (c) {
       case '{':
         currentState_ = JSON_OBJECT_KEY;
-        runBeginCallback(STRUCT_DICT_T);
+        runBeginCallback(StructElementType::DICT);
         break;
       case '[':
         currentState_ = JSON_ARRAY;
-        runBeginCallback(STRUCT_ARRAY_T);
+        runBeginCallback(StructElementType::ARRAY);
         break;
       case '"':
         currentState_ = JSON_STRING;
-        runBeginCallback(STRUCT_STRING_T);
+        runBeginCallback(StructElementType::STRING);
         break;
       case '-':
         number_ = 0;
         numberSign_ = -1;
         numConsumed_ = 0;
         currentState_ = JSON_NUMBER;
-        runBeginCallback(STRUCT_NUMBER_T);
+        runBeginCallback(StructElementType::NUMBER);
         break;
       case 't':
         numConsumed_ = 1;
         currentState_ = JSON_TRUE;
-        runBeginCallback(STRUCT_BOOL_T);
+        runBeginCallback(StructElementType::BOOL);
         break;
       case 'f':
         numConsumed_ = 1;
         currentState_ = JSON_FALSE;
-        runBeginCallback(STRUCT_BOOL_T);
+        runBeginCallback(StructElementType::BOOL);
         break;
       case 'n':
         numConsumed_ = 1;
         currentState_ = JSON_NULL;
-        runBeginCallback(STRUCT_NULL_T);
+        runBeginCallback(StructElementType::NULL_VALUE);
         break;
       default:
         if (util::isDigit(c)) {
@@ -168,11 +170,11 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
           numberSign_ = 1;
           numConsumed_ = 1;
           currentState_ = JSON_NUMBER;
-          runBeginCallback(STRUCT_NUMBER_T);
+          runBeginCallback(StructElementType::NUMBER);
         }
         else if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_VAL;
+          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_VAL);
         }
       }
       break;
@@ -186,7 +188,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = ERR_UNEXPECTED_LITERAL;
+        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
       }
       break;
     case JSON_FALSE:
@@ -199,7 +201,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = ERR_UNEXPECTED_LITERAL;
+        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
       }
       break;
     case JSON_NULL:
@@ -211,7 +213,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = ERR_UNEXPECTED_LITERAL;
+        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
       }
       break;
     case JSON_OBJECT_KEY:
@@ -222,7 +224,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
           return rv;
         }
         currentState_ = JSON_STRING;
-        runBeginCallback(STRUCT_DICT_KEY_T);
+        runBeginCallback(StructElementType::DICT_KEY);
         break;
       }
       case '}':
@@ -231,7 +233,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_OBJ_KEY;
+          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_KEY);
         }
       }
       break;
@@ -241,12 +243,12 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       case ':':
         pushState(currentState_);
         currentState_ = JSON_VALUE;
-        runBeginCallback(STRUCT_DICT_DATA_T);
+        runBeginCallback(StructElementType::DICT_DATA);
         break;
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_OBJ_VAL;
+          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_VAL);
         }
       }
       break;
@@ -261,7 +263,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_OBJ_SEP;
+          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_SEP);
         }
       }
       break;
@@ -270,7 +272,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       case ',':
         pushState(JSON_ARRAY);
         currentState_ = JSON_VALUE;
-        runBeginCallback(STRUCT_ARRAY_DATA_T);
+        runBeginCallback(StructElementType::ARRAY_DATA);
         break;
       case ']':
         onArrayEnd();
@@ -278,7 +280,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_ARRAY_SEP;
+          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_ARRAY_SEP);
         }
       }
       break;
@@ -295,7 +297,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         for (j = i; j < size && data[j] != '\\' && data[j] != '"'; ++j)
           ;
         if (j - i >= 1) {
-          runCharactersCallback(&data[i], j - i);
+          runCharactersCallback(dataIn.subspan(i, j - i));
         }
         i = j - 1;
         break;
@@ -312,24 +314,29 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       default:
         switch (c) {
         case 'b':
-          runCharactersCallback("\b", 1);
+          runCharactersCallback(
+              std::as_bytes(std::span{"\b", 1}));
           break;
         case 'f':
-          runCharactersCallback("\f", 1);
+          runCharactersCallback(
+              std::as_bytes(std::span{"\f", 1}));
           break;
         case 'n':
-          runCharactersCallback("\n", 1);
+          runCharactersCallback(
+              std::as_bytes(std::span{"\n", 1}));
           break;
         case 'r':
-          runCharactersCallback("\r", 1);
+          runCharactersCallback(
+              std::as_bytes(std::span{"\r", 1}));
           break;
         case 't':
-          runCharactersCallback("\t", 1);
+          runCharactersCallback(
+              std::as_bytes(std::span{"\t", 1}));
           break;
         default: {
           char temp[1];
           temp[0] = c;
-          runCharactersCallback(temp, 1);
+          runCharactersCallback(std::as_bytes(std::span{temp, 1}));
           break;
         }
         }
@@ -344,7 +351,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_INVALID_UNICODE_POINT;
+          return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
         }
       }
       i = j - 1;
@@ -357,7 +364,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         break;
       default:
         currentState_ = JSON_ERROR;
-        return lastError_ = ERR_INVALID_UNICODE_POINT;
+        return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
       }
       break;
     case JSON_STRING_LOW_SURROGATE_U:
@@ -369,7 +376,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         break;
       default:
         currentState_ = JSON_ERROR;
-        return lastError_ = ERR_INVALID_UNICODE_POINT;
+        return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
       }
       break;
     case JSON_STRING_LOW_SURROGATE: {
@@ -385,7 +392,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_INVALID_UNICODE_POINT;
+          return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
         }
       }
       i = j - 1;
@@ -396,7 +403,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       for (j = i; j < size && in(data[j], '0', '9'); ++j) {
         if ((INT64_MAX - (data[j] - '0')) / 10 < number_) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_NUMBER_OUT_OF_RANGE;
+          return lastError_ = static_cast<int>(JsonError::NUMBER_OUT_OF_RANGE);
         }
         number_ *= 10;
         number_ += data[j] - '0';
@@ -405,7 +412,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_INVALID_NUMBER;
+          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
         }
         switch (data[j]) {
         case '.':
@@ -445,7 +452,7 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_INVALID_NUMBER;
+          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
         }
         switch (data[j]) {
         case 'e':
@@ -492,14 +499,14 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
         exp_ += data[j] - '0';
         if (exp_ > 18) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_NUMBER_OUT_OF_RANGE;
+          return lastError_ = static_cast<int>(JsonError::NUMBER_OUT_OF_RANGE);
         }
       }
       numConsumed_ += j - i;
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = ERR_INVALID_NUMBER;
+          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
         }
         switch (data[j]) {
         default:
@@ -514,13 +521,13 @@ ssize_t JsonParser::parseUpdate(const char* data, size_t size)
   return i;
 }
 
-ssize_t JsonParser::parseFinal(const char* data, size_t len)
+ssize_t JsonParser::parseFinal(std::span<const std::byte> data)
 {
   ssize_t rv;
-  rv = parseUpdate(data, len);
+  rv = parseUpdate(data);
   if (rv >= 0) {
     if (currentState_ != JSON_FINISH) {
-      rv = ERR_PREMATURE_DATA;
+      rv = static_cast<int>(JsonError::PREMATURE_DATA);
     }
   }
   return rv;
@@ -539,39 +546,39 @@ void JsonParser::reset()
 
 void JsonParser::onStringEnd()
 {
-  runEndCallback(stateTop() == JSON_OBJECT_KEY ? STRUCT_DICT_KEY_T
-                                               : STRUCT_STRING_T);
+  runEndCallback(stateTop() == JSON_OBJECT_KEY ? StructElementType::DICT_KEY
+                                               : StructElementType::STRING);
   onValueEnd();
 }
 
 void JsonParser::onNumberEnd()
 {
   runNumberCallback(numberSign_ * number_, frac_, expSign_ * exp_);
-  runEndCallback(STRUCT_NUMBER_T);
+  runEndCallback(StructElementType::NUMBER);
   onValueEnd();
 }
 
 void JsonParser::onObjectEnd()
 {
-  runEndCallback(STRUCT_DICT_T);
+  runEndCallback(StructElementType::DICT);
   onValueEnd();
 }
 
 void JsonParser::onArrayEnd()
 {
-  runEndCallback(STRUCT_ARRAY_T);
+  runEndCallback(StructElementType::ARRAY);
   onValueEnd();
 }
 
 void JsonParser::onBoolEnd()
 {
-  runEndCallback(STRUCT_BOOL_T);
+  runEndCallback(StructElementType::BOOL);
   onValueEnd();
 }
 
 void JsonParser::onNullEnd()
 {
-  runEndCallback(STRUCT_NULL_T);
+  runEndCallback(StructElementType::NULL_VALUE);
   onValueEnd();
 }
 
@@ -583,12 +590,12 @@ void JsonParser::onValueEnd()
     currentState_ = JSON_OBJECT_VAL;
     break;
   case JSON_OBJECT_VAL:
-    runEndCallback(STRUCT_DICT_DATA_T);
+    runEndCallback(StructElementType::DICT_DATA);
     popState();
     currentState_ = JSON_OBJECT_SEP;
     break;
   case JSON_ARRAY:
-    runEndCallback(STRUCT_ARRAY_DATA_T);
+    runEndCallback(StructElementType::ARRAY_DATA);
     popState();
     currentState_ = JSON_ARRAY_SEP;
     break;
@@ -602,7 +609,7 @@ void JsonParser::onValueEnd()
 int JsonParser::pushState(int state)
 {
   if (stateStack_.size() >= 50) {
-    return ERR_STRUCTURE_TOO_DEEP;
+    return static_cast<int>(JsonError::STRUCTURE_TOO_DEEP);
   }
   else {
     stateStack_.push(state);
@@ -647,7 +654,7 @@ void JsonParser::consumeUnicode(char c)
         temp[2] = 0x80u | (codepoint_ & 0x003Fu);
         len = 3;
       }
-      runCharactersCallback(temp, len);
+      runCharactersCallback(std::as_bytes(std::span{temp, len}));
       currentState_ = JSON_STRING;
     }
   }
@@ -660,7 +667,7 @@ int JsonParser::consumeLowSurrogate(char c)
   ++numConsumed_;
   if (numConsumed_ == 4) {
     if (!in(codepoint2_, 0xDC00u, 0xDFFFu)) {
-      return ERR_INVALID_UNICODE_POINT;
+      return static_cast<int>(JsonError::INVALID_UNICODE_POINT);
     }
     uint32_t fullcodepoint = 0x010000u;
     fullcodepoint += (codepoint_ & 0x03FFu) << 10;
@@ -670,40 +677,40 @@ int JsonParser::consumeLowSurrogate(char c)
     temp[1] = 0x80u | ((fullcodepoint >> 12) & 0x003Fu);
     temp[2] = 0x80u | ((fullcodepoint >> 6) & 0x003Fu);
     temp[3] = 0x80u | (fullcodepoint & 0x003Fu);
-    runCharactersCallback(temp, sizeof(temp));
+    runCharactersCallback(std::as_bytes(std::span{temp, sizeof(temp)}));
     currentState_ = JSON_STRING;
   }
   return 0;
 }
 
-void JsonParser::runBeginCallback(int elementType)
+void JsonParser::runBeginCallback(StructElementType elementType)
 {
   // switch(elementType) {
-  // case STRUCT_DICT_T:
+  // case StructElementType::DICT:
   //   std::cout << "object start" << std::endl;
   //   break;
-  // case STRUCT_DICT_KEY_T:
+  // case StructElementType::DICT_KEY:
   //   std::cout << "object key start" << std::endl;
   //   break;
-  // case STRUCT_DICT_DATA_T:
+  // case StructElementType::DICT_DATA:
   //   std::cout << "object data start" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_T:
+  // case StructElementType::ARRAY:
   //   std::cout << "array start" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_DATA_T:
+  // case StructElementType::ARRAY_DATA:
   //   std::cout << "array data start" << std::endl;
   //   break;
-  // case STRUCT_STRING_T:
+  // case StructElementType::STRING:
   //   std::cout << "string start" << std::endl;
   //   break;
-  // case STRUCT_NUMBER_T:
+  // case StructElementType::NUMBER:
   //   std::cout << "number start" << std::endl;
   //   break;
-  // case STRUCT_BOOL_T:
+  // case StructElementType::BOOL:
   //   std::cout << "bool start" << std::endl;
   //   break;
-  // case STRUCT_NULL_T:
+  // case StructElementType::NULL_VALUE:
   //   std::cout << "null start" << std::endl;
   //   break;
   // default:
@@ -712,34 +719,34 @@ void JsonParser::runBeginCallback(int elementType)
   psm_->beginElement(elementType);
 }
 
-void JsonParser::runEndCallback(int elementType)
+void JsonParser::runEndCallback(StructElementType elementType)
 {
   // switch(elementType) {
-  // case STRUCT_DICT_T:
+  // case StructElementType::DICT:
   //   std::cout << "object end" << std::endl;
   //   break;
-  // case STRUCT_DICT_KEY_T:
+  // case StructElementType::DICT_KEY:
   //   std::cout << "object key end" << std::endl;
   //   break;
-  // case STRUCT_DICT_DATA_T:
+  // case StructElementType::DICT_DATA:
   //   std::cout << "object data end" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_T:
+  // case StructElementType::ARRAY:
   //   std::cout << "array end" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_DATA_T:
+  // case StructElementType::ARRAY_DATA:
   //   std::cout << "array data end" << std::endl;
   //   break;
-  // case STRUCT_STRING_T:
+  // case StructElementType::STRING:
   //   std::cout << "string end" << std::endl;
   //   break;
-  // case STRUCT_NUMBER_T:
+  // case StructElementType::NUMBER:
   //   std::cout << "number end" << std::endl;
   //   break;
-  // case STRUCT_BOOL_T:
+  // case StructElementType::BOOL:
   //   std::cout << "bool end" << std::endl;
   //   break;
-  // case STRUCT_NULL_T:
+  // case StructElementType::NULL_VALUE:
   //   std::cout << "null end" << std::endl;
   //   break;
   // default:
@@ -748,9 +755,9 @@ void JsonParser::runEndCallback(int elementType)
   psm_->endElement(elementType);
 }
 
-void JsonParser::runCharactersCallback(const char* data, size_t len)
+void JsonParser::runCharactersCallback(std::span<const std::byte> data)
 {
-  psm_->charactersCallback(data, len);
+  psm_->charactersCallback(data);
 }
 
 void JsonParser::runNumberCallback(int64_t number, int frac, int exp)

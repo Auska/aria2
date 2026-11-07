@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "bencode2.h"
 
+#include <span>
+
 #include <sstream>
 
 #include "fmt.h"
@@ -65,8 +67,7 @@ std::unique_ptr<ValueBase> decode(std::span<const std::byte> data, size_t& end)
   bittorrent::ValueBaseBencodeParser parser;
   // The parser chain still takes a raw pointer and a length; they stay out
   // of this refactor's scope.
-  auto res = parser.parseFinal(reinterpret_cast<const char*>(data.data()),
-                               data.size(), error);
+  auto res = parser.parseFinal(data, error);
   if (error < 0) {
     throw DL_ABORT_EX2(
         fmt("Bencode decoding failed: error={}", static_cast<int>(error)),

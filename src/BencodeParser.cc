@@ -74,8 +74,10 @@ BencodeParser::BencodeParser(StructParserStateMachine* psm)
 
 BencodeParser::~BencodeParser() = default;
 
-ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
+ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
 {
+  const char* d = reinterpret_cast<const char*>(data.data());
+  size_t size = data.size();
   size_t i;
   if (currentState_ == BENCODE_FINISH) {
     return 0;
@@ -84,7 +86,7 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
     return lastError_;
   }
   for (i = 0; i < size && currentState_ != BENCODE_FINISH; ++i) {
-    char c = data[i];
+    char c = d[i];
     switch (currentState_) {
     case BENCODE_LIST:
       if (c == 'e') {
@@ -97,7 +99,7 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
           return rv;
         }
         currentState_ = BENCODE_VALUE;
-        runBeginCallback(STRUCT_ARRAY_DATA_T);
+        runBeginCallback(StructElementType::ARRAY_DATA);
       }
     // Fall through
     case BENCODE_INITIAL:
@@ -105,31 +107,31 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
       switch (c) {
       case 'd': {
         currentState_ = BENCODE_DICT_KEY;
-        runBeginCallback(STRUCT_DICT_T);
+        runBeginCallback(StructElementType::DICT);
         break;
       }
       case 'l':
         currentState_ = BENCODE_LIST;
-        runBeginCallback(STRUCT_ARRAY_T);
+        runBeginCallback(StructElementType::ARRAY);
         break;
       case 'i':
         number_ = 0;
         numberSign_ = 1;
         numConsumed_ = 0;
         currentState_ = BENCODE_NUMBER_SIGN;
-        runBeginCallback(STRUCT_NUMBER_T);
+        runBeginCallback(StructElementType::NUMBER);
         break;
       default:
         if (util::isDigit(c)) {
           strLength_ = c - '0';
           numConsumed_ = 1;
           currentState_ = BENCODE_STRING_LEN;
-          runBeginCallback(STRUCT_STRING_T);
+          runBeginCallback(StructElementType::STRING);
           break;
         }
         else {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_UNEXPECTED_CHAR_BEFORE_VAL;
+          return lastError_ = static_cast<int>(BencodeError::UNEXPECTED_CHAR_BEFORE_VAL);
         }
       }
       break;
@@ -144,30 +146,30 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
       }
       strLength_ = 0;
       numConsumed_ = 0;
-      runBeginCallback(STRUCT_DICT_KEY_T);
+      runBeginCallback(StructElementType::DICT_KEY);
       currentState_ = BENCODE_STRING_LEN;
       // Fall through
     }
     case BENCODE_STRING_LEN: {
       size_t j;
-      for (j = i; j < size && in(data[j], '0', '9'); ++j) {
-        if ((INT64_MAX - (data[j] - '0')) / 10 < strLength_) {
+      for (j = i; j < size && in(d[j], '0', '9'); ++j) {
+        if ((INT64_MAX - (d[j] - '0')) / 10 < strLength_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_STRING_LENGTH_OUT_OF_RANGE;
+          return lastError_ = static_cast<int>(BencodeError::STRING_LENGTH_OUT_OF_RANGE);
         }
         strLength_ *= 10;
-        strLength_ += data[j] - '0';
+        strLength_ += d[j] - '0';
       }
       numConsumed_ += j - i;
       if (j != size) {
-        if (data[j] != ':' || numConsumed_ == 0) {
+        if (d[j] != ':' || numConsumed_ == 0) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_INVALID_STRING_LENGTH;
+          return lastError_ = static_cast<int>(BencodeError::INVALID_STRING_LENGTH);
         }
         i = j;
         currentState_ = BENCODE_STRING;
         if (strLength_ == 0) {
-          runCharactersCallback(nullptr, 0);
+          runCharactersCallback(std::span<const std::byte>{});
           onStringEnd();
         }
       }
@@ -178,7 +180,7 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
     }
     case BENCODE_STRING: {
       size_t nread = std::min(static_cast<int64_t>(size - i), strLength_);
-      runCharactersCallback(&data[i], nread);
+      runCharactersCallback(data.subspan(i, nread));
       strLength_ -= nread;
       i += nread - 1;
       if (strLength_ == 0) {
@@ -207,22 +209,22 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
     }
     case BENCODE_NUMBER: {
       size_t j;
-      for (j = i; j < size && in(data[j], '0', '9'); ++j) {
-        if ((INT64_MAX - (data[j] - '0')) / 10 < number_) {
+      for (j = i; j < size && in(d[j], '0', '9'); ++j) {
+        if ((INT64_MAX - (d[j] - '0')) / 10 < number_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_NUMBER_OUT_OF_RANGE;
+          return lastError_ = static_cast<int>(BencodeError::NUMBER_OUT_OF_RANGE);
         }
         number_ *= 10;
-        number_ += data[j] - '0';
+        number_ += d[j] - '0';
       }
       numConsumed_ += j - i;
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_INVALID_NUMBER;
+          return lastError_ = static_cast<int>(BencodeError::INVALID_NUMBER);
         }
 
-        auto c = data[j];
+        auto c = d[j];
         if (util::isDigit(c) || c == '.' || c == 'E' || c == '+' || c == '-') {
           // some torrent generator adds floating point number in
           // scientific notation (e.g., -1.134E+3) in integer field.
@@ -238,7 +240,7 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
 
         if (c != 'e') {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = ERR_INVALID_NUMBER;
+          return lastError_ = static_cast<int>(BencodeError::INVALID_NUMBER);
         }
 
         i = j;
@@ -251,14 +253,14 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
       break;
     }
     case BENCODE_FLOAT_NUMBER_IGNORE: {
-      auto c = data[i];
+      auto c = d[i];
       if (util::isDigit(c) || c == '.' || c == 'E' || c == '+' || c == '-') {
         continue;
       }
 
       if (c != 'e') {
         currentState_ = BENCODE_ERROR;
-        return lastError_ = ERR_INVALID_FLOAT_NUMBER;
+        return lastError_ = static_cast<int>(BencodeError::INVALID_FLOAT_NUMBER);
       }
 
       onNumberEnd();
@@ -269,13 +271,13 @@ ssize_t BencodeParser::parseUpdate(const char* data, size_t size)
   return i;
 }
 
-ssize_t BencodeParser::parseFinal(const char* data, size_t len)
+ssize_t BencodeParser::parseFinal(std::span<const std::byte> data)
 {
   ssize_t rv;
-  rv = parseUpdate(data, len);
+  rv = parseUpdate(data);
   if (rv >= 0) {
     if (currentState_ != BENCODE_FINISH && currentState_ != BENCODE_INITIAL) {
-      rv = ERR_PREMATURE_DATA;
+      rv = static_cast<int>(BencodeError::PREMATURE_DATA);
     }
   }
   return rv;
@@ -294,27 +296,27 @@ void BencodeParser::reset()
 
 void BencodeParser::onStringEnd()
 {
-  runEndCallback(stateTop() == BENCODE_DICT_KEY ? STRUCT_DICT_KEY_T
-                                                : STRUCT_STRING_T);
+  runEndCallback(stateTop() == BENCODE_DICT_KEY ? StructElementType::DICT_KEY
+                                                : StructElementType::STRING);
   onValueEnd();
 }
 
 void BencodeParser::onNumberEnd()
 {
   runNumberCallback(numberSign_ * number_);
-  runEndCallback(STRUCT_NUMBER_T);
+  runEndCallback(StructElementType::NUMBER);
   onValueEnd();
 }
 
 void BencodeParser::onDictEnd()
 {
-  runEndCallback(STRUCT_DICT_T);
+  runEndCallback(StructElementType::DICT);
   onValueEnd();
 }
 
 void BencodeParser::onListEnd()
 {
-  runEndCallback(STRUCT_ARRAY_T);
+  runEndCallback(StructElementType::ARRAY);
   onValueEnd();
 }
 
@@ -325,15 +327,15 @@ void BencodeParser::onValueEnd()
     popState();
     pushState(BENCODE_DICT_VAL);
     currentState_ = BENCODE_VALUE;
-    runBeginCallback(STRUCT_DICT_DATA_T);
+    runBeginCallback(StructElementType::DICT_DATA);
     break;
   case BENCODE_DICT_VAL:
-    runEndCallback(STRUCT_DICT_DATA_T);
+    runEndCallback(StructElementType::DICT_DATA);
     popState();
     currentState_ = BENCODE_DICT_KEY;
     break;
   case BENCODE_LIST:
-    runEndCallback(STRUCT_ARRAY_DATA_T);
+    runEndCallback(StructElementType::ARRAY_DATA);
     popState();
     currentState_ = BENCODE_LIST;
     break;
@@ -347,7 +349,7 @@ void BencodeParser::onValueEnd()
 int BencodeParser::pushState(int state)
 {
   if (stateStack_.size() >= 50) {
-    return ERR_STRUCTURE_TOO_DEEP;
+    return static_cast<int>(BencodeError::STRUCTURE_TOO_DEEP);
   }
   else {
     stateStack_.push(state);
@@ -364,34 +366,34 @@ int BencodeParser::popState()
   return state;
 }
 
-void BencodeParser::runBeginCallback(int elementType)
+void BencodeParser::runBeginCallback(StructElementType elementType)
 {
   // switch(elementType) {
-  // case STRUCT_DICT_T:
+  // case StructElementType::DICT:
   //   std::cout << "object start" << std::endl;
   //   break;
-  // case STRUCT_DICT_KEY_T:
+  // case StructElementType::DICT_KEY:
   //   std::cout << "object key start" << std::endl;
   //   break;
-  // case STRUCT_DICT_DATA_T:
+  // case StructElementType::DICT_DATA:
   //   std::cout << "object data start" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_T:
+  // case StructElementType::ARRAY:
   //   std::cout << "array start" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_DATA_T:
+  // case StructElementType::ARRAY_DATA:
   //   std::cout << "array data start" << std::endl;
   //   break;
-  // case STRUCT_STRING_T:
+  // case StructElementType::STRING:
   //   std::cout << "string start" << std::endl;
   //   break;
-  // case STRUCT_NUMBER_T:
+  // case StructElementType::NUMBER:
   //   std::cout << "number start" << std::endl;
   //   break;
-  // case STRUCT_BOOL_T:
+  // case StructElementType::BOOL:
   //   std::cout << "bool start" << std::endl;
   //   break;
-  // case STRUCT_NULL_T:
+  // case StructElementType::NULL_VALUE:
   //   std::cout << "null start" << std::endl;
   //   break;
   // default:
@@ -400,34 +402,34 @@ void BencodeParser::runBeginCallback(int elementType)
   psm_->beginElement(elementType);
 }
 
-void BencodeParser::runEndCallback(int elementType)
+void BencodeParser::runEndCallback(StructElementType elementType)
 {
   // switch(elementType) {
-  // case STRUCT_DICT_T:
+  // case StructElementType::DICT:
   //   std::cout << "object end" << std::endl;
   //   break;
-  // case STRUCT_DICT_KEY_T:
+  // case StructElementType::DICT_KEY:
   //   std::cout << "object key end" << std::endl;
   //   break;
-  // case STRUCT_DICT_DATA_T:
+  // case StructElementType::DICT_DATA:
   //   std::cout << "object data end" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_T:
+  // case StructElementType::ARRAY:
   //   std::cout << "array end" << std::endl;
   //   break;
-  // case STRUCT_ARRAY_DATA_T:
+  // case StructElementType::ARRAY_DATA:
   //   std::cout << "array data end" << std::endl;
   //   break;
-  // case STRUCT_STRING_T:
+  // case StructElementType::STRING:
   //   std::cout << "string end" << std::endl;
   //   break;
-  // case STRUCT_NUMBER_T:
+  // case StructElementType::NUMBER:
   //   std::cout << "number end" << std::endl;
   //   break;
-  // case STRUCT_BOOL_T:
+  // case StructElementType::BOOL:
   //   std::cout << "bool end" << std::endl;
   //   break;
-  // case STRUCT_NULL_T:
+  // case StructElementType::NULL_VALUE:
   //   std::cout << "null end" << std::endl;
   //   break;
   // default:
@@ -436,9 +438,9 @@ void BencodeParser::runEndCallback(int elementType)
   psm_->endElement(elementType);
 }
 
-void BencodeParser::runCharactersCallback(const char* data, size_t len)
+void BencodeParser::runCharactersCallback(std::span<const std::byte> data)
 {
-  psm_->charactersCallback(data, len);
+  psm_->charactersCallback(data);
 }
 
 void BencodeParser::runNumberCallback(int64_t number)

@@ -33,6 +33,8 @@
  */
 /* copyright --> */
 #include "BtPostDownloadHandler.h"
+
+#include <span>
 #include "prefs.h"
 #include "RequestGroup.h"
 #include "Option.h"
@@ -93,7 +95,7 @@ void BtPostDownloadHandler::getNextRequestGroups(
     }
     ssize_t error;
     torrent = bittorrent::ValueBaseBencodeParser().parseFinal(
-        content.c_str(), content.size(), error);
+        std::as_bytes(std::span{content}), error);
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Could not parse BitTorrent metainfo",

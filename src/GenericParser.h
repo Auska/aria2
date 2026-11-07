@@ -36,6 +36,7 @@
 #define D_GENERIC_PARSER_H
 
 #include <array>
+#include <span>
 #include "common.h"
 #include "a2io.h"
 #include "util.h"
@@ -53,27 +54,25 @@ public:
 
   ~GenericParser() = default;
 
-  typedef typename ParserStateMachine::ResultType ResultType;
-  typedef ParserStateMachine ParserStateMachineType;
+  using ResultType = typename ParserStateMachine::ResultType;
+  using ParserStateMachineType = ParserStateMachine;
 
-  // Parses |size| bytes of data |data| and returns the number of
-  // bytes processed. On error, one of the negative error codes is
-  // returned.
-  ssize_t parseUpdate(const char* data, size_t size)
+  // Parses |data| and returns the number of bytes processed. On error,
+  // one of the negative error codes is returned.
+  ssize_t parseUpdate(std::span<const std::byte> data)
   {
-    return parser_.parseUpdate(data, size);
+    return parser_.parseUpdate(data);
   }
 
-  // Parses |size| bytes of data |data| and returns result. On error,
-  // null value is returned. On success, the |error| will be the
-  // number of bytes processed (>= 0). On error, it will be one of the
-  // negative error code. This function also resets underlying parser
-  // facility and make it ready to reuse.
-  ResultType parseFinal(const char* data, size_t size, ssize_t& error)
+  // Parses |data| and returns the result. The |consumed| argument
+  // receives the number of bytes processed (>= 0) on success or one of
+  // the negative error codes on failure. This function also resets the
+  // underlying parser and makes it ready to reuse.
+  ResultType parseFinal(std::span<const std::byte> data, ssize_t& consumed)
   {
     ResultType res;
-    error = parser_.parseFinal(data, size);
-    if (error < 0) {
+    consumed = parser_.parseFinal(data);
+    if (consumed < 0) {
       res = ParserStateMachine::noResult();
     }
     else {
@@ -106,12 +105,13 @@ typename Parser::ResultType parseFile(Parser& parser,
   ssize_t nread;
   ssize_t nproc;
   while ((nread = read(fd, buf.data(), buf.size())) > 0) {
-    nproc = parser.parseUpdate(buf.data(), nread);
+    nproc = parser.parseUpdate(
+        std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
     if (nproc < 0) {
       break;
     }
   }
-  return parser.parseFinal(0, 0, nproc);
+  return parser.parseFinal(std::span<const std::byte>{}, nproc);
 }
 
 } // namespace aria2

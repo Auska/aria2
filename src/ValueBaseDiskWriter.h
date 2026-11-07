@@ -73,7 +73,7 @@ public:
                          int64_t offset) override
   {
     // Return value is ignored here but handled in finalize()
-    parser_.parseUpdate(reinterpret_cast<const char*>(data), len);
+    parser_.parseUpdate(std::as_bytes(std::span{data, len}));
   }
 
   virtual ssize_t readData(unsigned char* data, size_t len,
@@ -82,7 +82,10 @@ public:
     return 0;
   }
 
-  int finalize() { return parser_.parseFinal(0, 0); }
+  int finalize()
+  {
+    return parser_.parseFinal(std::span<const std::byte>{});
+  }
 
   std::unique_ptr<ValueBase> getResult() { return psm_.getResult(); }
 

@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include "StructParserStateMachine.h"
+
 namespace aria2 {
 
 class ValueBaseStructParserStateMachine;
@@ -46,10 +48,10 @@ public:
   virtual ~ValueBaseStructParserState() = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            int elementType) = 0;
+                            StructElementType elementType) = 0;
 
   virtual void endElement(ValueBaseStructParserStateMachine* psm,
-                          int elementType) = 0;
+                          StructElementType elementType) = 0;
 };
 
 } // namespace aria2

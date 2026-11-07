@@ -55,7 +55,7 @@ class ValueBaseStructParserState;
 // value holder.
 class ValueBaseStructParserStateMachine : public StructParserStateMachine {
 public:
-  typedef std::unique_ptr<ValueBase> ResultType;
+  using ResultType = std::unique_ptr<ValueBase>;
   static std::unique_ptr<ValueBase> noResult();
 
   struct NumberData {
@@ -73,10 +73,10 @@ public:
   ValueBaseStructParserStateMachine();
   virtual ~ValueBaseStructParserStateMachine();
 
-  virtual void beginElement(int elementType) override;
-  virtual void endElement(int elementType) override;
+  virtual void beginElement(StructElementType elementType) override;
+  virtual void endElement(StructElementType elementType) override;
 
-  virtual void charactersCallback(const char* data, size_t len) override;
+  virtual void charactersCallback(std::span<const std::byte> data) override;
   virtual void numberCallback(int64_t number, int frac, int exp) override;
   virtual void boolCallback(bool bval) override;
 

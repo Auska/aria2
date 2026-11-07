@@ -37,18 +37,20 @@
 
 #include "common.h"
 
+#include <span>
+
 namespace aria2 {
 
-enum StructElementType {
-  STRUCT_DICT_T,
-  STRUCT_DICT_KEY_T,
-  STRUCT_DICT_DATA_T,
-  STRUCT_ARRAY_T,
-  STRUCT_ARRAY_DATA_T,
-  STRUCT_STRING_T,
-  STRUCT_NUMBER_T,
-  STRUCT_BOOL_T,
-  STRUCT_NULL_T
+enum class StructElementType {
+  DICT,
+  DICT_KEY,
+  DICT_DATA,
+  ARRAY,
+  ARRAY_DATA,
+  STRING,
+  NUMBER,
+  BOOL,
+  NULL_VALUE,
 };
 
 // Interface for streaming parser of structured data format (e.g.,
@@ -57,10 +59,10 @@ class StructParserStateMachine {
 public:
   virtual ~StructParserStateMachine() = default;
 
-  virtual void beginElement(int elementType) = 0;
-  virtual void endElement(int elementType) = 0;
+  virtual void beginElement(StructElementType elementType) = 0;
+  virtual void endElement(StructElementType elementType) = 0;
   virtual void reset() = 0;
-  virtual void charactersCallback(const char* data, size_t len) = 0;
+  virtual void charactersCallback(std::span<const std::byte> data) = 0;
   virtual void numberCallback(int64_t number, int frac, int exp) = 0;
   virtual void boolCallback(bool bval) = 0;
 };

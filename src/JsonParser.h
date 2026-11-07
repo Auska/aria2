@@ -37,26 +37,27 @@
 
 #include "common.h"
 
+#include <span>
 #include <stack>
+
+#include "StructParserStateMachine.h"
 
 namespace aria2 {
 
-class StructParserStateMachine;
-
 namespace json {
 
-enum JsonError {
-  ERR_UNEXPECTED_CHAR_BEFORE_VAL = -1,
-  ERR_UNEXPECTED_CHAR_BEFORE_OBJ_KEY = -2,
-  ERR_UNEXPECTED_CHAR_BEFORE_OBJ_VAL = -3,
-  ERR_UNEXPECTED_CHAR_BEFORE_OBJ_SEP = -4,
-  ERR_INVALID_UNICODE_POINT = -5,
-  ERR_INVALID_NUMBER = -6,
-  ERR_NUMBER_OUT_OF_RANGE = -7,
-  ERR_UNEXPECTED_CHAR_BEFORE_ARRAY_SEP = -8,
-  ERR_UNEXPECTED_LITERAL = -9,
-  ERR_PREMATURE_DATA = -10,
-  ERR_STRUCTURE_TOO_DEEP = -11
+enum class JsonError {
+  UNEXPECTED_CHAR_BEFORE_VAL = -1,
+  UNEXPECTED_CHAR_BEFORE_OBJ_KEY = -2,
+  UNEXPECTED_CHAR_BEFORE_OBJ_VAL = -3,
+  UNEXPECTED_CHAR_BEFORE_OBJ_SEP = -4,
+  INVALID_UNICODE_POINT = -5,
+  INVALID_NUMBER = -6,
+  NUMBER_OUT_OF_RANGE = -7,
+  UNEXPECTED_CHAR_BEFORE_ARRAY_SEP = -8,
+  UNEXPECTED_LITERAL = -9,
+  PREMATURE_DATA = -10,
+  STRUCTURE_TOO_DEEP = -11
 };
 
 class JsonParser {
@@ -66,13 +67,13 @@ public:
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned.
-  ssize_t parseUpdate(const char* data, size_t size);
+  ssize_t parseUpdate(std::span<const std::byte> data);
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned. Call this function to signal the parser that this is
   // the last piece of data. This function does NOT reset the internal
   // state.
-  ssize_t parseFinal(const char* data, size_t size);
+  ssize_t parseFinal(std::span<const std::byte> data);
   // Resets the internal state of the parser and makes it ready for
   // reuse.
   void reset();
@@ -81,9 +82,9 @@ private:
   int pushState(int state);
   int stateTop() const;
   int popState();
-  void runBeginCallback(int elementType);
-  void runEndCallback(int elementType);
-  void runCharactersCallback(const char* data, size_t len);
+  void runBeginCallback(StructElementType elementType);
+  void runEndCallback(StructElementType elementType);
+  void runCharactersCallback(std::span<const std::byte> data);
   void runNumberCallback(int64_t number, int frac, int exp);
   void runBoolCallback(bool bval);
 

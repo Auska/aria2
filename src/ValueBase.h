@@ -75,7 +75,7 @@ public:
 
 class String : public ValueBase {
 public:
-  typedef std::string ValueType;
+  using ValueType = std::string;
 
   String(const ValueType& string);
   String(ValueType&& string);
@@ -124,7 +124,7 @@ private:
 
 class Integer : public ValueBase {
 public:
-  typedef int64_t ValueType;
+  using ValueType = int64_t;
 
   Integer(ValueType integer);
 
@@ -174,7 +174,7 @@ private:
 
 class List : public ValueBase {
 public:
-  typedef std::deque<std::unique_ptr<ValueBase>> ValueType;
+  using ValueType = std::deque<std::unique_ptr<ValueBase>>;
 
   List();
 
@@ -246,7 +246,7 @@ private:
 
 class Dict : public ValueBase {
 public:
-  typedef std::map<std::string, std::unique_ptr<ValueBase>> ValueType;
+  using ValueType = std::map<std::string, std::unique_ptr<ValueBase>>;
 
   Dict();
 

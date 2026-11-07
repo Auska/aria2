@@ -323,7 +323,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
 
 （一个阶段一次提交；6 个阶段，用户授权后用 `todo` 同步 6 个任务）
 
-1. [ ] **阶段 1：util 簇（31 文件 / 7 285 行）+ fmt 全量迁移**
+1. [x] **阶段 1：util 簇（31 文件 / 7 285 行）+ fmt 全量迁移**
    - 惯用法：7 处 `typedef`→`using`（`a2iterator.h:44,47`、`array_fun.h:69,98,119`、
      `GroupId.h:46`、`util.h:338`）；`BitfieldMan.cc` 的 14 处 `new[]`/`delete[]`
      （7 组 new/delete 对，`bitfield_`/`useBitfield_`/`filterBitfield_`）

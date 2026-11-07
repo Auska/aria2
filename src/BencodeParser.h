@@ -37,23 +37,24 @@
 
 #include "common.h"
 
+#include <span>
 #include <stack>
+
+#include "StructParserStateMachine.h"
 
 namespace aria2 {
 
-class StructParserStateMachine;
-
 namespace bittorrent {
 
-enum BencodeError {
-  ERR_UNEXPECTED_CHAR_BEFORE_VAL = -1,
-  ERR_INVALID_NUMBER = -2,
-  ERR_NUMBER_OUT_OF_RANGE = -3,
-  ERR_PREMATURE_DATA = -4,
-  ERR_STRUCTURE_TOO_DEEP = -5,
-  ERR_INVALID_STRING_LENGTH = -6,
-  ERR_STRING_LENGTH_OUT_OF_RANGE = -7,
-  ERR_INVALID_FLOAT_NUMBER = -8,
+enum class BencodeError {
+  UNEXPECTED_CHAR_BEFORE_VAL = -1,
+  INVALID_NUMBER = -2,
+  NUMBER_OUT_OF_RANGE = -3,
+  PREMATURE_DATA = -4,
+  STRUCTURE_TOO_DEEP = -5,
+  INVALID_STRING_LENGTH = -6,
+  STRING_LENGTH_OUT_OF_RANGE = -7,
+  INVALID_FLOAT_NUMBER = -8,
 };
 
 class BencodeParser {
@@ -63,13 +64,13 @@ public:
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned.
-  ssize_t parseUpdate(const char* data, size_t size);
+  ssize_t parseUpdate(std::span<const std::byte> data);
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned. Call this function to signal the parser that this is
   // the last piece of data. This function does NOT reset the internal
   // state.
-  ssize_t parseFinal(const char* data, size_t size);
+  ssize_t parseFinal(std::span<const std::byte> data);
   // Resets the internal state of the parser and makes it ready for
   // reuse.
   void reset();
@@ -78,9 +79,9 @@ private:
   int pushState(int state);
   int stateTop() const;
   int popState();
-  void runBeginCallback(int elementType);
-  void runEndCallback(int elementType);
-  void runCharactersCallback(const char* data, size_t len);
+  void runBeginCallback(StructElementType elementType);
+  void runEndCallback(StructElementType elementType);
+  void runCharactersCallback(std::span<const std::byte> data);
   void runNumberCallback(int64_t number);
 
   void onStringEnd();

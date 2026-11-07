@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "download_helper.h"
 
+#include <span>
+
 #include <algorithm>
 #include <sstream>
 
@@ -312,7 +314,8 @@ void createRequestGroupForBitTorrent(
   }
   else {
     ssize_t error;
-    torrent = parser.parseFinal(torrentData.c_str(), torrentData.size(), error);
+    torrent = parser.parseFinal(std::as_bytes(std::span{torrentData}),
+                                 error);
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Bencode decoding failed",

@@ -42,27 +42,28 @@
 namespace aria2 {
 
 void ValueValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   switch (elementType) {
-  case STRUCT_DICT_T:
+  case StructElementType::DICT:
     psm->setCurrentFrameValue(Dict::g());
     psm->pushDictState();
     break;
-  case STRUCT_ARRAY_T:
+  case StructElementType::ARRAY:
     psm->setCurrentFrameValue(List::g());
     psm->pushArrayState();
     break;
-  case STRUCT_STRING_T:
+  case StructElementType::STRING:
     psm->pushStringState();
     break;
-  case STRUCT_NUMBER_T:
+  case StructElementType::NUMBER:
     psm->pushNumberState();
     break;
-  case STRUCT_BOOL_T:
+  case StructElementType::BOOL:
     psm->pushBoolState();
     break;
-  case STRUCT_NULL_T:
+  case StructElementType::NULL_VALUE:
     psm->pushNullState();
     break;
   default:
@@ -72,14 +73,15 @@ void ValueValueBaseStructParserState::beginElement(
 }
 
 void DictValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   switch (elementType) {
-  case STRUCT_DICT_KEY_T:
+  case StructElementType::DICT_KEY:
     psm->pushFrame();
     psm->pushDictKeyState();
     break;
-  case STRUCT_DICT_DATA_T:
+  case StructElementType::DICT_DATA:
     psm->pushDictDataState();
     break;
   default:
@@ -89,52 +91,60 @@ void DictValueBaseStructParserState::beginElement(
 }
 
 void DictKeyValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->setCurrentFrameName(psm->getCharacters());
 }
 
 void DictDataValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->popDictFrame();
 }
 
 void ArrayValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
-  assert(elementType == STRUCT_ARRAY_DATA_T);
+  assert(elementType == StructElementType::ARRAY_DATA);
   psm->pushFrame();
   psm->pushArrayDataState();
 }
 
 void ArrayDataValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->popArrayFrame();
 }
 
 void StringValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->setCurrentFrameValue(String::g(psm->getCharacters()));
 }
 
 void NumberValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   // TODO Ignore frac and exp
   psm->setCurrentFrameValue(Integer::g(psm->getNumber().number));
 }
 
 void BoolValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->setCurrentFrameValue(psm->getBool() ? Bool::gTrue() : Bool::gFalse());
 }
 
 void NullValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm, int elementType)
+    ValueBaseStructParserStateMachine* psm,
+                                StructElementType elementType)
 {
   psm->setCurrentFrameValue(Null::g());
 }

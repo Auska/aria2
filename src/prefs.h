@@ -48,7 +48,7 @@ struct Pref {
   size_t i;
 };
 
-typedef const Pref* PrefPtr;
+using PrefPtr = const Pref*;
 
 namespace option {
 

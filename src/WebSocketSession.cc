@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "WebSocketSession.h"
 
+#include <span>
+
 #include <cerrno>
 #include <cstring>
 #include <cassert>
@@ -318,14 +320,13 @@ ssize_t WebSocketSession::parseUpdate(const uint8_t* data, size_t len)
   else {
     len = 0;
   }
-  return parser_.parseUpdate(reinterpret_cast<const char*>(data), len);
+  return parser_.parseUpdate(std::as_bytes(std::span{data, len}));
 }
 
 std::unique_ptr<ValueBase>
 WebSocketSession::parseFinal(const uint8_t* data, size_t len, ssize_t& error)
 {
-  auto res =
-      parser_.parseFinal(reinterpret_cast<const char*>(data), len, error);
+  auto res = parser_.parseFinal(std::as_bytes(std::span{data, len}), error);
   receivedLength_ = 0;
   return res;
 }
