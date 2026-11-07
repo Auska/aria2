@@ -38,7 +38,7 @@
 // the main window.
 //
 // Compile and link like this:
-// $ g++ -O2 -Wall -g -std=c++11 `wx-config --cflags` -o libaria2wx
+// $ g++ -O2 -Wall -g -std=c++20 `wx-config --cflags` -o libaria2wx
 // libaria2wx.cc `wx-config --libs` -laria2 -pthread
 #include <iostream>
 #include <chrono>

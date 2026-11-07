@@ -34,7 +34,7 @@
 /* copyright --> */
 //
 // Compile and link like this:
-// $ g++ -Wall -O2 -g -std=c++11 -o libaria2ex libaria2ex.cc -laria2
+// $ g++ -Wall -O2 -g -std=c++20 -o libaria2ex libaria2ex.cc -laria2
 #include <iostream>
 #include <chrono>
 
