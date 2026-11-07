@@ -153,7 +153,7 @@ std::string usedLibs()
   res += "sqlite3/" SQLITE_VERSION " ";
 #endif // HAVE_SQLITE3
 #ifdef HAVE_OPENSSL
-  res += fmt("OpenSSL/%ld.%ld.%ld", OPENSSL_VERSION_NUMBER >> 28,
+  res += fmt("OpenSSL/{}.{}.{}", OPENSSL_VERSION_NUMBER >> 28,
              (OPENSSL_VERSION_NUMBER >> 20) & 0xff,
              (OPENSSL_VERSION_NUMBER >> 12) & 0xff);
   if ((OPENSSL_VERSION_NUMBER >> 4) & 0xff) {

@@ -227,7 +227,7 @@ DefaultBtMessageFactory::createBtMessage(const unsigned char* data,
       break;
     }
     default:
-      throw DL_ABORT_EX(fmt("Invalid message ID. id=%u", id));
+      throw DL_ABORT_EX(fmt("Invalid message ID. id={}", id));
     }
   }
   setCommonProperty(msg.get());

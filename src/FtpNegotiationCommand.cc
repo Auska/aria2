@@ -276,7 +276,7 @@ bool FtpNegotiationCommand::recvPwd()
                        error_code::FTP_PROTOCOL_ERROR);
   }
   ftp_->setBaseWorkingDir(pwd);
-  A2_LOG_INFO(fmt("CUID#%" PRId64 " - base working directory is '%s'",
+  A2_LOG_INFO(fmt("CUID#{} - base working directory is '{}'",
                   getCuid(), pwd.c_str()));
   sequence_ = SEQ_SEND_CWD_PREP;
   return true;
@@ -358,7 +358,7 @@ bool FtpNegotiationCommand::recvMdtm()
   if (status == 213) {
     if (lastModifiedTime.good()) {
       getRequestGroup()->updateLastModifiedTime(lastModifiedTime);
-      A2_LOG_DEBUG(fmt("MDTM result was parsed as: %s",
+      A2_LOG_DEBUG(fmt("MDTM result was parsed as: {}",
                        lastModifiedTime.toHTTPDate().c_str()));
     }
     else {
@@ -367,7 +367,7 @@ bool FtpNegotiationCommand::recvMdtm()
     }
   }
   else {
-    A2_LOG_INFO(fmt("CUID#%" PRId64 " - MDTM command failed.", getCuid()));
+    A2_LOG_INFO(fmt("CUID#{} - MDTM command failed.", getCuid()));
   }
   sequence_ = SEQ_SEND_SIZE;
   return true;
@@ -526,8 +526,7 @@ bool FtpNegotiationCommand::recvSize()
     }
   }
   else {
-    A2_LOG_INFO(fmt("CUID#%" PRId64
-                    " - The remote FTP Server doesn't recognize SIZE"
+    A2_LOG_INFO(fmt("CUID#{} - The remote FTP Server doesn't recognize SIZE"
                     " command. Continue.",
                     getCuid()));
     // Even if one of the other servers waiting in the queue supports SIZE

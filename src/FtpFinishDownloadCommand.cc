@@ -89,13 +89,12 @@ bool FtpFinishDownloadCommand::execute()
         }
       }
       else {
-        A2_LOG_INFO(fmt("CUID#%" PRId64 " - Bad status for transfer complete.",
+        A2_LOG_INFO(fmt("CUID#{} - Bad status for transfer complete.",
                         getCuid()));
       }
     }
     else if (getCheckPoint().difference(global::wallclock()) >= getTimeout()) {
-      A2_LOG_INFO(fmt("CUID#%" PRId64
-                      " - Timeout before receiving transfer complete.",
+      A2_LOG_INFO(fmt("CUID#{} - Timeout before receiving transfer complete.",
                       getCuid()));
     }
     else {
@@ -104,8 +103,7 @@ bool FtpFinishDownloadCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#%" PRId64
-                       " - Exception was thrown, but download was"
+    A2_LOG_INFO_EX(fmt("CUID#{} - Exception was thrown, but download was"
                        " finished, so we can ignore the exception.",
                        getCuid()),
                    e);

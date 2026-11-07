@@ -95,7 +95,7 @@ const Dict* getDictionary(const Dict* dict, const std::string& key)
     return d;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing %s", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
   }
 }
 } // namespace
@@ -108,7 +108,7 @@ const String* getString(const Dict* dict, const std::string& key)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing %s", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
   }
 }
 } // namespace
@@ -121,7 +121,7 @@ const Integer* getInteger(const Dict* dict, const std::string& key)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing %s", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
   }
 }
 } // namespace
@@ -134,7 +134,7 @@ const String* getString(const List* list, size_t index)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. element[%lu] is not String.",
+    throw DL_ABORT_EX(fmt("Malformed DHT message. element[{}] is not String.",
                           static_cast<unsigned long>(index)));
   }
 }
@@ -148,7 +148,7 @@ const Integer* getInteger(const List* list, size_t index)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. element[%lu] is not Integer.",
+    throw DL_ABORT_EX(fmt("Malformed DHT message. element[{}] is not Integer.",
                           static_cast<unsigned long>(index)));
   }
 }
@@ -162,7 +162,7 @@ const List* getList(const Dict* dict, const std::string& key)
     return l;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing %s", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
   }
 }
 } // namespace
@@ -171,7 +171,7 @@ void DHTMessageFactoryImpl::validateID(const String* id) const
 {
   if (id->s().size() != DHT_ID_LENGTH) {
     throw DL_ABORT_EX(fmt("Malformed DHT message. Invalid ID length."
-                          " Expected:%lu, Actual:%lu",
+                          " Expected:{}, Actual:{}",
                           static_cast<unsigned long>(DHT_ID_LENGTH),
                           static_cast<unsigned long>(id->s().size())));
   }
@@ -181,7 +181,7 @@ void DHTMessageFactoryImpl::validatePort(const Integer* port) const
 {
   if (!(0 < port->i() && port->i() < UINT16_MAX)) {
     throw DL_ABORT_EX(
-        fmt("Malformed DHT message. Invalid port=%" PRId64 "", port->i()));
+        fmt("Malformed DHT message. Invalid port={}", port->i()));
   }
 }
 
@@ -240,7 +240,7 @@ std::unique_ptr<DHTQueryMessage> DHTMessageFactoryImpl::createQueryMessage(
   }
   else {
     throw DL_ABORT_EX(
-        fmt("Unsupported message type: %s", messageType->s().c_str()));
+        fmt("Unsupported message type: {}", messageType->s().c_str()));
   }
   setVersion(msg.get(), dict);
   return msg;
@@ -258,7 +258,7 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
     // for now, just report error message arrived and throw exception.
     const List* e = getList(dict, DHTUnknownMessage::E);
     if (e->size() == 2) {
-      A2_LOG_INFO(fmt("Received Error DHT message. code=%" PRId64 ", msg=%s",
+      A2_LOG_INFO(fmt("Received Error DHT message. code={}, msg={}",
                       getInteger(e, 0)->i(),
                       util::percentEncode(getString(e, 1)->s()).c_str()));
     }
@@ -268,7 +268,7 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
     throw DL_ABORT_EX("Received Error DHT message.");
   }
   else if (y->s() != DHTResponseMessage::R) {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. y != r: y=%s",
+    throw DL_ABORT_EX(fmt("Malformed DHT message. y != r: y={}",
                           util::percentEncode(y->s()).c_str()));
   }
   const Dict* rDict = getDictionary(dict, DHTResponseMessage::R);
@@ -289,7 +289,7 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
     msg = createAnnouncePeerReplyMessage(remoteNode, transactionID->s());
   }
   else {
-    throw DL_ABORT_EX(fmt("Unsupported message type: %s", messageType.c_str()));
+    throw DL_ABORT_EX(fmt("Unsupported message type: {}", messageType.c_str()));
   }
   setVersion(msg.get(), dict);
   return msg;
@@ -369,7 +369,7 @@ void DHTMessageFactoryImpl::extractNodes(
 {
   int unit = bittorrent::getCompactLength(family_) + 20;
   if (length % unit != 0) {
-    throw DL_ABORT_EX(fmt("Nodes length is not multiple of %d", unit));
+    throw DL_ABORT_EX(fmt("Nodes length is not multiple of {}", unit));
   }
   for (size_t offset = 0; offset < length; offset += unit) {
     auto node = std::make_shared<DHTNode>(src + offset);

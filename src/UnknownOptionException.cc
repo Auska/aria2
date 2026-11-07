@@ -38,7 +38,7 @@
 namespace aria2 {
 
 namespace {
-const char* MESSAGE = _("Unknown option '%s'");
+constexpr auto MESSAGE = _("Unknown option '{}'");
 } // namespace
 
 UnknownOptionException::UnknownOptionException(const char* file, int line,

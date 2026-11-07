@@ -73,7 +73,7 @@ bool DHTRoutingTable::addGoodNode(const std::shared_ptr<DHTNode>& node)
 
 bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
 {
-  A2_LOG_DEBUG(fmt("Trying to add node:%s", node->toString().c_str()));
+  A2_LOG_DEBUG(fmt("Trying to add node:{}", node->toString().c_str()));
   if (*localNode_ == *node) {
     A2_LOG_DEBUG("Adding node with the same ID with localnode is not allowed.");
     return false;
@@ -86,7 +86,7 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
       return true;
     }
     else if (bucket->splitAllowed()) {
-      A2_LOG_DEBUG(fmt("Splitting bucket. Range:%s-%s",
+      A2_LOG_DEBUG(fmt("Splitting bucket. Range:{}-{}",
                        util::toHex(std::as_bytes(std::span{bucket->getMinID(), DHT_ID_LENGTH})).c_str(),
                        util::toHex(std::as_bytes(std::span{bucket->getMaxID(), DHT_ID_LENGTH})).c_str()));
       treeNode->split();
@@ -101,7 +101,7 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
     else {
       if (good) {
         bucket->cacheNode(node);
-        A2_LOG_DEBUG(fmt("Cached node=%s", node->toString().c_str()));
+        A2_LOG_DEBUG(fmt("Cached node={}", node->toString().c_str()));
       }
       return false;
     }

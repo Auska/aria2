@@ -98,7 +98,7 @@ bool DHTGetPeersCommand::execute()
                    (btRuntime_->getConnections() == 0 &&
                     elapsed >= GET_PEER_INTERVAL_ZERO))))) {
     A2_LOG_DEBUG(
-        fmt("Issuing PeerLookup for infoHash=%s",
+        fmt("Issuing PeerLookup for infoHash={}",
             bittorrent::getInfoHashString(requestGroup_->getDownloadContext())
                 .c_str()));
     task_ = taskFactory_->createPeerLookupTask(
@@ -114,8 +114,8 @@ bool DHTGetPeersCommand::execute()
          btRuntime_->getMaxPeers() >
              static_cast<int>(peerStorage_->countAllPeer()))) {
       ++numRetry_;
-      A2_LOG_DEBUG(fmt("Too few peers. peers=%lu, max_peers=%d."
-                       " Try again(%d)",
+      A2_LOG_DEBUG(fmt("Too few peers. peers={}, max_peers={}."
+                       " Try again({})",
                        static_cast<unsigned long>(peerStorage_->countAllPeer()),
                        btRuntime_->getMaxPeers(), numRetry_));
     }

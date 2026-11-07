@@ -74,7 +74,7 @@ bool HttpListenCommand::execute()
       socket->setTcpNodelay(true);
       auto endpoint = socket->getPeerInfo();
 
-      A2_LOG_INFO(fmt("RPC: Accepted the connection from %s:%u.",
+      A2_LOG_INFO(fmt("RPC: Accepted the connection from {}:{}.",
                       endpoint.addr.c_str(), endpoint.port));
 
       e_->setNoWait(true);
@@ -105,11 +105,11 @@ bool HttpListenCommand::bindPort(uint16_t port)
     serverSocket_->beginListen();
     A2_LOG_INFO(fmt(MSG_LISTENING_PORT, getCuid(), port));
     e_->addSocketForReadCheck(serverSocket_, this);
-    A2_LOG_NOTICE(fmt(_("IPv%d RPC: listening on TCP port %u"), ipv, port));
+    A2_LOG_NOTICE(fmt(_("IPv{} RPC: listening on TCP port {}"), ipv, port));
     return true;
   }
   catch (RecoverableException& e) {
-    A2_LOG_ERROR_EX(fmt("IPv%d RPC: failed to bind TCP port %u", ipv, port), e);
+    A2_LOG_ERROR_EX(fmt("IPv{} RPC: failed to bind TCP port {}", ipv, port), e);
     serverSocket_->closeConnection();
   }
   return false;

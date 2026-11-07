@@ -67,59 +67,59 @@ std::shared_ptr<GroupId> GroupId::import(a2_gid_t n)
 
 void GroupId::clear() { set_.clear(); }
 
-int GroupId::expandUnique(a2_gid_t& n, const char* hex)
+GroupId::Err GroupId::expandUnique(a2_gid_t& n, const char* hex)
 {
   a2_gid_t p = 0;
   size_t i;
   for (i = 0; hex[i]; ++i) {
     unsigned int c = util::hexCharToUInt(hex[i]);
     if (c == 255) {
-      return ERR_INVALID;
+      return Err::INVALID;
     }
     p <<= 4;
     p |= c;
   }
   if (i == 0 || i > sizeof(a2_gid_t) * 2) {
-    return ERR_INVALID;
+    return Err::INVALID;
   }
   p <<= 64 - i * 4;
   a2_gid_t mask = UINT64_MAX - ((1LL << (64 - i * 4)) - 1);
   auto itr = set_.lower_bound(p);
   if (itr == set_.end()) {
-    return ERR_NOT_FOUND;
+    return Err::NOT_FOUND;
   }
   if (p == ((*itr) & mask)) {
     n = *itr;
     ++itr;
     if (itr == set_.end() || p != ((*itr) & mask)) {
-      return 0;
+      return Err::OK;
     }
     else {
-      return ERR_NOT_UNIQUE;
+      return Err::NOT_UNIQUE;
     }
   }
   else {
-    return ERR_NOT_FOUND;
+    return Err::NOT_FOUND;
   }
 }
 
-int GroupId::toNumericId(a2_gid_t& n, const char* hex)
+GroupId::Err GroupId::toNumericId(a2_gid_t& n, const char* hex)
 {
   a2_gid_t p = 0;
   size_t i;
   for (i = 0; hex[i]; ++i) {
     unsigned int c = util::hexCharToUInt(hex[i]);
     if (c == 255) {
-      return ERR_INVALID;
+      return Err::INVALID;
     }
     p <<= 4;
     p |= c;
   }
   if (p == 0 || i != sizeof(a2_gid_t) * 2) {
-    return ERR_INVALID;
+    return Err::INVALID;
   }
   n = p;
-  return 0;
+  return Err::OK;
 }
 
 std::string GroupId::toHex(a2_gid_t gid)

@@ -96,7 +96,7 @@ DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
     const char* extensionName = registry_->getExtensionName(extensionMessageID);
     if (!extensionName) {
       throw DL_ABORT_EX(
-          fmt("No extension registered for extended message ID %u",
+          fmt("No extension registered for extended message ID {}",
               extensionMessageID));
     }
     if (strcmp(extensionName, "ut_pex") == 0) {
@@ -164,12 +164,12 @@ DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
       }
       default:
         throw DL_ABORT_EX(
-            fmt("Bad ut_metadata: unknown msg_type=%" PRId64, msgType->i()));
+            fmt("Bad ut_metadata: unknown msg_type={}", msgType->i()));
       }
     }
     else {
       throw DL_ABORT_EX(fmt("Unsupported extension message received."
-                            " extensionMessageID=%u, extensionName=%s",
+                            " extensionMessageID={}, extensionName={}",
                             extensionMessageID, extensionName));
     }
   }

@@ -129,13 +129,13 @@ bool Piece::hasBlock(size_t blockIndex) const
 
 bool Piece::getMissingUnusedBlockIndex(size_t& index) const
 {
-  if (bitfield_->getFirstMissingUnusedIndex(index)) {
-    bitfield_->setUseBit(index);
-    return true;
-  }
-  else {
+  auto indexOpt = bitfield_->getFirstMissingUnusedIndex();
+  if (!indexOpt) {
     return false;
   }
+  index = *indexOpt;
+  bitfield_->setUseBit(index);
+  return true;
 }
 
 size_t Piece::getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
@@ -154,7 +154,12 @@ size_t Piece::getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
 
 bool Piece::getFirstMissingBlockIndexWithoutLock(size_t& index) const
 {
-  return bitfield_->getFirstMissingIndex(index);
+  auto indexOpt = bitfield_->getFirstMissingIndex();
+  if (!indexOpt) {
+    return false;
+  }
+  index = *indexOpt;
+  return true;
 }
 
 bool Piece::getAllMissingBlockIndexes(unsigned char* misbitfield,
@@ -165,7 +170,7 @@ bool Piece::getAllMissingBlockIndexes(unsigned char* misbitfield,
 
 std::string Piece::toString() const
 {
-  return fmt("piece: index=%lu, length=%" PRId64,
+  return fmt("piece: index={}, length={}",
              static_cast<unsigned long>(index_), length_);
 }
 
@@ -339,7 +344,8 @@ void Piece::updateWrCache(WrDiskCache* diskCache, unsigned char* data,
     return;
   }
   assert(wrCache_);
-  A2_LOG_DEBUG(fmt("updateWrCache entry=%p", wrCache_.get()));
+  A2_LOG_DEBUG(fmt("updateWrCache entry={:p}",
+                   static_cast<const void*>(wrCache_.get())));
   auto cell = new WrDiskCacheEntry::DataCell();
   cell->goff = goff;
   cell->data = data;

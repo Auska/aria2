@@ -37,14 +37,27 @@
 
 #include "common.h"
 
+#include <format>
 #include <string>
-#include <cstdarg>
+#include <utility>
 
 namespace aria2 {
 
-std::string fmt(const char* fmt, ...)
-    __attribute__((format(printf, 1, 2)))
-    ;
+// Formats |f| with |args|. Unlike printf, the format string is checked
+// at compile time, so the argument types must match the placeholders.
+template <typename... Args>
+std::string fmt(std::format_string<Args...> f, Args&&... args)
+{
+  return std::format(f, std::forward<Args>(args)...);
+}
+
+// Runtime counterpart of fmt(), for the few places where the format
+// string is assembled while the program runs.
+template <typename... Args>
+std::string fmtRuntime(const std::string& f, Args&&... args)
+{
+  return std::vformat(f, std::make_format_args(args...));
+}
 
 } // namespace aria2
 

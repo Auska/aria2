@@ -106,7 +106,7 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
   }
   else {
     good_ = false;
-    A2_LOG_ERROR(fmt("SSL_CTX_new() failed. Cause: %s",
+    A2_LOG_ERROR(fmt("SSL_CTX_new() failed. Cause: {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
     return;
   }
@@ -147,7 +147,7 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
 #endif
   if (SSL_CTX_set_cipher_list(sslCtx_, "HIGH:!aNULL:!eNULL") == 0) {
     good_ = false;
-    A2_LOG_ERROR(fmt("SSL_CTX_set_cipher_list() failed. Cause: %s",
+    A2_LOG_ERROR(fmt("SSL_CTX_set_cipher_list() failed. Cause: {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
   }
 
@@ -156,7 +156,7 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
 #  ifndef OPENSSL_NO_ECDH
   auto ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
   if (ecdh == nullptr) {
-    A2_LOG_WARN(fmt("Failed to enable ECDHE cipher suites. Cause: %s",
+    A2_LOG_WARN(fmt("Failed to enable ECDHE cipher suites. Cause: {}",
                     ERR_error_string(ERR_get_error(), nullptr)));
   }
   else {
@@ -180,18 +180,18 @@ bool OpenSSLTLSContext::addCredentialFile(const std::string& certfile,
   }
   if (SSL_CTX_use_PrivateKey_file(sslCtx_, keyfile.c_str(), SSL_FILETYPE_PEM) !=
       1) {
-    A2_LOG_ERROR(fmt("Failed to load private key from %s. Cause: %s",
+    A2_LOG_ERROR(fmt("Failed to load private key from {}. Cause: {}",
                      keyfile.c_str(),
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   if (SSL_CTX_use_certificate_chain_file(sslCtx_, certfile.c_str()) != 1) {
-    A2_LOG_ERROR(fmt("Failed to load certificate from %s. Cause: %s",
+    A2_LOG_ERROR(fmt("Failed to load certificate from {}. Cause: {}",
                      certfile.c_str(),
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
-  A2_LOG_INFO(fmt("Credential files(cert=%s, key=%s) were successfully added.",
+  A2_LOG_INFO(fmt("Credential files(cert={}, key={}) were successfully added.",
                   certfile.c_str(), keyfile.c_str()));
   return true;
 }
@@ -212,13 +212,13 @@ bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
   p12_t p12(d2i_PKCS12_bio(bio.get(), nullptr));
   if (!p12) {
     if (side_ == TLS_SERVER) {
-      A2_LOG_ERROR(fmt("Failed to open PKCS12 file: %s. "
+      A2_LOG_ERROR(fmt("Failed to open PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--rpc-private-key. See the manual.",
                        ERR_error_string(ERR_get_error(), nullptr)));
     }
     else {
-      A2_LOG_ERROR(fmt("Failed to open PKCS12 file: %s. "
+      A2_LOG_ERROR(fmt("Failed to open PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--private-key. See the manual.",
                        ERR_error_string(ERR_get_error(), nullptr)));
@@ -230,13 +230,13 @@ bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
   STACK_OF(X509)* ca = nullptr;
   if (!PKCS12_parse(p12.get(), "", &pkey, &cert, &ca)) {
     if (side_ == TLS_SERVER) {
-      A2_LOG_ERROR(fmt("Failed to parse PKCS12 file: %s. "
+      A2_LOG_ERROR(fmt("Failed to parse PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--rpc-private-key. See the manual.",
                        ERR_error_string(ERR_get_error(), nullptr)));
     }
     else {
-      A2_LOG_ERROR(fmt("Failed to parse PKCS12 file: %s. "
+      A2_LOG_ERROR(fmt("Failed to parse PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--private-key. See the manual.",
                        ERR_error_string(ERR_get_error(), nullptr)));
@@ -249,22 +249,22 @@ bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
   x509_sk_t ca_holder(ca);
 
   if (!pkey || !cert) {
-    A2_LOG_ERROR(fmt("Failed to use PKCS12 file: no pkey or cert %s",
+    A2_LOG_ERROR(fmt("Failed to use PKCS12 file: no pkey or cert {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   if (!SSL_CTX_use_PrivateKey(sslCtx_, pkey)) {
-    A2_LOG_ERROR(fmt("Failed to use PKCS12 file pkey: %s",
+    A2_LOG_ERROR(fmt("Failed to use PKCS12 file pkey: {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   if (!SSL_CTX_use_certificate(sslCtx_, cert)) {
-    A2_LOG_ERROR(fmt("Failed to use PKCS12 file cert: %s",
+    A2_LOG_ERROR(fmt("Failed to use PKCS12 file cert: {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   if (ca && sk_X509_num(ca) && !SSL_CTX_add_extra_chain_cert(sslCtx_, ca)) {
-    A2_LOG_ERROR(fmt("Failed to use PKCS12 file chain: %s",
+    A2_LOG_ERROR(fmt("Failed to use PKCS12 file chain: {}",
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }

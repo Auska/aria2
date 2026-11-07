@@ -70,7 +70,7 @@ void DHTTaskExecutor::update()
       --r;
     }
   }
-  A2_LOG_DEBUG(fmt("Executing %u Task(s). Queue has %u task(s).",
+  A2_LOG_DEBUG(fmt("Executing {} Task(s). Queue has {} task(s).",
                    static_cast<unsigned int>(getExecutingTaskSize()),
                    static_cast<unsigned int>(getQueueSize())));
 }

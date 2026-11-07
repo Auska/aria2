@@ -250,7 +250,7 @@ void DefaultBtProgressInfoFile::load()
   }
   else {
     throw DL_ABORT_EX(
-        fmt("Unsupported ctrl file version: %s", versionHex.c_str()));
+        fmt("Unsupported ctrl file version: {}", versionHex.c_str()));
   }
   unsigned char extension[4];
   READ_CHECK(fp, extension, sizeof(extension));
@@ -267,7 +267,7 @@ void DefaultBtProgressInfoFile::load()
   }
   if (infoHashLength > INFO_HASH_LENGTH ||
       (infoHashLength != INFO_HASH_LENGTH && infoHashCheckEnabled)) {
-    throw DL_ABORT_EX(fmt("Invalid info hash length: %d", infoHashLength));
+    throw DL_ABORT_EX(fmt("Invalid info hash length: {}", infoHashLength));
   }
   if (infoHashLength > 0) {
     std::array<unsigned char, INFO_HASH_LENGTH> savedInfoHash;
@@ -277,7 +277,7 @@ void DefaultBtProgressInfoFile::load()
       const unsigned char* infoHash = bittorrent::getInfoHash(dctx_);
       if (memcmp(savedInfoHash.data(), infoHash, INFO_HASH_LENGTH) != 0) {
         throw DL_ABORT_EX(
-            fmt("info hash mismatch. expected: %s, actual: %s",
+            fmt("info hash mismatch. expected: {}, actual: {}",
                 util::toHex(std::as_bytes(std::span{infoHash, INFO_HASH_LENGTH})).c_str(),
                 util::toHex(std::as_bytes(std::span{savedInfoHash.data(), infoHashLength})).c_str()));
       }
@@ -302,7 +302,7 @@ void DefaultBtProgressInfoFile::load()
   }
   if (totalLength != static_cast<uint64_t>(dctx_->getTotalLength())) {
     throw DL_ABORT_EX(
-        fmt("total length mismatch. expected: %" PRId64 ", actual: %" PRId64 "",
+        fmt("total length mismatch. expected: {}, actual: {}",
             dctx_->getTotalLength(), static_cast<int64_t>(totalLength)));
   }
   uint64_t uploadLength;
@@ -324,7 +324,7 @@ void DefaultBtProgressInfoFile::load()
   uint32_t expectedBitfieldLength =
       ((totalLength + pieceLength - 1) / pieceLength + 7) / 8;
   if (expectedBitfieldLength != bitfieldLength) {
-    throw DL_ABORT_EX(fmt("bitfield length mismatch. expected: %d, actual: %d",
+    throw DL_ABORT_EX(fmt("bitfield length mismatch. expected: {}, actual: {}",
                           expectedBitfieldLength, bitfieldLength));
   }
 
@@ -347,7 +347,7 @@ void DefaultBtProgressInfoFile::load()
         index = ntohl(index);
       }
       if (!(index < dctx_->getNumPieces())) {
-        throw DL_ABORT_EX(fmt("piece index out of range: %u", index));
+        throw DL_ABORT_EX(fmt("piece index out of range: {}", index));
       }
       uint32_t length;
       READ_CHECK(fp, &length, sizeof(length));
@@ -355,7 +355,7 @@ void DefaultBtProgressInfoFile::load()
         length = ntohl(length);
       }
       if (!(length <= static_cast<uint32_t>(dctx_->getPieceLength()))) {
-        throw DL_ABORT_EX(fmt("piece length out of range: %u", length));
+        throw DL_ABORT_EX(fmt("piece length out of range: {}", length));
       }
       auto piece = std::make_shared<Piece>(index, length);
       uint32_t bitfieldLength;
@@ -366,7 +366,7 @@ void DefaultBtProgressInfoFile::load()
       if (piece->getBitfieldLength() != bitfieldLength) {
         throw DL_ABORT_EX(
             fmt("piece bitfield length mismatch."
-                " expected: %lu actual: %u",
+                " expected: {} actual: {}",
                 static_cast<unsigned long>(piece->getBitfieldLength()),
                 bitfieldLength));
       }

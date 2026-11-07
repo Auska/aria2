@@ -193,16 +193,18 @@ a2_gid_t str2Gid(const String* str)
 {
   assert(str);
   if (str->s().size() > sizeof(a2_gid_t) * 2) {
-    throw DL_ABORT_EX(fmt("Invalid GID %s", str->s().c_str()));
+    throw DL_ABORT_EX(fmt("Invalid GID {}", str->s().c_str()));
   }
   a2_gid_t n;
   switch (GroupId::expandUnique(n, str->s().c_str())) {
-  case GroupId::ERR_NOT_UNIQUE:
-    throw DL_ABORT_EX(fmt("GID %s is not unique", str->s().c_str()));
-  case GroupId::ERR_NOT_FOUND:
-    throw DL_ABORT_EX(fmt("GID %s is not found", str->s().c_str()));
-  case GroupId::ERR_INVALID:
-    throw DL_ABORT_EX(fmt("Invalid GID %s", str->s().c_str()));
+  case GroupId::Err::OK:
+    break;
+  case GroupId::Err::NOT_UNIQUE:
+    throw DL_ABORT_EX(fmt("GID {} is not unique", str->s().c_str()));
+  case GroupId::Err::NOT_FOUND:
+    throw DL_ABORT_EX(fmt("GID {} is not found", str->s().c_str()));
+  case GroupId::Err::INVALID:
+    throw DL_ABORT_EX(fmt("Invalid GID {}", str->s().c_str()));
   }
   return n;
 }
@@ -297,12 +299,12 @@ std::unique_ptr<ValueBase> AddTorrentRpcMethod::process(const RpcRequest& req,
     // --save-session file.
     if (util::saveAs(filename, torrentParam->s(), true)) {
       A2_LOG_INFO(
-          fmt("Uploaded torrent data was saved as %s", filename.c_str()));
+          fmt("Uploaded torrent data was saved as {}", filename.c_str()));
       requestOption->put(PREF_TORRENT_FILE, filename);
     }
     else {
       A2_LOG_INFO(fmt("Uploaded torrent data was not saved."
-                      " Failed to write file %s",
+                      " Failed to write file {}",
                       filename.c_str()));
       filename.clear();
     }
@@ -344,12 +346,12 @@ std::unique_ptr<ValueBase> removeDownload(const RpcRequest& req,
       }
       else {
         throw DL_ABORT_EX(
-            fmt("GID#%s cannot be removed now", GroupId::toHex(gid).c_str()));
+            fmt("GID#{} cannot be removed now", GroupId::toHex(gid).c_str()));
       }
     }
   }
   else {
-    throw DL_ABORT_EX(fmt("Active Download not found for GID#%s",
+    throw DL_ABORT_EX(fmt("Active Download not found for GID#{}",
                           GroupId::toHex(gid).c_str()));
   }
   return createGIDResponse(gid);
@@ -384,7 +386,7 @@ std::unique_ptr<ValueBase> pauseDownload(const RpcRequest& req,
     }
   }
   throw DL_ABORT_EX(
-      fmt("GID#%s cannot be paused now", GroupId::toHex(gid).c_str()));
+      fmt("GID#{} cannot be paused now", GroupId::toHex(gid).c_str()));
 }
 } // namespace
 
@@ -446,7 +448,7 @@ std::unique_ptr<ValueBase> UnpauseRpcMethod::process(const RpcRequest& req,
   if (!group || group->getState() != RequestGroup::STATE_WAITING ||
       !group->isPauseRequested()) {
     throw DL_ABORT_EX(
-        fmt("GID#%s cannot be unpaused now", GroupId::toHex(gid).c_str()));
+        fmt("GID#{} cannot be unpaused now", GroupId::toHex(gid).c_str()));
   }
   else {
     group->setPauseRequested(false);
@@ -867,7 +869,7 @@ std::unique_ptr<ValueBase> GetFilesRpcMethod::process(const RpcRequest& req,
   if (!group) {
     auto dr = e->getRequestGroupMan()->findDownloadResult(gid);
     if (!dr) {
-      throw DL_ABORT_EX(fmt("No file data is available for GID#%s",
+      throw DL_ABORT_EX(fmt("No file data is available for GID#{}",
                             GroupId::toHex(gid).c_str()));
     }
     else {
@@ -895,7 +897,7 @@ std::unique_ptr<ValueBase> GetUrisRpcMethod::process(const RpcRequest& req,
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (!group) {
-    throw DL_ABORT_EX(fmt("No URI data is available for GID#%s",
+    throw DL_ABORT_EX(fmt("No URI data is available for GID#{}",
                           GroupId::toHex(gid).c_str()));
   }
   auto uriList = List::g();
@@ -916,7 +918,7 @@ std::unique_ptr<ValueBase> GetPeersRpcMethod::process(const RpcRequest& req,
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (!group) {
-    throw DL_ABORT_EX(fmt("No peer data is available for GID#%s",
+    throw DL_ABORT_EX(fmt("No peer data is available for GID#{}",
                           GroupId::toHex(gid).c_str()));
   }
   auto peers = List::g();
@@ -945,7 +947,7 @@ std::unique_ptr<ValueBase> TellStatusRpcMethod::process(const RpcRequest& req,
     auto ds = e->getRequestGroupMan()->findDownloadResult(gid);
     if (!ds) {
       throw DL_ABORT_EX(
-          fmt("No such download for GID#%s", GroupId::toHex(gid).c_str()));
+          fmt("No such download for GID#{}", GroupId::toHex(gid).c_str()));
     }
     gatherStoppedDownload(entryDict.get(), ds, keys);
   }
@@ -1034,7 +1036,7 @@ RemoveDownloadResultRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
 
   a2_gid_t gid = str2Gid(gidParam);
   if (!e->getRequestGroupMan()->removeDownloadResult(gid)) {
-    throw DL_ABORT_EX(fmt("Could not remove download result of GID#%s",
+    throw DL_ABORT_EX(fmt("Could not remove download result of GID#{}",
                           GroupId::toHex(gid).c_str()));
   }
   return createOKResponse();
@@ -1072,7 +1074,7 @@ std::unique_ptr<ValueBase> ChangeOptionRpcMethod::process(const RpcRequest& req,
   }
   else {
     throw DL_ABORT_EX(
-        fmt("Cannot change option for GID#%s", GroupId::toHex(gid).c_str()));
+        fmt("Cannot change option for GID#{}", GroupId::toHex(gid).c_str()));
   }
   return createOKResponse();
 }
@@ -1130,7 +1132,7 @@ std::unique_ptr<ValueBase> GetOptionRpcMethod::process(const RpcRequest& req,
     auto dr = e->getRequestGroupMan()->findDownloadResult(gid);
     if (!dr) {
       throw DL_ABORT_EX(
-          fmt("Cannot get option for GID#%s", GroupId::toHex(gid).c_str()));
+          fmt("Cannot get option for GID#{}", GroupId::toHex(gid).c_str()));
     }
     pushRequestOption(result.get(), dr->option, getOptionParser());
   }
@@ -1202,7 +1204,7 @@ std::unique_ptr<ValueBase> GetServersRpcMethod::process(const RpcRequest& req,
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (!group || group->getState() != RequestGroup::STATE_ACTIVE) {
     throw DL_ABORT_EX(
-        fmt("No active download for GID#%s", GroupId::toHex(gid).c_str()));
+        fmt("No active download for GID#{}", GroupId::toHex(gid).c_str()));
   }
   auto result = List::g();
   size_t index = 1;
@@ -1243,7 +1245,7 @@ std::unique_ptr<ValueBase> ChangeUriRpcMethod::process(const RpcRequest& req,
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (!group) {
     throw DL_ABORT_EX(
-        fmt("Cannot remove URIs from GID#%s", GroupId::toHex(gid).c_str()));
+        fmt("Cannot remove URIs from GID#{}", GroupId::toHex(gid).c_str()));
   }
   auto& files = group->getDownloadContext()->getFileEntries();
   if (files.size() <= index) {
@@ -1337,11 +1339,11 @@ std::unique_ptr<ValueBase> SaveSessionRpcMethod::process(const RpcRequest& req,
   SessionSerializer sessionSerializer(e->getRequestGroupMan().get());
   if (sessionSerializer.save(filename)) {
     A2_LOG_NOTICE(
-        fmt(_("Serialized session to '%s' successfully."), filename.c_str()));
+        fmt(_("Serialized session to '{}' successfully."), filename.c_str()));
     return createOKResponse();
   }
   throw DL_ABORT_EX(
-      fmt("Failed to serialize session to '%s'.", filename.c_str()));
+      fmt("Failed to serialize session to '{}'.", filename.c_str()));
 }
 
 std::unique_ptr<ValueBase>
@@ -1386,7 +1388,7 @@ RpcResponse SystemListNotificationsRpcMethod::execute(RpcRequest req,
 std::unique_ptr<ValueBase> NoSuchMethodRpcMethod::process(const RpcRequest& req,
                                                           DownloadEngine* e)
 {
-  throw DL_ABORT_EX(fmt("No such method: %s", req.methodName.c_str()));
+  throw DL_ABORT_EX(fmt("No such method: {}", req.methodName.c_str()));
 }
 
 } // namespace rpc

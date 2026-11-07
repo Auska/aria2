@@ -100,7 +100,7 @@ void showFiles(const std::vector<std::string>& uris,
   ProtocolDetector dt;
   for (const auto& uri : uris) {
     printf(">>> ");
-    printf(MSG_SHOW_FILES, (uri).c_str());
+    printf("%s", fmt(MSG_SHOW_FILES, uri).c_str());
     printf("\n");
     try {
 #  ifdef ENABLE_BITTORRENT
@@ -155,7 +155,7 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
   A2_LOG_INFO("<<--- --- --- ---");
   A2_LOG_INFO("  --- --- --- ---");
   A2_LOG_INFO("  --- --- --- --->>");
-  A2_LOG_INFO(fmt("%s %s", PACKAGE, PACKAGE_VERSION));
+  A2_LOG_INFO(fmt("{} {}", PACKAGE, PACKAGE_VERSION));
   A2_LOG_INFO(usedCompilerAndPlatform());
   A2_LOG_INFO(getOperatingSystemInfo());
   A2_LOG_INFO(usedLibs());
@@ -176,19 +176,19 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
     if (rlim_new != r.rlim_cur) {
       if (setrlimit(RLIMIT_NOFILE, &r) != 0) {
         int errNum = errno;
-        A2_LOG_WARN(fmt("Failed to set rlimit NO_FILE from %" PRIu64 " to "
-                        "%" PRIu64 ": %s",
+        A2_LOG_WARN(fmt("Failed to set rlimit NO_FILE from {} to "
+                        "{}: {}",
                         (uint64_t)r.rlim_cur, (uint64_t)rlim_new,
                         util::safeStrerror(errNum).c_str()));
       }
       else {
-        A2_LOG_DEBUG(fmt("Set rlimit NO_FILE from %" PRIu64 " to %" PRIu64,
+        A2_LOG_DEBUG(fmt("Set rlimit NO_FILE from {} to {}",
                          (uint64_t)r.rlim_cur, (uint64_t)rlim_new));
       }
     }
     else {
       rlim_new = op->getAsInt(PREF_RLIMIT_NOFILE);
-      A2_LOG_DEBUG(fmt("Not setting rlimit NO_FILE: %" PRIu64 " >= %" PRIu64,
+      A2_LOG_DEBUG(fmt("Not setting rlimit NO_FILE: {} >=", 
                        (uint64_t)r.rlim_cur, (uint64_t)rlim_new));
     }
   }
@@ -271,7 +271,7 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
   }
   else {
     if (!requestGroups.empty()) {
-      A2_LOG_NOTICE(fmt("Downloading %" PRId64 " item(s)",
+      A2_LOG_NOTICE(fmt("Downloading {} item(s)",
                         static_cast<uint64_t>(requestGroups.size())));
     }
     reqinfo = std::make_shared<MultiUrlRequestInfo>(std::move(requestGroups),

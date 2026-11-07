@@ -116,7 +116,7 @@ std::vector<unsigned char> BtPortMessage::createMessage()
 
 std::string BtPortMessage::toString() const
 {
-  return fmt("%s port=%u", NAME, port_);
+  return fmt("{} port={}", NAME, port_);
 }
 
 void BtPortMessage::setLocalNode(DHTNode* localNode) { localNode_ = localNode; }

@@ -286,7 +286,7 @@ void RequestGroup::createInitialCommand(
       // TODO If metadataGetMode == false and each FileEntry has
       // URI, then go without BT.
       throw DOWNLOAD_FAILURE_EXCEPTION2(
-          fmt("InfoHash %s is already registered.",
+          fmt("InfoHash {} is already registered.",
               bittorrent::getInfoHashString(downloadContext_).c_str()),
           error_code::DUPLICATE_INFO_HASH);
     }
@@ -415,7 +415,7 @@ void RequestGroup::createInitialCommand(
         // Open file in writable mode to allow the program
         // truncate the file to downloadContext_->getTotalLength()
         A2_LOG_DEBUG(fmt("File size not match. File is opened in writable"
-                         " mode. Expected:%" PRId64 " Actual:%" PRId64 "",
+                         " mode. Expected:{} Actual:{}",
                          downloadContext_->getTotalLength(), actualFileSize));
       }
     }
@@ -660,7 +660,7 @@ void RequestGroup::adjustFilename(
   if (!option_->getAsBool(PREF_DRY_RUN) &&
       option_->getAsBool(PREF_REMOVE_CONTROL_FILE) && infoFile->exists()) {
     infoFile->removeFile();
-    A2_LOG_NOTICE(fmt(_("Removed control file for %s because it is requested by"
+    A2_LOG_NOTICE(fmt(_("Removed control file for {} because it is requested by"
                         " user."),
                       infoFile->getFilename().c_str()));
   }
@@ -756,7 +756,7 @@ void RequestGroup::tryAutoFileRenaming()
   std::string filepath = getFirstFilePath();
   if (filepath.empty()) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt("File renaming failed: %s", getFirstFilePath().c_str()),
+        fmt("File renaming failed: {}", getFirstFilePath().c_str()),
         error_code::FILE_RENAMING_FAILED);
   }
   auto fn = filepath;
@@ -779,7 +779,7 @@ void RequestGroup::tryAutoFileRenaming()
     fn = fn.substr(0, idx);
   }
   for (int i = 1; i < 10000; ++i) {
-    auto newfilename = fmt("%s.%d%s", fn.c_str(), i, ext.c_str());
+    auto newfilename = fmt("{}.{}{}", fn.c_str(), i, ext.c_str());
     File newfile(newfilename);
     File ctrlfile(newfile.getPath() + DefaultBtProgressInfoFile::getSuffix());
     if (!newfile.exists() || (newfile.exists() && ctrlfile.exists())) {
@@ -788,7 +788,7 @@ void RequestGroup::tryAutoFileRenaming()
     }
   }
   throw DOWNLOAD_FAILURE_EXCEPTION2(
-      fmt("File renaming failed: %s", getFirstFilePath().c_str()),
+      fmt("File renaming failed: {}", getFirstFilePath().c_str()),
       error_code::FILE_RENAMING_FAILED);
 }
 
@@ -948,7 +948,7 @@ void RequestGroup::decreaseNumCommand()
 {
   --numCommand_;
   if (!numCommand_ && requestGroupMan_) {
-    A2_LOG_DEBUG(fmt("GID#%s - Request queue check", gid_->toHex().c_str()));
+    A2_LOG_DEBUG(fmt("GID#{} - Request queue check", gid_->toHex().c_str()));
     requestGroupMan_->requestQueueCheck();
   }
 }
@@ -1010,7 +1010,7 @@ void RequestGroup::releaseRuntimeResource(DownloadEngine* e)
 
 void RequestGroup::preDownloadProcessing()
 {
-  A2_LOG_DEBUG(fmt("Finding PreDownloadHandler for path %s.",
+  A2_LOG_DEBUG(fmt("Finding PreDownloadHandler for path {}.",
                    getFirstFilePath().c_str()));
   try {
     for (const auto& pdh : preDownloadHandlers_) {
@@ -1032,7 +1032,7 @@ void RequestGroup::preDownloadProcessing()
 void RequestGroup::postDownloadProcessing(
     std::vector<std::shared_ptr<RequestGroup>>& groups)
 {
-  A2_LOG_DEBUG(fmt("Finding PostDownloadHandler for path %s.",
+  A2_LOG_DEBUG(fmt("Finding PostDownloadHandler for path {}.",
                    getFirstFilePath().c_str()));
   try {
     for (const auto& pdh : postDownloadHandlers_) {
@@ -1125,7 +1125,7 @@ bool RequestGroup::needsFileAllocation() const
 
 std::shared_ptr<DownloadResult> RequestGroup::createDownloadResult() const
 {
-  A2_LOG_DEBUG(fmt("GID#%s - Creating DownloadResult.", gid_->toHex().c_str()));
+  A2_LOG_DEBUG(fmt("GID#{} - Creating DownloadResult.", gid_->toHex().c_str()));
   TransferStat st = calculateStat();
   auto res = std::make_shared<DownloadResult>();
   res->gid = gid_;
@@ -1198,10 +1198,10 @@ void RequestGroup::applyLastModifiedTimeToLocalFiles()
   if (!pieceStorage_ || !lastModifiedTime_.good()) {
     return;
   }
-  A2_LOG_INFO(fmt("Applying Last-Modified time: %s",
+  A2_LOG_INFO(fmt("Applying Last-Modified time: {}",
                   lastModifiedTime_.toHTTPDate().c_str()));
   size_t n = pieceStorage_->getDiskAdaptor()->utime(Time(), lastModifiedTime_);
-  A2_LOG_INFO(fmt("Last-Modified attrs of %lu files were updated.",
+  A2_LOG_INFO(fmt("Last-Modified attrs of {} files were updated.",
                   static_cast<unsigned long>(n)));
 }
 
@@ -1219,7 +1219,7 @@ void RequestGroup::increaseAndValidateFileNotFoundCount()
   if (maxCount > 0 && fileNotFoundCount_ >= maxCount &&
       downloadContext_->getNetStat().getSessionDownloadLength() == 0) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt("Reached max-file-not-found count=%d", maxCount),
+        fmt("Reached max-file-not-found count={}", maxCount),
         error_code::MAX_FILE_NOT_FOUND);
   }
 }

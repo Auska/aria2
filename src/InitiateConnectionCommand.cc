@@ -152,8 +152,7 @@ InitiateConnectionCommand::createBackupIPv4ConnectCommand(
       auto command = make_unique<BackupIPv4ConnectCommand>(
           getDownloadEngine()->newCUID(), *i, port, info, mainCommand,
           getRequestGroup(), getDownloadEngine());
-      A2_LOG_INFO(fmt("Issue backup connection command CUID#%" PRId64
-                      ", addr=%s",
+      A2_LOG_INFO(fmt("Issue backup connection command CUID#{}, addr={}",
                       command->getCuid(), (*i).c_str()));
       getDownloadEngine()->addCommand(std::move(command));
       return info;

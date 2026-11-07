@@ -243,8 +243,8 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
       }
       if (initialized) {
         btReg->setLpdMessageReceiver(receiver);
-        A2_LOG_INFO(fmt("LpdMessageReceiver initialized. multicastAddr=%s:%u,"
-                        " localAddr=%s",
+        A2_LOG_INFO(fmt("LpdMessageReceiver initialized. multicastAddr={}:{},"
+                        " localAddr={}",
                         LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT,
                         receiver->getLocalAddress().c_str()));
         e->addCommand(

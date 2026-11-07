@@ -776,36 +776,36 @@ void checkIndex(size_t index, size_t pieces)
 {
   if (!(index < pieces)) {
     throw DL_ABORT_EX(
-        fmt("Invalid index: %lu", static_cast<unsigned long>(index)));
+        fmt("Invalid index: {}", static_cast<unsigned long>(index)));
   }
 }
 
 void checkBegin(int32_t begin, int32_t pieceLength)
 {
   if (!(begin < pieceLength)) {
-    throw DL_ABORT_EX(fmt("Invalid begin: %d", begin));
+    throw DL_ABORT_EX(fmt("Invalid begin: {}", begin));
   }
 }
 
 void checkLength(int32_t length)
 {
   if (length > static_cast<int32_t>(MAX_BLOCK_LENGTH)) {
-    throw DL_ABORT_EX(fmt("Length too long: %d > %dKB", length,
+    throw DL_ABORT_EX(fmt("Length too long: {} > {}KB", length,
                           static_cast<int32_t>(MAX_BLOCK_LENGTH / 1024)));
   }
   if (length == 0) {
-    throw DL_ABORT_EX(fmt("Invalid length: %d", length));
+    throw DL_ABORT_EX(fmt("Invalid length: {}", length));
   }
 }
 
 void checkRange(int32_t begin, int32_t length, int32_t pieceLength)
 {
   if (!(0 < length)) {
-    throw DL_ABORT_EX(fmt("Invalid range: begin=%d, length=%d", begin, length));
+    throw DL_ABORT_EX(fmt("Invalid range: begin={}, length={}", begin, length));
   }
   int32_t end = begin + length;
   if (!(end <= pieceLength)) {
-    throw DL_ABORT_EX(fmt("Invalid range: begin=%d, length=%d", begin, length));
+    throw DL_ABORT_EX(fmt("Invalid range: begin={}, length={}", begin, length));
   }
 }
 
@@ -813,7 +813,7 @@ void checkBitfield(const unsigned char* bitfield, size_t bitfieldLength,
                    size_t pieces)
 {
   if (!(bitfieldLength == (pieces + 7) / 8)) {
-    throw DL_ABORT_EX(fmt("Invalid bitfield length: %lu",
+    throw DL_ABORT_EX(fmt("Invalid bitfield length: {}",
                           static_cast<unsigned long>(bitfieldLength)));
   }
   // Check if last byte contains garbage set bit.

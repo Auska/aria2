@@ -71,13 +71,13 @@ bool LpdMessageDispatcher::init(const std::string& localAddr, unsigned char ttl,
     socket_ = std::make_shared<SocketCore>(SOCK_DGRAM);
     socket_->create(AF_INET);
     A2_LOG_DEBUG(
-        fmt("Setting multicast outgoing interface=%s", localAddr.c_str()));
+        fmt("Setting multicast outgoing interface={}", localAddr.c_str()));
     socket_->setMulticastInterface(localAddr);
     A2_LOG_DEBUG(
-        fmt("Setting multicast ttl=%u", static_cast<unsigned int>(ttl)));
+        fmt("Setting multicast ttl={}", static_cast<unsigned int>(ttl)));
     socket_->setMulticastTtl(ttl);
     A2_LOG_DEBUG(
-        fmt("Setting multicast loop=%u", static_cast<unsigned int>(loop)));
+        fmt("Setting multicast loop={}", static_cast<unsigned int>(loop)));
     socket_->setMulticastLoop(loop);
     return true;
   }
@@ -111,9 +111,9 @@ std::string createLpdRequest(const std::string& multicastAddress,
                              const std::string& infoHash, uint16_t port)
 {
   return fmt("BT-SEARCH * HTTP/1.1\r\n"
-             "Host: %s:%u\r\n"
-             "Port: %u\r\n"
-             "Infohash: %s\r\n"
+             "Host: {}:{}\r\n"
+             "Port: {}\r\n"
+             "Infohash: {}\r\n"
              "\r\n\r\n",
              multicastAddress.c_str(), multicastPort, port,
              util::toHex(infoHash).c_str());

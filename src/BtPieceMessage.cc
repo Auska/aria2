@@ -145,8 +145,7 @@ void BtPieceMessage::doReceivedAction()
     }
   }
   else {
-    A2_LOG_DEBUG(fmt("CUID#%" PRId64
-                     " - RequestSlot not found, index=%lu, begin=%d",
+    A2_LOG_DEBUG(fmt("CUID#{} - RequestSlot not found, index={}, begin={}",
                      getCuid(), static_cast<unsigned long>(index_), begin_));
   }
 }
@@ -235,20 +234,20 @@ void BtPieceMessage::pushPieceData(int64_t offset, int32_t length) const
 
 std::string BtPieceMessage::toString() const
 {
-  return fmt("%s index=%lu, begin=%d, length=%d", NAME,
+  return fmt("{} index={}, begin={}, length={}", NAME,
              static_cast<unsigned long>(index_), begin_, blockLength_);
 }
 
 bool BtPieceMessage::checkPieceHash(const std::shared_ptr<Piece>& piece)
 {
   if (!getPieceStorage()->isEndGame() && piece->isHashCalculated()) {
-    A2_LOG_DEBUG(fmt("Hash is available!! index=%lu",
+    A2_LOG_DEBUG(fmt("Hash is available!! index={}",
                      static_cast<unsigned long>(piece->getIndex())));
     return piece->getDigest() ==
            downloadContext_->getPieceHash(piece->getIndex());
   }
   else {
-    A2_LOG_DEBUG(fmt("Calculating hash index=%lu",
+    A2_LOG_DEBUG(fmt("Calculating hash index={}",
                      static_cast<unsigned long>(piece->getIndex())));
     try {
       return piece->getDigestWithWrCache(downloadContext_->getPieceLength(),
@@ -271,7 +270,7 @@ void BtPieceMessage::onNewPiece(const std::shared_ptr<Piece>& piece)
         WrDiskCacheEntry::CACHE_ERR_SUCCESS) {
       piece->clearAllBlock(getPieceStorage()->getWrDiskCache());
       throw DOWNLOAD_FAILURE_EXCEPTION2(
-          fmt("Write disk cache flush failure index=%lu",
+          fmt("Write disk cache flush failure index={}",
               static_cast<unsigned long>(piece->getIndex())),
           piece->getWrDiskCacheEntry()->getErrorCode());
     }

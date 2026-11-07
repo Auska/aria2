@@ -102,11 +102,11 @@ void AbstractDiskWriter::closeFile()
     }
     if (errNum != 0) {
       int errNum = fileError();
-      A2_LOG_ERROR(fmt("Unmapping file %s failed: %s", filename_.c_str(),
+      A2_LOG_ERROR(fmt("Unmapping file {} failed: {}", filename_.c_str(),
                        fileStrerror(errNum).c_str()));
     }
     else {
-      A2_LOG_INFO(fmt("Unmapping file %s succeeded", filename_.c_str()));
+      A2_LOG_INFO(fmt("Unmapping file {} succeeded", filename_.c_str()));
     }
     mapaddr_ = nullptr;
     maplen_ = 0;
@@ -226,7 +226,7 @@ void AbstractDiskWriter::ensureMmapWrite(size_t len, int64_t offset)
           errNum = errno;
         }
         if (errNum != 0) {
-          A2_LOG_ERROR(fmt("Unmapping file %s failed: %s", filename_.c_str(),
+          A2_LOG_ERROR(fmt("Unmapping file {} failed: {}", filename_.c_str(),
                            fileStrerror(errNum).c_str()));
         }
         mapaddr_ = nullptr;
@@ -264,12 +264,12 @@ void AbstractDiskWriter::ensureMmapWrite(size_t len, int64_t offset)
           mapaddr_ = reinterpret_cast<unsigned char*>(pa);
         }
         if (mapaddr_) {
-          A2_LOG_DEBUG(fmt("Mapping file %s succeeded, length=%" PRId64 "",
+          A2_LOG_DEBUG(fmt("Mapping file {} succeeded, length={}",
                            filename_.c_str(), static_cast<uint64_t>(filesize)));
           maplen_ = filesize;
         }
         else {
-          A2_LOG_WARN(fmt("Mapping file %s failed: %s", filename_.c_str(),
+          A2_LOG_WARN(fmt("Mapping file {} failed: {}", filename_.c_str(),
                           fileStrerror(errNum).c_str()));
           enableMmap_ = false;
         }
@@ -329,7 +329,7 @@ void AbstractDiskWriter::truncate(int64_t length)
   if (a2ftruncate(fd_, length) == -1) {
     int errNum = fileError();
     throw DL_ABORT_EX2(
-        fmt("File truncation failed. cause: %s", fileStrerror(errNum).c_str()),
+        fmt("File truncation failed. cause: {}", fileStrerror(errNum).c_str()),
         error_code::FILE_IO_ERROR);
   }
 }
@@ -354,7 +354,7 @@ void AbstractDiskWriter::allocate(int64_t offset, int64_t length, bool sparse)
   if (r == -1) {
     throw DL_ABORT_EX3(
         errNum,
-        fmt("fallocate failed. cause: %s", util::safeStrerror(errNum).c_str()),
+        fmt("fallocate failed. cause: {}", util::safeStrerror(errNum).c_str()),
         isDiskFullError(errNum) ? error_code::NOT_ENOUGH_DISK_SPACE
                                 : error_code::FILE_IO_ERROR);
   }
@@ -363,7 +363,7 @@ void AbstractDiskWriter::allocate(int64_t offset, int64_t length, bool sparse)
   if (r != 0) {
     throw DL_ABORT_EX3(
         r,
-        fmt("posix_fallocate failed. cause: %s", util::safeStrerror(r).c_str()),
+        fmt("posix_fallocate failed. cause: {}", util::safeStrerror(r).c_str()),
         isDiskFullError(r) ? error_code::NOT_ENOUGH_DISK_SPACE
                            : error_code::FILE_IO_ERROR);
   }

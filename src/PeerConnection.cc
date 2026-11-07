@@ -209,8 +209,7 @@ bool PeerConnection::receiveHandshake(unsigned char* data, size_t& dataLength,
     readData(resbuf_.get() + resbufLength_, remaining, encryptionEnabled_);
     if (remaining == 0 && !socket_->wantRead() && !socket_->wantWrite()) {
       // we got EOF
-      A2_LOG_DEBUG(fmt("CUID#%" PRId64
-                       " - In PeerConnection::receiveHandshake(), remain=%lu",
+      A2_LOG_DEBUG(fmt("CUID#{} - In PeerConnection::receiveHandshake(), remain={}",
                        cuid_, static_cast<unsigned long>(temp)));
       peer_->setDisconnectedGracefully(true);
       throw DL_ABORT_EX(EX_EOF_FROM_PEER);
@@ -267,7 +266,7 @@ size_t PeerConnection::getBufferEntrySize() const
 ssize_t PeerConnection::sendPendingData()
 {
   ssize_t writtenLength = socketBuffer_.send();
-  A2_LOG_DEBUG(fmt("sent %ld byte(s).", static_cast<long int>(writtenLength)));
+  A2_LOG_DEBUG(fmt("sent {} byte(s).", static_cast<long int>(writtenLength)));
   return writtenLength;
 }
 

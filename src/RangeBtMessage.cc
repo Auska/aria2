@@ -65,7 +65,7 @@ std::vector<unsigned char> RangeBtMessage::createMessage()
 
 std::string RangeBtMessage::toString() const
 {
-  return fmt("%s index=%lu, begin=%d, length=%d", getName(),
+  return fmt("{} index={}, begin={}, length={}", getName(),
              static_cast<unsigned long>(index_), begin_, length_);
 }
 

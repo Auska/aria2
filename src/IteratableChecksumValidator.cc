@@ -75,7 +75,7 @@ void IteratableChecksumValidator::validateChunk()
       dctx_->setChecksumVerified(true);
     }
     else {
-      A2_LOG_INFO(fmt("Checksum validation failed. expected=%s, actual=%s",
+      A2_LOG_INFO(fmt("Checksum validation failed. expected={}, actual={}",
                       util::toHex(dctx_->getDigest()).c_str(),
                       util::toHex(actualDigest).c_str()));
       BitfieldMan bitfield(dctx_->getPieceLength(), dctx_->getTotalLength());

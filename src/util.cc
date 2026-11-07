@@ -46,12 +46,13 @@
 #include <array>
 #include <cerrno>
 #include <cassert>
+#include <charconv>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <sstream>
 #include <ostream>
 #include <algorithm>
+#include <ranges>
 #include <fstream>
 #include <iomanip>
 
@@ -184,32 +185,28 @@ bool inRFC3986ReservedChars(const char c)
 {
   static const char reserved[] = {':', '/',  '?', '#', '[', ']', '@', '!', '$',
                                   '&', '\'', '(', ')', '*', '+', ',', ';', '='};
-  return std::find(std::begin(reserved), std::end(reserved), c) !=
-         std::end(reserved);
+  return std::ranges::find(reserved, c) != std::end(reserved);
 }
 
 bool inRFC3986UnreservedChars(const char c)
 {
   static const char unreserved[] = {'-', '.', '_', '~'};
   return isAlpha(c) || isDigit(c) ||
-         std::find(std::begin(unreserved), std::end(unreserved), c) !=
-             std::end(unreserved);
+         std::ranges::find(unreserved, c) != std::end(unreserved);
 }
 
 bool inRFC2978MIMECharset(const char c)
 {
   static const char chars[] = {'!', '#', '$', '%', '&', '\'', '+',
                                '-', '^', '_', '`', '{', '}',  '~'};
-  return isAlpha(c) || isDigit(c) ||
-         std::find(std::begin(chars), std::end(chars), c) != std::end(chars);
+  return isAlpha(c) || isDigit(c) || std::ranges::find(chars, c) != std::end(chars);
 }
 
 bool inRFC2616HttpToken(const char c)
 {
   static const char chars[] = {'!', '#', '$', '%', '&', '\'', '*', '+',
                                '-', '.', '^', '_', '`', '|',  '~'};
-  return isAlpha(c) || isDigit(c) ||
-         std::find(std::begin(chars), std::end(chars), c) != std::end(chars);
+  return isAlpha(c) || isDigit(c) || std::ranges::find(chars, c) != std::end(chars);
 }
 
 bool inRFC5987AttrChar(const char c)
@@ -316,7 +313,7 @@ std::string percentEncode(std::span<const std::byte> target)
       dest += static_cast<char>(c);
     }
     else {
-      dest.append(fmt("%%%02X", c));
+      dest.append(fmt("%{:02X}", c));
     }
   }
   return dest;
@@ -341,7 +338,7 @@ std::string percentEncodeMini(const std::string& src)
   std::string result;
   for (auto c : src) {
     if (!inPercentEncodeMini(c)) {
-      result += fmt("%%%02X", static_cast<unsigned char>(c));
+      result += fmt("%{:02X}", static_cast<unsigned char>(c));
     }
     else {
       result += c;
@@ -359,7 +356,7 @@ std::string torrentPercentEncode(std::span<const std::byte> target)
       dest += static_cast<char>(c);
     }
     else {
-      dest.append(fmt("%%%02X", c));
+      dest.append(fmt("%{:02X}", c));
     }
   }
   return dest;
@@ -444,106 +441,115 @@ std::string secfmt(time_t sec)
   time_t tsec = sec;
   std::string str;
   if (sec >= 3600) {
-    str = fmt("%" PRId64 "h", static_cast<int64_t>(sec / 3600));
+    str = fmt("{}h", static_cast<int64_t>(sec / 3600));
     sec %= 3600;
   }
   if (sec >= 60) {
-    str += fmt("%dm", static_cast<int>(sec / 60));
+    str += fmt("{}m", static_cast<int>(sec / 60));
     sec %= 60;
   }
   if (sec || tsec == 0) {
-    str += fmt("%ds", static_cast<int>(sec));
+    str += fmt("{}s", static_cast<int>(sec));
   }
   return str;
 }
 
 namespace {
-template <typename T, typename F>
-bool parseLong(T& res, F f, const std::string& s, int base)
+// Strips leading and trailing spaces, matching what the printf family does
+// with its leading whitespace and what the old strto* callers tolerated.
+std::string_view trimSpaces(std::string_view s)
 {
-  if (s.empty()) {
+  while (!s.empty() && isspace(static_cast<unsigned char>(s.front()))) {
+    s.remove_prefix(1);
+  }
+  while (!s.empty() && isspace(static_cast<unsigned char>(s.back()))) {
+    s.remove_suffix(1);
+  }
+  return s;
+}
+
+// std::from_chars only takes base 10 for the strictly-standard overloads, so
+// the |base| argument is handled here with a manual digit loop for the rare
+// non-decimal callers.
+template <typename T> bool parseIntegral(T& res, std::string_view sv, int base)
+{
+  auto t = trimSpaces(sv);
+  if (t.empty()) {
     return false;
   }
+  if (base == 10) {
+    auto r = std::from_chars(t.data(), t.data() + t.size(), res);
+    return r.ec == std::errc() && r.ptr == t.data() + t.size();
+  }
+  // Non-decimal bases are not used by any caller today; keep the previous
+  // semantics with a slow but obviously correct path.
+  std::string buf(t);
   char* endptr;
   errno = 0;
-  res = f(s.c_str(), &endptr, base);
-  if (errno == ERANGE) {
-    return false;
-  }
-  if (*endptr != '\0') {
-    for (const char *i = endptr, *eoi = s.c_str() + s.size(); i < eoi; ++i) {
-      if (!isspace(*i)) {
-        return false;
-      }
+  if constexpr (std::is_signed_v<T>) {
+    auto v = std::strtoll(buf.c_str(), &endptr, base);
+    if (errno == ERANGE) {
+      return false;
     }
+    res = static_cast<T>(v);
   }
-  return true;
+  else {
+    auto v = std::strtoull(buf.c_str(), &endptr, base);
+    if (errno == ERANGE) {
+      return false;
+    }
+    res = static_cast<T>(v);
+  }
+  return endptr == buf.c_str() + buf.size();
 }
 } // namespace
 
 bool parseIntNoThrow(int32_t& res, const std::string& s, int base)
 {
-  long int t;
-  if (parseLong(t, strtol, s, base) &&
-      t >= std::numeric_limits<int32_t>::min() &&
-      t <= std::numeric_limits<int32_t>::max()) {
+  int32_t t;
+  if (parseIntegral(t, s, base)) {
     res = t;
     return true;
   }
-  else {
-    return false;
-  }
+  return false;
 }
 
 bool parseUIntNoThrow(uint32_t& res, const std::string& s, int base)
 {
-  long int t;
-  if (parseLong(t, strtol, s, base) && t >= 0 &&
-      t <= std::numeric_limits<int32_t>::max()) {
-    res = t;
-    return true;
-  }
-  else {
+  uint32_t t;
+  if (!parseIntegral(t, s, base) || t > static_cast<uint32_t>(INT32_MAX)) {
     return false;
   }
+  res = t;
+  return true;
 }
 
 bool parseLLIntNoThrow(int64_t& res, const std::string& s, int base)
 {
   int64_t t;
-  if (parseLong(t, strtoll, s, base)) {
+  if (parseIntegral(t, s, base)) {
     res = t;
     return true;
   }
-  else {
-    return false;
-  }
+  return false;
 }
 
 bool parseDoubleNoThrow(double& res, const std::string& s)
 {
-  if (s.empty()) {
+  auto t = trimSpaces(s);
+  if (t.empty()) {
     return false;
   }
-
-  errno = 0;
-  char* endptr;
-  auto d = strtod(s.c_str(), &endptr);
-
-  if (errno == ERANGE) {
+  double d = 0;
+  auto r = std::from_chars(t.data(), t.data() + t.size(), d);
+  if (r.ec == std::errc::result_out_of_range) {
     return false;
   }
-
-  if (endptr != s.c_str() + s.size()) {
-    for (auto i = std::begin(s) + (endptr - s.c_str()); i != std::end(s); ++i) {
-      if (!isspace(*i)) {
-        return false;
-      }
-    }
+  // Anything but the whole (trimmed) input is a malformed number.
+  if (r.ec != std::errc() || r.ptr != t.data() + t.size()) {
+    return false;
   }
-
   res = d;
-
   return true;
 }
 
@@ -564,7 +570,7 @@ SegList<int> parseIntSegments(const std::string& src)
         sgl.add(a, a + 1);
       }
       else {
-        throw DL_ABORT_EX(fmt("Bad range %s", std::string(i, j).c_str()));
+        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j).c_str()));
       }
     }
     else if (p == i || p + 1 == j) {
@@ -577,7 +583,7 @@ SegList<int> parseIntSegments(const std::string& src)
         sgl.add(a, b + 1);
       }
       else {
-        throw DL_ABORT_EX(fmt("Bad range %s", std::string(i, j).c_str()));
+        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j).c_str()));
       }
     }
     if (j == eoi) {
@@ -661,7 +667,7 @@ void parsePrioritizePieceRange(
     }
     else {
       throw DL_ABORT_EX(
-          fmt("Unrecognized token %s", std::string(i.first, i.second).c_str()));
+          fmt("Unrecognized token {}", std::string(i.first, i.second).c_str()));
     }
   }
   std::sort(indexes.begin(), indexes.end());
@@ -1584,13 +1590,13 @@ void setGlobalSignalHandler(int sig, sigset_t* mask, signal_handler_t handler,
   sigact.sa_mask = *mask;
   if (sigaction(sig, &sigact, nullptr) == -1) {
     auto errNum = errno;
-    A2_LOG_ERROR(fmt("sigaction() failed for signal %d: %s", sig,
+    A2_LOG_ERROR(fmt("sigaction() failed for signal {}: {}", sig,
                      safeStrerror(errNum).c_str()));
   }
 #else
   if (signal(sig, handler) == SIG_ERR) {
     auto errNum = errno;
-    A2_LOG_ERROR(fmt("signal() failed for signal %d: %s", sig,
+    A2_LOG_ERROR(fmt("signal() failed for signal {}: {}", sig,
                      safeStrerror(errNum).c_str()));
   }
 #endif // HAVE_SIGACTION
@@ -1670,7 +1676,7 @@ int64_t getRealSize(const std::string& sizeWithUnit)
   int64_t v;
   if (!parseLLIntNoThrow(v, size) || v < 0) {
     throw DL_ABORT_EX(
-        fmt("Bad or negative value detected: %s", sizeWithUnit.c_str()));
+        fmt("Bad or negative value detected: {}", sizeWithUnit.c_str()));
   }
   if (INT64_MAX / mult < v) {
     throw DL_ABORT_EX(
@@ -1754,17 +1760,18 @@ void convertBitfield(BitfieldMan* dest, const BitfieldMan* src)
 
 std::string toString(const std::shared_ptr<BinaryStream>& binaryStream)
 {
-  std::stringstream strm;
-  char data[2048];
-  while (1) {
+  std::string result;
+  std::array<char, 2048> data;
+  while (true) {
     int32_t dataLength = binaryStream->readData(
-        reinterpret_cast<unsigned char*>(data), sizeof(data), strm.tellp());
-    strm.write(data, dataLength);
+        reinterpret_cast<unsigned char*>(data.data()), data.size(),
+        static_cast<int64_t>(result.size()));
+    result.append(data.data(), dataLength);
     if (dataLength == 0) {
       break;
     }
   }
-  return strm.str();
+  return result;
 }
 
 #ifdef HAVE_POSIX_MEMALIGN
@@ -1777,7 +1784,7 @@ void* allocateAlignedMemory(size_t alignment, size_t size)
   int res;
   if ((res = posix_memalign(&buffer, alignment, size)) != 0) {
     throw FATAL_EXCEPTION(
-        fmt("Error in posix_memalign: %s", util::safeStrerror(res).c_str()));
+        fmt("Error in posix_memalign: {}", util::safeStrerror(res).c_str()));
   }
   return buffer;
 }
@@ -1791,7 +1798,7 @@ Endpoint getNumericNameInfo(const struct sockaddr* sockaddr, socklen_t len)
                       NI_NUMERICHOST | NI_NUMERICSERV);
   if (s != 0) {
     throw DL_ABORT_EX(
-        fmt("Failed to get hostname and port. cause: %s", gai_strerror(s)));
+        fmt("Failed to get hostname and port. cause: {}", gai_strerror(s)));
   }
   return {host, sockaddr->sa_family,
           static_cast<uint16_t>(strtoul(service, nullptr, 10))};
@@ -1839,7 +1846,7 @@ std::pair<size_t, std::string> parseIndexPath(const std::string& line)
     throw DL_ABORT_EX("Bad path index");
   }
   if (p.second.first == p.second.second) {
-    throw DL_ABORT_EX(fmt("Path with index=%u is empty.", index));
+    throw DL_ABORT_EX(fmt("Path with index={} is empty.", index));
   }
   return std::make_pair(index, std::string(p.second.first, p.second.second));
 }
@@ -1931,7 +1938,7 @@ bool inPrivateAddress(const std::string& ipv4addr)
   }
   if (ipv4addr.starts_with("172.")) {
     for (int i = 16; i <= 31; ++i) {
-      std::string t(fmt("%d.", i));
+      std::string t(fmt("{}.", i));
       if (util::startsWith(ipv4addr.begin() + 4, ipv4addr.end(), t.begin(),
                            t.end())) {
         return true;
@@ -1965,7 +1972,7 @@ std::string escapePath(const std::string& s)
   for (auto cc : s) {
     unsigned char c = cc;
     if (in(c, 0x00u, 0x1fu) || c == 0x7fu) {
-      d += fmt("%%%02X", c);
+      d += fmt("%{:02X}", c);
     }
     else {
       d += c;
@@ -2006,7 +2013,7 @@ void executeHook(const std::string& command, a2_gid_t gid, size_t numFiles,
 {
   const std::string gidStr = GroupId::toHex(gid);
   const std::string numFilesStr = util::uitos(numFiles);
-  A2_LOG_INFO(fmt("Executing user command: %s %s %s %s", command.c_str(),
+  A2_LOG_INFO(fmt("Executing user command: {} {} {} {}", command.c_str(),
                   gidStr.c_str(), numFilesStr.c_str(), firstFilename.c_str()));
   pid_t cpid = fork();
   if (cpid == 0) {

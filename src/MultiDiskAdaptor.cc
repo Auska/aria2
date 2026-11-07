@@ -155,7 +155,7 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
       else if (fileEntry->getOffset() < lastOffset) {
         // The files which shares last piece are not needed to be
         // allocated. They just require DiskWriter
-        A2_LOG_DEBUG(fmt("%s needs DiskWriter", fileEntry->getPath().c_str()));
+        A2_LOG_DEBUG(fmt("{} needs DiskWriter", fileEntry->getPath().c_str()));
         dwent->needsDiskWriter(true);
       }
     }
@@ -173,7 +173,7 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
         // required, especially for file system which does not support
         // sparse files.
         A2_LOG_DEBUG(
-            fmt("%s needs file allocation", fileEntry->getPath().c_str()));
+            fmt("{} needs file allocation", fileEntry->getPath().c_str()));
         (*i)->needsFileAllocation(true);
       }
     }
@@ -182,7 +182,7 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
   for (auto& dwent : diskWriterEntries_) {
     if (dwent->needsFileAllocation() || dwent->needsDiskWriter() ||
         dwent->fileExists()) {
-      A2_LOG_DEBUG(fmt("Creating DiskWriter for filename=%s",
+      A2_LOG_DEBUG(fmt("Creating DiskWriter for filename={}",
                        dwent->getFilePath().c_str()));
       dwent->setDiskWriter(dwFactory.newDiskWriter(dwent->getFilePath()));
       if (readOnly_) {
@@ -214,7 +214,7 @@ void MultiDiskAdaptor::openIfNot(DiskWriterEntry* entry,
                                  void (DiskWriterEntry::*open)())
 {
   if (!entry->isOpen()) {
-    // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache MISS. offset=%s",
+    // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache MISS. offset={}",
     //        util::itos(entry->getFileEntry()->getOffset()).c_str()));
     auto& openedFileCounter = getOpenedFileCounter();
     if (openedFileCounter) {
@@ -224,7 +224,7 @@ void MultiDiskAdaptor::openIfNot(DiskWriterEntry* entry,
     openedDiskWriterEntries_.push_back(entry);
   }
   else {
-    // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache HIT. offset=%s",
+    // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache HIT. offset={}",
     //        util::itos(entry->getFileEntry()->getOffset()).c_str()));
   }
 }
@@ -329,7 +329,7 @@ namespace {
 void throwOnDiskWriterNotOpened(DiskWriterEntry* e, int64_t offset)
 {
   throw DL_ABORT_EX(
-      fmt("DiskWriter for offset=%" PRId64 ", filename=%s is not opened.",
+      fmt("DiskWriter for offset={}, filename={} is not opened.",
           static_cast<int64_t>(offset), e->getFilePath().c_str()));
 }
 } // namespace
@@ -413,7 +413,7 @@ ssize_t MultiDiskAdaptor::readData(unsigned char* data, size_t len,
 void MultiDiskAdaptor::writeCache(const WrDiskCacheEntry* entry)
 {
   for (auto& d : entry->getDataSet()) {
-    A2_LOG_DEBUG(fmt("Cache flush goff=%" PRId64 ", len=%lu", d->goff,
+    A2_LOG_DEBUG(fmt("Cache flush goff={}, len={}", d->goff,
                      static_cast<unsigned long>(d->len)));
     writeData(d->data + d->offset, d->len, d->goff);
   }

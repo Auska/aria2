@@ -309,7 +309,7 @@ error_code::Value option_processing(Option& op, bool standalone,
 #endif // ENABLE_BITTORRENT
       op.blank(PREF_INPUT_FILE)) {
     if (uris.empty()) {
-      global::cerr()->printf(MSG_URI_REQUIRED);
+      global::cerr()->printf("%s", MSG_URI_REQUIRED);
       global::cerr()->printf("\n");
       showUsage("", oparser, global::cerr());
       return error_code::UNKNOWN_ERROR;

@@ -224,7 +224,7 @@ size_t RequestGroupMan::changeReservedGroupPosition(a2_gid_t gid, int pos,
 {
   ssize_t dest = reservedGroups_.move(gid, pos, how);
   if (dest == -1) {
-    throw DL_ABORT_EX(fmt("GID#%s not found in the waiting queue.",
+    throw DL_ABORT_EX(fmt("GID#{} not found in the waiting queue.",
                           GroupId::toHex(gid).c_str()));
   }
   else {
@@ -371,7 +371,7 @@ public:
         group->closeFile();
         if (group->isPauseRequested()) {
           if (!group->isRestartRequested()) {
-            A2_LOG_NOTICE(fmt(_("Download GID#%s paused"),
+            A2_LOG_NOTICE(fmt(_("Download GID#{} paused"),
                               GroupId::toHex(group->getGID()).c_str()));
           }
           group->saveControlFile();
@@ -391,7 +391,7 @@ public:
           std::vector<std::shared_ptr<RequestGroup>> nextGroups;
           group->postDownloadProcessing(nextGroups);
           if (!nextGroups.empty()) {
-            A2_LOG_DEBUG(fmt("Adding %lu RequestGroups as a result of"
+            A2_LOG_DEBUG(fmt("Adding {} RequestGroups as a result of"
                              " PostDownloadHandler.",
                              static_cast<unsigned long>(nextGroups.size())));
             e_->getRequestGroupMan()->insertReservedGroup(0, nextGroups);
@@ -422,7 +422,7 @@ public:
         }
         else {
           A2_LOG_NOTICE(
-              fmt(_("Download GID#%s not complete: %s"),
+              fmt(_("Download GID#{} not complete: {}"),
                   GroupId::toHex(group->getGID()).c_str(),
                   group->getDownloadContext()->getBasePath().c_str()));
           group->saveControlFile();
@@ -478,7 +478,7 @@ void RequestGroupMan::removeStoppedGroup(DownloadEngine* e)
   requestGroups_.remove_if(ProcessStoppedRequestGroup(e, reservedGroups_));
   size_t numRemoved = numPrev - requestGroups_.size();
   if (numRemoved > 0) {
-    A2_LOG_DEBUG(fmt("%lu RequestGroup(s) deleted.",
+    A2_LOG_DEBUG(fmt("{} RequestGroup(s) deleted.",
                      static_cast<unsigned long>(numRemoved)));
   }
 }
@@ -588,7 +588,7 @@ void RequestGroupMan::fillRequestGroupFromReserver(DownloadEngine* e)
   if (count > 0) {
     e->setNoWait(true);
     e->setRefreshInterval(std::chrono::milliseconds(0));
-    A2_LOG_DEBUG(fmt("%d RequestGroup(s) added.", count));
+    A2_LOG_DEBUG(fmt("{} RequestGroup(s) added.", count));
   }
 }
 
@@ -1104,8 +1104,8 @@ int RequestGroupMan::optimizeConcurrentDownloads()
       std::min(std::max(1, maxConcurrentDownloads), maxConcurrentDownloads_);
 
   A2_LOG_DEBUG(
-      fmt("Max concurrent downloads optimized at %d (%lu currently active) "
-          "[optimization speed %sB/s, current speed %sB/s]",
+      fmt("Max concurrent downloads optimized at {} ({} currently active) "
+          "[optimization speed {}B/s, current speed {}B/s]",
           maxConcurrentDownloads, static_cast<unsigned long>(numActive_),
           util::abbrevSize(optimizationSpeed_).c_str(),
           util::abbrevSize(currentSpeed).c_str()));

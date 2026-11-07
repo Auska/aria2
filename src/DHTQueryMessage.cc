@@ -64,7 +64,7 @@ bool DHTQueryMessage::isReply() const { return false; }
 
 std::string DHTQueryMessage::toString() const
 {
-  return fmt("dht query %s TransactionID=%s Remote:%s(%u), id=%s, v=%s, %s",
+  return fmt("dht query {} TransactionID={} Remote:{}({}), id={}, v={}, {}",
              getMessageType().c_str(), util::toHex(getTransactionID()).c_str(),
              getRemoteNode()->getIPAddress().c_str(),
              getRemoteNode()->getPort(),

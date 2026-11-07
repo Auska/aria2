@@ -165,7 +165,7 @@ std::shared_ptr<Piece> DefaultPieceStorage::getPiece(size_t index)
 void DefaultPieceStorage::addUsedPiece(const std::shared_ptr<Piece>& piece)
 {
   usedPieces_.insert(piece);
-  A2_LOG_DEBUG(fmt("usedPieces_.size()=%lu",
+  A2_LOG_DEBUG(fmt("usedPieces_.size()={}",
                    static_cast<unsigned long>(usedPieces_.size())));
 }
 
@@ -379,8 +379,7 @@ std::shared_ptr<Piece> DefaultPieceStorage::getMissingFastPiece(
 
 bool DefaultPieceStorage::hasMissingUnusedPiece()
 {
-  size_t index;
-  return bitfieldMan_->getFirstMissingUnusedIndex(index);
+  return bitfieldMan_->getFirstMissingUnusedIndex().has_value();
 }
 
 std::shared_ptr<Piece>

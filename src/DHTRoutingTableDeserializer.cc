@@ -76,11 +76,11 @@ void readBytes(BufferedFile& fp, unsigned char* buf, size_t buflen,
 
 void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
 {
-  A2_LOG_INFO(fmt("Loading DHT routing table from %s.", filename.c_str()));
+  A2_LOG_INFO(fmt("Loading DHT routing table from {}.", filename.c_str()));
   BufferedFile fp(filename.c_str(), BufferedFile::READ);
   if (!fp) {
     throw DL_ABORT_EX(
-        fmt("Failed to load DHT routing table from %s", filename.c_str()));
+        fmt("Failed to load DHT routing table from {}", filename.c_str()));
   }
   char header[8];
   memset(header, 0, sizeof(header));
@@ -122,7 +122,7 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
     version = 2;
   }
   else {
-    throw DL_ABORT_EX(fmt("Failed to load DHT routing table from %s. cause:%s",
+    throw DL_ABORT_EX(fmt("Failed to load DHT routing table from {}. cause:{}",
                           filename.c_str(), "bad header"));
   }
 

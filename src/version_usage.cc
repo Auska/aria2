@@ -77,7 +77,7 @@ void showVersion()
       << _("Compiler") << ": " << usedCompilerAndPlatform() << "\n"
       << _("System") << ": " << getOperatingSystemInfo() << "\n"
       << "\n"
-      << fmt(_("Report bugs to %s"), PACKAGE_BUGREPORT) << "\n"
+      << fmt(_("Report bugs to {}"), PACKAGE_BUGREPORT) << "\n"
       << _("Visit") << " " << PACKAGE_URL << std::endl;
 }
 

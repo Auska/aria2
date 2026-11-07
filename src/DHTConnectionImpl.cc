@@ -79,11 +79,11 @@ bool DHTConnectionImpl::bind(uint16_t& port, const std::string& addr)
     socket_->setNonBlockingMode();
     auto endpoint = socket_->getAddrInfo();
     port = endpoint.port;
-    A2_LOG_NOTICE(fmt(_("IPv%d DHT: listening on UDP port %u"), ipv, port));
+    A2_LOG_NOTICE(fmt(_("IPv{} DHT: listening on UDP port {}"), ipv, port));
     return true;
   }
   catch (RecoverableException& e) {
-    A2_LOG_ERROR_EX(fmt("IPv%d DHT: failed to bind UDP port %u", ipv, port), e);
+    A2_LOG_ERROR_EX(fmt("IPv{} DHT: failed to bind UDP port {}", ipv, port), e);
   }
   return false;
 }

@@ -66,7 +66,7 @@ std::unique_ptr<BtHandshakeMessage>
 DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
 {
   A2_LOG_DEBUG(
-      fmt("Receiving handshake bufferLength=%lu",
+      fmt("Receiving handshake bufferLength={}",
           static_cast<unsigned long>(peerConnection_->getBufferLength())));
   unsigned char data[BtHandshakeMessage::MESSAGE_LENGTH];
   size_t dataLength = BtHandshakeMessage::MESSAGE_LENGTH;
@@ -88,7 +88,7 @@ DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
     }
     else {
       throw DL_ABORT_EX(
-          fmt("Bad Info Hash %s",
+          fmt("Bad Info Hash {}",
               util::toHex(std::as_bytes(std::span{peerConnection_->getBuffer() + 28, INFO_HASH_LENGTH}))
                   .c_str()));
     }

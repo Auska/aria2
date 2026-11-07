@@ -48,7 +48,7 @@ namespace {
 void handleError(const std::string& funName)
 {
   throw DL_ABORT_EX(
-      fmt("Exception in libssl routine %s(DHKeyExchange class): %s",
+      fmt("Exception in libssl routine {}(DHKeyExchange class): {}",
           funName.c_str(), ERR_error_string(ERR_get_error(), nullptr)));
 }
 } // namespace
@@ -112,7 +112,7 @@ size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
 {
   if (outLength < keyLength_) {
     throw DL_ABORT_EX(
-        fmt("Insufficient buffer for public key. expect:%lu, actual:%lu",
+        fmt("Insufficient buffer for public key. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
             static_cast<unsigned long>(outLength)));
   }
@@ -122,8 +122,8 @@ size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
   size_t nwritten = BN_bn2bin(publicKey_, out + offset);
   if (nwritten != publicKeyBytes) {
     throw DL_ABORT_EX(
-        fmt("BN_bn2bin in DHKeyExchange::getPublicKey, %lu bytes written,"
-            " but %lu bytes expected.",
+        fmt("BN_bn2bin in DHKeyExchange::getPublicKey, {} bytes written,"
+            " but {} bytes expected.",
             static_cast<unsigned long>(nwritten),
             static_cast<unsigned long>(publicKeyBytes)));
   }
@@ -143,7 +143,7 @@ size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
 {
   if (outLength < keyLength_) {
     throw DL_ABORT_EX(
-        fmt("Insufficient buffer for secret. expect:%lu, actual:%lu",
+        fmt("Insufficient buffer for secret. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
             static_cast<unsigned long>(outLength)));
   }
@@ -165,8 +165,8 @@ size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
   BN_free(secret);
   if (nwritten != secretBytes) {
     throw DL_ABORT_EX(
-        fmt("BN_bn2bin in DHKeyExchange::getPublicKey, %lu bytes written,"
-            " but %lu bytes expected.",
+        fmt("BN_bn2bin in DHKeyExchange::getPublicKey, {} bytes written,"
+            " but {} bytes expected.",
             static_cast<unsigned long>(nwritten),
             static_cast<unsigned long>(secretBytes)));
   }

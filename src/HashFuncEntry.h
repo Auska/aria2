@@ -77,7 +77,7 @@ getHashFunc(HashFuncEntry* first, HashFuncEntry* last,
       first, last,
       FindHashFunc<typename HashFuncEntry::HashFuncType>(hashType));
   if (e == last) {
-    throw DL_ABORT_EX(fmt("Hash type %s is not supported.", hashType.c_str()));
+    throw DL_ABORT_EX(fmt("Hash type {} is not supported.", hashType.c_str()));
   }
   return e->hashFunc;
 }

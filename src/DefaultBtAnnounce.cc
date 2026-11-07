@@ -162,14 +162,14 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
   std::string uri = announceList_.getAnnounce();
   uri += uriHasQuery(uri) ? "&" : "?";
   uri +=
-      fmt("info_hash=%s&"
-          "peer_id=%s&"
-          "uploaded=%" PRId64 "&"
-          "downloaded=%" PRId64 "&"
-          "left=%" PRId64 "&"
+      fmt("info_hash={}&"
+          "peer_id={}&"
+          "uploaded={}&"
+          "downloaded={}&"
+          "left={}&"
           "compact=1&"
-          "key=%s&"
-          "numwant=%d&"
+          "key={}&"
+          "numwant={}&"
           "no_peer_id=1",
           util::percentEncode(std::as_bytes(std::span{bittorrent::getInfoHash(downloadContext_), INFO_HASH_LENGTH}))
               .c_str(),
@@ -180,7 +180,7 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
               .c_str(),
           numWant);
   if (tcpPort_) {
-    uri += fmt("&port=%u", tcpPort_);
+    uri += fmt("&port={}", tcpPort_);
   }
   const char* event = announceList_.getEventString();
   if (event[0]) {
@@ -308,18 +308,18 @@ void DefaultBtAnnounce::processAnnounceResponse(
   const String* tid = downcast<String>(dict->get(BtAnnounce::TRACKER_ID));
   if (tid) {
     trackerId_ = tid->s();
-    A2_LOG_DEBUG(fmt("Tracker ID:%s", trackerId_.c_str()));
+    A2_LOG_DEBUG(fmt("Tracker ID:{}", trackerId_.c_str()));
   }
   const Integer* ival = downcast<Integer>(dict->get(BtAnnounce::INTERVAL));
   if (ival && ival->i() > 0) {
     interval_ = std::chrono::seconds(ival->i());
-    A2_LOG_DEBUG(fmt("Interval:%ld", static_cast<long int>(interval_.count())));
+    A2_LOG_DEBUG(fmt("Interval:{}", static_cast<long int>(interval_.count())));
   }
   const Integer* mival = downcast<Integer>(dict->get(BtAnnounce::MIN_INTERVAL));
   if (mival && mival->i() > 0) {
     minInterval_ = std::chrono::seconds(mival->i());
     A2_LOG_DEBUG(
-        fmt("Min interval:%ld", static_cast<long int>(minInterval_.count())));
+        fmt("Min interval:{}", static_cast<long int>(minInterval_.count())));
     minInterval_ = std::min(minInterval_, interval_);
   }
   else {
@@ -329,12 +329,12 @@ void DefaultBtAnnounce::processAnnounceResponse(
   const Integer* comp = downcast<Integer>(dict->get(BtAnnounce::COMPLETE));
   if (comp && comp->i() >= 0) {
     complete_ = comp->i();
-    A2_LOG_DEBUG(fmt("Complete:%d", complete_));
+    A2_LOG_DEBUG(fmt("Complete:{}", complete_));
   }
   const Integer* incomp = downcast<Integer>(dict->get(BtAnnounce::INCOMPLETE));
   if (incomp && incomp->i() >= 0) {
     incomplete_ = incomp->i();
-    A2_LOG_DEBUG(fmt("Incomplete:%d", incomplete_));
+    A2_LOG_DEBUG(fmt("Incomplete:{}", incomplete_));
   }
   auto peerData = dict->get(BtAnnounce::PEERS);
   if (!peerData) {
@@ -368,13 +368,13 @@ void DefaultBtAnnounce::processUDPTrackerResponse(
   if (reply->interval > 0) {
     minInterval_ = std::chrono::seconds(reply->interval);
     A2_LOG_DEBUG(
-        fmt("Min interval:%ld", static_cast<long int>(minInterval_.count())));
+        fmt("Min interval:{}", static_cast<long int>(minInterval_.count())));
     interval_ = minInterval_;
   }
   complete_ = reply->seeders;
-  A2_LOG_DEBUG(fmt("Complete:%d", reply->seeders));
+  A2_LOG_DEBUG(fmt("Complete:{}", reply->seeders));
   incomplete_ = reply->leechers;
-  A2_LOG_DEBUG(fmt("Incomplete:%d", reply->leechers));
+  A2_LOG_DEBUG(fmt("Incomplete:{}", reply->leechers));
   if (!btRuntime_->isHalt() && btRuntime_->lessThanMinPeers()) {
     for (auto& elem : reply->peers) {
       peerStorage_->addPeer(std::make_shared<Peer>(elem.first, elem.second));

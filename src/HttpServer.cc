@@ -180,7 +180,7 @@ bool HttpServer::receiveRequest()
   if (headerProcessor_->parse(socketRecvBuffer_->getBuffer(),
                               socketRecvBuffer_->getBufferLength())) {
     lastRequestHeader_ = headerProcessor_->getResult();
-    A2_LOG_INFO(fmt("HTTP Server received request\n%s",
+    A2_LOG_INFO(fmt("HTTP Server received request\n{}",
                     headerProcessor_->getHeaderString().c_str()));
     socketRecvBuffer_->drain(headerProcessor_->getLastBytesProcessed());
     bodyConsumed_ = 0;
@@ -193,7 +193,7 @@ bool HttpServer::receiveRequest()
       if (!util::parseLLIntNoThrow(lastContentLength_, contentLengthHdr) ||
           lastContentLength_ < 0) {
         throw DL_ABORT_EX(
-            fmt("Invalid Content-Length=%s", contentLengthHdr.c_str()));
+            fmt("Invalid Content-Length={}", contentLengthHdr.c_str()));
       }
     }
     else {
@@ -265,10 +265,10 @@ void HttpServer::feedResponse(int status, const std::string& headers,
 {
   std::string httpDate = Time().toHTTPDate();
   std::string header =
-      fmt("HTTP/1.1 %s\r\n"
-          "Date: %s\r\n"
-          "Content-Length: %lu\r\n"
-          "Expires: %s\r\n"
+      fmt("HTTP/1.1 {}\r\n"
+          "Date: {}\r\n"
+          "Content-Length: {}\r\n"
+          "Expires: {}\r\n"
           "Cache-Control: no-cache\r\n",
           getStatusString(status), httpDate.c_str(),
           static_cast<unsigned long>(text.size()), httpDate.c_str());
@@ -290,7 +290,7 @@ void HttpServer::feedResponse(int status, const std::string& headers,
   }
   header += headers;
   header += "\r\n";
-  A2_LOG_DEBUG(fmt("HTTP Server sends response:\n%s", header.c_str()));
+  A2_LOG_DEBUG(fmt("HTTP Server sends response:\n{}", header.c_str()));
   socketBuffer_.pushStr(std::move(header));
   socketBuffer_.pushStr(std::move(text));
 }
@@ -299,12 +299,12 @@ void HttpServer::feedUpgradeResponse(const std::string& protocol,
                                      const std::string& headers)
 {
   std::string header = fmt("HTTP/1.1 101 Switching Protocols\r\n"
-                           "Upgrade: %s\r\n"
+                           "Upgrade: {}\r\n"
                            "Connection: Upgrade\r\n"
-                           "%s"
+                           "{}"
                            "\r\n",
                            protocol.c_str(), headers.c_str());
-  A2_LOG_DEBUG(fmt("HTTP Server sends upgrade response:\n%s", header.c_str()));
+  A2_LOG_DEBUG(fmt("HTTP Server sends upgrade response:\n{}", header.c_str()));
   socketBuffer_.pushStr(std::move(header));
 }
 

@@ -132,7 +132,7 @@ void Netrc::parse(const std::string& path)
   authenticators_.clear();
   BufferedFile fp(path.c_str(), BufferedFile::READ);
   if (!fp) {
-    throw DL_ABORT_EX(fmt("Cannot open file: %s", path.c_str()));
+    throw DL_ABORT_EX(fmt("Cannot open file: {}", path.c_str()));
   }
   enum STATE {
     GET_TOKEN,
@@ -179,7 +179,7 @@ void Netrc::parse(const std::string& path)
         else {
           if (!authenticator) {
             throw DL_ABORT_EX(
-                fmt("Netrc:parse error. %s encountered where 'machine'"
+                fmt("Netrc:parse error. {} encountered where 'machine'"
                     " or 'default' expected.",
                     std::string((*iter).first, (*iter).second).c_str()));
           }

@@ -55,7 +55,7 @@ std::vector<unsigned char> IndexBtMessage::createMessage()
 
 std::string IndexBtMessage::toString() const
 {
-  return fmt("%s index=%lu", getName(), static_cast<unsigned long>(index_));
+  return fmt("{} index={}", getName(), static_cast<unsigned long>(index_));
 }
 
 } // namespace aria2

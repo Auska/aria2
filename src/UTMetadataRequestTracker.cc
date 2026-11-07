@@ -73,7 +73,7 @@ std::vector<size_t> UTMetadataRequestTracker::removeTimeoutEntry()
   std::vector<size_t> indexes;
   std::erase_if(trackedRequests_, [&indexes](const RequestEntry& ent) {
     if (ent.elapsed(TIMEOUT)) {
-      A2_LOG_DEBUG(fmt("ut_metadata request timeout. index=%lu",
+      A2_LOG_DEBUG(fmt("ut_metadata request timeout. index={}",
                        static_cast<unsigned long>(ent.index_)));
       indexes.push_back(ent.index_);
       return true;

@@ -105,7 +105,7 @@ bool PeerReceiveHandshakeCommand::executeInternal()
         getDownloadEngine()->getBtRegistry()->getDownloadContext(infoHash);
     if (!downloadContext) {
       throw DL_ABORT_EX(
-          fmt("Unknown info hash %s", util::toHex(infoHash).c_str()));
+          fmt("Unknown info hash {}", util::toHex(infoHash).c_str()));
     }
     auto btObject = getDownloadEngine()->getBtRegistry()->get(
         downloadContext->getOwnerRequestGroup()->getGID());
@@ -114,7 +114,7 @@ bool PeerReceiveHandshakeCommand::executeInternal()
     const std::shared_ptr<PeerStorage>& peerStorage = btObject->peerStorage;
     if (!btRuntime->ready()) {
       throw DL_ABORT_EX(
-          fmt("Unknown info hash %s", util::toHex(infoHash).c_str()));
+          fmt("Unknown info hash {}", util::toHex(infoHash).c_str()));
     }
     if (btRuntime->isHalt()) {
       A2_LOG_DEBUG("Info hash found but the download is over."

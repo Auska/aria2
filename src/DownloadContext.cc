@@ -119,7 +119,7 @@ void DownloadContext::setFilePathWithIndex(size_t index,
   }
   else {
     throw DL_ABORT_EX(
-        fmt("No such file with index=%u", static_cast<unsigned int>(index)));
+        fmt("No such file with index={}", static_cast<unsigned int>(index)));
   }
 }
 
@@ -164,7 +164,7 @@ DownloadContext::getAttribute(ContextAttributeType key)
   const auto& attr = attrs_[key];
   if (!attr) {
     throw DL_ABORT_EX(
-        fmt("No attribute named %s", strContextAttributeType(key)));
+        fmt("No attribute named {}", strContextAttributeType(key)));
   }
 
   return attr;

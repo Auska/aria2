@@ -105,7 +105,7 @@ void DHTAnnouncePeerMessage::validate() const
                                     getRemoteNode()->getIPAddress(),
                                     getRemoteNode()->getPort())) {
     throw DL_ABORT_EX(fmt(
-        "Invalid token=%s from %s:%u", util::toHex(token_).c_str(),
+        "Invalid token={} from {}:{}", util::toHex(token_).c_str(),
         getRemoteNode()->getIPAddress().c_str(), getRemoteNode()->getPort()));
   }
 }
@@ -123,7 +123,7 @@ void DHTAnnouncePeerMessage::setTokenTracker(DHTTokenTracker* tokenTracker)
 
 std::string DHTAnnouncePeerMessage::toStringOptional() const
 {
-  return fmt("token=%s, info_hash=%s, tcpPort=%u", util::toHex(token_).c_str(),
+  return fmt("token={}, info_hash={}, tcpPort={}", util::toHex(token_).c_str(),
              util::toHex(std::as_bytes(std::span{infoHash_, INFO_HASH_LENGTH})).c_str(), tcpPort_);
 }
 

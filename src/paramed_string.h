@@ -37,13 +37,13 @@
 
 #include "common.h"
 
+#include <format>
 #include <string>
 #include <vector>
 #include <algorithm>
 
 #include "util.h"
 #include "DlAbortEx.h"
-#include "fmt.h"
 
 namespace aria2 {
 
@@ -128,21 +128,16 @@ InputIterator expandLoop(std::vector<std::string>& res, InputIterator first,
       throw DL_ABORT_EX("Loop range overflow.");
     }
     if (start <= end) {
-      std::string format;
-      if (minus - first == colon - minus - 1) {
-        format = fmt("%%0%lud", static_cast<unsigned long>(minus - first));
-      }
-      else {
-        format = "%d";
-      }
+      size_t width = minus - first == colon - minus - 1
+                         ? static_cast<size_t>(minus - first)
+                         : 0;
       std::vector<std::string> res2;
       res2.reserve(res.size() * ((end + 1 - start) / step));
-      for (std::vector<std::string>::const_iterator i = res.begin(),
-                                                    eoi = res.end();
-           i != eoi; ++i) {
+      for (auto& r : res) {
         for (uint32_t j = start; j <= end; j += step) {
-          res2.push_back(*i);
-          res2.back() += fmt(format.c_str(), j);
+          res2.push_back(r);
+          res2.back() += width ? std::format("{:0{}}", j, width)
+                               : std::format("{}", j);
         }
       }
       res.swap(res2);

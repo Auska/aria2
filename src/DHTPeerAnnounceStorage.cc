@@ -85,7 +85,7 @@ void DHTPeerAnnounceStorage::addPeerAnnounce(const unsigned char* infoHash,
                                              const std::string& ipaddr,
                                              uint16_t port)
 {
-  A2_LOG_DEBUG(fmt("Adding %s:%u to peer announce list: infoHash=%s",
+  A2_LOG_DEBUG(fmt("Adding {}:{} to peer announce list: infoHash={}",
                    ipaddr.c_str(), port,
                    util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})).c_str()));
   getPeerAnnounceEntry(infoHash)->addPeerAddrEntry(PeerAddrEntry(ipaddr, port));
@@ -111,7 +111,7 @@ void DHTPeerAnnounceStorage::getPeers(std::vector<std::shared_ptr<Peer>>& peers,
 
 void DHTPeerAnnounceStorage::handleTimeout()
 {
-  A2_LOG_DEBUG(fmt("Now purge peer announces(%lu entries) which are timed out.",
+  A2_LOG_DEBUG(fmt("Now purge peer announces({} entries) which are timed out.",
                    static_cast<unsigned long>(entries_.size())));
   std::for_each(std::begin(entries_), std::end(entries_),
                 [](const std::shared_ptr<DHTPeerAnnounceEntry>& e) {
@@ -126,7 +126,7 @@ void DHTPeerAnnounceStorage::handleTimeout()
       ++i;
     }
   }
-  A2_LOG_DEBUG(fmt("Currently %lu peer announce entries",
+  A2_LOG_DEBUG(fmt("Currently {} peer announce entries",
                    static_cast<unsigned long>(entries_.size())));
 }
 
@@ -141,7 +141,7 @@ void DHTPeerAnnounceStorage::announcePeer()
     e->notifyUpdate();
     auto task = taskFactory_->createPeerAnnounceTask(e->getInfoHash());
     taskQueue_->addPeriodicTask2(task);
-    A2_LOG_DEBUG(fmt("Added 1 peer announce: infoHash=%s",
+    A2_LOG_DEBUG(fmt("Added 1 peer announce: infoHash={}",
                      util::toHex(std::as_bytes(std::span{e->getInfoHash(), DHT_ID_LENGTH})).c_str()));
   }
 }

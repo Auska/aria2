@@ -177,7 +177,7 @@ std::string gidToHex(A2Gid gid) { return GroupId::toHex(gid); }
 A2Gid hexToGid(const std::string& hex)
 {
   A2Gid gid;
-  if (GroupId::toNumericId(gid, hex.c_str()) == 0) {
+  if (GroupId::toNumericId(gid, hex.c_str()) == GroupId::Err::OK) {
     return gid;
   }
   else {

@@ -81,14 +81,14 @@ std::string HandshakeExtensionMessage::getPayload()
 
 std::string HandshakeExtensionMessage::toString() const
 {
-  std::string s(fmt("%s client=%s, tcpPort=%u, metadataSize=%lu",
+  std::string s(fmt("{} client={}, tcpPort={}, metadataSize={}",
                     getExtensionName(),
                     util::percentEncode(clientVersion_).c_str(), tcpPort_,
                     static_cast<unsigned long>(metadataSize_)));
   for (int i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     int id = extreg_.getExtensionMessageID(i);
     if (id) {
-      s += fmt(", %s=%u", strBtExtension(i), id);
+      s += fmt(", {}={}", strBtExtension(i), id);
     }
   }
   return s;
@@ -167,7 +167,7 @@ HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
     throw DL_ABORT_EX(fmt(MSG_TOO_SMALL_PAYLOAD_SIZE, EXTENSION_NAME,
                           static_cast<unsigned long>(length)));
   }
-  A2_LOG_DEBUG(fmt("Creating HandshakeExtensionMessage from %s",
+  A2_LOG_DEBUG(fmt("Creating HandshakeExtensionMessage from {}",
                    util::percentEncode(std::as_bytes(std::span{data, length})).c_str()));
   auto decoded =
       bencode2::decode(std::as_bytes(std::span{data + 1, length - 1}));
@@ -191,13 +191,13 @@ HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
       const Integer* extId = downcast<Integer>(elem.second);
       if (extId) {
         if (extId->i() < 0 || extId->i() > 255) {
-          A2_LOG_DEBUG(fmt("Extension ID=%" PRId64 " is invalid", extId->i()));
+          A2_LOG_DEBUG(fmt("Extension ID={} is invalid", extId->i()));
           continue;
         }
 
         int key = keyBtExtension(elem.first.c_str());
         if (key == ExtensionMessageRegistry::MAX_EXTENSION) {
-          A2_LOG_DEBUG(fmt("Unsupported BitTorrent extension %s=%" PRId64,
+          A2_LOG_DEBUG(fmt("Unsupported BitTorrent extension {}={}",
                            elem.first.c_str(), extId->i()));
         }
         else {
@@ -213,7 +213,7 @@ HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
 
     if (size < 0) {
       throw DL_ABORT_EX(
-          fmt("Negative metadataSize %" PRId64 " was received", size));
+          fmt("Negative metadataSize {} was received", size));
     }
 
     // Only accept metadata up to 8MiB in size.  Be aware that broken

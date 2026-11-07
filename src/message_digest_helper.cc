@@ -80,7 +80,7 @@ void digest(unsigned char* md, size_t mdLength, MessageDigest* ctx,
   size_t reqLength = ctx->getDigestLength();
   if (mdLength < reqLength) {
     throw DL_ABORT_EX(fmt("Insufficient space for storing message digest:"
-                          " %lu required, but only %lu is allocated",
+                          " {} required, but only {} is allocated",
                           static_cast<unsigned long>(reqLength),
                           static_cast<unsigned long>(mdLength)));
   }

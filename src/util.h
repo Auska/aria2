@@ -335,7 +335,7 @@ char toLowerChar(char c);
 
 bool isNumericHost(const std::string& name);
 
-typedef void (*signal_handler_t)(int);
+using signal_handler_t = void (*)(int);
 void setGlobalSignalHandler(int signal, sigset_t* mask,
                             signal_handler_t handler, int flags);
 

@@ -57,7 +57,7 @@ void HttpServerResponseCommand::afterSend(
     const std::shared_ptr<HttpServer>& httpServer, DownloadEngine* e)
 {
   if (httpServer->supportsPersistentConnection()) {
-    A2_LOG_INFO(fmt("CUID#%" PRId64 " - Persist connection.", getCuid()));
+    A2_LOG_INFO(fmt("CUID#{} - Persist connection.", getCuid()));
     e->addCommand(make_unique<HttpServerCommand>(getCuid(), httpServer, e,
                                                  httpServer->getSocket()));
   }

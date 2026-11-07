@@ -63,7 +63,7 @@ std::string FeedbackURISelector::select(
 {
   if (A2_LOG_DEBUG_ENABLED) {
     for (const auto& h : usedHosts) {
-      A2_LOG_DEBUG(fmt("UsedHost=%lu, %s", static_cast<unsigned long>(h.first),
+      A2_LOG_DEBUG(fmt("UsedHost={}, {}", static_cast<unsigned long>(h.first),
                        h.second.c_str()));
     }
   }
@@ -81,7 +81,7 @@ std::string FeedbackURISelector::select(
     std::deque<std::string>& uris = fileEntry->getRemainingUris();
     uris.erase(std::find(uris.begin(), uris.end(), uri));
   }
-  A2_LOG_DEBUG(fmt("FeedbackURISelector selected %s", uri.c_str()));
+  A2_LOG_DEBUG(fmt("FeedbackURISelector selected {}", uri.c_str()));
   return uri;
 }
 
@@ -100,7 +100,7 @@ std::string FeedbackURISelector::selectRarer(
     auto protocol = uri::getFieldString(us, USR_SCHEME, u.c_str());
     auto ss = serverStatMan_->find(host, protocol);
     if (ss && ss->isError()) {
-      A2_LOG_DEBUG(fmt("Error not considered: %s", u.c_str()));
+      A2_LOG_DEBUG(fmt("Error not considered: {}", u.c_str()));
       continue;
     }
     cands.push_back(std::make_pair(host, u));
@@ -137,7 +137,7 @@ std::string FeedbackURISelector::selectFaster(
     auto host = uri::getFieldString(us, USR_HOST, u.c_str());
     if (findSecond(usedHosts.begin(), usedHosts.end(), host) !=
         usedHosts.end()) {
-      A2_LOG_DEBUG(fmt("%s is in usedHosts, not considered", u.c_str()));
+      A2_LOG_DEBUG(fmt("{} is in usedHosts, not considered", u.c_str()));
       continue;
     }
     auto protocol = uri::getFieldString(us, USR_SCHEME, u.c_str());

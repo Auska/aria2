@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include <optional>
+
 #include <vector>
 
 namespace aria2 {
@@ -107,7 +109,7 @@ public:
   bool hasMissingPiece(const unsigned char* bitfield, size_t len) const;
 
   // affected by filter
-  bool getFirstMissingUnusedIndex(size_t& index) const;
+  std::optional<size_t> getFirstMissingUnusedIndex() const;
 
   // Appends at most n missing unused index to out. This function
   // doesn't delete existing elements in out.  Returns the number of
@@ -120,7 +122,7 @@ public:
   // index is found. Otherwise returns false.
   //
   // affected by filter
-  bool getFirstMissingIndex(size_t& index) const;
+  std::optional<size_t> getFirstMissingIndex() const;
 
   // Stores missing bit index to index. index is selected so that it
   // divides longest missing bit subarray into 2 equally sized
@@ -128,9 +130,10 @@ public:
   // if such bit index is found. Otherwise returns false.
   //
   // affected by filter
-  bool getSparseMissingUnusedIndex(size_t& index, int32_t minSplitSize,
-                                   const unsigned char* ignoreBitfield,
-                                   size_t ignoreBitfieldLength) const;
+  std::optional<size_t>
+  getSparseMissingUnusedIndex(int32_t minSplitSize,
+                              const unsigned char* ignoreBitfield,
+                              size_t ignoreBitfieldLength) const;
 
   // Stores missing bit index to index. This function first try to
   // select smallest index starting offsetIndex in the order:
@@ -146,10 +149,11 @@ public:
   // result.
   //
   // affected by filter
-  bool getGeomMissingUnusedIndex(size_t& index, int32_t minSplitSize,
-                                 const unsigned char* ignoreBitfield,
-                                 size_t ignoreBitfieldLength, double base,
-                                 size_t offsetIndex) const;
+  std::optional<size_t>
+  getGeomMissingUnusedIndex(int32_t minSplitSize,
+                            const unsigned char* ignoreBitfield,
+                            size_t ignoreBitfieldLength, double base,
+                            size_t offsetIndex) const;
 
   // Stores missing bit index to index. This function selects smallest
   // index of missing piece, considering minSplitSize.  Set bits in
@@ -157,19 +161,21 @@ public:
   // found. Otherwise returns false.
   //
   // affected by filter
-  bool getInorderMissingUnusedIndex(size_t& index, int32_t minSplitSize,
-                                    const unsigned char* ignoreBitfield,
-                                    size_t ignoreBitfieldLength) const;
+  std::optional<size_t>
+  getInorderMissingUnusedIndex(int32_t minSplitSize,
+                               const unsigned char* ignoreBitfield,
+                               size_t ignoreBitfieldLength) const;
 
   // Just like getInorderMissingUnusedIndex() above, but limit the
   // search area in [startIndex, endIndex).  |endIndex| is normalized
   // to min(|endIndex|, blocks_)
   //
   // affected by filter
-  bool getInorderMissingUnusedIndex(size_t& index, size_t startIndex,
-                                    size_t endIndex, int32_t minSplitSize,
-                                    const unsigned char* ignoreBitfield,
-                                    size_t ignoreBitfieldLength) const;
+  std::optional<size_t>
+  getInorderMissingUnusedIndex(size_t startIndex, size_t endIndex,
+                               int32_t minSplitSize,
+                               const unsigned char* ignoreBitfield,
+                               size_t ignoreBitfieldLength) const;
 
   // affected by filter
   bool getAllMissingIndexes(unsigned char* misbitfield, size_t mislen) const;

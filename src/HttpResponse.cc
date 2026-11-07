@@ -107,7 +107,7 @@ void HttpResponse::validateResponse() const
   if (statusCode >= 400) {
     return;
   }
-  throw DL_ABORT_EX2(fmt("Unexpected status %d", statusCode),
+  throw DL_ABORT_EX2(fmt("Unexpected status {}", statusCode),
                      error_code::HTTP_PROTOCOL_ERROR);
 }
 
@@ -160,7 +160,7 @@ void HttpResponse::processRedirect()
   const auto& req = httpRequest_->getRequest();
   if (!req->redirectUri(util::percentEncodeMini(getRedirectURI()))) {
     throw DL_RETRY_EX(fmt(
-        "CUID#%" PRId64 " - Redirect to %s failed. It may not be a valid URI.",
+        "CUID#{} - Redirect to {} failed. It may not be a valid URI.",
         cuid_, req->getCurrentUri().c_str()));
   }
 

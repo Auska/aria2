@@ -80,7 +80,7 @@ std::string DHTUnknownMessage::toString() const
   if (length_ < sampleLength) {
     sampleLength = length_;
   }
-  return fmt("dht unknown Remote:%s(%u) length=%lu, first 8 bytes(hex)=%s",
+  return fmt("dht unknown Remote:{}({}) length={}, first 8 bytes(hex)={}",
              ipaddr_.c_str(), port_, static_cast<unsigned long>(length_),
              util::toHex(std::as_bytes(std::span{data_, sampleLength})).c_str());
 }

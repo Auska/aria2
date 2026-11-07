@@ -114,7 +114,7 @@ void DHTFindNodeReplyMessage::setClosestKNodes(
 
 std::string DHTFindNodeReplyMessage::toStringOptional() const
 {
-  return fmt("nodes=%lu", static_cast<unsigned long>(closestKNodes_.size()));
+  return fmt("nodes={}", static_cast<unsigned long>(closestKNodes_.size()));
 }
 
 } // namespace aria2

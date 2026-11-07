@@ -192,7 +192,7 @@ void SelectEventPoll::poll(const struct timeval& tv)
   }
   else if (retval == -1) {
     int errNum = errno;
-    A2_LOG_INFO(fmt("select error: %s, fdmax: %d",
+    A2_LOG_INFO(fmt("select error: {}, fdmax: {}",
                     util::safeStrerror(errNum).c_str(), fdmax_));
   }
 #ifdef ENABLE_ASYNC_DNS
@@ -251,7 +251,7 @@ bool SelectEventPoll::deleteEvents(sock_t socket, Command* command,
 {
   auto i = socketEntries_.find(socket);
   if (i == std::end(socketEntries_)) {
-    A2_LOG_DEBUG(fmt("Socket %d is not found in SocketEntries.", socket));
+    A2_LOG_DEBUG(fmt("Socket {} is not found in SocketEntries.", socket));
     return false;
   }
 

@@ -99,14 +99,14 @@ void ServerStat::updateSingleConnectionAvgSpeed(int downloadSpeed)
                        ((1.0 / 5.0) * (float)downloadSpeed);
   }
   if (avgDownloadSpeed < (int)(0.80 * singleConnectionAvgSpeed_)) {
-    A2_LOG_DEBUG(fmt("ServerStat:%s: resetting counter since single connection"
+    A2_LOG_DEBUG(fmt("ServerStat:{}: resetting counter since single connection"
                      " speed dropped",
                      getHostname().c_str()));
     counter_ = 0;
   }
   A2_LOG_DEBUG(
-      fmt("ServerStat:%s: singleConnectionAvgSpeed_ old:%.2fKB/s"
-          " new:%.2fKB/s last:%.2fKB/s",
+      fmt("ServerStat:{}: singleConnectionAvgSpeed_ old:{:.2f}KB/s"
+          " new:{:.2f}KB/s last:{:.2f}KB/s",
           getHostname().c_str(), (float)singleConnectionAvgSpeed_ / 1024,
           (float)avgDownloadSpeed / 1024, (float)downloadSpeed / 1024));
   singleConnectionAvgSpeed_ = (int)avgDownloadSpeed;
@@ -132,8 +132,8 @@ void ServerStat::updateMultiConnectionAvgSpeed(int downloadSpeed)
                        ((1.0 / 5.0) * (float)downloadSpeed);
   }
   A2_LOG_DEBUG(
-      fmt("ServerStat:%s: multiConnectionAvgSpeed_ old:%.2fKB/s"
-          " new:%.2fKB/s last:%.2fKB/s",
+      fmt("ServerStat:{}: multiConnectionAvgSpeed_ old:{:.2f}KB/s"
+          " new:{:.2f}KB/s last:{:.2f}KB/s",
           getHostname().c_str(), (float)multiConnectionAvgSpeed_ / 1024,
           (float)avgDownloadSpeed / 1024, (float)downloadSpeed / 1024));
   multiConnectionAvgSpeed_ = (int)avgDownloadSpeed;
@@ -157,7 +157,7 @@ void ServerStat::setStatus(const std::string& status)
 
 void ServerStat::setStatusInternal(STATUS status)
 {
-  A2_LOG_DEBUG(fmt("ServerStat: set status %s for %s (%s)",
+  A2_LOG_DEBUG(fmt("ServerStat: set status {} for {} ({})",
                    STATUS_STRING[status], hostname_.c_str(),
                    protocol_.c_str()));
   status_ = status;
@@ -182,9 +182,8 @@ bool ServerStat::operator==(const ServerStat& serverStat) const
 
 std::string ServerStat::toString() const
 {
-  return fmt("host=%s, protocol=%s, dl_speed=%d, sc_avg_speed=%d,"
-             " mc_avg_speed=%d, last_updated=%" PRId64
-             ", counter=%d, status=%s",
+  return fmt("host={}, protocol={}, dl_speed={}, sc_avg_speed={},"
+             " mc_avg_speed={}, last_updated={}, counter={}, status={}",
              getHostname().c_str(), getProtocol().c_str(), getDownloadSpeed(),
              getSingleConnectionAvgSpeed(), getMultiConnectionAvgSpeed(),
              static_cast<int64_t>(getLastUpdated().getTimeFromEpoch()),

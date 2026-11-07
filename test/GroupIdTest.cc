@@ -43,24 +43,24 @@ void GroupIdTest::testToNumericId()
   a2_gid_t gid;
   std::string hex;
   hex = std::string(16, '0');
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::toNumericId(gid, hex.c_str()));
 
   hex = std::string(16, 'f');
-  CPPUNIT_ASSERT_EQUAL(0, GroupId::toNumericId(gid, hex.c_str()));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::toNumericId(gid, hex.c_str()));
   CPPUNIT_ASSERT_EQUAL((a2_gid_t)UINT64_MAX, gid);
 
-  CPPUNIT_ASSERT_EQUAL(0, GroupId::toNumericId(gid, "1234567890abcdef"));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::toNumericId(gid, "1234567890abcdef"));
   CPPUNIT_ASSERT_EQUAL((a2_gid_t)1311768467294899695LL, gid);
 
   hex = std::string(15, 'f');
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::toNumericId(gid, hex.c_str()));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::toNumericId(gid, ""));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::toNumericId(gid, "1234567890abcdeg"));
 }
 
@@ -74,32 +74,32 @@ void GroupIdTest::testExpandUnique()
     CPPUNIT_ASSERT(i);
   }
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_NOT_UNIQUE,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::NOT_UNIQUE,
                        GroupId::expandUnique(gid, "ff8"));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::expandUnique(gid, "ffg"));
 
   CPPUNIT_ASSERT_EQUAL(
-      (int)GroupId::ERR_INVALID,
+      GroupId::Err::INVALID,
       GroupId::expandUnique(gid, std::string(17, 'a').c_str()));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_INVALID,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::expandUnique(gid, ""));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_NOT_UNIQUE,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::NOT_UNIQUE,
                        GroupId::expandUnique(gid, "ff800000000"));
 
-  CPPUNIT_ASSERT_EQUAL(0, GroupId::expandUnique(gid, "ff8000000001"));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::expandUnique(gid, "ff8000000001"));
   CPPUNIT_ASSERT_EQUAL(std::string("ff80000000010000"), GroupId::toHex(gid));
 
-  CPPUNIT_ASSERT_EQUAL(0, GroupId::expandUnique(gid, "ff8000000002"));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::expandUnique(gid, "ff8000000002"));
   CPPUNIT_ASSERT_EQUAL(std::string("ff80000000020001"), GroupId::toHex(gid));
 
-  CPPUNIT_ASSERT_EQUAL(0, GroupId::expandUnique(gid, "fff800000003"));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::expandUnique(gid, "fff800000003"));
   CPPUNIT_ASSERT_EQUAL(std::string("fff8000000030000"), GroupId::toHex(gid));
 
-  CPPUNIT_ASSERT_EQUAL((int)GroupId::ERR_NOT_FOUND,
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::NOT_FOUND,
                        GroupId::expandUnique(gid, "ff80000000031"));
 }
 

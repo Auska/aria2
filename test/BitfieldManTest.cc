@@ -93,27 +93,32 @@ void BitfieldManTest::testGetFirstMissingUnusedIndex()
   {
     BitfieldMan bt1(1_k, 10_k);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+      }
     }
     bt1.setUseBit(0);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.unsetUseBit(0);
     bt1.setBit(0);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.setAllBit();
     {
-      size_t index;
-      CPPUNIT_ASSERT(!bt1.getFirstMissingUnusedIndex(index));
+      CPPUNIT_ASSERT(!bt1.getFirstMissingUnusedIndex());
     }
   }
   {
@@ -122,21 +127,27 @@ void BitfieldManTest::testGetFirstMissingUnusedIndex()
     bt1.addFilter(1_k, 10_k);
     bt1.enableFilter();
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.setUseBit(1);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+      }
     }
     bt1.setBit(2);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingUnusedIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)3, index);
+      {
+        auto index = bt1.getFirstMissingUnusedIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)3, *index);
+      }
     }
   }
 }
@@ -146,27 +157,32 @@ void BitfieldManTest::testGetFirstMissingIndex()
   {
     BitfieldMan bt1(1_k, 10_k);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+      }
     }
     bt1.setUseBit(0);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+      }
     }
     bt1.unsetUseBit(0);
     bt1.setBit(0);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.setAllBit();
     {
-      size_t index;
-      CPPUNIT_ASSERT(!bt1.getFirstMissingIndex(index));
+      CPPUNIT_ASSERT(!bt1.getFirstMissingIndex());
     }
   }
   {
@@ -175,21 +191,27 @@ void BitfieldManTest::testGetFirstMissingIndex()
     bt1.addFilter(1_k, 10_k);
     bt1.enableFilter();
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.setUseBit(1);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+      }
     }
     bt1.setBit(1);
     {
-      size_t index;
-      CPPUNIT_ASSERT(bt1.getFirstMissingIndex(index));
-      CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+      {
+        auto index = bt1.getFirstMissingIndex();
+        CPPUNIT_ASSERT(index);
+        CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+      }
     }
   }
 }
@@ -310,48 +332,77 @@ void BitfieldManTest::testGetSparseMissingUnusedIndex()
   unsigned char ignoreBitfield[length];
   memset(ignoreBitfield, 0, sizeof(ignoreBitfield));
   size_t minSplitSize = 1_m;
-  size_t index;
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+  }
   bitfield.setUseBit(0);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)5, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)5, *index);
+  }
   bitfield.setUseBit(5);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)3, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)3, *index);
+  }
   bitfield.setUseBit(3);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)8, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)8, *index);
+  }
   bitfield.setUseBit(8);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+  }
   bitfield.setUseBit(2);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+  }
   bitfield.setUseBit(1);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)4, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)4, *index);
+  }
   bitfield.setUseBit(4);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)7, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)7, *index);
+  }
   bitfield.setUseBit(7);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)6, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)6, *index);
+  }
   bitfield.setUseBit(6);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)9, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)9, *index);
+  }
   bitfield.setUseBit(9);
-  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
+  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(minSplitSize,
                                                        ignoreBitfield, length));
 }
 
@@ -362,48 +413,77 @@ void BitfieldManTest::testGetSparseMissingUnusedIndex_setBit()
   unsigned char ignoreBitfield[length];
   memset(ignoreBitfield, 0, sizeof(ignoreBitfield));
   size_t minSplitSize = 1_m;
-  size_t index;
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+  }
   bitfield.setBit(0);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+  }
   bitfield.setBit(1);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+  }
   bitfield.setBit(2);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)3, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)3, *index);
+  }
   bitfield.setBit(3);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)4, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)4, *index);
+  }
   bitfield.setBit(4);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)5, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)5, *index);
+  }
   bitfield.setBit(5);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)6, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)6, *index);
+  }
   bitfield.setBit(6);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)7, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)7, *index);
+  }
   bitfield.setBit(7);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)8, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)8, *index);
+  }
   bitfield.setBit(8);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)9, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)9, *index);
+  }
   bitfield.setBit(9);
-  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
+  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(minSplitSize,
                                                        ignoreBitfield, length));
 }
 
@@ -414,29 +494,43 @@ void BitfieldManTest::testGetSparseMissingUnusedIndex_withMinSplitSize()
   unsigned char ignoreBitfield[length];
   memset(ignoreBitfield, 0, sizeof(ignoreBitfield));
   size_t minSplitSize = 2_m;
-  size_t index;
   bitfield.setUseBit(1);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)6, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)6, *index);
+  }
   bitfield.setBit(6);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)7, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)7, *index);
+  }
   bitfield.setUseBit(7);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)4, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)4, *index);
+  }
   bitfield.setBit(4);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+  }
   bitfield.setBit(0);
-  CPPUNIT_ASSERT(bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
-                                                      ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)5, index);
+  {
+    auto index = bitfield.getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)5, *index);
+  }
   bitfield.setBit(5);
-  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(index, minSplitSize,
+  CPPUNIT_ASSERT(!bitfield.getSparseMissingUnusedIndex(minSplitSize,
                                                        ignoreBitfield, length));
 }
 
@@ -722,52 +816,72 @@ void BitfieldManTest::testGetInorderMissingUnusedIndex()
   unsigned char ignoreBitfield[length];
   memset(ignoreBitfield, 0, sizeof(ignoreBitfield));
   size_t minSplitSize = 1_k;
-  size_t index;
   // 00000|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+  }
   bt.setUseBit(0);
   // 10000|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+  }
   minSplitSize = 2_k;
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+  }
   bt.unsetUseBit(0);
   bt.setBit(0);
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+  }
   bt.setAllBit();
   bt.unsetBit(10);
   // 11111|11111|01111|11111
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)10, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)10, *index);
+  }
   bt.setUseBit(10);
-  CPPUNIT_ASSERT(!bt.getInorderMissingUnusedIndex(index, minSplitSize,
+  CPPUNIT_ASSERT(!bt.getInorderMissingUnusedIndex(minSplitSize,
                                                   ignoreBitfield, length));
   bt.unsetUseBit(10);
   bt.setAllBit();
   // 11111|11111|11111|11111
-  CPPUNIT_ASSERT(!bt.getInorderMissingUnusedIndex(index, minSplitSize,
+  CPPUNIT_ASSERT(!bt.getInorderMissingUnusedIndex(minSplitSize,
                                                   ignoreBitfield, length));
   bt.clearAllBit();
   // 00000|00000|00000|00000
   for (int i = 0; i <= 1; ++i) {
     bitfield::flipBit(ignoreBitfield, length, i);
   }
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+  }
   bt.addFilter(3_k, 3_k);
   bt.enableFilter();
-  CPPUNIT_ASSERT(bt.getInorderMissingUnusedIndex(index, minSplitSize,
-                                                 ignoreBitfield, length));
-  CPPUNIT_ASSERT_EQUAL((size_t)3, index);
+  {
+    auto index = bt.getInorderMissingUnusedIndex(minSplitSize,
+                                                 ignoreBitfield, length);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)3, *index);
+  }
 }
 
 void BitfieldManTest::testGetGeomMissingUnusedIndex()
@@ -777,41 +891,61 @@ void BitfieldManTest::testGetGeomMissingUnusedIndex()
   unsigned char ignoreBitfield[length];
   memset(ignoreBitfield, 0, sizeof(ignoreBitfield));
   size_t minSplitSize = 1_k;
-  size_t index;
   // 00000|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
+  }
   bt.setUseBit(0);
   // 10000|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
+  }
   bt.setUseBit(1);
   // 11000|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
+  }
   bt.setUseBit(2);
   // 11100|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)4, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)4, *index);
+  }
   bt.setUseBit(4);
   // 11110|00000|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)8, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)8, *index);
+  }
   bt.setUseBit(8);
   // 11110|00010|00000|00000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)16, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)16, *index);
+  }
   bt.setUseBit(16);
   // 11110|00010|00000|01000
-  CPPUNIT_ASSERT(bt.getGeomMissingUnusedIndex(index, minSplitSize,
-                                              ignoreBitfield, length, 2, 0));
-  CPPUNIT_ASSERT_EQUAL((size_t)12, index);
+  {
+    auto index = bt.getGeomMissingUnusedIndex(minSplitSize,
+                                              ignoreBitfield, length, 2, 0);
+    CPPUNIT_ASSERT(index);
+    CPPUNIT_ASSERT_EQUAL((size_t)12, *index);
+  }
   bt.setUseBit(12);
 }
 

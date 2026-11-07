@@ -223,7 +223,7 @@ bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
   }
   else if (getOption()->getAsBool(PREF_BT_FORCE_ENCRYPTION) ||
            getOption()->getAsBool(PREF_BT_REQUIRE_CRYPTO)) {
-    A2_LOG_INFO(fmt("CUID#%" PRId64 " - Establishing connection using legacy"
+    A2_LOG_INFO(fmt("CUID#{} - Establishing connection using legacy"
                     " BitTorrent handshake is disabled by preference.",
                     getCuid()));
     tryNewPeer();
@@ -231,8 +231,7 @@ bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
   }
   else {
     // try legacy BitTorrent handshake
-    A2_LOG_INFO(fmt("CUID#%" PRId64
-                    " - Retry using legacy BitTorrent handshake.",
+    A2_LOG_INFO(fmt("CUID#{} - Retry using legacy BitTorrent handshake.",
                     getCuid()));
     auto command = make_unique<PeerInitiateConnectionCommand>(
         getCuid(), requestGroup_, getPeer(), getDownloadEngine(), btRuntime_,

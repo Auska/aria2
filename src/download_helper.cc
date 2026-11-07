@@ -108,14 +108,15 @@ std::shared_ptr<GroupId> getGID(const std::shared_ptr<Option>& option)
   std::shared_ptr<GroupId> gid;
   if (option->defined(PREF_GID)) {
     a2_gid_t n;
-    if (GroupId::toNumericId(n, option->get(PREF_GID).c_str()) != 0) {
+    if (GroupId::toNumericId(n, option->get(PREF_GID).c_str()) !=
+        GroupId::Err::OK) {
       throw DL_ABORT_EX(
-          fmt("%s is invalid for GID.", option->get(PREF_GID).c_str()));
+          fmt("{} is invalid for GID.", option->get(PREF_GID).c_str()));
     }
     gid = GroupId::import(n);
     if (!gid) {
       throw DL_ABORT_EX(
-          fmt("GID %s is not unique.", option->get(PREF_GID).c_str()));
+          fmt("GID {} is not unique.", option->get(PREF_GID).c_str()));
     }
   }
   else {
@@ -257,14 +258,14 @@ createBtMagnetRequestGroup(const std::string& magnetLink,
           bittorrent::getTorrentAttrs(rg->getDownloadContext())->infoHash;
 
       if (torrentAttrs->infoHash == actualInfoHash) {
-        A2_LOG_NOTICE(fmt("BitTorrent metadata was loaded from %s",
+        A2_LOG_NOTICE(fmt("BitTorrent metadata was loaded from {}",
                           torrentFilename.c_str()));
         rg->setMetadataInfo(createMetadataInfo(rg->getGroupId(), magnetLink));
         return rg;
       }
 
       A2_LOG_WARN(
-          fmt("BitTorrent metadata loaded from %s has unexpected infohash %s\n",
+          fmt("BitTorrent metadata loaded from {} has unexpected infohash {}\n",
               torrentFilename.c_str(), util::toHex(actualInfoHash).c_str()));
     }
   }

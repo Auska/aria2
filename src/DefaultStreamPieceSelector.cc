@@ -48,8 +48,13 @@ bool DefaultStreamPieceSelector::select(size_t& index, size_t minSplitSize,
                                         const unsigned char* ignoreBitfield,
                                         size_t length)
 {
-  return bitfieldMan_->getSparseMissingUnusedIndex(index, minSplitSize,
-                                                   ignoreBitfield, length);
+  auto rv = bitfieldMan_->getSparseMissingUnusedIndex(minSplitSize,
+                                                      ignoreBitfield, length);
+  if (!rv) {
+    return false;
+  }
+  index = *rv;
+  return true;
 }
 
 void DefaultStreamPieceSelector::onBitfieldInit() {}

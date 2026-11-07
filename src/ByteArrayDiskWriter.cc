@@ -60,7 +60,7 @@ void ByteArrayDiskWriter::writeData(const unsigned char* data,
                                     size_t dataLength, int64_t offset)
 {
   if (offset + dataLength > maxLength_) {
-    throw DL_ABORT_EX(fmt("Maximum length(%lu) exceeded.",
+    throw DL_ABORT_EX(fmt("Maximum length({}) exceeded.",
                           static_cast<unsigned long>(maxLength_)));
   }
   int64_t length = size();

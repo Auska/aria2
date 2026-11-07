@@ -85,7 +85,7 @@ size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
 {
   if (outLength < keyLength_) {
     throw DL_ABORT_EX(
-        fmt("Insufficient buffer for public key. expect:%lu, actual:%lu",
+        fmt("Insufficient buffer for public key. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
             static_cast<unsigned long>(outLength)));
   }
@@ -104,13 +104,13 @@ size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
 {
   if (outLength < keyLength_) {
     throw DL_ABORT_EX(
-        fmt("Insufficient buffer for secret. expect:%lu, actual:%lu",
+        fmt("Insufficient buffer for secret. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
             static_cast<unsigned long>(outLength)));
   }
   if (prime_.length() < peerPublicKeyLength) {
     throw DL_ABORT_EX(
-        fmt("peer public key overflows bignum. max:%lu, actual:%lu",
+        fmt("peer public key overflows bignum. max:{}, actual:{}",
             static_cast<unsigned long>(prime_.length()),
             static_cast<unsigned long>(peerPublicKeyLength)));
   }

@@ -175,8 +175,8 @@ DefaultBtRequestFactory::createRequestMessages(size_t max, bool endGame)
       for (auto i = std::begin(blockIndexes), eoi2 = std::end(blockIndexes);
            i != eoi2; ++i) {
         A2_LOG_DEBUG(
-            fmt("Creating RequestMessage index=%lu, begin=%u,"
-                " blockIndex=%lu",
+            fmt("Creating RequestMessage index={}, begin={},"
+                " blockIndex={}",
                 static_cast<unsigned long>(piece->getIndex()),
                 static_cast<unsigned int>((*i) * piece->getBlockLength()),
                 static_cast<unsigned long>(*i)));
@@ -219,8 +219,8 @@ DefaultBtRequestFactory::createRequestMessagesOnEndGame(size_t max)
       size_t blockIndex = *bitr;
       if (!dispatcher_->isOutstandingRequest(piece->getIndex(), blockIndex)) {
         A2_LOG_DEBUG(
-            fmt("Creating RequestMessage index=%lu, begin=%u,"
-                " blockIndex=%lu",
+            fmt("Creating RequestMessage index={}, begin={},"
+                " blockIndex={}",
                 static_cast<unsigned long>(piece->getIndex()),
                 static_cast<unsigned int>(blockIndex * piece->getBlockLength()),
                 static_cast<unsigned long>(blockIndex)));

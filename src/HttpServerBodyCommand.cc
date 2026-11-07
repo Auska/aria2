@@ -237,8 +237,7 @@ bool HttpServerBodyCommand::execute()
             dw->reset();
           }
           if (error < 0) {
-            A2_LOG_INFO(fmt("CUID#%" PRId64
-                            " - Failed to parse JSON-RPC request",
+            A2_LOG_INFO(fmt("CUID#{} - Failed to parse JSON-RPC request",
                             getCuid()));
             rpc::RpcResponse res(rpc::createJsonRpcErrorResponse(
                 -32700, "Parse error.", Null::g()));
@@ -298,8 +297,7 @@ bool HttpServerBodyCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#%" PRId64
-                       " - Error occurred while reading HTTP request body",
+    A2_LOG_INFO_EX(fmt("CUID#{} - Error occurred while reading HTTP request body",
                        getCuid()),
                    e);
     return true;

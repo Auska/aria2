@@ -109,7 +109,7 @@ getContentEncodingStreamFilter(HttpResponse* httpResponse,
   if (httpResponse->isContentEncodingSpecified()) {
     auto filter = httpResponse->getContentEncodingStreamFilter();
     if (!filter) {
-      A2_LOG_INFO(fmt("Content-Encoding %s is specified, but the current "
+      A2_LOG_INFO(fmt("Content-Encoding {} is specified, but the current "
                       "implementation doesn't support it. The decoding "
                       "process is skipped and the downloaded content will be "
                       "still encoded.",
@@ -210,7 +210,7 @@ bool HttpResponseCommand::executeInternal()
       httpResponse->getDigest(checksums);
       for (const auto& checksum : checksums) {
         if (ctx->getHashType().empty()) {
-          A2_LOG_DEBUG(fmt("Setting digest: type=%s, digest=%s",
+          A2_LOG_DEBUG(fmt("Setting digest: type={}, digest={}",
                            checksum.getHashType().c_str(),
                            checksum.getDigest().c_str()));
           ctx->setDigest(checksum.getHashType(), checksum.getDigest());

@@ -69,7 +69,7 @@ std::unique_ptr<ValueBase> decode(std::span<const std::byte> data, size_t& end)
                                data.size(), error);
   if (error < 0) {
     throw DL_ABORT_EX2(
-        fmt("Bencode decoding failed: error=%d", static_cast<int>(error)),
+        fmt("Bencode decoding failed: error={}", static_cast<int>(error)),
         error_code::BENCODE_PARSE_ERROR);
   }
   end = error;

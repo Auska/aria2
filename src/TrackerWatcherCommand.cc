@@ -127,7 +127,7 @@ bool HTTPAnnRequest::processResponse(
     const auto& fe = dctx->getFirstFileEntry();
     auto uris = fe->getUris();
 
-    A2_LOG_ERROR_EX(fmt("GID#%s - Tracker request %s failed",
+    A2_LOG_ERROR_EX(fmt("GID#{} - Tracker request {} failed",
                         GroupId::toHex(rg_->getGID()).c_str(), uris[0].c_str()),
                     e);
     return false;
@@ -288,7 +288,7 @@ void TrackerWatcherCommand::addConnection()
     command->setPeerStorage(peerStorage_);
     command->setPieceStorage(pieceStorage_);
     e_->addCommand(std::move(command));
-    A2_LOG_DEBUG(fmt("CUID#%" PRId64 " - Adding new command CUID#%" PRId64 "",
+    A2_LOG_DEBUG(fmt("CUID#{} - Adding new command CUID#{}",
                      getCuid(), peer->usedBy()));
   }
 }
@@ -397,7 +397,7 @@ TrackerWatcherCommand::createHTTPAnnRequest(const std::string& uri)
   // RequestGroup is not handled by RequestGroupMan.
   rg->clearPreDownloadHandler();
   rg->clearPostDownloadHandler();
-  A2_LOG_INFO(fmt("Creating tracker request group GID#%s",
+  A2_LOG_INFO(fmt("Creating tracker request group GID#{}",
                   GroupId::toHex(rg->getGID()).c_str()));
   return make_unique<HTTPAnnRequest>(std::move(rg));
 }

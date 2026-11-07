@@ -82,7 +82,7 @@ void DHTAutoSaveCommand::save()
 {
   std::string dhtFile = getDownloadEngine()->getOption()->get(
       family_ == AF_INET ? PREF_DHT_FILE_PATH : PREF_DHT_FILE_PATH6);
-  A2_LOG_INFO(fmt("Saving DHT routing table to %s.", dhtFile.c_str()));
+  A2_LOG_INFO(fmt("Saving DHT routing table to {}.", dhtFile.c_str()));
 
   // Removing tempFile is unnecessary because the file is truncated on
   // open.  But the bug in 1.10.4 creates directory for this path.
@@ -109,7 +109,7 @@ void DHTAutoSaveCommand::save()
     serializer.serialize(dhtFile);
   }
   catch (RecoverableException& e) {
-    A2_LOG_ERROR_EX(fmt("Exception caught while saving DHT routing table to %s",
+    A2_LOG_ERROR_EX(fmt("Exception caught while saving DHT routing table to {}",
                         dhtFile.c_str()),
                     e);
   }

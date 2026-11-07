@@ -58,7 +58,7 @@ void SimpleBtMessage::send()
                   toString().c_str()));
   auto msg = createMessage();
   A2_LOG_DEBUG(
-      fmt("msglength = %lu bytes", static_cast<unsigned long>(msg.size())));
+      fmt("msglength = {} bytes", static_cast<unsigned long>(msg.size())));
   getPeerConnection()->pushBytes(std::move(msg), getProgressUpdate());
 }
 

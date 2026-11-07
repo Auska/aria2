@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include <optional>
+
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -142,18 +144,17 @@ size_t countSetBitSlow(const Array& bitfield, size_t nbits)
 
 void flipBit(unsigned char* data, size_t length, size_t bitIndex);
 
-// Stores first set bit index of bitfield to index.  bitfield contains
-// nbits. Returns true if set bit is found. Otherwise returns false.
+// Returns index of the first set bit of bitfield.  bitfield contains
+// nbits. Returns nullopt if no set bit is found.
 template <typename Array>
-bool getFirstSetBitIndex(size_t& index, const Array& bitfield, size_t nbits)
+std::optional<size_t> getFirstSetBitIndex(const Array& bitfield, size_t nbits)
 {
   for (size_t i = 0; i < nbits; ++i) {
     if (bitfield::test(bitfield, nbits, i)) {
-      index = i;
-      return true;
+      return i;
     }
   }
-  return false;
+  return std::nullopt;
 }
 
 // Appends first at most n set bit index in bitfield to out.  bitfield

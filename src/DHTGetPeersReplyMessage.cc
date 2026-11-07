@@ -156,7 +156,7 @@ void DHTGetPeersReplyMessage::accept(DHTMessageCallback* callback)
 
 std::string DHTGetPeersReplyMessage::toStringOptional() const
 {
-  return fmt("token=%s, values=%lu, nodes=%lu", util::toHex(token_).c_str(),
+  return fmt("token={}, values={}, nodes={}", util::toHex(token_).c_str(),
              static_cast<unsigned long>(values_.size()),
              static_cast<unsigned long>(closestKNodes_.size()));
 }

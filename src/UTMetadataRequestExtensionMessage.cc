@@ -72,7 +72,7 @@ std::string UTMetadataRequestExtensionMessage::getPayload()
 
 std::string UTMetadataRequestExtensionMessage::toString() const
 {
-  return fmt("ut_metadata request piece=%lu",
+  return fmt("ut_metadata request piece={}",
              static_cast<unsigned long>(getIndex()));
 }
 
@@ -101,7 +101,7 @@ void UTMetadataRequestExtensionMessage::doReceivedAction()
         messageFactory_->createBtExtendedMessage(std::move(m)));
   }
   else {
-    throw DL_ABORT_EX(fmt("Metadata piece index is too big. piece=%lu",
+    throw DL_ABORT_EX(fmt("Metadata piece index is too big. piece={}",
                           static_cast<unsigned long>(getIndex())));
   }
 }

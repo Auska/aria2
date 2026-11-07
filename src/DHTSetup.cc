@@ -104,7 +104,7 @@ DHTSetup::setup(DownloadEngine* e, int family)
     }
     catch (RecoverableException& e) {
       A2_LOG_ERROR_EX(
-          fmt("Exception caught while loading DHT routing table from %s",
+          fmt("Exception caught while loading DHT routing table from {}",
               dhtFile.c_str()),
           e);
     }
@@ -137,7 +137,7 @@ DHTSetup::setup(DownloadEngine* e, int family)
       }
       localNode->setPort(port);
     }
-    A2_LOG_DEBUG(fmt("Initialized local node ID=%s",
+    A2_LOG_DEBUG(fmt("Initialized local node ID={}",
                      util::toHex(std::as_bytes(std::span{localNode->getID(), DHT_ID_LENGTH})).c_str()));
     auto tracker = std::make_shared<DHTMessageTracker>();
     auto routingTable = make_unique<DHTRoutingTable>(localNode);

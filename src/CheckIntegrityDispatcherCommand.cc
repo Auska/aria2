@@ -54,8 +54,8 @@ std::unique_ptr<Command>
 CheckIntegrityDispatcherCommand::createCommand(CheckIntegrityEntry* entry)
 {
   cuid_t newCUID = getDownloadEngine()->newCUID();
-  A2_LOG_INFO(fmt("CUID#%" PRId64 " - Dispatching CheckIntegrityCommand "
-                  "CUID#%" PRId64 ".",
+  A2_LOG_INFO(fmt("CUID#{} - Dispatching CheckIntegrityCommand "
+                  "CUID#{}.",
                   getCuid(), newCUID));
   return make_unique<CheckIntegrityCommand>(newCUID, entry->getRequestGroup(),
                                             getDownloadEngine(), entry);

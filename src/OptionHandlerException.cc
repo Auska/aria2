@@ -38,8 +38,8 @@
 namespace aria2 {
 
 namespace {
-const char* MESSAGE =
-    _("We encountered a problem while processing the option '--%s'.");
+constexpr auto MESSAGE =
+    _("We encountered a problem while processing the option '--{}'.");
 } // namespace
 
 OptionHandlerException::OptionHandlerException(const char* file, int line,

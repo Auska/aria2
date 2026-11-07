@@ -222,7 +222,7 @@ std::shared_ptr<Request> FileEntry::getRequest(
   if (i != std::end(requestPool_)) {
     req = *i;
     requestPool_.erase(i);
-    A2_LOG_DEBUG(fmt("Picked up from pool: %s", req->getUri().c_str()));
+    A2_LOG_DEBUG(fmt("Picked up from pool: {}", req->getUri().c_str()));
   }
 
   inFlightRequests_.insert(req);
@@ -291,13 +291,13 @@ std::shared_ptr<Request> FileEntry::findFasterRequest(
     std::string protocol = uri::getFieldString(us, USR_SCHEME, (*i).c_str());
     if (std::count(inFlightHosts.begin(), inFlightHosts.end(), host) >=
         maxConnectionPerServer_) {
-      A2_LOG_DEBUG(fmt("%s has already used %d times, not considered.",
+      A2_LOG_DEBUG(fmt("{} has already used {} times, not considered.",
                        (*i).c_str(), maxConnectionPerServer_));
       continue;
     }
     if (findSecond(usedHosts.begin(), usedHosts.end(), host) !=
         usedHosts.end()) {
-      A2_LOG_DEBUG(fmt("%s is in usedHosts, not considered", (*i).c_str()));
+      A2_LOG_DEBUG(fmt("{} is in usedHosts, not considered", (*i).c_str()));
       continue;
     }
     std::shared_ptr<ServerStat> ss = serverStatMan->find(host, protocol);
@@ -313,7 +313,7 @@ std::shared_ptr<Request> FileEntry::findFasterRequest(
     std::sort(fastCands.begin(), fastCands.end(), ServerStatFaster());
     auto fastestRequest = std::make_shared<Request>();
     const std::string& uri = fastCands.front().second;
-    A2_LOG_DEBUG(fmt("Selected %s from fastCands", uri.c_str()));
+    A2_LOG_DEBUG(fmt("Selected {} from fastCands", uri.c_str()));
     // Candidate URIs where already parsed when populating fastCands.
     (void)fastestRequest->setUri(uri);
     fastestRequest->setReferer(base->getReferer());
@@ -367,7 +367,7 @@ void FileEntry::removeURIWhoseHostnameIs(const std::string& hostname)
       newURIs.push_back(*itr);
     }
   }
-  A2_LOG_DEBUG(fmt("Removed %lu duplicate hostname URIs for path=%s",
+  A2_LOG_DEBUG(fmt("Removed {} duplicate hostname URIs for path={}",
                    static_cast<unsigned long>(uris_.size() - newURIs.size()),
                    getPath().c_str()));
   uris_.swap(newURIs);
@@ -411,7 +411,7 @@ void FileEntry::reuseUri(const std::vector<std::string>& ignore)
 {
   if (A2_LOG_DEBUG_ENABLED) {
     for (const auto& i : ignore) {
-      A2_LOG_DEBUG(fmt("ignore host=%s", i.c_str()));
+      A2_LOG_DEBUG(fmt("ignore host={}", i.c_str()));
     }
   }
   std::deque<std::string> uris = spentUris_;
@@ -428,7 +428,7 @@ void FileEntry::reuseUri(const std::vector<std::string>& ignore)
     for (std::vector<std::string>::const_iterator i = errorUris.begin(),
                                                   eoi = errorUris.end();
          i != eoi; ++i) {
-      A2_LOG_DEBUG(fmt("error URI=%s", (*i).c_str()));
+      A2_LOG_DEBUG(fmt("error URI={}", (*i).c_str()));
     }
   }
   std::vector<std::string> reusableURIs;
@@ -451,11 +451,11 @@ void FileEntry::reuseUri(const std::vector<std::string>& ignore)
   size_t ininum = reusableURIs.size();
   if (A2_LOG_DEBUG_ENABLED) {
     A2_LOG_DEBUG(
-        fmt("Found %u reusable URIs", static_cast<unsigned int>(ininum)));
+        fmt("Found {} reusable URIs", static_cast<unsigned int>(ininum)));
     for (std::vector<std::string>::const_iterator i = reusableURIs.begin(),
                                                   eoi = reusableURIs.end();
          i != eoi; ++i) {
-      A2_LOG_DEBUG(fmt("URI=%s", (*i).c_str()));
+      A2_LOG_DEBUG(fmt("URI={}", (*i).c_str()));
     }
   }
   uris_.insert(uris_.end(), reusableURIs.begin(), reusableURIs.end());

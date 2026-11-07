@@ -83,7 +83,7 @@ bool File::exists(std::string& err)
 {
   a2_struct_stat fstat;
   if (fillStat(fstat) != 0) {
-    err = fmt("Could not get file status: %s", strerror(errno));
+    err = fmt("Could not get file status: {}", strerror(errno));
     return false;
   }
   return true;
@@ -147,13 +147,13 @@ bool File::mkdirs()
       ++i;
     }
     std::string dir(begin, j);
-    A2_LOG_DEBUG(fmt("Making directory %s", dir.c_str()));
+    A2_LOG_DEBUG(fmt("Making directory {}", dir.c_str()));
     if (File(dir).isDir()) {
-      A2_LOG_DEBUG(fmt("%s exists and is a directory.", dir.c_str()));
+      A2_LOG_DEBUG(fmt("{} exists and is a directory.", dir.c_str()));
       continue;
     }
     if (a2mkdir(dir.c_str(), DIR_OPEN_MODE) == -1) {
-      A2_LOG_DEBUG(fmt("Failed to create %s", dir.c_str()));
+      A2_LOG_DEBUG(fmt("Failed to create {}", dir.c_str()));
       return false;
     }
   }

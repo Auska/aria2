@@ -78,14 +78,14 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
         }
       }
       else {
-        A2_LOG_INFO(fmt("Malformed DHT message. Missing 'y' key. From:%s:%u",
+        A2_LOG_INFO(fmt("Malformed DHT message. Missing 'y' key. From:{}:{}",
                         remoteAddr.c_str(), remotePort));
         return handleUnknownMessage(data, length, remoteAddr, remotePort);
       }
     }
     else {
       A2_LOG_INFO(fmt("Malformed DHT message. This is not a bencoded directory."
-                      " From:%s:%u",
+                      " From:{}:{}",
                       remoteAddr.c_str(), remotePort));
       return handleUnknownMessage(data, length, remoteAddr, remotePort);
     }
@@ -120,7 +120,7 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
 
 void DHTMessageReceiver::onMessageReceived(DHTMessage* message)
 {
-  A2_LOG_INFO(fmt("Message received: %s", message->toString().c_str()));
+  A2_LOG_INFO(fmt("Message received: {}", message->toString().c_str()));
   message->validate();
   message->doReceivedAction();
   message->getRemoteNode()->markGood();
@@ -135,7 +135,7 @@ std::unique_ptr<DHTUnknownMessage> DHTMessageReceiver::handleUnknownMessage(
     uint16_t remotePort)
 {
   auto m = factory_->createUnknownMessage(data, length, remoteAddr, remotePort);
-  A2_LOG_INFO(fmt("Message received: %s", m->toString().c_str()));
+  A2_LOG_INFO(fmt("Message received: {}", m->toString().c_str()));
   return m;
 }
 

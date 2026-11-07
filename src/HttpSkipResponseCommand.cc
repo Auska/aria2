@@ -194,7 +194,7 @@ bool HttpSkipResponseCommand::processResponse()
     int rnum =
         httpResponse_->getHttpRequest()->getRequest()->getRedirectCount();
     if (rnum >= Request::MAX_REDIRECT) {
-      throw DL_ABORT_EX2(fmt("Too many redirects: count=%u", rnum),
+      throw DL_ABORT_EX2(fmt("Too many redirects: count={}", rnum),
                          error_code::HTTP_TOO_MANY_REDIRECTS);
     }
     httpResponse_->processRedirect();

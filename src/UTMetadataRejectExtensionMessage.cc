@@ -56,7 +56,7 @@ std::string UTMetadataRejectExtensionMessage::getPayload()
 
 std::string UTMetadataRejectExtensionMessage::toString() const
 {
-  return fmt("ut_metadata reject piece=%lu",
+  return fmt("ut_metadata reject piece={}",
              static_cast<unsigned long>(getIndex()));
 }
 

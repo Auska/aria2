@@ -228,8 +228,9 @@ void RpcMethodTest::testAddUri()
     auto res = m.execute(std::move(req), e_.get());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(
-        0, GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
+                         GroupId::toNumericId(
+                             gid, downcast<String>(res.param)->s().c_str()));
     CPPUNIT_ASSERT_EQUAL(std::string("/sink"),
                          findReservedGroup(e_->getRequestGroupMan().get(), gid)
                              ->getOption()
@@ -345,8 +346,9 @@ void RpcMethodTest::testAddTorrent()
                        .exists());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(
-        0, GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
+                         GroupId::toNumericId(
+                             gid, downcast<String>(res.param)->s().c_str()));
 
     auto group = findReservedGroup(e_->getRequestGroupMan().get(), gid);
     CPPUNIT_ASSERT(group);
@@ -375,8 +377,9 @@ void RpcMethodTest::testAddTorrent()
     auto res = m.execute(std::move(req), e_.get());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(
-        0, GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
+                         GroupId::toNumericId(
+                             gid, downcast<String>(res.param)->s().c_str()));
     CPPUNIT_ASSERT_EQUAL(dir + "/aria2-0.8.2.tar.bz2",
                          findReservedGroup(e_->getRequestGroupMan().get(), gid)
                              ->getFirstFilePath());

@@ -73,14 +73,14 @@ std::string UTMetadataDataExtensionMessage::getPayload()
 
 std::string UTMetadataDataExtensionMessage::toString() const
 {
-  return fmt("ut_metadata data piece=%lu",
+  return fmt("ut_metadata data piece={}",
              static_cast<unsigned long>(getIndex()));
 }
 
 void UTMetadataDataExtensionMessage::doReceivedAction()
 {
   if (tracker_->tracks(getIndex())) {
-    A2_LOG_DEBUG(fmt("ut_metadata index=%lu found in tracking list",
+    A2_LOG_DEBUG(fmt("ut_metadata index={} found in tracking list",
                      static_cast<unsigned long>(getIndex())));
     tracker_->remove(getIndex());
     pieceStorage_->getDiskAdaptor()->writeData(
@@ -107,7 +107,7 @@ void UTMetadataDataExtensionMessage::doReceivedAction()
     }
   }
   else {
-    A2_LOG_DEBUG(fmt("ut_metadata index=%lu is not tracked",
+    A2_LOG_DEBUG(fmt("ut_metadata index={} is not tracked",
                      static_cast<unsigned long>(getIndex())));
   }
 }

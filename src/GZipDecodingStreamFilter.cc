@@ -105,7 +105,7 @@ GZipDecodingStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       finished_ = true;
     }
     else if (ret != Z_OK && ret != Z_BUF_ERROR) {
-      throw DL_ABORT_EX(fmt("libz::inflate() failed. cause:%s", strm_->msg));
+      throw DL_ABORT_EX(fmt("libz::inflate() failed. cause:{}", strm_->msg));
     }
 
     size_t produced = OUTBUF_LENGTH - strm_->avail_out;

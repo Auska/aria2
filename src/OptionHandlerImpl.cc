@@ -123,8 +123,8 @@ void IntegerRangeOptionHandler::parseArg(Option& option,
     if (v < min_ || max_ < v) {
       std::string msg = pref_->k;
       msg += " ";
-      msg += _("must be between %d and %d.");
-      throw DL_ABORT_EX(fmt(msg.c_str(), min_, max_));
+      msg += std::format(_("must be between {} and {}."), min_, max_);
+      throw DL_ABORT_EX(msg);
     }
     option.put(pref_, optarg);
   }
@@ -132,7 +132,7 @@ void IntegerRangeOptionHandler::parseArg(Option& option,
 
 std::string IntegerRangeOptionHandler::createPossibleValuesString() const
 {
-  return fmt("%d-%d", min_, max_);
+  return fmt("{}-{}", min_, max_);
 }
 
 NumberOptionHandler::NumberOptionHandler(PrefPtr pref, const char* description,
@@ -156,7 +156,7 @@ void NumberOptionHandler::parseArg(Option& option,
     parseArg(option, number);
   }
   else {
-    throw DL_ABORT_EX(fmt("Bad number %s", optarg.c_str()));
+    throw DL_ABORT_EX(fmt("Bad number {}", optarg.c_str()));
   }
 }
 
@@ -170,13 +170,13 @@ void NumberOptionHandler::parseArg(Option& option, int64_t number) const
   std::string msg = pref_->k;
   msg += " ";
   if (min_ == -1 && max_ != -1) {
-    msg += fmt(_("must be smaller than or equal to %" PRId64 "."), max_);
+    msg += fmt(_("must be smaller than or equal to {}."), max_);
   }
   else if (min_ != -1 && max_ != -1) {
-    msg += fmt(_("must be between %" PRId64 " and %" PRId64 "."), min_, max_);
+    msg += fmt(_("must be between {} and {}."), min_, max_);
   }
   else if (min_ != -1 && max_ == -1) {
-    msg += fmt(_("must be greater than or equal to %" PRId64 "."), min_);
+    msg += fmt(_("must be greater than or equal to {}."), min_);
   }
   else {
     msg += _("must be a number.");
@@ -242,13 +242,13 @@ void FloatNumberOptionHandler::parseArg(Option& option,
     std::string msg = pref_->k;
     msg += " ";
     if (min_ < 0 && max_ >= 0) {
-      msg += fmt(_("must be smaller than or equal to %.1f."), max_);
+      msg += fmt(_("must be smaller than or equal to {:.1f}."), max_);
     }
     else if (min_ >= 0 && max_ >= 0) {
-      msg += fmt(_("must be between %.1f and %.1f."), min_, max_);
+      msg += fmt(_("must be between {:.1f} and {:.1f}."), min_, max_);
     }
     else if (min_ >= 0 && max_ < 0) {
-      msg += fmt(_("must be greater than or equal to %.1f."), min_);
+      msg += fmt(_("must be greater than or equal to {:.1f}."), min_);
     }
     else {
       msg += _("must be a number.");
@@ -264,14 +264,14 @@ std::string FloatNumberOptionHandler::createPossibleValuesString() const
     valuesString += "*";
   }
   else {
-    valuesString += fmt("%.1f", min_);
+    valuesString += fmt("{:.1f}", min_);
   }
   valuesString += "-";
   if (max_ < 0) {
     valuesString += "*";
   }
   else {
-    valuesString += fmt("%.1f", max_);
+    valuesString += fmt("{:.1f}", max_);
   }
   return valuesString;
 }
@@ -386,7 +386,7 @@ void ChecksumOptionHandler::parseArg(Option& option,
       std::find(std::begin(acceptableTypes_), std::end(acceptableTypes_),
                 hashType) == std::end(acceptableTypes_)) {
     throw DL_ABORT_EX(
-        fmt("Checksum type %s is not acceptable", hashType.c_str()));
+        fmt("Checksum type {} is not acceptable", hashType.c_str()));
   }
   std::string hexDigest(p.second.first, p.second.second);
   util::lowercase(hashType);
@@ -639,7 +639,7 @@ void OptimizeConcurrentDownloadsOptionHandler::parseArg(
       errno = 0;
       strtod(sptr->c_str(), &end);
       if (errno != 0 || sptr->c_str() + sptr->size() != end) {
-        throw DL_ABORT_EX(fmt("Bad number '%s'", sptr->c_str()));
+        throw DL_ABORT_EX(fmt("Bad number '{}'", sptr->c_str()));
       }
       option.put(pref, *sptr);
 
@@ -680,19 +680,19 @@ void DeprecatedOptionHandler::parse(Option& option,
                                     const std::string& arg) const
 {
   if (repOptHandler_) {
-    A2_LOG_WARN(fmt(_("--%s option is deprecated. Use --%s option instead. %s"),
+    A2_LOG_WARN(fmt(_("--{} option is deprecated. Use --{} option instead. {}"),
                     depOptHandler_->getName(), repOptHandler_->getName(),
                     additionalMessage_.c_str()));
     repOptHandler_->parse(option, arg);
   }
   else if (stillWork_) {
-    A2_LOG_WARN(fmt(_("--%s option will be deprecated in the future release. "
-                      "%s"),
+    A2_LOG_WARN(fmt(_("--{} option will be deprecated in the future release. "
+                      "{}"),
                     depOptHandler_->getName(), additionalMessage_.c_str()));
     depOptHandler_->parse(option, arg);
   }
   else {
-    A2_LOG_WARN(fmt(_("--%s option is deprecated. %s"),
+    A2_LOG_WARN(fmt(_("--{} option is deprecated. {}"),
                     depOptHandler_->getName(), additionalMessage_.c_str()));
   }
 }

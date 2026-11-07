@@ -56,7 +56,7 @@ BtAllowedFastMessage::create(const unsigned char* data, size_t dataLength)
 void BtAllowedFastMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
-    throw DL_ABORT_EX(fmt("%s received while fast extension is disabled",
+    throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
                           toString().c_str()));
   }
   if (isMetadataGetMode()) {

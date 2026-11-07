@@ -87,7 +87,7 @@ const std::shared_ptr<Request>& ConnectCommand::getProxyRequest() const
 bool ConnectCommand::executeInternal()
 {
   if (backupConnectionInfo_ && !backupConnectionInfo_->ipaddr.empty()) {
-    A2_LOG_INFO(fmt("CUID#%" PRId64 " - Use backup connection address %s",
+    A2_LOG_INFO(fmt("CUID#{} - Use backup connection address {}",
                     getCuid(), backupConnectionInfo_->ipaddr.c_str()));
     getDownloadEngine()->markBadIPAddress(getRequest()->getConnectedHostname(),
                                           getRequest()->getConnectedAddr(),

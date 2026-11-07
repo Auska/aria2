@@ -61,7 +61,7 @@ bool LpdDispatchMessageCommand::execute()
   }
   if (dispatcher_->isAnnounceReady()) {
     try {
-      A2_LOG_INFO(fmt("Dispatching LPD message for infohash=%s",
+      A2_LOG_INFO(fmt("Dispatching LPD message for infohash={}",
                       util::toHex(dispatcher_->getInfoHash()).c_str()));
       if (dispatcher_->sendMessage()) {
         A2_LOG_INFO("Sending LPD message is complete.");
@@ -72,7 +72,7 @@ bool LpdDispatchMessageCommand::execute()
         ++tryCount_;
         if (tryCount_ >= 5) {
           A2_LOG_INFO(
-              fmt("Sending LPD message %u times but all failed.", tryCount_));
+              fmt("Sending LPD message {} times but all failed.", tryCount_));
           dispatcher_->resetAnnounceTimer();
           tryCount_ = 0;
         }

@@ -48,8 +48,13 @@ bool InorderStreamPieceSelector::select(size_t& index, size_t minSplitSize,
                                         const unsigned char* ignoreBitfield,
                                         size_t length)
 {
-  return bitfieldMan_->getInorderMissingUnusedIndex(index, minSplitSize,
-                                                    ignoreBitfield, length);
+  auto rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
+                                                       ignoreBitfield, length);
+  if (!rv) {
+    return false;
+  }
+  index = *rv;
+  return true;
 }
 
 void InorderStreamPieceSelector::onBitfieldInit() {}

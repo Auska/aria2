@@ -77,7 +77,7 @@ bool LpdReceiveMessageCommand::execute()
     auto& reg = e_->getBtRegistry();
     auto& dctx = reg->getDownloadContext(m->infoHash);
     if (!dctx) {
-      A2_LOG_DEBUG(fmt("Download Context is null for infohash=%s.",
+      A2_LOG_DEBUG(fmt("Download Context is null for infohash={}.",
                        util::toHex(m->infoHash).c_str()));
       continue;
     }
@@ -93,12 +93,12 @@ bool LpdReceiveMessageCommand::execute()
     assert(peerStorage);
     auto& peer = m->peer;
     if (peerStorage->addPeer(peer)) {
-      A2_LOG_DEBUG(fmt("LPD peer %s:%u local=%d added.",
+      A2_LOG_DEBUG(fmt("LPD peer {}:{} local={} added.",
                        peer->getIPAddress().c_str(), peer->getPort(),
                        peer->isLocalPeer() ? 1 : 0));
     }
     else {
-      A2_LOG_DEBUG(fmt("LPD peer %s:%u local=%d not added.",
+      A2_LOG_DEBUG(fmt("LPD peer {}:{} local={} not added.",
                        peer->getIPAddress().c_str(), peer->getPort(),
                        peer->isLocalPeer() ? 1 : 0));
     }

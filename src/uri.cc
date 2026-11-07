@@ -195,7 +195,7 @@ std::string construct(const UriStruct& us)
 
   uint16_t defPort = getDefaultPort(us.protocol);
   if (us.port != 0 && defPort != us.port) {
-    res += fmt(":%u", us.port);
+    res += fmt(":{}", us.port);
   }
 
   res += us.dir;

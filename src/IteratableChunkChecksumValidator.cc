@@ -87,7 +87,7 @@ void IteratableChunkChecksumValidator::validateChunk()
       }
     }
     catch (RecoverableException& ex) {
-      A2_LOG_DEBUG_EX(fmt("Caught exception while validating piece index=%lu."
+      A2_LOG_DEBUG_EX(fmt("Caught exception while validating piece index={}."
                           " Some part of file may be missing."
                           " Continue operation.",
                           static_cast<unsigned long>(currentIndex_)),

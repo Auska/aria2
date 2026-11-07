@@ -95,8 +95,7 @@ void MultiFileAllocationIterator::allocateChunk()
 
     if ((*entryItr_)->needsFileAllocation() &&
         (*entryItr_)->size() < fileEntry->getLength()) {
-      A2_LOG_INFO(fmt("Allocating file %s: target size=%" PRId64
-                      ", current size=%" PRId64,
+      A2_LOG_INFO(fmt("Allocating file {}: target size={}, current size={}",
                       (*entryItr_)->getFilePath().c_str(),
                       fileEntry->getLength(), (*entryItr_)->size()));
       switch (diskAdaptor_->getFileAllocationMethod()) {

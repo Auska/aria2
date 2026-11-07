@@ -53,20 +53,22 @@ bool RandomStreamPieceSelector::select(size_t& index, size_t minSplitSize,
       bitfieldMan_->countBlock());
 
   auto rv = bitfieldMan_->getInorderMissingUnusedIndex(
-      index, start, bitfieldMan_->countBlock(), minSplitSize, ignoreBitfield,
-      length);
-  if (rv) {
-    return true;
-  }
-  rv = bitfieldMan_->getInorderMissingUnusedIndex(index, 0, start, minSplitSize,
-                                                  ignoreBitfield, length);
-  if (rv) {
-    return true;
-  }
-  // Fall back to inorder search because randomized search may fail
-  // because of |minSplitSize| constraint.
-  return bitfieldMan_->getInorderMissingUnusedIndex(index, minSplitSize,
+      start, bitfieldMan_->countBlock(), minSplitSize, ignoreBitfield, length);
+  if (!rv) {
+    rv = bitfieldMan_->getInorderMissingUnusedIndex(0, start, minSplitSize,
                                                     ignoreBitfield, length);
+  }
+  if (!rv) {
+    // Fall back to inorder search because randomized search may fail
+    // because of |minSplitSize| constraint.
+    rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize, ignoreBitfield,
+                                                    length);
+  }
+  if (!rv) {
+    return false;
+  }
+  index = *rv;
+  return true;
 }
 
 void RandomStreamPieceSelector::onBitfieldInit() {}

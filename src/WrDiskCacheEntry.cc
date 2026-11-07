@@ -58,7 +58,7 @@ WrDiskCacheEntry::WrDiskCacheEntry(
 WrDiskCacheEntry::~WrDiskCacheEntry()
 {
   if (!set_.empty()) {
-    A2_LOG_WARN(fmt("WrDiskCacheEntry is not empty size=%lu",
+    A2_LOG_WARN(fmt("WrDiskCacheEntry is not empty size={}",
                     static_cast<unsigned long>(size_)));
   }
   deleteDataCells();
@@ -91,7 +91,7 @@ void WrDiskCacheEntry::clear() { deleteDataCells(); }
 
 bool WrDiskCacheEntry::cacheData(DataCell* dataCell)
 {
-  A2_LOG_DEBUG(fmt("WrDiskCacheEntry cache goff=%" PRId64 ", len=%lu",
+  A2_LOG_DEBUG(fmt("WrDiskCacheEntry cache goff={}, len={}",
                    dataCell->goff, static_cast<unsigned long>(dataCell->len)));
   if (set_.insert(dataCell).second) {
     size_ += dataCell->len;

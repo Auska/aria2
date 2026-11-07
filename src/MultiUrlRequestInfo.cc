@@ -206,7 +206,7 @@ int MultiUrlRequestInfo::prepare()
           e_->getCookieStorage()->load(cookieFile.getPath(),
                                        Time().getTimeFromEpoch())) {
         A2_LOG_INFO(
-            fmt("Loaded cookies from '%s'.", cookieFile.getPath().c_str()));
+            fmt("Loaded cookies from '{}'.", cookieFile.getPath().c_str()));
       }
       else {
         A2_LOG_ERROR(
@@ -315,11 +315,11 @@ error_code::Value MultiUrlRequestInfo::getResult()
     const std::string& filename = option_->get(PREF_SAVE_SESSION);
     if (sessionSerializer.save(filename)) {
       A2_LOG_NOTICE(
-          fmt(_("Serialized session to '%s' successfully."), filename.c_str()));
+          fmt(_("Serialized session to '{}' successfully."), filename.c_str()));
     }
     else {
       A2_LOG_NOTICE(
-          fmt(_("Failed to serialize session to '%s'."), filename.c_str()));
+          fmt(_("Failed to serialize session to '{}'."), filename.c_str()));
     }
   }
   SingletonHolder<Notifier>::clear();

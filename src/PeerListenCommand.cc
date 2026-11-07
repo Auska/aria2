@@ -76,12 +76,12 @@ bool PeerListenCommand::bindPort(uint16_t& port, SegList<int>& sgl)
       socket_->bind(nullptr, port, family_);
       socket_->beginListen();
       A2_LOG_NOTICE(
-          fmt(_("IPv%d BitTorrent: listening on TCP port %u"), ipv, port));
+          fmt(_("IPv{} BitTorrent: listening on TCP port {}"), ipv, port));
       return true;
     }
     catch (RecoverableException& ex) {
       A2_LOG_ERROR_EX(
-          fmt("IPv%d BitTorrent: failed to bind TCP port %u", ipv, port), ex);
+          fmt("IPv{} BitTorrent: failed to bind TCP port {}", ipv, port), ex);
       socket_->closeConnection();
     }
   }
@@ -113,10 +113,10 @@ bool PeerListenCommand::execute()
       cuid_t cuid = e_->newCUID();
       e_->addCommand(
           make_unique<ReceiverMSEHandshakeCommand>(cuid, peer, e_, peerSocket));
-      A2_LOG_DEBUG(fmt("Accepted the connection from %s:%u.",
+      A2_LOG_DEBUG(fmt("Accepted the connection from {}:{}.",
                        peer->getIPAddress().c_str(), peer->getPort()));
       A2_LOG_DEBUG(fmt(
-          "Added CUID#%" PRId64 " to receive BitTorrent/MSE handshake.", cuid));
+          "Added CUID#{} to receive BitTorrent/MSE handshake.", cuid));
     }
     catch (RecoverableException& ex) {
       A2_LOG_DEBUG_EX(fmt(MSG_ACCEPT_FAILURE, getCuid()), ex);

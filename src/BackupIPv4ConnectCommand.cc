@@ -83,7 +83,7 @@ bool BackupIPv4ConnectCommand::execute()
   }
   else if (info_->cancel) {
     A2_LOG_INFO(
-        fmt("CUID#%" PRId64 " - Backup connection canceled", getCuid()));
+        fmt("CUID#{} - Backup connection canceled", getCuid()));
     retval = true;
   }
   else if (socket_) {
@@ -91,7 +91,7 @@ bool BackupIPv4ConnectCommand::execute()
       try {
         std::string error = socket_->getSocketError();
         if (error.empty()) {
-          A2_LOG_INFO(fmt("CUID#%" PRId64 " - Backup connection to %s "
+          A2_LOG_INFO(fmt("CUID#{} - Backup connection to {} "
                           "established",
                           getCuid(), ipaddr_.c_str()));
           info_->ipaddr = ipaddr_;
@@ -102,14 +102,14 @@ bool BackupIPv4ConnectCommand::execute()
           retval = true;
         }
         else {
-          A2_LOG_INFO(fmt("CUID#%" PRId64 " - Backup connection failed: %s",
+          A2_LOG_INFO(fmt("CUID#{} - Backup connection failed: {}",
                           getCuid(), error.c_str()));
           retval = true;
         }
       }
       catch (RecoverableException& e) {
         A2_LOG_INFO_EX(
-            fmt("CUID#%" PRId64 " - Backup connection failed", getCuid()), e);
+            fmt("CUID#{} - Backup connection failed", getCuid()), e);
         retval = true;
       }
     }
@@ -128,7 +128,7 @@ bool BackupIPv4ConnectCommand::execute()
       }
       catch (RecoverableException& e) {
         A2_LOG_INFO_EX(
-            fmt("CUID#%" PRId64 " - Backup connection failed", getCuid()), e);
+            fmt("CUID#{} - Backup connection failed", getCuid()), e);
         socket_.reset();
         retval = true;
       }
@@ -136,7 +136,7 @@ bool BackupIPv4ConnectCommand::execute()
   }
   else if (timeoutCheck_.difference(global::wallclock()) >= timeout_) {
     A2_LOG_INFO(
-        fmt("CUID#%" PRId64 " - Backup connection command timeout", getCuid()));
+        fmt("CUID#{} - Backup connection command timeout", getCuid()));
     retval = true;
   }
   if (!retval) {

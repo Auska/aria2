@@ -34,24 +34,10 @@
 /* copyright --> */
 #include "fmt.h"
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-
 namespace aria2 {
 
-std::string fmt(const char* fmtTemplate, ...)
-{
-  va_list ap;
-  va_start(ap, fmtTemplate);
-  char buf[2048];
-  int rv;
-  rv = vsnprintf(buf, sizeof(buf), fmtTemplate, ap);
-  if (rv < 0) {
-    buf[0] = '\0';
-  }
-  va_end(ap);
-  return buf;
-}
+// fmt() and fmtRuntime() are header-only templates; this translation unit
+// is kept so the build file lists stay valid and to give the templates a
+// place to live if they ever need a non-inline part.
 
 } // namespace aria2

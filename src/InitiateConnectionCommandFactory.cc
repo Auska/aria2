@@ -72,7 +72,7 @@ InitiateConnectionCommandFactory::createInitiateConnectionCommand(
   }
   else if (req->getProtocol() == "ftp") {
     if (req->getFile().empty()) {
-      throw DL_ABORT_EX(fmt("FTP URI %s doesn't contain file path.",
+      throw DL_ABORT_EX(fmt("FTP URI {} doesn't contain file path.",
                             req->getUri().c_str()));
     }
     return make_unique<FtpInitiateConnectionCommand>(cuid, req, fileEntry,
@@ -81,7 +81,7 @@ InitiateConnectionCommandFactory::createInitiateConnectionCommand(
   else {
     // these protocols are not supported yet
     throw DL_ABORT_EX(
-        fmt("%s is not supported yet.", req->getProtocol().c_str()));
+        fmt("{} is not supported yet.", req->getProtocol().c_str()));
   }
 }
 

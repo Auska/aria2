@@ -95,7 +95,7 @@ void putOptions(struct option* longOpts, int* plopt, InputIterator first,
       if ((*longOpts).name == nullptr) {
         auto errNum = errno;
         A2_LOG_ERROR(
-            fmt("strdup() failed: %s", util::safeStrerror(errNum).c_str()));
+            fmt("strdup() failed: {}", util::safeStrerror(errNum).c_str()));
         exit(EXIT_FAILURE);
       }
 #endif // !HAVE_OPTION_CONST_NAME
@@ -251,7 +251,7 @@ void OptionParser::parse(Option& option, std::istream& is) const
       handler->parse(option, std::string(nv.second.first, nv.second.second));
     }
     else {
-      A2_LOG_WARN(fmt("Unknown option: %s", line.c_str()));
+      A2_LOG_WARN(fmt("Unknown option: {}", line.c_str()));
     }
   }
 }
@@ -265,7 +265,7 @@ void OptionParser::parse(Option& option, const KeyVals& options) const
       handler->parse(option, o.second);
     }
     else {
-      A2_LOG_WARN(fmt("Unknown option: %s", o.first.c_str()));
+      A2_LOG_WARN(fmt("Unknown option: {}", o.first.c_str()));
     }
   }
 }

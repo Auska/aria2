@@ -130,7 +130,7 @@ void BtSeederStateChoke::unchoke(
 
     peer->chokingRequired(false);
 
-    A2_LOG_INFO(fmt("RU: %s:%u, ulspd=%d", peer->getIPAddress().c_str(),
+    A2_LOG_INFO(fmt("RU: {}:{}, ulspd={}", peer->getIPAddress().c_str(),
                     peer->getPort(), (*r).getUploadSpeed()));
   }
 
@@ -145,14 +145,14 @@ void BtSeederStateChoke::unchoke(
       peer->optUnchoking(true);
 
       A2_LOG_INFO(
-          fmt("POU: %s:%u", peer->getIPAddress().c_str(), peer->getPort()));
+          fmt("POU: {}:{}", peer->getIPAddress().c_str(), peer->getPort()));
     }
   }
 }
 
 void BtSeederStateChoke::executeChoke(const PeerSet& peerSet)
 {
-  A2_LOG_INFO(fmt("Seeder state, %d choke round started", round_));
+  A2_LOG_INFO(fmt("Seeder state, {} choke round started", round_));
   lastRound_ = global::wallclock();
 
   std::vector<PeerEntry> peerEntries;

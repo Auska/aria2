@@ -101,7 +101,7 @@ void DHTNode::timeout() { ++condition_; }
 
 std::string DHTNode::toString() const
 {
-  return fmt("DHTNode ID=%s, Host=%s(%u), Condition=%d, RTT=%ld",
+  return fmt("DHTNode ID={}, Host={}({}), Condition={}, RTT={}",
              util::toHex(std::as_bytes(std::span{id_, DHT_ID_LENGTH})).c_str(), ipaddr_.c_str(), port_,
              condition_, static_cast<long int>(rtt_.count()));
 }

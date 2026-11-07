@@ -129,13 +129,13 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
   if (memcmp(message->getPeerId(), bittorrent::getStaticPeerId(),
              PEER_ID_LENGTH) == 0) {
     throw DL_ABORT_EX(
-        fmt("CUID#%" PRId64 " - Drop connection from the same Peer ID", cuid_));
+        fmt("CUID#{} - Drop connection from the same Peer ID", cuid_));
   }
   for (auto& peer : peerStorage_->getUsedPeers()) {
     if (peer->isActive() &&
         memcmp(peer->getPeerId(), message->getPeerId(), PEER_ID_LENGTH) == 0) {
       throw DL_ABORT_EX(
-          fmt("CUID#%" PRId64 " - Same Peer ID has been already seen.", cuid_));
+          fmt("CUID#{} - Same Peer ID has been already seen.", cuid_));
     }
   }
 
@@ -441,7 +441,7 @@ void DefaultBtInteractive::cancelAllPiece()
                                              eoi = metadataRequests.end();
          i != eoi; ++i) {
       A2_LOG_DEBUG(
-          fmt("Cancel metadata: piece=%lu", static_cast<unsigned long>(*i)));
+          fmt("Cancel metadata: piece={}", static_cast<unsigned long>(*i)));
       pieceStorage_->cancelPiece(pieceStorage_->getPiece(*i), cuid_);
     }
   }
@@ -481,7 +481,7 @@ void DefaultBtInteractive::checkActiveInteraction()
       // TODO change the message
       throw DL_ABORT_EX(
           fmt("Disconnect peer because we are not interested each other"
-              " after %ld second(s).",
+              " after {} second(s).",
               static_cast<long int>(interval)));
     }
   }

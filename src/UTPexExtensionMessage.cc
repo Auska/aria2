@@ -120,7 +120,7 @@ UTPexExtensionMessage::createCompactPeerListAndFlag(
 
 std::string UTPexExtensionMessage::toString() const
 {
-  return fmt("ut_pex added=%lu, dropped=%lu",
+  return fmt("ut_pex added={}, dropped={}",
              static_cast<unsigned long>(freshPeers_.size()),
              static_cast<unsigned long>(droppedPeers_.size()));
 }

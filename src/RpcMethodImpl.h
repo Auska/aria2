@@ -64,12 +64,12 @@ const T* checkParam(const RpcRequest& req, size_t index, bool required = false)
   const T* p = 0;
   if (req.params->size() > index) {
     if ((p = downcast<T>(req.params->get(index))) == 0) {
-      throw DL_ABORT_EX(fmt("The parameter at %lu has wrong type.",
+      throw DL_ABORT_EX(fmt("The parameter at {} has wrong type.",
                             static_cast<unsigned long>(index)));
     }
   }
   else if (required) {
-    throw DL_ABORT_EX(fmt("The parameter at %lu is required but missing.",
+    throw DL_ABORT_EX(fmt("The parameter at {} is required but missing.",
                           static_cast<unsigned long>(index)));
   }
   return p;
@@ -91,7 +91,7 @@ struct IntegerGE {
     }
     else {
       if (error) {
-        *error = fmt("the value must be greater than or equal to %d.", min);
+        *error = fmt("the value must be greater than or equal to {}.", min);
       }
       return false;
     }
@@ -107,7 +107,7 @@ const Integer* checkRequiredInteger(const RpcRequest& req, size_t index,
   const Integer* param = checkRequiredParam<Integer>(req, index);
   std::string error;
   if (!validator(param, &error)) {
-    throw DL_ABORT_EX(fmt("The integer parameter at %lu has invalid value: %s",
+    throw DL_ABORT_EX(fmt("The integer parameter at {} has invalid value: {}",
                           static_cast<unsigned long>(index), error.c_str()));
   }
   return param;

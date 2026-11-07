@@ -205,7 +205,7 @@ bool FtpConnection::sendEprt(const std::shared_ptr<SocketCore>& serverSocket)
   if (socketBuffer_.sendBufferIsEmpty()) {
     auto endpoint = serverSocket->getAddrInfo();
     auto request =
-        fmt("EPRT |%d|%s|%u|\r\n", endpoint.family == AF_INET ? 1 : 2,
+        fmt("EPRT |{}|{}|{}|\r\n", endpoint.family == AF_INET ? 1 : 2,
             endpoint.addr.c_str(), endpoint.port);
     A2_LOG_INFO(fmt(MSG_SENDING_REQUEST, cuid_, request.c_str()));
     socketBuffer_.pushStr(std::move(request));
@@ -223,7 +223,7 @@ bool FtpConnection::sendPort(const std::shared_ptr<SocketCore>& serverSocket)
            &ipaddr[2], &ipaddr[3]);
     auto svEndpoint = serverSocket->getAddrInfo();
     auto request =
-        fmt("PORT %d,%d,%d,%d,%d,%d\r\n", ipaddr[0], ipaddr[1], ipaddr[2],
+        fmt("PORT {},{},{},{},{},{}\r\n", ipaddr[0], ipaddr[1], ipaddr[2],
             ipaddr[3], svEndpoint.port / 256, svEndpoint.port % 256);
     A2_LOG_INFO(fmt(MSG_SENDING_REQUEST, cuid_, request.c_str()));
     socketBuffer_.pushStr(std::move(request));
@@ -236,7 +236,7 @@ bool FtpConnection::sendRest(const std::shared_ptr<Segment>& segment)
 {
   if (socketBuffer_.sendBufferIsEmpty()) {
     std::string request =
-        fmt("REST %" PRId64 "\r\n", segment ? segment->getPositionToWrite()
+        fmt("REST {}\r\n", segment ? segment->getPositionToWrite()
                                             : static_cast<int64_t>(0LL));
     A2_LOG_INFO(fmt(MSG_SENDING_REQUEST, cuid_, request.c_str()));
     socketBuffer_.pushStr(std::move(request));
@@ -289,7 +289,7 @@ FtpConnection::findEndOfResponse(int status, const std::string& buf) const
   if (buf.at(3) == '-') {
     // multi line response
     std::string::size_type p;
-    p = buf.find(fmt("\r\n%d ", status));
+    p = buf.find(fmt("\r\n{} ", status));
     if (p == std::string::npos) {
       return std::string::npos;
     }
@@ -328,7 +328,7 @@ bool FtpConnection::bulkReceiveResponse(std::pair<int, std::string>& response)
       }
     }
     if (strbuf_.size() + size > MAX_RECV_BUFFER) {
-      throw DL_RETRY_EX(fmt("Max FTP recv buffer reached. length=%lu",
+      throw DL_RETRY_EX(fmt("Max FTP recv buffer reached. length={}",
                             static_cast<unsigned long>(strbuf_.size() + size)));
     }
     strbuf_.append(std::begin(buf), std::begin(buf) + size);
@@ -367,12 +367,6 @@ int FtpConnection::receiveResponse()
     return 0;
   }
 }
-
-#define LONGLONG_PRINTF "%" PRId64 ""
-#define ULONGLONG_PRINTF "%llu"
-#define LONGLONG_SCANF "%Ld"
-// Mac OSX uses "%llu" for 64bits integer.
-#define ULONGLONG_SCANF "%Lu"
 
 int FtpConnection::receiveSizeResponse(int64_t& size)
 {
@@ -497,7 +491,7 @@ int FtpConnection::receivePasvResponse(std::pair<std::string, uint16_t>& dest)
         sscanf(response.second.c_str() + p, "(%d,%d,%d,%d,%d,%d).", &h1, &h2,
                &h3, &h4, &p1, &p2);
         // ip address
-        dest.first = fmt("%d.%d.%d.%d", h1, h2, h3, h4);
+        dest.first = fmt("{}.{}.{}.{}", h1, h2, h3, h4);
         // port number
         dest.second = 256 * p1 + p2;
       }

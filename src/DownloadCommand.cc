@@ -122,7 +122,7 @@ void flushWrDiskCacheEntry(WrDiskCache* wrDiskCache,
         WrDiskCacheEntry::CACHE_ERR_SUCCESS) {
       segment->clear(wrDiskCache);
       throw DOWNLOAD_FAILURE_EXCEPTION2(
-          fmt("Write disk cache flush failure index=%lu",
+          fmt("Write disk cache flush failure index={}",
               static_cast<unsigned long>(piece->getIndex())),
           piece->getWrDiskCacheEntry()->getErrorCode());
     }
@@ -252,7 +252,7 @@ bool DownloadCommand::executeInternal()
                !getDownloadContext()->hasAttribute(CTX_ATTR_BT)) &&
 #endif // ENABLE_BITTORRENT
               segment->isHashCalculated()) {
-            A2_LOG_DEBUG(fmt("Hash is available! index=%lu",
+            A2_LOG_DEBUG(fmt("Hash is available! index={}",
                              static_cast<unsigned long>(segment->getIndex())));
             validatePieceHash(segment, expectedPieceHash, segment->getDigest());
           }
@@ -395,7 +395,7 @@ void DownloadCommand::validatePieceHash(const std::shared_ptr<Segment>& segment,
                     util::toHex(actualHash).c_str()));
     segment->clear(getPieceStorage()->getWrDiskCache());
     getSegmentMan()->cancelSegment(getCuid());
-    throw DL_RETRY_EX(fmt("Invalid checksum index=%lu",
+    throw DL_RETRY_EX(fmt("Invalid checksum index={}",
                           static_cast<unsigned long>(segment->getIndex())));
   }
 }

@@ -95,7 +95,7 @@ EpollEventPoll::~EpollEventPoll()
     int errNum = errno;
     if (r == -1) {
       A2_LOG_ERROR(fmt("Error occurred while closing epoll file descriptor"
-                       " %d: %s",
+                       " {}: {}",
                        epfd_, util::safeStrerror(errNum).c_str()));
     }
   }
@@ -123,7 +123,7 @@ void EpollEventPoll::poll(const struct timeval& tv)
   else if (res == -1) {
     int errNum = errno;
     A2_LOG_INFO(
-        fmt("epoll_wait error: %s", util::safeStrerror(errNum).c_str()));
+        fmt("epoll_wait error: {}", util::safeStrerror(errNum).c_str()));
   }
 #ifdef ENABLE_ASYNC_DNS
   // It turns out that we have to call ares_process_fd before ares's
@@ -199,7 +199,7 @@ bool EpollEventPoll::addEvents(sock_t socket,
     errNum = errno;
   }
   if (r == -1) {
-    A2_LOG_DEBUG(fmt("Failed to add socket event %d:%s", socket,
+    A2_LOG_DEBUG(fmt("Failed to add socket event {}:{}", socket,
                      util::safeStrerror(errNum).c_str()));
     return false;
   }
@@ -228,7 +228,7 @@ bool EpollEventPoll::deleteEvents(sock_t socket,
 {
   auto i = socketEntries_.find(socket);
   if (i == std::end(socketEntries_)) {
-    A2_LOG_DEBUG(fmt("Socket %d is not found in SocketEntries.", socket));
+    A2_LOG_DEBUG(fmt("Socket {} is not found in SocketEntries.", socket));
     return false;
   }
 
@@ -251,12 +251,12 @@ bool EpollEventPoll::deleteEvents(sock_t socket,
     r = epoll_ctl(epfd_, EPOLL_CTL_MOD, socketEntry.getSocket(), &epEvent);
     errNum = errno;
     if (r == -1) {
-      A2_LOG_DEBUG(fmt("Failed to delete socket event, but may be ignored:%s",
+      A2_LOG_DEBUG(fmt("Failed to delete socket event, but may be ignored:{}",
                        util::safeStrerror(errNum).c_str()));
     }
   }
   if (r == -1) {
-    A2_LOG_DEBUG(fmt("Failed to delete socket event:%s",
+    A2_LOG_DEBUG(fmt("Failed to delete socket event:{}",
                      util::safeStrerror(errNum).c_str()));
     return false;
   }

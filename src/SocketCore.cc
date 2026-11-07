@@ -157,7 +157,7 @@ void applySocketBufferSize(sock_t fd)
   if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (a2_sockopt_t)&recvBufSize,
                  sizeof(recvBufSize)) < 0) {
     auto errNum = SOCKET_ERRNO;
-    A2_LOG_WARN(fmt("Failed to set socket buffer size. Cause: %s",
+    A2_LOG_WARN(fmt("Failed to set socket buffer size. Cause: {}",
                     errorMsg(errNum).c_str()));
   }
 }
@@ -171,7 +171,7 @@ void SocketCore::create(int family, int protocol)
   errNum = SOCKET_ERRNO;
   if (fd == (sock_t)-1) {
     throw DL_ABORT_EX(
-        fmt("Failed to create socket. Cause:%s", errorMsg(errNum).c_str()));
+        fmt("Failed to create socket. Cause:{}", errorMsg(errNum).c_str()));
   }
   util::make_fd_cloexec(fd);
   int sockopt = 1;
@@ -180,7 +180,7 @@ void SocketCore::create(int family, int protocol)
     errNum = SOCKET_ERRNO;
     CLOSE(fd);
     throw DL_ABORT_EX(
-        fmt("Failed to create socket. Cause:%s", errorMsg(errNum).c_str()));
+        fmt("Failed to create socket. Cause:{}", errorMsg(errNum).c_str()));
   }
 
   applySocketBufferSize(fd);
@@ -496,7 +496,7 @@ void SocketCore::setMulticastInterface(const std::string& localAddr)
   }
   else if (inetPton(AF_INET, localAddr.c_str(), &addr) != 0) {
     throw DL_ABORT_EX(
-        fmt("%s is not valid IPv4 numeric address", localAddr.c_str()));
+        fmt("{} is not valid IPv4 numeric address", localAddr.c_str()));
   }
   setSockOpt(IPPROTO_IP, IP_MULTICAST_IF, &addr, sizeof(addr));
 }
@@ -518,7 +518,7 @@ void SocketCore::joinMulticastGroup(const std::string& multicastAddr,
   in_addr multiAddr;
   if (inetPton(AF_INET, multicastAddr.c_str(), &multiAddr) != 0) {
     throw DL_ABORT_EX(
-        fmt("%s is not valid IPv4 numeric address", multicastAddr.c_str()));
+        fmt("{} is not valid IPv4 numeric address", multicastAddr.c_str()));
   }
   in_addr ifAddr;
   if (localAddr.empty()) {
@@ -526,7 +526,7 @@ void SocketCore::joinMulticastGroup(const std::string& multicastAddr,
   }
   else if (inetPton(AF_INET, localAddr.c_str(), &ifAddr) != 0) {
     throw DL_ABORT_EX(
-        fmt("%s is not valid IPv4 numeric address", localAddr.c_str()));
+        fmt("{} is not valid IPv4 numeric address", localAddr.c_str()));
   }
   struct ip_mreq mreq;
   memset(&mreq, 0, sizeof(mreq));
@@ -902,7 +902,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
       auto peerInfo = ss.str();
 
-      A2_LOG_DEBUG(fmt("Securely connected to %s with %s", peerInfo.c_str(),
+      A2_LOG_DEBUG(fmt("Securely connected to {} with {}", peerInfo.c_str(),
                        tlsVersion.c_str()));
 
       // 2. We're connected now!
@@ -927,7 +927,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
     if (rv == TLS_ERR_ERROR) {
       // Damn those error.
-      throw DL_ABORT_EX(fmt("SSL/TLS handshake failure: %s",
+      throw DL_ABORT_EX(fmt("SSL/TLS handshake failure: {}",
                             handshakeError.empty()
                                 ? tlsSession_->getLastErrorString().c_str()
                                 : handshakeError.c_str()));
@@ -1022,7 +1022,7 @@ std::string SocketCore::getSocketError() const
                  &optlen) == -1) {
     int errNum = SOCKET_ERRNO;
     throw DL_ABORT_EX(
-        fmt("Failed to get socket error: %s", errorMsg(errNum).c_str()));
+        fmt("Failed to get socket error: {}", errorMsg(errNum).c_str()));
   }
   if (error != 0) {
     return errorMsg(error);
@@ -1048,7 +1048,7 @@ void SocketCore::bindAddress(const std::string& iface)
     s = getnameinfo(&a.su.sa, a.suLength, host, NI_MAXHOST, nullptr, 0,
                     NI_NUMERICHOST);
     if (s == 0) {
-      A2_LOG_DEBUG(fmt("Sockets will bind to %s", host));
+      A2_LOG_DEBUG(fmt("Sockets will bind to {}", host));
     }
   }
   bindAddrsList_.push_back(bindAddrs_);
@@ -1078,7 +1078,7 @@ void SocketCore::bindAllAddress(const std::string& ifaces)
       s = getnameinfo(&a.su.sa, a.suLength, host, NI_MAXHOST, nullptr, 0,
                       NI_NUMERICHOST);
       if (s == 0) {
-        A2_LOG_DEBUG(fmt("Sockets will bind to %s", host));
+        A2_LOG_DEBUG(fmt("Sockets will bind to {}", host));
       }
     }
   }
@@ -1110,7 +1110,7 @@ size_t SocketCore::getRecvBufferedLength() const
 std::vector<SockAddr> SocketCore::getInterfaceAddress(const std::string& iface,
                                                       int family, int aiFlags)
 {
-  A2_LOG_DEBUG(fmt("Finding interface %s", iface.c_str()));
+  A2_LOG_DEBUG(fmt("Finding interface {}", iface.c_str()));
   std::vector<SockAddr> ifAddrs;
 #ifdef HAVE_GETIFADDRS
   // First find interface in interface addresses
@@ -1344,7 +1344,7 @@ void checkAddrconfig()
   rv = getifaddrs(&ifaddr);
   if (rv == -1) {
     int errNum = SOCKET_ERRNO;
-    A2_LOG_INFO(fmt("getifaddrs failed. Cause: %s", errorMsg(errNum).c_str()));
+    A2_LOG_INFO(fmt("getifaddrs failed. Cause: {}", errorMsg(errNum).c_str()));
     return;
   }
   std::unique_ptr<ifaddrs, decltype(&freeifaddrs)> ifaddrDeleter(ifaddr,
@@ -1384,14 +1384,14 @@ void checkAddrconfig()
                      NI_NUMERICHOST);
     if (rv == 0) {
       if (found) {
-        A2_LOG_INFO(fmt("Found configured address: %s", host));
+        A2_LOG_INFO(fmt("Found configured address: {}", host));
       }
       else {
-        A2_LOG_INFO(fmt("Not considered: %s", host));
+        A2_LOG_INFO(fmt("Not considered: {}", host));
       }
     }
   }
-  A2_LOG_INFO(fmt("IPv4 configured=%d, IPv6 configured=%d", ipv4AddrConfigured,
+  A2_LOG_INFO(fmt("IPv4 configured={}, IPv6 configured={}", ipv4AddrConfigured,
                   ipv6AddrConfigured));
 #else  // !HAVE_GETIFADDRS
   A2_LOG_INFO("getifaddrs is not available. Assume IPv4 and IPv6 addresses"

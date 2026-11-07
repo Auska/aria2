@@ -77,14 +77,13 @@ void WatchProcessCommand::process()
 {
   // Check process pid_ is running. If it is not running, shutdown
   // aria2.
-  A2_LOG_DEBUG(fmt("Checking proess %u", pid_));
+  A2_LOG_DEBUG(fmt("Checking proess {}", pid_));
   bool waiting = true;
-  if (access(fmt("/proc/%u", pid_).c_str(), F_OK) == -1) {
+  if (access(fmt("/proc/{}", pid_).c_str(), F_OK) == -1) {
     waiting = false;
   }
   if (!waiting) {
-    A2_LOG_INFO(fmt("CUID#%" PRId64
-                    " - Process %u is not running. Commencing shutdown.",
+    A2_LOG_INFO(fmt("CUID#{} - Process {} is not running. Commencing shutdown.",
                     getCuid(), pid_));
     if (forceHalt_) {
       getDownloadEngine()->requestForceHalt();

@@ -69,7 +69,7 @@ std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
   memset(src, 0, sizeof(src));
   int compactlen = bittorrent::packcompact(src + DHT_ID_LENGTH, ipaddr, port);
   if (compactlen == 0) {
-    throw DL_ABORT_EX(fmt("Token generation failed: ipaddr=%s, port=%u",
+    throw DL_ABORT_EX(fmt("Token generation failed: ipaddr={}, port={}",
                           ipaddr.c_str(), port));
   }
   memcpy(src, infoHash, DHT_ID_LENGTH);

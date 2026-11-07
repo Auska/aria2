@@ -218,7 +218,7 @@ bool HttpServerCommand::execute()
               header->find(HttpHeader::SEC_WEBSOCKET_KEY));
           httpServer_->feedUpgradeResponse(
               "websocket",
-              fmt("Sec-WebSocket-Accept: %s\r\n", serverKey.c_str()));
+              fmt("Sec-WebSocket-Accept: {}\r\n", serverKey.c_str()));
           e_->addCommand(make_unique<rpc::WebSocketResponseCommand>(
               getCuid(), httpServer_, e_, socket_));
         }
@@ -245,7 +245,7 @@ bool HttpServerCommand::execute()
       else {
         if (e_->getOption()->getAsInt(PREF_RPC_MAX_REQUEST_SIZE) <
             httpServer_->getContentLength()) {
-          A2_LOG_INFO(fmt("Request too long. ContentLength=%" PRId64 "."
+          A2_LOG_INFO(fmt("Request too long. ContentLength={}."
                           " See --rpc-max-request-size option to loose"
                           " this limitation.",
                           httpServer_->getContentLength()));
@@ -269,8 +269,7 @@ bool HttpServerCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#%" PRId64
-                       " - Error occurred while reading HTTP request",
+    A2_LOG_INFO_EX(fmt("CUID#{} - Error occurred while reading HTTP request",
                        getCuid()),
                    e);
     return true;

@@ -124,7 +124,7 @@ void flushWrDiskCache(WrDiskCache* wrDiskCache,
       WrDiskCacheEntry::CACHE_ERR_SUCCESS) {
     piece->clearAllBlock(wrDiskCache);
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt("Write disk cache flush failure index=%lu",
+        fmt("Write disk cache flush failure index={}",
             static_cast<unsigned long>(piece->getIndex())),
         piece->getWrDiskCacheEntry()->getErrorCode());
   }
@@ -137,14 +137,14 @@ SegmentMan::checkoutSegment(cuid_t cuid, const std::shared_ptr<Piece>& piece)
   if (!piece) {
     return nullptr;
   }
-  A2_LOG_DEBUG(fmt("Attach segment#%lu to CUID#%" PRId64 ".",
+  A2_LOG_DEBUG(fmt("Attach segment#{} to CUID#{}.",
                    static_cast<unsigned long>(piece->getIndex()), cuid));
 
   if (piece->getWrDiskCacheEntry()) {
     // Flush cached data here, because the cached data may be overlapped
     // if BT peers are involved.
     A2_LOG_DEBUG(fmt(
-        "Flushing cached data, size=%lu",
+        "Flushing cached data, size={}",
         static_cast<unsigned long>(piece->getWrDiskCacheEntry()->getSize())));
     flushWrDiskCache(pieceStorage_->getWrDiskCache(), piece);
   }
@@ -160,8 +160,8 @@ SegmentMan::checkoutSegment(cuid_t cuid, const std::shared_ptr<Piece>& piece)
   }
   auto entry = std::make_shared<SegmentEntry>(cuid, segment);
   usedSegmentEntries_.push_back(entry);
-  A2_LOG_DEBUG(fmt("index=%lu, length=%" PRId64 ", segmentLength=%" PRId64 ","
-                   " writtenLength=%" PRId64,
+  A2_LOG_DEBUG(fmt("index={}, length={}, segmentLength={},"
+                   " writtenLength={}",
                    static_cast<unsigned long>(segment->getIndex()),
                    segment->getLength(), segment->getSegmentLength(),
                    segment->getWrittenLength()));
@@ -170,8 +170,7 @@ SegmentMan::checkoutSegment(cuid_t cuid, const std::shared_ptr<Piece>& piece)
     auto positr = segmentWrittenLengthMemo_.find(segment->getIndex());
     if (positr != segmentWrittenLengthMemo_.end()) {
       const auto writtenLength = (*positr).second;
-      A2_LOG_DEBUG(fmt("writtenLength(in memo)=%" PRId64
-                       ", writtenLength=%" PRId64,
+      A2_LOG_DEBUG(fmt("writtenLength(in memo)={}, writtenLength={}",
                        writtenLength, segment->getWrittenLength()));
       //  If the difference between cached writtenLength and segment's
       //  writtenLength is less than one block, we assume that these
@@ -285,7 +284,7 @@ std::shared_ptr<Segment> SegmentMan::getCleanSegmentIfOwnerIsIdle(cuid_t cuid,
 void SegmentMan::cancelSegmentInternal(cuid_t cuid,
                                        const std::shared_ptr<Segment>& segment)
 {
-  A2_LOG_DEBUG(fmt("Canceling segment#%lu",
+  A2_LOG_DEBUG(fmt("Canceling segment#{}",
                    static_cast<unsigned long>(segment->getIndex())));
   const std::shared_ptr<Piece>& piece = segment->getPiece();
   // TODO In PieceStorage::cancelPiece(), WrDiskCacheEntry may be
@@ -294,7 +293,7 @@ void SegmentMan::cancelSegmentInternal(cuid_t cuid,
     // Flush cached data here, because the cached data may be overlapped
     // if BT peers are involved.
     A2_LOG_DEBUG(fmt(
-        "Flushing cached data, size=%lu",
+        "Flushing cached data, size={}",
         static_cast<unsigned long>(piece->getWrDiskCacheEntry()->getSize())));
     flushWrDiskCache(pieceStorage_->getWrDiskCache(), piece);
     // TODO Exception may cause some segments (pieces) are not
@@ -303,7 +302,7 @@ void SegmentMan::cancelSegmentInternal(cuid_t cuid,
   piece->setUsedBySegment(false);
   pieceStorage_->cancelPiece(piece, cuid);
   segmentWrittenLengthMemo_[segment->getIndex()] = segment->getWrittenLength();
-  A2_LOG_DEBUG(fmt("Memorized segment index=%lu, writtenLength=%" PRId64,
+  A2_LOG_DEBUG(fmt("Memorized segment index={}, writtenLength={}",
                    static_cast<unsigned long>(segment->getIndex()),
                    segment->getWrittenLength()));
 }
@@ -468,8 +467,7 @@ size_t SegmentMan::countFreePieceFrom(size_t index) const
 
 void SegmentMan::ignoreSegmentFor(const std::shared_ptr<FileEntry>& fileEntry)
 {
-  A2_LOG_DEBUG(fmt("ignoring segment for path=%s, offset=%" PRId64
-                   ", length=%" PRId64 "",
+  A2_LOG_DEBUG(fmt("ignoring segment for path={}, offset={}, length={}",
                    fileEntry->getPath().c_str(), fileEntry->getOffset(),
                    fileEntry->getLength()));
   ignoreBitfield_.addFilter(fileEntry->getOffset(), fileEntry->getLength());
