@@ -79,9 +79,9 @@ public:
   Exception(const char* file, int line, int errNum, const std::string& msg,
             error_code::Value errorCode);
 
-  virtual ~Exception() throw();
+  virtual ~Exception() noexcept;
 
-  virtual const char* what() const throw() CXX11_OVERRIDE;
+  virtual const char* what() const noexcept override;
 
   std::string stackTrace() const;
 

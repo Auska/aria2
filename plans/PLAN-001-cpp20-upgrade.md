@@ -179,7 +179,7 @@ C++20 容器/字符串惯用法，同步 CI 工具链与文档；公共 libaria2
      `examples/libaria2wx.cc`。
    - 门禁：全新目录 `autoreconf -i` → `configure` → `make -j check`；核对
      `src/Makefile` 里 `CXX = g++ -std=c++20`。
-2. [ ] **阶段 2：清理 C++11 兼容层**
+2. [x] **阶段 2：清理 C++11 兼容层**
    - `configure.ac` 删 `117-149` 的 nullptr/override 探测与
      `CXX11_OVERRIDE` 定义；`CXXSTDCXXFLAGS` 的 save/restore 逻辑按现状保留。
    - 用 `git grep -l CXX11_OVERRIDE -- 'src/*.h' 'src/*.cc' 'test/*.h' 'test/*.cc'`

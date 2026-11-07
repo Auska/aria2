@@ -149,23 +149,7 @@ struct RefLess {
   }
 };
 
-#if __cplusplus > 201103L
 using std::make_unique;
-#else  // __cplusplus <= 201103L
-template <typename T, typename... U>
-typename std::enable_if<!std::is_array<T>::value, std::unique_ptr<T>>::type
-make_unique(U&&... u)
-{
-  return std::unique_ptr<T>(new T(std::forward<U>(u)...));
-}
-
-template <typename T>
-typename std::enable_if<std::is_array<T>::value, std::unique_ptr<T>>::type
-make_unique(size_t size)
-{
-  return std::unique_ptr<T>(new typename std::remove_extent<T>::type[size]());
-}
-#endif // __cplusplus <= 201103L
 
 // User-defined literals for K, M, and G (powers of 1024)
 

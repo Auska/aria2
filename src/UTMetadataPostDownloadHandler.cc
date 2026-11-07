@@ -57,7 +57,7 @@ namespace aria2 {
 namespace {
 class Criteria : public RequestGroupCriteria {
 public:
-  virtual bool match(const RequestGroup* requestGroup) const CXX11_OVERRIDE
+  virtual bool match(const RequestGroup* requestGroup) const override
   {
     auto& dctx = requestGroup->getDownloadContext();
     if (dctx->hasAttribute(CTX_ATTR_BT)) {

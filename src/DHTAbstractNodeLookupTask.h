@@ -144,7 +144,7 @@ public:
 
   static const size_t ALPHA = 3;
 
-  virtual void startup() CXX11_OVERRIDE
+  virtual void startup() override
   {
     std::vector<std::shared_ptr<DHTNode>> nodes;
     getRoutingTable()->getClosestKNodes(nodes, targetID_);

@@ -54,15 +54,15 @@ public:
 
   virtual ~DHTResponseMessage();
 
-  virtual const std::string& getType() const CXX11_OVERRIDE;
+  virtual const std::string& getType() const override;
 
-  virtual void fillMessage(Dict* msgDict) CXX11_OVERRIDE;
+  virtual void fillMessage(Dict* msgDict) override;
 
   virtual std::unique_ptr<Dict> getResponse() = 0;
 
-  virtual bool isReply() const CXX11_OVERRIDE;
+  virtual bool isReply() const override;
 
-  virtual std::string toString() const CXX11_OVERRIDE;
+  virtual std::string toString() const override;
 
   virtual void accept(DHTMessageCallback* callback) = 0;
 

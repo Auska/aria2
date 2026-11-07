@@ -114,40 +114,6 @@ CXXSTDCXXFLAGS="$CXXFLAGS"
 CXXFLAGS="$save_CXXFLAGS"
 AC_SUBST([CXXSTDCXXFLAGS])
 
-# Check C++ compiler actually supports nullptr
-save_CXXFLAGS=$CXXFLAGS
-CXXFLAGS="$CXXFLAGS $CXXSTDCXXFLAGS"
-
-AC_MSG_CHECKING([whether the c++ compiler supports nullptr])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-]],
-[[
-int *a = nullptr;
-]])],
-[],
-[AC_MSG_FAILURE([C++ compiler does not understand nullptr, perhaps C++ compiler is too old.  Try again with new one (gcc >= 4.8.3 or clang >= 3.4)])])
-
-# Check whether the C++ compiler supports `override` keyword.
-AC_MSG_CHECKING([whether the C++ compiler supports `override` keyword])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-struct Base {
-virtual void f() = 0;
-};
-struct Derived : Base {
-virtual void f() override {}
-};
-]],
-[[
-Derived x;
-]])],
-    [cxx11_override=override
-     AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])])
-AC_DEFINE_UNQUOTED([CXX11_OVERRIDE], [$cxx11_override],
-                   [Define `override` keyword if the compiler supports it])
-
-CXXFLAGS=$save_CXXFLAGS
-
 # Check static build is requested
 if test "x$ARIA2_STATIC" = "xyes"; then
   # Make pkg-config produce static linking variables

@@ -46,11 +46,11 @@ public:
                  const std::shared_ptr<DHTNode>& remoteNode,
                  const std::string& transactionID = A2STR::NIL);
 
-  virtual void doReceivedAction() CXX11_OVERRIDE;
+  virtual void doReceivedAction() override;
 
-  virtual std::unique_ptr<Dict> getArgument() CXX11_OVERRIDE;
+  virtual std::unique_ptr<Dict> getArgument() override;
 
-  virtual const std::string& getMessageType() const CXX11_OVERRIDE;
+  virtual const std::string& getMessageType() const override;
 
   static const std::string PING;
 };

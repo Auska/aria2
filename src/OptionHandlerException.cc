@@ -59,7 +59,7 @@ OptionHandlerException::OptionHandlerException(const char* file, int line,
 {
 }
 
-OptionHandlerException::~OptionHandlerException() throw() = default;
+OptionHandlerException::~OptionHandlerException() noexcept = default;
 
 std::shared_ptr<Exception> OptionHandlerException::copy() const
 {

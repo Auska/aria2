@@ -86,26 +86,26 @@ public:
 
   virtual std::unique_ptr<DHTQueryMessage>
   createQueryMessage(const Dict* dict, const std::string& ipaddr,
-                     uint16_t port) CXX11_OVERRIDE;
+                     uint16_t port) override;
 
   virtual std::unique_ptr<DHTResponseMessage>
   createResponseMessage(const std::string& messageType, const Dict* dict,
                         const std::string& ipaddr,
-                        uint16_t port) CXX11_OVERRIDE;
+                        uint16_t port) override;
 
   virtual std::unique_ptr<DHTPingMessage> createPingMessage(
       const std::shared_ptr<DHTNode>& remoteNode,
-      const std::string& transactionID = A2STR::NIL) CXX11_OVERRIDE;
+      const std::string& transactionID = A2STR::NIL) override;
 
   virtual std::unique_ptr<DHTPingReplyMessage>
   createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
                          const unsigned char* id,
-                         const std::string& transactionID) CXX11_OVERRIDE;
+                         const std::string& transactionID) override;
 
   virtual std::unique_ptr<DHTFindNodeMessage> createFindNodeMessage(
       const std::shared_ptr<DHTNode>& remoteNode,
       const unsigned char* targetNodeID,
-      const std::string& transactionID = A2STR::NIL) CXX11_OVERRIDE;
+      const std::string& transactionID = A2STR::NIL) override;
 
   std::unique_ptr<DHTFindNodeReplyMessage>
   createFindNodeReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
@@ -115,17 +115,17 @@ public:
   virtual std::unique_ptr<DHTFindNodeReplyMessage> createFindNodeReplyMessage(
       const std::shared_ptr<DHTNode>& remoteNode,
       std::vector<std::shared_ptr<DHTNode>> closestKNodes,
-      const std::string& transactionID) CXX11_OVERRIDE;
+      const std::string& transactionID) override;
 
   virtual std::unique_ptr<DHTGetPeersMessage> createGetPeersMessage(
       const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
-      const std::string& transactionID = A2STR::NIL) CXX11_OVERRIDE;
+      const std::string& transactionID = A2STR::NIL) override;
 
   virtual std::unique_ptr<DHTGetPeersReplyMessage> createGetPeersReplyMessage(
       const std::shared_ptr<DHTNode>& remoteNode,
       std::vector<std::shared_ptr<DHTNode>> closestKNodes,
       std::vector<std::shared_ptr<Peer>> peers, const std::string& token,
-      const std::string& transactionID) CXX11_OVERRIDE;
+      const std::string& transactionID) override;
 
   std::unique_ptr<DHTGetPeersReplyMessage>
   createGetPeersReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
@@ -135,16 +135,16 @@ public:
   virtual std::unique_ptr<DHTAnnouncePeerMessage> createAnnouncePeerMessage(
       const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
       uint16_t tcpPort, const std::string& token,
-      const std::string& transactionID = A2STR::NIL) CXX11_OVERRIDE;
+      const std::string& transactionID = A2STR::NIL) override;
 
   virtual std::unique_ptr<DHTAnnouncePeerReplyMessage>
   createAnnouncePeerReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
                                  const std::string& transactionID)
-      CXX11_OVERRIDE;
+      override;
 
   virtual std::unique_ptr<DHTUnknownMessage>
   createUnknownMessage(const unsigned char* data, size_t length,
-                       const std::string& ipaddr, uint16_t port) CXX11_OVERRIDE;
+                       const std::string& ipaddr, uint16_t port) override;
 
   void setRoutingTable(DHTRoutingTable* routingTable);
 

@@ -43,7 +43,7 @@ class Dependency {
 public:
   virtual ~Dependency() = default;
 
-  virtual bool resolve() = 0; // throw()
+  virtual bool resolve() = 0;
 };
 
 } // namespace aria2

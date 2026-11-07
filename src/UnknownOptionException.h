@@ -43,7 +43,7 @@ private:
   std::string unknownOption_;
 
 protected:
-  virtual std::shared_ptr<Exception> copy() const CXX11_OVERRIDE;
+  virtual std::shared_ptr<Exception> copy() const override;
 
 public:
   UnknownOptionException(const char* file, int line,
@@ -53,7 +53,7 @@ public:
                          const std::string& unknownOption,
                          const Exception& cause);
 
-  virtual ~UnknownOptionException() throw();
+  virtual ~UnknownOptionException() noexcept;
 
   const std::string& getUnknownOption() const { return unknownOption_; }
 };

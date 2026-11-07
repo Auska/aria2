@@ -95,7 +95,7 @@ Exception::Exception(const char* file, int line, int errNum,
 {
 }
 
-Exception::~Exception() throw() = default;
+Exception::~Exception() noexcept = default;
 
 std::string Exception::stackTrace() const
 {
@@ -120,6 +120,6 @@ std::string Exception::stackTrace() const
   return s.str();
 }
 
-const char* Exception::what() const throw() { return msg_.c_str(); }
+const char* Exception::what() const noexcept { return msg_.c_str(); }
 
 } // namespace aria2
