@@ -34,8 +34,7 @@
 /* copyright --> */
 #include "Option.h"
 
-#include <cstdlib>
-#include <cstring>
+#include <charconv>
 
 #include "bitfield.h"
 
@@ -121,7 +120,9 @@ int32_t Option::getAsInt(PrefPtr pref) const
     return 0;
   }
   else {
-    return strtol(value.c_str(), nullptr, 10);
+    int32_t res = 0;
+    std::from_chars(value.data(), value.data() + value.size(), res);
+    return res;
   }
 }
 
@@ -132,7 +133,9 @@ int64_t Option::getAsLLInt(PrefPtr pref) const
     return 0;
   }
   else {
-    return strtoll(value.c_str(), nullptr, 10);
+    int64_t res = 0;
+    std::from_chars(value.data(), value.data() + value.size(), res);
+    return res;
   }
 }
 
@@ -145,7 +148,9 @@ double Option::getAsDouble(PrefPtr pref) const
     return 0.0;
   }
   else {
-    return strtod(value.c_str(), nullptr);
+    double res = 0.0;
+    std::from_chars(value.data(), value.data() + value.size(), res);
+    return res;
   }
 }
 

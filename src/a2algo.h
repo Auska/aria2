@@ -101,9 +101,9 @@ template <class InputIterator, class Predicate>
 InputIterator find_wrap_if(InputIterator first, InputIterator last,
                            InputIterator current, Predicate pred)
 {
-  InputIterator itr = std::find_if(current, last, pred);
+  InputIterator itr = std::ranges::find_if(current, last, pred);
   if (itr == last) {
-    itr = std::find_if(first, current, pred);
+    itr = std::ranges::find_if(first, current, pred);
   }
   return itr;
 }

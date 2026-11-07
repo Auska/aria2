@@ -44,6 +44,8 @@ namespace aria2 {
 namespace json {
 
 namespace {
+// shortcut: unscoped state constants, ~100 uses plus std::stack<int> state
+// members; enum class would touch every switch, upgrade on parser rewrite.
 enum {
   JSON_FINISH,
   JSON_ERROR,

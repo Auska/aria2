@@ -151,7 +151,7 @@ std::pair<std::pair<InputIterator, InputIterator>,
           std::pair<InputIterator, InputIterator>>
 divide(InputIterator first, InputIterator last, char delim, bool strip = true)
 {
-  auto dpos = std::find(first, last, delim);
+  auto dpos = std::ranges::find(first, last, delim);
   if (dpos == last) {
     if (strip) {
       return {stripIter(first, last), {last, last}};
@@ -484,7 +484,7 @@ OutputIterator splitIter(InputIterator first, InputIterator last,
                          bool allowEmpty = false)
 {
   for (InputIterator i = first; i != last;) {
-    InputIterator j = std::find(i, last, delim);
+    InputIterator j = std::ranges::find(i, last, delim);
     std::pair<InputIterator, InputIterator> p(i, j);
     if (doStrip) {
       p = stripIter(i, j);
@@ -512,7 +512,7 @@ OutputIterator splitIterM(InputIterator first, InputIterator last,
   const char* dlast = delims + numDelims;
   for (InputIterator i = first; i != last;) {
     InputIterator j = i;
-    for (; j != last && std::find(delims, dlast, *j) == dlast; ++j)
+    for (; j != last && std::ranges::find(delims, dlast, *j) == dlast; ++j)
       ;
     std::pair<InputIterator, InputIterator> p(i, j);
     if (doStrip) {
@@ -526,8 +526,8 @@ OutputIterator splitIterM(InputIterator first, InputIterator last,
       ++i;
     }
   }
-  if (allowEmpty &&
-      (first == last || std::find(delims, dlast, *(last - 1)) != dlast)) {
+  if (allowEmpty && (first == last ||
+                     std::ranges::find(delims, dlast, *(last - 1)) != dlast)) {
     *out++ = std::make_pair(last, last);
   }
   return out;
@@ -539,7 +539,7 @@ OutputIterator split(InputIterator first, InputIterator last,
                      bool allowEmpty = false)
 {
   for (InputIterator i = first; i != last;) {
-    InputIterator j = std::find(i, last, delim);
+    InputIterator j = std::ranges::find(i, last, delim);
     std::pair<InputIterator, InputIterator> p(i, j);
     if (doStrip) {
       p = stripIter(i, j);

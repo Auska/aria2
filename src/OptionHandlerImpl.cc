@@ -40,7 +40,6 @@
 #include <utility>
 #include <algorithm>
 #include <numeric>
-#include <sstream>
 #include <iterator>
 #include <vector>
 #include <stdexcept>
@@ -234,7 +233,8 @@ FloatNumberOptionHandler::~FloatNumberOptionHandler() = default;
 void FloatNumberOptionHandler::parseArg(Option& option,
                                         const std::string& optarg) const
 {
-  double number = strtod(optarg.c_str(), nullptr);
+  double number = 0;
+  util::parseDoubleNoThrow(number, optarg);
   if ((min_ < 0 || min_ <= number) && (max_ < 0 || number <= max_)) {
     option.put(pref_, optarg);
   }
@@ -383,8 +383,8 @@ void ChecksumOptionHandler::parseArg(Option& option,
   auto p = util::divide(std::begin(optarg), std::end(optarg), '=');
   std::string hashType(p.first.first, p.first.second);
   if (!acceptableTypes_.empty() &&
-      std::find(std::begin(acceptableTypes_), std::end(acceptableTypes_),
-                hashType) == std::end(acceptableTypes_)) {
+      std::ranges::find(acceptableTypes_, hashType) ==
+          std::end(acceptableTypes_)) {
     throw DL_ABORT_EX(
         fmt("Checksum type {} is not acceptable", hashType.c_str()));
   }
@@ -416,8 +416,7 @@ ParameterOptionHandler::~ParameterOptionHandler() = default;
 void ParameterOptionHandler::parseArg(Option& option,
                                       const std::string& optarg) const
 {
-  auto itr =
-      std::find(validParamValues_.begin(), validParamValues_.end(), optarg);
+  auto itr = std::ranges::find(validParamValues_, optarg);
   if (itr == validParamValues_.end()) {
     std::string msg = pref_->k;
     msg += " ";
@@ -441,10 +440,7 @@ void ParameterOptionHandler::parseArg(Option& option,
 
 std::string ParameterOptionHandler::createPossibleValuesString() const
 {
-  std::stringstream s;
-  std::copy(validParamValues_.begin(), validParamValues_.end(),
-            std::ostream_iterator<std::string>(s, ", "));
-  return util::strip(s.str(), ", ");
+  return strjoin(validParamValues_.begin(), validParamValues_.end(), ", ");
 }
 
 HostPortOptionHandler::HostPortOptionHandler(
@@ -635,10 +631,8 @@ void OptimizeConcurrentDownloadsOptionHandler::parseArg(
     PrefPtr pref = PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFA;
     std::string* sptr = &coeff_a;
     for (;;) {
-      char* end;
-      errno = 0;
-      strtod(sptr->c_str(), &end);
-      if (errno != 0 || sptr->c_str() + sptr->size() != end) {
+      double number = 0;
+      if (!util::parseDoubleNoThrow(number, *sptr)) {
         throw DL_ABORT_EX(fmt("Bad number '{}'", sptr->c_str()));
       }
       option.put(pref, *sptr);

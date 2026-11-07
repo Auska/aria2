@@ -66,7 +66,7 @@ public:
 namespace expr {
 
 template <typename L, typename R, typename Op> struct BinExpr {
-  typedef typename Op::result_type value_type;
+  using value_type = typename Op::result_type;
 
   BinExpr(L lhs, R rhs, Op op)
       : lhs(std::move(lhs)), rhs(std::move(rhs)), op(std::move(op))
@@ -95,7 +95,7 @@ BinExpr<L, R, Op> operator|(L lhs, R rhs)
 }
 
 template <typename Arg, typename Op> struct UnExpr {
-  typedef typename Op::result_type value_type;
+  using value_type = typename Op::result_type;
 
   UnExpr(Arg arg, Op op) : arg(std::move(arg)), op(std::move(op)) {}
 
@@ -116,7 +116,7 @@ UnExpr<Arg, Op> operator~(Arg arg)
 }
 
 template <typename T> struct Array {
-  typedef T value_type;
+  using value_type = T;
 
   Array(T* t) : t(t) {}
 

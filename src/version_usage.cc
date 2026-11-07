@@ -78,7 +78,7 @@ void showVersion()
       << _("System") << ": " << getOperatingSystemInfo() << "\n"
       << "\n"
       << fmt(_("Report bugs to {}"), PACKAGE_BUGREPORT) << "\n"
-      << _("Visit") << " " << PACKAGE_URL << std::endl;
+      << _("Visit") << " " << PACKAGE_URL << "\n";
 }
 
 void showUsage(const std::string& keyword,

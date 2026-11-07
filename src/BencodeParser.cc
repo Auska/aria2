@@ -44,6 +44,8 @@ namespace aria2 {
 namespace bittorrent {
 
 namespace {
+// shortcut: unscoped state constants, ~100 uses plus std::stack<int> state
+// members; enum class would touch every switch, upgrade on parser rewrite.
 enum {
   BENCODE_FINISH,
   BENCODE_ERROR,

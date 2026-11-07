@@ -78,7 +78,7 @@ using namespace crypto::hash;
 template <typename word_, uint_fast8_t bsize, uint_fast8_t ssize>
 class AlgorithmImpl : public Algorithm {
 public:
-  typedef word_ word_t;
+  using word_t = word_;
 
 protected:
   template <uint_fast8_t size> union buffer_t {
@@ -115,7 +115,8 @@ public:
     // We have data buffered...
     if (unlikely(offset_)) {
       const uint32_t rem = sizeof(buffer_) - offset_;
-      const uint32_t turn = (uint32_t)(len + ((rem - len) & (rem - len) >> 31));
+      const uint32_t turn =
+          static_cast<uint32_t>(len + ((rem - len) & (rem - len) >> 31));
       memcpy(buffer_.bytes + offset_, bytes, turn);
       len -= turn;
       bytes += turn;
@@ -139,7 +140,8 @@ public:
     // Buffer remaining bytes, if any.
     if (unlikely(len)) {
       const uint32_t rem = sizeof(buffer_) - offset_;
-      const uint32_t turn = (uint32_t)(len + ((rem - len) & (rem - len) >> 31));
+      const uint32_t turn =
+          static_cast<uint32_t>(len + ((rem - len) & (rem - len) >> 31));
       memcpy(buffer_.bytes + offset_, bytes, turn);
       offset_ += turn;
     }

@@ -44,6 +44,8 @@ namespace aria2 {
 
 class ByteArrayDiskWriter : public DiskWriter {
 private:
+  // shortcut: std::stringstream kept for seekp/seekg semantics, no cheap
+  // C++20 replacement (ispanstream is C++23), upgrade when C++23 is required.
   std::stringstream buf_;
   size_t maxLength_;
   void clear();

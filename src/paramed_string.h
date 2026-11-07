@@ -54,7 +54,7 @@ InputIterator expandChoice(std::vector<std::string>& res, InputIterator first,
                            InputIterator last)
 {
   ++first;
-  InputIterator i = std::find(first, last, '}');
+  InputIterator i = std::ranges::find(first, last, '}');
   if (i == last) {
     throw DL_ABORT_EX("Missing '}' in the parameterized string.");
   }
@@ -97,11 +97,11 @@ InputIterator expandLoop(std::vector<std::string>& res, InputIterator first,
                          InputIterator last)
 {
   ++first;
-  InputIterator i = std::find(first, last, ']');
+  InputIterator i = std::ranges::find(first, last, ']');
   if (i == last) {
     throw DL_ABORT_EX("Missing ']' in the parameterized string.");
   }
-  InputIterator colon = std::find(first, i, ':');
+  InputIterator colon = std::ranges::find(first, i, ':');
   uint32_t step;
   if (colon == i) {
     step = 1;
@@ -114,7 +114,7 @@ InputIterator expandLoop(std::vector<std::string>& res, InputIterator first,
       throw DL_ABORT_EX("Loop step overflow.");
     }
   }
-  InputIterator minus = std::find(first, colon, '-');
+  InputIterator minus = std::ranges::find(first, colon, '-');
   if (minus == colon) {
     throw DL_ABORT_EX("Loop range missing.");
   }

@@ -35,8 +35,7 @@
 #include "bencode2.h"
 
 #include <span>
-
-#include <sstream>
+#include <string>
 
 #include "fmt.h"
 #include "DlAbortEx.h"
@@ -81,19 +80,22 @@ std::string encode(const ValueBase* vlb)
 {
   class BencodeValueBaseVisitor : public ValueBaseVisitor {
   private:
-    std::ostringstream out_;
+    std::string out_;
 
   public:
     virtual void visit(const String& string) override
     {
       const std::string& s = string.s();
-      out_ << s.size() << ":";
-      out_.write(s.data(), s.size());
+      out_ += std::to_string(s.size());
+      out_ += ':';
+      out_ += s;
     }
 
     virtual void visit(const Integer& integer) override
     {
-      out_ << "i" << integer.i() << "e";
+      out_ += 'i';
+      out_ += std::to_string(integer.i());
+      out_ += 'e';
     }
 
     virtual void visit(const Bool& v) override {}
@@ -101,26 +103,27 @@ std::string encode(const ValueBase* vlb)
 
     virtual void visit(const List& list) override
     {
-      out_ << "l";
+      out_ += 'l';
       for (const auto& e : list) {
         e->accept(*this);
       }
-      out_ << "e";
+      out_ += 'e';
     }
 
     virtual void visit(const Dict& dict) override
     {
-      out_ << "d";
+      out_ += 'd';
       for (const auto& e : dict) {
         auto& key = e.first;
-        out_ << key.size() << ":";
-        out_.write(key.data(), key.size());
+        out_ += std::to_string(key.size());
+        out_ += ':';
+        out_ += key;
         e.second->accept(*this);
       }
-      out_ << "e";
+      out_ += 'e';
     }
 
-    std::string getResult() const { return out_.str(); }
+    std::string getResult() const { return out_; }
   };
   BencodeValueBaseVisitor visitor;
   vlb->accept(visitor);

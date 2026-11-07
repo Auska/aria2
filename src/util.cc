@@ -130,8 +130,8 @@ int64_t difftv(struct timeval tv1, struct timeval tv2)
       ((tv1.tv_sec == tv2.tv_sec) && (tv1.tv_usec < tv2.tv_usec))) {
     return 0;
   }
-  return ((int64_t)(tv1.tv_sec - tv2.tv_sec) * 1000000 + tv1.tv_usec -
-          tv2.tv_usec);
+  return (static_cast<int64_t>(tv1.tv_sec - tv2.tv_sec) * 1000000 +
+          tv1.tv_usec - tv2.tv_usec);
 }
 
 int32_t difftvsec(struct timeval tv1, struct timeval tv2)
@@ -201,14 +201,16 @@ bool inRFC2978MIMECharset(const char c)
 {
   static const char chars[] = {'!', '#', '$', '%', '&', '\'', '+',
                                '-', '^', '_', '`', '{', '}',  '~'};
-  return isAlpha(c) || isDigit(c) || std::ranges::find(chars, c) != std::end(chars);
+  return isAlpha(c) || isDigit(c) ||
+         std::ranges::find(chars, c) != std::end(chars);
 }
 
 bool inRFC2616HttpToken(const char c)
 {
   static const char chars[] = {'!', '#', '$', '%', '&', '\'', '*', '+',
                                '-', '.', '^', '_', '`', '|',  '~'};
-  return isAlpha(c) || isDigit(c) || std::ranges::find(chars, c) != std::end(chars);
+  return isAlpha(c) || isDigit(c) ||
+         std::ranges::find(chars, c) != std::end(chars);
 }
 
 bool inRFC5987AttrChar(const char c)
@@ -323,8 +325,8 @@ std::string percentEncode(std::span<const std::byte> target)
 
 std::string percentEncode(const std::string& target)
 {
-  if (std::find_if_not(target.begin(), target.end(),
-                       inRFC3986UnreservedChars) == target.end()) {
+  if (std::ranges::find_if_not(target.begin(), target.end(),
+                               inRFC3986UnreservedChars) == target.end()) {
     return target;
   }
   return percentEncode(
@@ -333,7 +335,7 @@ std::string percentEncode(const std::string& target)
 
 std::string percentEncodeMini(const std::string& src)
 {
-  if (std::find_if_not(src.begin(), src.end(), inPercentEncodeMini) ==
+  if (std::ranges::find_if_not(src.begin(), src.end(), inPercentEncodeMini) ==
       src.end()) {
     return src;
   }
@@ -470,39 +472,14 @@ std::string_view trimSpaces(std::string_view s)
   return s;
 }
 
-// std::from_chars only takes base 10 for the strictly-standard overloads, so
-// the |base| argument is handled here with a manual digit loop for the rare
-// non-decimal callers.
 template <typename T> bool parseIntegral(T& res, std::string_view sv, int base)
 {
   auto t = trimSpaces(sv);
   if (t.empty()) {
     return false;
   }
-  if (base == 10) {
-    auto r = std::from_chars(t.data(), t.data() + t.size(), res);
-    return r.ec == std::errc() && r.ptr == t.data() + t.size();
-  }
-  // Non-decimal bases are not used by any caller today; keep the previous
-  // semantics with a slow but obviously correct path.
-  std::string buf(t);
-  char* endptr;
-  errno = 0;
-  if constexpr (std::is_signed_v<T>) {
-    auto v = std::strtoll(buf.c_str(), &endptr, base);
-    if (errno == ERANGE) {
-      return false;
-    }
-    res = static_cast<T>(v);
-  }
-  else {
-    auto v = std::strtoull(buf.c_str(), &endptr, base);
-    if (errno == ERANGE) {
-      return false;
-    }
-    res = static_cast<T>(v);
-  }
-  return endptr == buf.c_str() + buf.size();
+  auto r = std::from_chars(t.data(), t.data() + t.size(), res, base);
+  return r.ec == std::errc() && r.ptr == t.data() + t.size();
 }
 } // namespace
 
@@ -560,12 +537,12 @@ SegList<int> parseIntSegments(const std::string& src)
   SegList<int> sgl;
   for (std::string::const_iterator i = src.begin(), eoi = src.end();
        i != eoi;) {
-    std::string::const_iterator j = std::find(i, eoi, ',');
+    std::string::const_iterator j = std::ranges::find(i, eoi, ',');
     if (j == i) {
       ++i;
       continue;
     }
-    std::string::const_iterator p = std::find(i, j, '-');
+    std::string::const_iterator p = std::ranges::find(i, j, '-');
     if (p == j) {
       int a;
       if (parseIntNoThrow(a, std::string(i, j))) {
@@ -656,16 +633,18 @@ void parsePrioritizePieceRange(
     }
     else if (util::startsWith(i.first, i.second, "head=")) {
       std::string sizestr(i.first + 5, i.second);
-      computeHeadPieces(indexes, fileEntries, pieceLength,
-                        std::max((int64_t)0, getRealSize(sizestr)));
+      computeHeadPieces(
+          indexes, fileEntries, pieceLength,
+          std::max(static_cast<int64_t>(0), getRealSize(sizestr)));
     }
     else if (util::streq(i.first, i.second, "tail")) {
       computeTailPieces(indexes, fileEntries, pieceLength, defaultSize);
     }
     else if (util::startsWith(i.first, i.second, "tail=")) {
       std::string sizestr(i.first + 5, i.second);
-      computeTailPieces(indexes, fileEntries, pieceLength,
-                        std::max((int64_t)0, getRealSize(sizestr)));
+      computeTailPieces(
+          indexes, fileEntries, pieceLength,
+          std::max(static_cast<int64_t>(0), getRealSize(sizestr)));
     }
     else {
       throw DL_ABORT_EX(
@@ -1126,7 +1105,11 @@ static uint32_t utf8dfa(uint32_t* state, uint32_t* codep, uint32_t byte)
 
 /* End of utf8 dfa */
 
-typedef enum {
+// Content-Disposition parser states. Kept as unscoped enumerators: they are
+// used as plain ints in the switch/bitmask below.
+// shortcut: not enum class, 85 CD_* uses in one function, upgrade when the
+// parser is rewritten.
+enum {
   CD_BEFORE_DISPOSITION_TYPE,
   CD_AFTER_DISPOSITION_TYPE,
   CD_DISPOSITION_TYPE,
@@ -1143,18 +1126,18 @@ typedef enum {
   CD_VALUE_CHARS,
   CD_VALUE_CHARS_PCT_ENCODED1,
   CD_VALUE_CHARS_PCT_ENCODED2
-} content_disposition_parse_state;
+};
 
-typedef enum {
+enum {
   CD_FILENAME_FOUND = 1,
   CD_EXT_FILENAME_FOUND = 1 << 1
-} content_disposition_parse_flag;
+};
 
-typedef enum {
+enum {
   CD_ENC_UNKNOWN,
   CD_ENC_UTF8,
   CD_ENC_ISO_8859_1
-} content_disposition_charset;
+};
 
 ssize_t parse_content_disposition(std::span<std::byte> dest,
                                   std::span<const std::byte>* charsetp,
@@ -1753,8 +1736,9 @@ void convertBitfield(BitfieldMan* dest, const BitfieldMan* src)
 {
   size_t numBlock = dest->countBlock();
   for (size_t index = 0; index < numBlock; ++index) {
-    if (src->isBitSetOffsetRange((int64_t)index * dest->getBlockLength(),
-                                 dest->getBlockLength())) {
+    if (src->isBitSetOffsetRange(
+            static_cast<int64_t>(index) * dest->getBlockLength(),
+            dest->getBlockLength())) {
       dest->setBit(index);
     }
   }
@@ -1801,8 +1785,9 @@ Endpoint getNumericNameInfo(const struct sockaddr* sockaddr, socklen_t len)
     throw DL_ABORT_EX(
         fmt("Failed to get hostname and port. cause: {}", gai_strerror(s)));
   }
-  return {host, sockaddr->sa_family,
-          static_cast<uint16_t>(strtoul(service, nullptr, 10))};
+  uint16_t port = 0;
+  std::from_chars(service, service + strlen(service), port);
+  return {host, sockaddr->sa_family, port};
 }
 
 std::string htmlEscape(const std::string& src)
@@ -2099,20 +2084,21 @@ bool noProxyDomainMatch(const std::string& hostname, const std::string& domain)
 bool tlsHostnameMatch(const std::string& pattern, const std::string& hostname)
 {
   std::string::const_iterator ptWildcard =
-      std::find(pattern.begin(), pattern.end(), '*');
+      std::ranges::find(pattern.begin(), pattern.end(), '*');
   if (ptWildcard == pattern.end()) {
     return strieq(pattern.begin(), pattern.end(), hostname.begin(),
                   hostname.end());
   }
   std::string::const_iterator ptLeftLabelEnd =
-      std::find(pattern.begin(), pattern.end(), '.');
+      std::ranges::find(pattern.begin(), pattern.end(), '.');
   bool wildcardEnabled = true;
   // Do case-insensitive match. At least 2 dots are required to enable
   // wildcard match. Also wildcard must be in the left-most label.
   // Don't attempt to match a presented identifier where the wildcard
   // character is embedded within an A-label.
   if (ptLeftLabelEnd == pattern.end() ||
-      std::find(ptLeftLabelEnd + 1, pattern.end(), '.') == pattern.end() ||
+      std::ranges::find(ptLeftLabelEnd + 1, pattern.end(), '.') ==
+          pattern.end() ||
       ptLeftLabelEnd < ptWildcard || istartsWith(pattern, "xn--")) {
     wildcardEnabled = false;
   }
@@ -2121,7 +2107,7 @@ bool tlsHostnameMatch(const std::string& pattern, const std::string& hostname)
                   hostname.end());
   }
   std::string::const_iterator hnLeftLabelEnd =
-      std::find(hostname.begin(), hostname.end(), '.');
+      std::ranges::find(hostname.begin(), hostname.end(), '.');
   if (!strieq(ptLeftLabelEnd, pattern.end(), hnLeftLabelEnd, hostname.end())) {
     return false;
   }
