@@ -45,7 +45,6 @@ TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
 ./configure \
     --host=aarch64-linux-android \
     --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
-    --disable-nls \
     --without-gnutls \
     --with-openssl \
     --without-sqlite3 \

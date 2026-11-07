@@ -1,10 +1,9 @@
-SUBDIRS =  po lib deps src doc test
+SUBDIRS =  deps src doc test
 
 ACLOCAL_AMFLAGS = -I m4 --install
 RST2HTML = @RST2HTML@
 
-EXTRA_DIST = config.rpath \
-	     script-helper \
+EXTRA_DIST = script-helper \
 	     makerelease \
 	     mingw-config mingw-release mingw-build-memo \
 	     android-config \

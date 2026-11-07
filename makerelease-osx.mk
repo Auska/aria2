@@ -136,7 +136,7 @@ libgpgerror_hash = babd98437208c163175c29453f8681094bcaf92968a15cafb1a276076b33c
 libgpgerror_url = https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-$(libgpgerror_version).tar.bz2
 libgpgerror_cflags=$(CFLAGS) $(LTO_FLAGS)
 libgpgerror_ldflags=$(CFLAGS) $(LTO_FLAGS)
-libgpgerror_confflags = --with-pic --disable-languages --disable-doc --disable-nls
+libgpgerror_confflags = --with-pic --disable-languages --disable-doc
 
 libgcrypt_version = 1.8.5
 libgcrypt_hash = 3b4a2a94cb637eff5bdebbcaf46f4d95c4f25206f459809339cdada0eb577ac3
@@ -181,7 +181,7 @@ ARIA2_CONFFLAGS = \
         --disable-shared \
         --enable-metalink \
         --enable-bittorrent \
-        --disable-nls \
+        \
         --with-appletls \
         --with-libgmp \
         --with-sqlite3 \

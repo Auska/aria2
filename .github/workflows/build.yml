@@ -30,7 +30,6 @@ jobs:
           autoconf \
           automake \
           autotools-dev \
-          autopoint \
           libtool \
           pkg-config \
           libssl-dev \
@@ -43,7 +42,7 @@ jobs:
     - name: MacOS setup
       if: runner.os == 'macOS'
       run: |
-        brew install cppunit gettext openssl libssh2 c-ares sqlite3 \
+        brew install cppunit openssl libssh2 c-ares sqlite3 \
           autoconf automake pkg-config libtool
     - name: Setup clang (Linux)
       if: runner.os == 'Linux' && matrix.compiler == 'clang'
@@ -96,7 +95,6 @@ jobs:
       run: |
         ./configure \
           --without-openssl --without-gnutls --with-appletls \
-          --disable-nls
     - name: Build aria2
       run: |
         make -j"$(nproc 2> /dev/null || sysctl -n hw.ncpu)" check

@@ -243,7 +243,6 @@ endif # ENABLE_LIBARIA2
 
 aria2c_LDADD = \
 	../src/libaria2.la \
-	@LIBINTL@ \
 	@EXTRALIBS@ \
 	@ZLIB_LIBS@ \
 	@LIBUV_LIBS@ \
@@ -266,8 +265,6 @@ aria2c_LDADD = \
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/includes -I$(top_builddir)/src/includes \
-	-I$(top_srcdir)/lib -I$(top_srcdir)/intl \
-        -DLOCALEDIR=\"$(localedir)\" \
 	-DA2_TEST_DIR=\"$(top_srcdir)/test\" \
 	-DA2_TEST_OUT_DIR=\"${a2_test_outdir}\" \
 	@CPPUNIT_CFLAGS@ \

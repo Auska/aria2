@@ -118,10 +118,6 @@
 #  include <pthread.h>
 #endif
 
-#ifdef ENABLE_NLS
-#  include <libintl.h>
-#endif
-
 #ifndef HAVE_MEMCPY
 #  define memcpy(d, s, n) bcopy((s), (d), (n))
 #  ifdef __STDC__
@@ -143,18 +139,9 @@ extern int h_errno;
 
 #include "getaddrinfo.h"
 
-#ifdef ENABLE_NLS
-#  define _(string) gettext(string)
-#  ifdef gettext_noop
-#    define N_(string) gettext_noop(string)
-#  else
-#    define N_(string) (string)
-#  endif
-#else
-#  define gettext(string) (string)
-#  define _(string) (string)
-#  define N_(string) (string)
-#endif
+#define gettext(string) (string)
+#define _(string) (string)
+#define N_(string) (string)
 
 /*
  * Error messages for gai_strerror().

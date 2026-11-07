@@ -4,7 +4,7 @@ MAINTAINER Igor Khomyakov
 
 RUN apt-get update && \
     apt-get install -y make binutils autoconf automake autotools-dev libtool \
-    pkg-config git curl dpkg-dev autopoint libcppunit-dev libxml2-dev \
+    pkg-config git curl dpkg-dev libcppunit-dev libxml2-dev \
     libgcrypt11-dev lzip
 
 RUN git clone https://github.com/raspberrypi/tools.git --depth=1 /tools
@@ -86,7 +86,6 @@ RUN mkdir aria && cd aria && \
     ./configure \
         --host=$HOST \
         --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
-        --disable-nls \
         --disable-ssl \
         --without-gnutls \
         --without-libxml2 \

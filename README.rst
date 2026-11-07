@@ -221,7 +221,7 @@ You can use libexpat1-dev instead of libxml2-dev:
 * libexpat1-dev    (Required for Metalink support)
 
 On Fedora you need the following packages: gcc, gcc-c++, kernel-devel,
-libgcrypt-devel, libxml2-devel, openssl-devel, gettext-devel, cppunit
+libgcrypt-devel, libxml2-devel, openssl-devel, cppunit
 
 If you downloaded source code from a git repository, you have to install
 the following packages to get autoconf macros:
@@ -231,7 +231,6 @@ the following packages to get autoconf macros:
 * autoconf
 * automake
 * autotools-dev
-* autopoint
 * libtool
 
 And run the following command to generate configure script and other files

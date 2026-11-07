@@ -39,8 +39,6 @@
 
 #include <cstdlib>
 #include <cstdarg>
-
-// include <string> just to cancel libintl's #define vprintf libintl_vprintf
 #include <string>
 
 namespace aria2 {
