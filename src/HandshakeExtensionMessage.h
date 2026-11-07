@@ -37,6 +37,9 @@
 
 #include "ExtensionMessage.h"
 
+#include <cstddef>
+#include <span>
+
 #include <memory>
 
 #include "BtConstants.h"
@@ -96,16 +99,18 @@ public:
 
   void setDownloadContext(DownloadContext* dctx) { dctx_ = dctx; }
 
-  void setExtension(int key, uint8_t id);
+  void setExtension(ExtensionMessageRegistry::InterestingExtension key,
+                    uint8_t id);
 
   void setExtensions(const Extensions& extensions);
 
-  uint8_t getExtensionMessageID(int key) const;
+  uint8_t getExtensionMessageID(
+      ExtensionMessageRegistry::InterestingExtension key) const;
 
   void setPeer(const std::shared_ptr<Peer>& peer);
 
   static std::unique_ptr<HandshakeExtensionMessage>
-  create(const unsigned char* data, size_t dataLength);
+  create(std::span<const std::byte> data);
 };
 
 } // namespace aria2

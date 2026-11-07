@@ -44,9 +44,9 @@ BtSuggestPieceMessage::BtSuggestPieceMessage(size_t index)
 const char BtSuggestPieceMessage::NAME[] = "suggest piece";
 
 std::unique_ptr<BtSuggestPieceMessage>
-BtSuggestPieceMessage::create(const unsigned char* data, size_t dataLength)
+BtSuggestPieceMessage::create(std::span<const std::byte> data)
 {
-  return IndexBtMessage::create<BtSuggestPieceMessage>(data, dataLength);
+  return IndexBtMessage::create<BtSuggestPieceMessage>(data);
 }
 
 } // namespace aria2

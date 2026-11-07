@@ -48,11 +48,12 @@ private:
 
 protected:
   template <typename T>
-  static std::unique_ptr<T> create(const unsigned char* data, size_t dataLength)
+  static std::unique_ptr<T> create(std::span<const std::byte> data)
   {
-    bittorrent::assertPayloadLengthEqual(5, dataLength, T::NAME);
+    auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+    bittorrent::assertPayloadLengthEqual(5, data.size(), T::NAME);
     bittorrent::assertID(T::ID, data, T::NAME);
-    return make_unique<T>(bittorrent::getIntParam(data, 1));
+    return make_unique<T>(bittorrent::getIntParam(dataPtr, 1));
   }
 
 public:

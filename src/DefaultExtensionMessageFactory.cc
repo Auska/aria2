@@ -81,13 +81,14 @@ DefaultExtensionMessageFactory::DefaultExtensionMessageFactory(
 }
 
 std::unique_ptr<ExtensionMessage>
-DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
-                                              size_t length)
+DefaultExtensionMessageFactory::createMessage(std::span<const std::byte> data)
 {
-  uint8_t extensionMessageID = *data;
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto length = data.size();
+  uint8_t extensionMessageID = *dataPtr;
   if (extensionMessageID == 0) {
     // handshake
-    auto m = HandshakeExtensionMessage::create(data, length);
+    auto m = HandshakeExtensionMessage::create(data);
     m->setPeer(peer_);
     m->setDownloadContext(dctx_);
     return std::move(m);
@@ -101,7 +102,7 @@ DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
     }
     if (strcmp(extensionName, "ut_pex") == 0) {
       // uTorrent compatible Peer-Exchange
-      auto m = UTPexExtensionMessage::create(data, length);
+      auto m = UTPexExtensionMessage::create(data);
       m->setPeerStorage(peerStorage_);
       return std::move(m);
     }
@@ -111,8 +112,7 @@ DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
                               static_cast<unsigned long>(length)));
       }
       size_t end;
-      auto decoded = bencode2::decode(
-          std::as_bytes(std::span{data + 1, length - 1}), end);
+      auto decoded = bencode2::decode(data.subspan(1), end);
       const Dict* dict = downcast<Dict>(decoded);
       if (!dict) {
         throw DL_ABORT_EX("Bad ut_metadata: dictionary not found");
@@ -148,7 +148,8 @@ DefaultExtensionMessageFactory::createMessage(const unsigned char* data,
             make_unique<UTMetadataDataExtensionMessage>(extensionMessageID);
         m->setIndex(index->i());
         m->setTotalSize(totalSize->i());
-        m->setData(&data[1 + end], &data[length]);
+        m->setData(reinterpret_cast<const char*>(&dataPtr[1 + end]),
+                   reinterpret_cast<const char*>(&dataPtr[length]));
         m->setUTMetadataRequestTracker(tracker_);
         m->setPieceStorage(
             dctx_->getOwnerRequestGroup()->getPieceStorage().get());

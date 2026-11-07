@@ -37,11 +37,13 @@
 
 #include "common.h"
 
+#include <cstddef>
+#include <optional>
 #include <vector>
 
 namespace aria2 {
 
-typedef std::vector<int> Extensions;
+using Extensions = std::vector<int>;
 
 // This class stores mapping between BitTorrent extension name and its
 // ID. The BitTorrent Extension Protocol is specified in BEP10.  This
@@ -51,12 +53,14 @@ typedef std::vector<int> Extensions;
 // See also http://bittorrent.org/beps/bep_0010.html
 class ExtensionMessageRegistry {
 public:
-  enum InterestingExtension {
+  enum class InterestingExtension {
     UT_METADATA,
     UT_PEX,
-    // The number of extensions.
-    MAX_EXTENSION
   };
+
+  // The number of extensions.
+  static constexpr size_t MAX_EXTENSION =
+      static_cast<size_t>(InterestingExtension::UT_PEX) + 1;
 
   ExtensionMessageRegistry();
 
@@ -69,7 +73,7 @@ public:
   // Returns message ID corresponding the given |key|.  The |key| must
   // be one of InterestingExtension other than MAX_EXTENSION. If
   // message ID is not defined, returns 0.
-  uint8_t getExtensionMessageID(int key) const;
+  uint8_t getExtensionMessageID(InterestingExtension key) const;
 
   // Returns extension name corresponding to the given |id|. If no
   // extension is defined for the given |id|, returns NULL.
@@ -77,12 +81,12 @@ public:
 
   // Sets association of the |key| and |id|. The |key| must be one of
   // InterestingExtension other than MAX_EXTENSION.
-  void setExtensionMessageID(int key, uint8_t id);
+  void setExtensionMessageID(InterestingExtension key, uint8_t id);
 
   // Removes association of the |key|. The |key| must be one of
   // InterestingExtension other than MAX_EXTENSION. After this call,
   // getExtensionMessageID(key) returns 0.
-  void removeExtension(int key);
+  void removeExtension(InterestingExtension key);
 
 private:
   Extensions extensions_;
@@ -90,12 +94,12 @@ private:
 
 // Returns the extension name corresponding to the given |key|. The
 // |key| must be one of InterestingExtension other than MAX_EXTENSION.
-const char* strBtExtension(int key);
+const char* strBtExtension(ExtensionMessageRegistry::InterestingExtension key);
 
 // Returns extension key corresponding to the given extension |name|.
-// If no such key exists, returns
-// ExtensionMessageRegistry::MAX_EXTENSION.
-int keyBtExtension(const char* name);
+// If no such key exists, returns std::nullopt.
+std::optional<ExtensionMessageRegistry::InterestingExtension>
+keyBtExtension(const char* name);
 
 } // namespace aria2
 

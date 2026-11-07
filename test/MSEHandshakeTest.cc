@@ -89,7 +89,7 @@ void MSEHandshakeTest::doHandshake(
   while (!initiator->receivePublicKey()) {
     initiator->read();
   }
-  initiator->initCipher(bittorrent::getInfoHash(dctx_));
+  initiator->initCipher(bittorrent::getInfoHash(dctx_).data());
   initiator->sendInitiatorStep2();
   while (initiator->getWantWrite()) {
     initiator->send();

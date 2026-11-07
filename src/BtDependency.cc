@@ -147,7 +147,7 @@ bool BtDependency::resolve()
           if (d == std::end(destFiles) ||
               (*d)->getOriginalName() != e->getOriginalName()) {
             throw DL_ABORT_EX(fmt("No entry {} in torrent file",
-                                  e->getOriginalName().c_str()));
+                                  e->getOriginalName()));
           }
           else {
             copyValues(*d, e);
@@ -158,11 +158,11 @@ bool BtDependency::resolve()
     catch (RecoverableException& e) {
       A2_LOG_ERROR_EX(EX_EXCEPTION_CAUGHT, e);
       A2_LOG_INFO(fmt("BtDependency for GID#{} failed. Go without Bt.",
-                      GroupId::toHex(dependant_->getGID()).c_str()));
+                      GroupId::toHex(dependant_->getGID())));
       return true;
     }
     A2_LOG_INFO(fmt("Dependency resolved for GID#{}",
-                    GroupId::toHex(dependant_->getGID()).c_str()));
+                    GroupId::toHex(dependant_->getGID())));
     dependant_->setDownloadContext(context);
     return true;
   }
@@ -171,7 +171,7 @@ bool BtDependency::resolve()
     // cut reference here
     dependee_.reset();
     A2_LOG_INFO(fmt("BtDependency for GID#{} failed. Go without Bt.",
-                    GroupId::toHex(dependant_->getGID()).c_str()));
+                    GroupId::toHex(dependant_->getGID())));
     return true;
   }
   else {

@@ -50,10 +50,11 @@ namespace {
 const char* EXTENSION_NAMES[] = {"ut_metadata", "ut_pex", nullptr};
 } // namespace
 
-uint8_t ExtensionMessageRegistry::getExtensionMessageID(int key) const
+uint8_t
+ExtensionMessageRegistry::getExtensionMessageID(InterestingExtension key) const
 {
-  assert(key < MAX_EXTENSION);
-  return extensions_[key];
+  assert(static_cast<size_t>(key) < MAX_EXTENSION);
+  return extensions_[static_cast<size_t>(key)];
 }
 
 const char* ExtensionMessageRegistry::getExtensionName(uint8_t id) const
@@ -62,7 +63,7 @@ const char* ExtensionMessageRegistry::getExtensionName(uint8_t id) const
   if (id == 0) {
     return nullptr;
   }
-  for (i = 0; i < MAX_EXTENSION; ++i) {
+  for (i = 0; i < static_cast<int>(MAX_EXTENSION); ++i) {
     if (extensions_[i] == id) {
       break;
     }
@@ -70,16 +71,17 @@ const char* ExtensionMessageRegistry::getExtensionName(uint8_t id) const
   return EXTENSION_NAMES[i];
 }
 
-void ExtensionMessageRegistry::setExtensionMessageID(int key, uint8_t id)
+void ExtensionMessageRegistry::setExtensionMessageID(InterestingExtension key,
+                                                     uint8_t id)
 {
-  assert(key < MAX_EXTENSION);
-  extensions_[key] = id;
+  assert(static_cast<size_t>(key) < MAX_EXTENSION);
+  extensions_[static_cast<size_t>(key)] = id;
 }
 
-void ExtensionMessageRegistry::removeExtension(int key)
+void ExtensionMessageRegistry::removeExtension(InterestingExtension key)
 {
-  assert(key < MAX_EXTENSION);
-  extensions_[key] = 0;
+  assert(static_cast<size_t>(key) < MAX_EXTENSION);
+  extensions_[static_cast<size_t>(key)] = 0;
 }
 
 void ExtensionMessageRegistry::setExtensions(const Extensions& extensions)
@@ -87,25 +89,23 @@ void ExtensionMessageRegistry::setExtensions(const Extensions& extensions)
   extensions_ = extensions;
 }
 
-const char* strBtExtension(int key)
+const char* strBtExtension(ExtensionMessageRegistry::InterestingExtension key)
 {
-  if (key >= ExtensionMessageRegistry::MAX_EXTENSION) {
+  if (static_cast<size_t>(key) >= ExtensionMessageRegistry::MAX_EXTENSION) {
     return nullptr;
   }
-  else {
-    return EXTENSION_NAMES[key];
-  }
+  return EXTENSION_NAMES[static_cast<size_t>(key)];
 }
 
-int keyBtExtension(const char* name)
+std::optional<ExtensionMessageRegistry::InterestingExtension>
+keyBtExtension(const char* name)
 {
-  int i;
-  for (i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     if (strcmp(EXTENSION_NAMES[i], name) == 0) {
-      break;
+      return static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
     }
   }
-  return i;
+  return std::nullopt;
 }
 
 } // namespace aria2

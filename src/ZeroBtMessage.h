@@ -46,9 +46,9 @@ private:
 
 protected:
   template <typename T>
-  static std::unique_ptr<T> create(const unsigned char* data, size_t dataLength)
+  static std::unique_ptr<T> create(std::span<const std::byte> data)
   {
-    bittorrent::assertPayloadLengthEqual(1, dataLength, T::NAME);
+    bittorrent::assertPayloadLengthEqual(1, data.size(), T::NAME);
     bittorrent::assertID(T::ID, data, T::NAME);
     return make_unique<T>();
   }

@@ -94,8 +94,8 @@ void UTMetadataDataExtensionMessage::doReceivedAction()
       message_digest::digest(infoHash, INFO_HASH_LENGTH,
                              MessageDigest::sha1().get(),
                              std::as_bytes(std::span{metadata}));
-      if (memcmp(infoHash, bittorrent::getInfoHash(dctx_), INFO_HASH_LENGTH) ==
-          0) {
+      if (memcmp(infoHash, bittorrent::getInfoHash(dctx_).data(),
+                 INFO_HASH_LENGTH) == 0) {
         A2_LOG_INFO("Got ut_metadata");
       }
       else {

@@ -1,5 +1,7 @@
 #include "BtExtendedMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 #include <iostream>
 
@@ -43,14 +45,14 @@ void BtExtendedMessageTest::testCreate()
   bittorrent::createPeerMessageString((unsigned char*)msg, sizeof(msg), 13, 20);
   msg[5] = 1; // Set dummy extended message ID 1
   memcpy(msg + 6, payload.c_str(), payload.size());
-  auto pm = BtExtendedMessage::create(&exmsgFactory, peer, &msg[4], 13);
+  auto pm = BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 13));
   CPPUNIT_ASSERT_EQUAL((uint8_t)20, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[5];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 20);
-    BtExtendedMessage::create(&exmsgFactory, peer, &msg[4], 1);
+    BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {
@@ -60,7 +62,7 @@ void BtExtendedMessageTest::testCreate()
   try {
     unsigned char msg[6];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 21);
-    BtExtendedMessage::create(&exmsgFactory, peer, &msg[4], 2);
+    BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {

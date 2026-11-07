@@ -37,6 +37,9 @@
 
 #include "ExtensionMessageFactory.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class PeerStorage;
@@ -70,7 +73,7 @@ public:
                                  ExtensionMessageRegistry* registry);
 
   virtual std::unique_ptr<ExtensionMessage>
-  createMessage(const unsigned char* data, size_t length) override;
+  createMessage(std::span<const std::byte> data) override;
 
   void setPeerStorage(PeerStorage* peerStorage);
 

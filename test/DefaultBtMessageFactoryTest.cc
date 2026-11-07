@@ -1,5 +1,7 @@
 #include "DefaultBtMessageFactory.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <iostream>
@@ -62,13 +64,14 @@ void DefaultBtMessageFactoryTest::testCreateBtMessage_BtExtendedMessage()
   msg[5] = 1; // Set dummy extended message ID 1
   memcpy(msg + 6, payload.c_str(), payload.size());
 
-  auto m =
-      factory_->createBtMessage((const unsigned char*)msg + 4, sizeof(msg) - 4);
+  auto m = factory_->createBtMessage(asBytesSpan(
+      reinterpret_cast<const unsigned char*>(msg) + 4, sizeof(msg) - 4));
   CPPUNIT_ASSERT(BtExtendedMessage::ID == m->getId());
   try {
     // disable extended messaging
     peer_->setExtendedMessagingEnabled(false);
-    factory_->createBtMessage((const unsigned char*)msg + 4, sizeof(msg) - 4);
+    factory_->createBtMessage(asBytesSpan(
+        reinterpret_cast<const unsigned char*>(msg) + 4, sizeof(msg) - 4));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {
@@ -83,7 +86,8 @@ void DefaultBtMessageFactoryTest::testCreatePortMessage()
     bittorrent::createPeerMessageString(data, sizeof(data), 3, 9);
     bittorrent::setShortIntParam(&data[5], 6881);
     try {
-      auto r = factory_->createBtMessage(&data[4], sizeof(data) - 4);
+      auto r = factory_->createBtMessage(
+          asBytesSpan(&data[4], sizeof(data) - 4));
       CPPUNIT_ASSERT(BtPortMessage::ID == r->getId());
       auto m = static_cast<const BtPortMessage*>(r.get());
       CPPUNIT_ASSERT_EQUAL((uint16_t)6881, m->getPort());

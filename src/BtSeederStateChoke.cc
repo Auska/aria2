@@ -130,7 +130,7 @@ void BtSeederStateChoke::unchoke(
 
     peer->chokingRequired(false);
 
-    A2_LOG_INFO(fmt("RU: {}:{}, ulspd={}", peer->getIPAddress().c_str(),
+    A2_LOG_INFO(fmt("RU: {}:{}, ulspd={}", peer->getIPAddress(),
                     peer->getPort(), (*r).getUploadSpeed()));
   }
 
@@ -145,7 +145,7 @@ void BtSeederStateChoke::unchoke(
       peer->optUnchoking(true);
 
       A2_LOG_INFO(
-          fmt("POU: {}:{}", peer->getIPAddress().c_str(), peer->getPort()));
+          fmt("POU: {}:{}", peer->getIPAddress(), peer->getPort()));
     }
   }
 }

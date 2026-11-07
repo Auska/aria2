@@ -49,16 +49,16 @@ BtRejectMessage::BtRejectMessage(size_t index, int32_t begin, int32_t length)
 }
 
 std::unique_ptr<BtRejectMessage>
-BtRejectMessage::create(const unsigned char* data, size_t dataLength)
+BtRejectMessage::create(std::span<const std::byte> data)
 {
-  return RangeBtMessage::create<BtRejectMessage>(data, dataLength);
+  return RangeBtMessage::create<BtRejectMessage>(data);
 }
 
 void BtRejectMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
     throw DL_ABORT_EX(fmt("{} received while fast extension is disabled.",
-                          toString().c_str()));
+                          toString()));
   }
   if (isMetadataGetMode()) {
     return;

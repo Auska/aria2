@@ -48,8 +48,10 @@ BtBitfieldMessageValidator::~BtBitfieldMessageValidator() = default;
 
 void BtBitfieldMessageValidator::validate()
 {
-  bittorrent::checkBitfield(message_->getBitfield(),
-                            message_->getBitfieldLength(), numPiece_);
+  bittorrent::checkBitfield(
+      std::as_bytes(std::span{message_->getBitfield(),
+                              message_->getBitfieldLength()}),
+      numPiece_);
 }
 
 } // namespace aria2

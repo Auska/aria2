@@ -1,5 +1,7 @@
 #include "BtBitfieldMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -43,7 +45,7 @@ void BtBitfieldMessageTest::testCreate()
   unsigned char bitfield[2];
   memset(bitfield, 0xff, sizeof(bitfield));
   memcpy(&msg[5], bitfield, sizeof(bitfield));
-  std::shared_ptr<BtBitfieldMessage> pm(BtBitfieldMessage::create(&msg[4], 3));
+  std::shared_ptr<BtBitfieldMessage> pm(BtBitfieldMessage::create(asBytesSpan(&msg[4], 3)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)5, pm->getId());
   CPPUNIT_ASSERT(memcmp(bitfield, pm->getBitfield(), sizeof(bitfield)) == 0);
   CPPUNIT_ASSERT_EQUAL((size_t)2, pm->getBitfieldLength());
@@ -51,7 +53,7 @@ void BtBitfieldMessageTest::testCreate()
   try {
     unsigned char msg[5];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 5);
-    BtBitfieldMessage::create(&msg[4], 1);
+    BtBitfieldMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -60,7 +62,7 @@ void BtBitfieldMessageTest::testCreate()
   try {
     unsigned char msg[5 + 2];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 3, 6);
-    BtBitfieldMessage::create(&msg[4], 3);
+    BtBitfieldMessage::create(asBytesSpan(&msg[4], 3));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -72,7 +74,7 @@ void BtBitfieldMessageTest::testCreateMessage()
   BtBitfieldMessage msg;
   unsigned char bitfield[2];
   memset(bitfield, 0xff, sizeof(bitfield));
-  msg.setBitfield(bitfield, sizeof(bitfield));
+  msg.setBitfield(std::span{bitfield});
   unsigned char data[5 + 2];
   bittorrent::createPeerMessageString(data, sizeof(data), 3, 5);
   memcpy(&data[5], bitfield, sizeof(bitfield));
@@ -90,7 +92,7 @@ void BtBitfieldMessageTest::testDoReceivedAction()
   auto pieceStorage = make_unique<MockPieceStorage>();
   msg.setPieceStorage(pieceStorage.get());
   unsigned char bitfield[] = {0xff, 0xff};
-  msg.setBitfield(bitfield, sizeof(bitfield));
+  msg.setBitfield(std::span{bitfield});
 
   CPPUNIT_ASSERT_EQUAL(
       std::string("0000"),
@@ -110,7 +112,7 @@ void BtBitfieldMessageTest::testDoReceivedAction_goodByeSeeder()
   auto pieceStorage = make_unique<MockPieceStorage>();
   msg.setPieceStorage(pieceStorage.get());
   unsigned char bitfield[] = {0x00};
-  msg.setBitfield(bitfield, sizeof(bitfield));
+  msg.setBitfield(std::span{bitfield});
 
   // peer is not seeder and client have not completed download
   msg.doReceivedAction();
@@ -122,7 +124,7 @@ void BtBitfieldMessageTest::testDoReceivedAction_goodByeSeeder()
 
   pieceStorage->setDownloadFinished(false);
   bitfield[0] = 0x80;
-  msg.setBitfield(bitfield, sizeof(bitfield));
+  msg.setBitfield(std::span{bitfield});
 
   // peer is seeder, but client have not completed download
   msg.doReceivedAction();
@@ -141,7 +143,7 @@ void BtBitfieldMessageTest::testToString()
 {
   BtBitfieldMessage msg;
   unsigned char bitfield[] = {0xff, 0xff};
-  msg.setBitfield(bitfield, sizeof(bitfield));
+  msg.setBitfield(std::span{bitfield});
 
   CPPUNIT_ASSERT_EQUAL(std::string("bitfield ffff"), msg.toString());
 }

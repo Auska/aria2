@@ -44,10 +44,9 @@ const char BtHaveMessage::NAME[] = "have";
 
 BtHaveMessage::BtHaveMessage(size_t index) : IndexBtMessage(ID, NAME, index) {}
 
-std::unique_ptr<BtHaveMessage> BtHaveMessage::create(const unsigned char* data,
-                                                     size_t dataLength)
+std::unique_ptr<BtHaveMessage> BtHaveMessage::create(std::span<const std::byte> data)
 {
-  return IndexBtMessage::create<BtHaveMessage>(data, dataLength);
+  return IndexBtMessage::create<BtHaveMessage>(data);
 }
 
 void BtHaveMessage::doReceivedAction()

@@ -44,10 +44,10 @@
 namespace aria2 {
 
 BtHandshakeMessageValidator::BtHandshakeMessageValidator(
-    const BtHandshakeMessage* message, const unsigned char* infoHash)
+    const BtHandshakeMessage* message, std::span<const unsigned char> infoHash)
     : message_(message)
 {
-  memcpy(infoHash_, infoHash, sizeof(infoHash_));
+  std::copy(infoHash.begin(), infoHash.end(), std::begin(infoHash_));
 }
 
 BtHandshakeMessageValidator::~BtHandshakeMessageValidator() = default;
@@ -61,13 +61,13 @@ void BtHandshakeMessageValidator::validate()
   if (memcmp(BtHandshakeMessage::BT_PSTR, message_->getPstr(), 19) != 0) {
     throw DL_ABORT_EX(
         fmt("invalid handshake pstr={}",
-            util::percentEncode(std::as_bytes(std::span{message_->getPstr(), 19})).c_str()));
+            util::percentEncode(std::as_bytes(std::span{message_->getPstr(), 19}))));
   }
   if (memcmp(infoHash_, message_->getInfoHash(), sizeof(infoHash_)) != 0) {
     throw DL_ABORT_EX(
         fmt("invalid handshake info hash: expected:{}, actual:{}",
-            util::toHex(std::as_bytes(std::span{infoHash_, sizeof(infoHash_)})).c_str(),
-            util::toHex(std::as_bytes(std::span{message_->getInfoHash(), INFO_HASH_LENGTH})).c_str()));
+            util::toHex(std::as_bytes(std::span{infoHash_, sizeof(infoHash_)})),
+            util::toHex(std::as_bytes(std::span{message_->getInfoHash(), INFO_HASH_LENGTH}))));
   }
 }
 

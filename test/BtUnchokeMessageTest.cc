@@ -1,5 +1,7 @@
 #include "BtUnchokeMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -34,14 +36,14 @@ void BtUnchokeMessageTest::testCreate()
 {
   unsigned char msg[5];
   bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 1);
-  std::shared_ptr<BtUnchokeMessage> pm(BtUnchokeMessage::create(&msg[4], 1));
+  std::shared_ptr<BtUnchokeMessage> pm(BtUnchokeMessage::create(asBytesSpan(&msg[4], 1)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)1, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[6];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 1);
-    BtUnchokeMessage::create(&msg[4], 2);
+    BtUnchokeMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -50,7 +52,7 @@ void BtUnchokeMessageTest::testCreate()
   try {
     unsigned char msg[5];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 2);
-    BtUnchokeMessage::create(&msg[4], 1);
+    BtUnchokeMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

@@ -49,9 +49,9 @@ BtInterestedMessage::BtInterestedMessage()
 BtInterestedMessage::~BtInterestedMessage() = default;
 
 std::unique_ptr<BtInterestedMessage>
-BtInterestedMessage::create(const unsigned char* data, size_t dataLength)
+BtInterestedMessage::create(std::span<const std::byte> data)
 {
-  return ZeroBtMessage::create<BtInterestedMessage>(data, dataLength);
+  return ZeroBtMessage::create<BtInterestedMessage>(data);
 }
 
 void BtInterestedMessage::doReceivedAction()

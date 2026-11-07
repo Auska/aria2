@@ -122,21 +122,21 @@ bool DefaultBtAnnounce::adjustAnnounceList()
     if (!announceList_.currentTierAcceptsStoppedEvent()) {
       announceList_.moveToStoppedAllowedTier();
     }
-    announceList_.setEvent(AnnounceTier::STOPPED);
+    announceList_.setEvent(AnnounceTier::AnnounceEvent::STOPPED);
   }
   else if (isCompletedAnnounceReady()) {
     if (!announceList_.currentTierAcceptsCompletedEvent()) {
       announceList_.moveToCompletedAllowedTier();
     }
-    announceList_.setEvent(AnnounceTier::COMPLETED);
+    announceList_.setEvent(AnnounceTier::AnnounceEvent::COMPLETED);
   }
   else if (isDefaultAnnounceReady()) {
     // If download completed before "started" event is sent to a tracker,
     // we change the event to something else to prevent us from
     // sending "completed" event.
     if (pieceStorage_->allDownloadFinished() &&
-        announceList_.getEvent() == AnnounceTier::STARTED) {
-      announceList_.setEvent(AnnounceTier::STARTED_AFTER_COMPLETION);
+        announceList_.getEvent() == AnnounceTier::AnnounceEvent::STARTED) {
+      announceList_.setEvent(AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
     }
   }
   else {
@@ -159,6 +159,8 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
       pieceStorage_->getTotalLength() - pieceStorage_->getCompletedLength();
   // Use last 8 bytes of peer ID as a key
   const size_t keyLen = 8;
+  const auto infoHash = bittorrent::getInfoHash(downloadContext_);
+  const auto& peerId = bittorrent::getStaticPeerId();
   std::string uri = announceList_.getAnnounce();
   uri += uriHasQuery(uri) ? "&" : "?";
   uri +=
@@ -171,13 +173,12 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
           "key={}&"
           "numwant={}&"
           "no_peer_id=1",
-          util::percentEncode(std::as_bytes(std::span{bittorrent::getInfoHash(downloadContext_), INFO_HASH_LENGTH}))
-              .c_str(),
-          util::percentEncode(std::as_bytes(std::span{bittorrent::getStaticPeerId(), PEER_ID_LENGTH}))
-              .c_str(),
+          util::percentEncode(std::as_bytes(std::span{infoHash})),
+          util::percentEncode(std::as_bytes(std::span{peerId})),
           stat.getSessionUploadLength(), stat.getSessionDownloadLength(), left,
-          util::percentEncode(std::as_bytes(std::span{bittorrent::getStaticPeerId() + PEER_ID_LENGTH - keyLen, keyLen}))
-              .c_str(),
+          util::percentEncode(
+              std::as_bytes(std::span{peerId}.last(keyLen)))
+              ,
           numWant);
   if (tcpPort_) {
     uri += fmt("&port={}", tcpPort_);
@@ -219,20 +220,20 @@ std::shared_ptr<UDPTrackerRequest> DefaultBtAnnounce::createUDPTrackerRequest(
   req->remotePort = remotePort;
   req->action = UDPTrackerAction::Announce;
   req->infohash = bittorrent::getTorrentAttrs(downloadContext_)->infoHash;
-  const unsigned char* peerId = bittorrent::getStaticPeerId();
-  req->peerId.assign(peerId, peerId + PEER_ID_LENGTH);
+  const auto& peerId = bittorrent::getStaticPeerId();
+  req->peerId.assign(peerId.begin(), peerId.end());
   req->downloaded = stat.getSessionDownloadLength();
   req->left = left;
   req->uploaded = stat.getSessionUploadLength();
   switch (announceList_.getEvent()) {
-  case AnnounceTier::STARTED:
-  case AnnounceTier::STARTED_AFTER_COMPLETION:
+  case AnnounceTier::AnnounceEvent::STARTED:
+  case AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION:
     req->event = UDPTrackerEvent::Started;
     break;
-  case AnnounceTier::STOPPED:
+  case AnnounceTier::AnnounceEvent::STOPPED:
     req->event = UDPTrackerEvent::Stopped;
     break;
-  case AnnounceTier::COMPLETED:
+  case AnnounceTier::AnnounceEvent::COMPLETED:
     req->event = UDPTrackerEvent::Completed;
     break;
   default:
@@ -287,11 +288,10 @@ void DefaultBtAnnounce::resetAnnounce()
 }
 
 void DefaultBtAnnounce::processAnnounceResponse(
-    const unsigned char* trackerResponse, size_t trackerResponseLength)
+    std::span<const std::byte> trackerResponse)
 {
   A2_LOG_DEBUG("Now processing tracker response.");
-  auto decodedValue = bencode2::decode(
-      std::as_bytes(std::span{trackerResponse, trackerResponseLength}));
+  auto decodedValue = bencode2::decode(trackerResponse);
   const Dict* dict = downcast<Dict>(decodedValue);
   if (!dict) {
     throw DL_ABORT_EX(MSG_NULL_TRACKER_RESPONSE);
@@ -299,16 +299,16 @@ void DefaultBtAnnounce::processAnnounceResponse(
   const String* failure =
       downcast<String>(dict->get(BtAnnounce::FAILURE_REASON));
   if (failure) {
-    throw DL_ABORT_EX(fmt(EX_TRACKER_FAILURE, failure->s().c_str()));
+    throw DL_ABORT_EX(fmt(EX_TRACKER_FAILURE, failure->s()));
   }
   const String* warn = downcast<String>(dict->get(BtAnnounce::WARNING_MESSAGE));
   if (warn) {
-    A2_LOG_WARN(fmt(MSG_TRACKER_WARNING_MESSAGE, warn->s().c_str()));
+    A2_LOG_WARN(fmt(MSG_TRACKER_WARNING_MESSAGE, warn->s()));
   }
   const String* tid = downcast<String>(dict->get(BtAnnounce::TRACKER_ID));
   if (tid) {
     trackerId_ = tid->s();
-    A2_LOG_DEBUG(fmt("Tracker ID:{}", trackerId_.c_str()));
+    A2_LOG_DEBUG(fmt("Tracker ID:{}", trackerId_));
   }
   const Integer* ival = downcast<Integer>(dict->get(BtAnnounce::INTERVAL));
   if (ival && ival->i() > 0) {

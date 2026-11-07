@@ -114,8 +114,8 @@ bool InitiatorMSEHandshakeCommand::executeInternal()
     case INITIATOR_WAIT_KEY: {
       if (mseHandshake_->receivePublicKey()) {
         mseHandshake_->initCipher(
-            bittorrent::getInfoHash(requestGroup_->getDownloadContext()));
-        ;
+            bittorrent::getInfoHash(requestGroup_->getDownloadContext())
+                .data());
         mseHandshake_->sendInitiatorStep2();
         sequence_ = INITIATOR_SEND_STEP2_PENDING;
       }

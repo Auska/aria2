@@ -52,9 +52,9 @@ BtRequestMessage::BtRequestMessage(size_t index, int32_t begin, int32_t length,
 }
 
 std::unique_ptr<BtRequestMessage>
-BtRequestMessage::create(const unsigned char* data, size_t dataLength)
+BtRequestMessage::create(std::span<const std::byte> data)
 {
-  return RangeBtMessage::create<BtRequestMessage>(data, dataLength);
+  return RangeBtMessage::create<BtRequestMessage>(data);
 }
 
 void BtRequestMessage::doReceivedAction()

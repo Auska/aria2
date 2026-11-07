@@ -37,6 +37,9 @@
 
 #include "SimpleBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class DHTNode;
@@ -66,8 +69,7 @@ public:
 
   uint16_t getPort() const { return port_; }
 
-  static std::unique_ptr<BtPortMessage> create(const unsigned char* data,
-                                               size_t dataLength);
+  static std::unique_ptr<BtPortMessage> create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

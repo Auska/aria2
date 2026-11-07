@@ -36,6 +36,9 @@
 #define D_BT_EXTENDED_MESSAGE_H
 #include "SimpleBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class ExtensionMessage;
@@ -57,7 +60,7 @@ public:
 
   static std::unique_ptr<BtExtendedMessage>
   create(ExtensionMessageFactory* factory, const std::shared_ptr<Peer>& peer,
-         const unsigned char* data, size_t dataLength);
+         std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

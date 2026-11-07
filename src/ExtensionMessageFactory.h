@@ -37,7 +37,9 @@
 
 #include "common.h"
 
+#include <cstddef>
 #include <memory>
+#include <span>
 
 namespace aria2 {
 
@@ -48,7 +50,7 @@ public:
   virtual ~ExtensionMessageFactory() = default;
 
   virtual std::unique_ptr<ExtensionMessage>
-  createMessage(const unsigned char* data, size_t length) = 0;
+  createMessage(std::span<const std::byte> data) = 0;
 };
 
 } // namespace aria2

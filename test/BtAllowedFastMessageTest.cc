@@ -1,5 +1,7 @@
 #include "BtAllowedFastMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -39,7 +41,7 @@ void BtAllowedFastMessageTest::testCreate()
   bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 17);
   bittorrent::setIntParam(&msg[5], 12345);
   std::shared_ptr<BtAllowedFastMessage> pm(
-      BtAllowedFastMessage::create(&msg[4], 5));
+      BtAllowedFastMessage::create(asBytesSpan(&msg[4], 5)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)17, pm->getId());
   CPPUNIT_ASSERT_EQUAL((size_t)12345, pm->getIndex());
 
@@ -47,7 +49,7 @@ void BtAllowedFastMessageTest::testCreate()
   try {
     unsigned char msg[10];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 6, 17);
-    BtAllowedFastMessage::create(&msg[4], 6);
+    BtAllowedFastMessage::create(asBytesSpan(&msg[4], 6));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -56,7 +58,7 @@ void BtAllowedFastMessageTest::testCreate()
   try {
     unsigned char msg[9];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 18);
-    BtAllowedFastMessage::create(&msg[4], 5);
+    BtAllowedFastMessage::create(asBytesSpan(&msg[4], 5));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

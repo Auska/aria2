@@ -50,13 +50,14 @@ private:
 
 protected:
   template <typename T>
-  static std::unique_ptr<T> create(const unsigned char* data, size_t dataLength)
+  static std::unique_ptr<T> create(std::span<const std::byte> data)
   {
-    bittorrent::assertPayloadLengthEqual(13, dataLength, T::NAME);
+    auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+    bittorrent::assertPayloadLengthEqual(13, data.size(), T::NAME);
     bittorrent::assertID(T::ID, data, T::NAME);
-    return make_unique<T>(bittorrent::getIntParam(data, 1),
-                          bittorrent::getIntParam(data, 5),
-                          bittorrent::getIntParam(data, 9));
+    return make_unique<T>(bittorrent::getIntParam(dataPtr, 1),
+                          bittorrent::getIntParam(dataPtr, 5),
+                          bittorrent::getIntParam(dataPtr, 9));
   }
 
 public:

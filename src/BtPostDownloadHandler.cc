@@ -69,7 +69,7 @@ void BtPostDownloadHandler::getNextRequestGroups(
     RequestGroup* requestGroup) const
 {
   A2_LOG_INFO(fmt("Generating RequestGroups for Torrent file {}",
-                  requestGroup->getFirstFilePath().c_str()));
+                  requestGroup->getFirstFilePath()));
   std::unique_ptr<ValueBase> torrent;
   if (requestGroup->inMemoryDownload()) {
     auto& dw = static_cast<AbstractSingleDiskAdaptor*>(

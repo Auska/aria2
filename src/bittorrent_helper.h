@@ -37,6 +37,10 @@
 
 #include "common.h"
 
+#include <array>
+#include <cstddef>
+#include <span>
+
 #include <cstring>
 #include <string>
 #include <vector>
@@ -74,13 +78,13 @@ void load(const std::string& torrentFile,
           const std::vector<std::string>& uris,
           const std::string& overrideName = "");
 
-void loadFromMemory(const unsigned char* content, size_t length,
+void loadFromMemory(std::span<const std::byte> content,
                     const std::shared_ptr<DownloadContext>& ctx,
                     const std::shared_ptr<Option>& option,
                     const std::string& defaultName,
                     const std::string& overrideName = "");
 
-void loadFromMemory(const unsigned char* content, size_t length,
+void loadFromMemory(std::span<const std::byte> content,
                     const std::shared_ptr<DownloadContext>& ctx,
                     const std::shared_ptr<Option>& option,
                     const std::vector<std::string>& uris,
@@ -139,7 +143,7 @@ const std::string& generateStaticPeerAgent(const std::string& peerAgent);
 // Returns Peer ID statically stored by generateStaticPeerId().  If
 // Peer ID is not stored yet, this function calls
 // generateStaticPeerId("aria2-")
-const unsigned char* getStaticPeerId();
+const std::array<unsigned char, PEER_ID_LENGTH>& getStaticPeerId();
 
 const std::string& getStaticPeerAgent();
 
@@ -160,8 +164,9 @@ TorrentAttribute* getTorrentAttrs(const std::shared_ptr<DownloadContext>& dctx);
 
 // Returns the value associated with INFO_HASH key in BITTORRENT
 // attribute.
-const unsigned char* getInfoHash(DownloadContext* downloadContext);
-const unsigned char*
+std::array<unsigned char, INFO_HASH_LENGTH>
+getInfoHash(DownloadContext* downloadContext);
+std::array<unsigned char, INFO_HASH_LENGTH>
 getInfoHash(const std::shared_ptr<DownloadContext>& downloadContext);
 
 std::string getInfoHashString(DownloadContext* downloadContext);
@@ -202,8 +207,7 @@ void checkIndex(size_t index, size_t pieces);
 void checkBegin(int32_t begin, int32_t pieceLength);
 void checkLength(int32_t length);
 void checkRange(int32_t begin, int32_t length, int32_t pieceLength);
-void checkBitfield(const unsigned char* bitfield, size_t bitfieldLength,
-                   size_t pieces);
+void checkBitfield(std::span<const std::byte> bitfield, size_t pieces);
 
 // Initialize msg with 0 and set payloadLength and messageId.
 void createPeerMessageString(unsigned char* msg, size_t msgLength,
@@ -239,7 +243,8 @@ void assertPayloadLengthEqual(size_t expected, size_t actual,
                               const char* msgName);
 
 // Throws exception if expected is not equal to id from data.
-void assertID(uint8_t expected, const unsigned char* data, const char* msgName);
+void assertID(uint8_t expected, std::span<const std::byte> data,
+              const char* msgName);
 
 // Converts attrs into torrent data. This function does not guarantee
 // the returned string is valid torrent data.

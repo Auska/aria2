@@ -44,16 +44,16 @@ const char BtHaveNoneMessage::NAME[] = "have none";
 BtHaveNoneMessage::BtHaveNoneMessage() : ZeroBtMessage(ID, NAME) {}
 
 std::unique_ptr<BtHaveNoneMessage>
-BtHaveNoneMessage::create(const unsigned char* data, size_t dataLength)
+BtHaveNoneMessage::create(std::span<const std::byte> data)
 {
-  return ZeroBtMessage::create<BtHaveNoneMessage>(data, dataLength);
+  return ZeroBtMessage::create<BtHaveNoneMessage>(data);
 }
 
 void BtHaveNoneMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
     throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
-                          toString().c_str()));
+                          toString()));
   }
 }
 

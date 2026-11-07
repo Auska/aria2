@@ -46,13 +46,13 @@ const char BtHandshakeMessage::NAME[] = "handshake";
 
 BtHandshakeMessage::BtHandshakeMessage() : SimpleBtMessage(ID, NAME) { init(); }
 
-BtHandshakeMessage::BtHandshakeMessage(const unsigned char* infoHash,
-                                       const unsigned char* peerId)
+BtHandshakeMessage::BtHandshakeMessage(std::span<const unsigned char> infoHash,
+                                       std::span<const unsigned char> peerId)
     : SimpleBtMessage(ID, NAME)
 {
   init();
-  std::copy_n(infoHash, infoHash_.size(), std::begin(infoHash_));
-  std::copy_n(peerId, peerId_.size(), std::begin(peerId_));
+  std::copy(infoHash.begin(), infoHash.end(), std::begin(infoHash_));
+  std::copy(peerId.begin(), peerId.end(), std::begin(peerId_));
 }
 
 BtHandshakeMessage::~BtHandshakeMessage() = default;
@@ -69,14 +69,15 @@ void BtHandshakeMessage::init()
 }
 
 std::unique_ptr<BtHandshakeMessage>
-BtHandshakeMessage::create(const unsigned char* data, size_t dataLength)
+BtHandshakeMessage::create(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
   auto msg = make_unique<BtHandshakeMessage>();
-  msg->pstrlen_ = data[0];
-  std::copy_n(&data[1], msg->pstr_.size(), std::begin(msg->pstr_));
-  std::copy_n(&data[20], msg->reserved_.size(), std::begin(msg->reserved_));
-  std::copy_n(&data[28], msg->infoHash_.size(), std::begin(msg->infoHash_));
-  std::copy_n(&data[48], msg->peerId_.size(), std::begin(msg->peerId_));
+  msg->pstrlen_ = dataPtr[0];
+  std::copy_n(&dataPtr[1], msg->pstr_.size(), std::begin(msg->pstr_));
+  std::copy_n(&dataPtr[20], msg->reserved_.size(), std::begin(msg->reserved_));
+  std::copy_n(&dataPtr[28], msg->infoHash_.size(), std::begin(msg->infoHash_));
+  std::copy_n(&dataPtr[48], msg->peerId_.size(), std::begin(msg->peerId_));
 
   return msg;
 }
@@ -96,8 +97,8 @@ std::vector<unsigned char> BtHandshakeMessage::createMessage()
 std::string BtHandshakeMessage::toString() const
 {
   return fmt("{} peerId={}, reserved={}", NAME,
-             util::percentEncode(std::as_bytes(std::span{peerId_.data(), peerId_.size()})).c_str(),
-             util::toHex(std::as_bytes(std::span{reserved_.data(), reserved_.size()})).c_str());
+             util::percentEncode(std::as_bytes(std::span{peerId_.data(), peerId_.size()})),
+             util::toHex(std::as_bytes(std::span{reserved_.data(), reserved_.size()})));
 }
 
 bool BtHandshakeMessage::isFastExtensionSupported() const
@@ -112,14 +113,14 @@ bool BtHandshakeMessage::isExtendedMessagingEnabled() const
 
 bool BtHandshakeMessage::isDHTEnabled() const { return reserved_[7] & 0x01u; }
 
-void BtHandshakeMessage::setInfoHash(const unsigned char* infoHash)
+void BtHandshakeMessage::setInfoHash(std::span<const unsigned char> infoHash)
 {
-  std::copy_n(infoHash, infoHash_.size(), std::begin(infoHash_));
+  std::copy(infoHash.begin(), infoHash.end(), std::begin(infoHash_));
 }
 
-void BtHandshakeMessage::setPeerId(const unsigned char* peerId)
+void BtHandshakeMessage::setPeerId(std::span<const unsigned char> peerId)
 {
-  std::copy_n(peerId, peerId_.size(), std::begin(peerId_));
+  std::copy(peerId.begin(), peerId.end(), std::begin(peerId_));
 }
 
 } // namespace aria2

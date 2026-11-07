@@ -119,7 +119,7 @@ bool HTTPAnnRequest::processResponse(
     }
     std::string res = strm.str();
     btAnnounce->processAnnounceResponse(
-        reinterpret_cast<const unsigned char*>(res.c_str()), res.size());
+        std::as_bytes(std::span{res.data(), res.size()}));
     return true;
   }
   catch (RecoverableException& e) {

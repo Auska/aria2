@@ -126,7 +126,7 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
   if (!message) {
     return nullptr;
   }
-  if (memcmp(message->getPeerId(), bittorrent::getStaticPeerId(),
+  if (memcmp(message->getPeerId(), bittorrent::getStaticPeerId().data(),
              PEER_ID_LENGTH) == 0) {
     throw DL_ABORT_EX(
         fmt("CUID#{} - Drop connection from the same Peer ID", cuid_));
@@ -149,7 +149,7 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
     peer_->setExtendedMessagingEnabled(true);
     if (!utPexEnabled_) {
       extensionMessageRegistry_->removeExtension(
-          ExtensionMessageRegistry::UT_PEX);
+          ExtensionMessageRegistry::InterestingExtension::UT_PEX);
     }
     A2_LOG_INFO(fmt(MSG_EXTENDED_MESSAGING_ENABLED, cuid_));
   }
@@ -158,8 +158,8 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
     A2_LOG_INFO(fmt(MSG_DHT_ENABLED_PEER, cuid_));
   }
   A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_,
-                  peer_->getIPAddress().c_str(), peer_->getPort(),
-                  message->toString().c_str()));
+                  peer_->getIPAddress(), peer_->getPort(),
+                  message->toString()));
   return message;
 }
 
@@ -235,7 +235,7 @@ void DefaultBtInteractive::addAllowedFastMessageToQueue()
   if (peer_->isFastExtensionEnabled()) {
     auto fastSet = bittorrent::computeFastSet(
         peer_->getIPAddress(), downloadContext_->getNumPieces(),
-        bittorrent::getInfoHash(downloadContext_), allowedFastSetSize_);
+        bittorrent::getInfoHash(downloadContext_).data(), allowedFastSetSize_);
     for (std::vector<size_t>::const_iterator itr = fastSet.begin(),
                                              eoi = fastSet.end();
          itr != eoi; ++itr) {
@@ -313,8 +313,8 @@ size_t DefaultBtInteractive::receiveMessages()
     }
     ++msgcount;
     A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_,
-                    peer_->getIPAddress().c_str(), peer_->getPort(),
-                    message->toString().c_str()));
+                    peer_->getIPAddress(), peer_->getPort(),
+                    message->toString()));
     message->doReceivedAction();
 
     switch (message->getId()) {
@@ -507,7 +507,7 @@ void DefaultBtInteractive::addPeerExchangeMessage()
   if (pexTimer_.difference(global::wallclock()) >=
       UTPexExtensionMessage::DEFAULT_INTERVAL) {
     auto m = make_unique<UTPexExtensionMessage>(
-        peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_PEX));
+        peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX));
     auto& usedPeers = peerStorage_->getUsedPeers();
     for (auto i = std::begin(usedPeers), eoi = std::end(usedPeers);
          i != eoi && !m->freshPeersAreFull(); ++i) {
@@ -536,7 +536,7 @@ void DefaultBtInteractive::doInteractionProcessing()
     // PieceStorage is re-initialized with metadata_size in
     // HandshakeExtensionMessage::doReceivedAction().
     pieceStorage_ = downloadContext_->getOwnerRequestGroup()->getPieceStorage();
-    if (peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_METADATA) &&
+    if (peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA) &&
         downloadContext_->getTotalLength() > 0) {
       size_t num = utMetadataRequestTracker_->avail();
       if (num > 0) {
@@ -578,7 +578,7 @@ void DefaultBtInteractive::doInteractionProcessing()
       addRequests();
     }
   }
-  if (peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_PEX) &&
+  if (peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX) &&
       utPexEnabled_) {
     addPeerExchangeMessage();
   }

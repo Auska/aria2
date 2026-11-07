@@ -193,15 +193,17 @@ void UTPexExtensionMessage::setPeerStorage(PeerStorage* peerStorage)
 }
 
 std::unique_ptr<UTPexExtensionMessage>
-UTPexExtensionMessage::create(const unsigned char* data, size_t len)
+UTPexExtensionMessage::create(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto len = data.size();
   if (len < 1) {
     throw DL_ABORT_EX(fmt(MSG_TOO_SMALL_PAYLOAD_SIZE, EXTENSION_NAME,
                           static_cast<unsigned long>(len)));
   }
-  auto msg = make_unique<UTPexExtensionMessage>(*data);
+  auto msg = make_unique<UTPexExtensionMessage>(*dataPtr);
 
-  auto decoded = bencode2::decode(std::as_bytes(std::span{data + 1, len - 1}));
+  auto decoded = bencode2::decode(std::as_bytes(std::span{dataPtr + 1, len - 1}));
   const Dict* dict = downcast<Dict>(decoded);
   if (dict) {
     const String* added = downcast<String>(dict->get("added"));

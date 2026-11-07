@@ -49,9 +49,9 @@ BtNotInterestedMessage::BtNotInterestedMessage()
 BtNotInterestedMessage::~BtNotInterestedMessage() = default;
 
 std::unique_ptr<BtNotInterestedMessage>
-BtNotInterestedMessage::create(const unsigned char* data, size_t dataLength)
+BtNotInterestedMessage::create(std::span<const std::byte> data)
 {
-  return ZeroBtMessage::create<BtNotInterestedMessage>(data, dataLength);
+  return ZeroBtMessage::create<BtNotInterestedMessage>(data);
 }
 
 void BtNotInterestedMessage::doReceivedAction()

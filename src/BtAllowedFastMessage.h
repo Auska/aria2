@@ -37,6 +37,9 @@
 
 #include "IndexBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class BtAllowedFastMessage : public IndexBtMessage {
@@ -47,8 +50,7 @@ public:
 
   static const char NAME[];
 
-  static std::unique_ptr<BtAllowedFastMessage> create(const unsigned char* data,
-                                                      size_t dataLength);
+  static std::unique_ptr<BtAllowedFastMessage> create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

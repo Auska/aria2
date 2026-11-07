@@ -66,10 +66,11 @@ std::string HandshakeExtensionMessage::getPayload()
     dict.put("p", Integer::g(tcpPort_));
   }
   auto extDict = Dict::g();
-  for (int i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
-    int id = extreg_.getExtensionMessageID(i);
+  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+    auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
+    int id = extreg_.getExtensionMessageID(key);
     if (id) {
-      extDict->put(strBtExtension(i), Integer::g(id));
+      extDict->put(strBtExtension(key), Integer::g(id));
     }
   }
   dict.put("m", std::move(extDict));
@@ -83,12 +84,13 @@ std::string HandshakeExtensionMessage::toString() const
 {
   std::string s(fmt("{} client={}, tcpPort={}, metadataSize={}",
                     getExtensionName(),
-                    util::percentEncode(clientVersion_).c_str(), tcpPort_,
+                    util::percentEncode(clientVersion_), tcpPort_,
                     static_cast<unsigned long>(metadataSize_)));
-  for (int i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
-    int id = extreg_.getExtensionMessageID(i);
+  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+    auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
+    int id = extreg_.getExtensionMessageID(key);
     if (id) {
-      s += fmt(", {}={}", strBtExtension(i), id);
+      s += fmt(", {}={}", strBtExtension(key), id);
     }
   }
   return s;
@@ -100,15 +102,16 @@ void HandshakeExtensionMessage::doReceivedAction()
     peer_->setPort(tcpPort_);
     peer_->setIncomingPeer(false);
   }
-  for (int i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
-    int id = extreg_.getExtensionMessageID(i);
+  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+    auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
+    int id = extreg_.getExtensionMessageID(key);
     if (id) {
-      peer_->setExtension(i, id);
+      peer_->setExtension(key, id);
     }
   }
   auto attrs = bittorrent::getTorrentAttrs(dctx_);
   if (attrs->metadata.empty()) {
-    if (!peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_METADATA)) {
+    if (!peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA)) {
       // TODO In metadataGetMode, if peer don't support metadata
       // transfer, should we drop connection? There is a possibility
       // that peer can still tell us peers using PEX.
@@ -145,7 +148,8 @@ void HandshakeExtensionMessage::setPeer(const std::shared_ptr<Peer>& peer)
   peer_ = peer;
 }
 
-void HandshakeExtensionMessage::setExtension(int key, uint8_t id)
+void HandshakeExtensionMessage::setExtension(
+    ExtensionMessageRegistry::InterestingExtension key, uint8_t id)
 {
   extreg_.setExtensionMessageID(key, id);
 }
@@ -155,22 +159,25 @@ void HandshakeExtensionMessage::setExtensions(const Extensions& extensions)
   extreg_.setExtensions(extensions);
 }
 
-uint8_t HandshakeExtensionMessage::getExtensionMessageID(int key) const
+uint8_t HandshakeExtensionMessage::getExtensionMessageID(
+    ExtensionMessageRegistry::InterestingExtension key) const
 {
   return extreg_.getExtensionMessageID(key);
 }
 
 std::unique_ptr<HandshakeExtensionMessage>
-HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
+HandshakeExtensionMessage::create(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto length = data.size();
   if (length < 1) {
     throw DL_ABORT_EX(fmt(MSG_TOO_SMALL_PAYLOAD_SIZE, EXTENSION_NAME,
                           static_cast<unsigned long>(length)));
   }
   A2_LOG_DEBUG(fmt("Creating HandshakeExtensionMessage from {}",
-                   util::percentEncode(std::as_bytes(std::span{data, length})).c_str()));
+                   util::percentEncode(std::as_bytes(std::span{dataPtr, length}))));
   auto decoded =
-      bencode2::decode(std::as_bytes(std::span{data + 1, length - 1}));
+      bencode2::decode(std::as_bytes(std::span{dataPtr + 1, length - 1}));
   const Dict* dict = downcast<Dict>(decoded);
   if (!dict) {
     throw DL_ABORT_EX(
@@ -195,13 +202,13 @@ HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
           continue;
         }
 
-        int key = keyBtExtension(elem.first.c_str());
-        if (key == ExtensionMessageRegistry::MAX_EXTENSION) {
+        auto key = keyBtExtension(elem.first.c_str());
+        if (!key) {
           A2_LOG_DEBUG(fmt("Unsupported BitTorrent extension {}={}",
-                           elem.first.c_str(), extId->i()));
+                           elem.first, extId->i()));
         }
         else {
-          msg->setExtension(key, extId->i());
+          msg->setExtension(*key, extId->i());
         }
       }
     }

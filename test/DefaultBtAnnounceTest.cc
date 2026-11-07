@@ -533,7 +533,7 @@ void DefaultBtAnnounceTest::testProcessAnnounceResponse_malformed()
     std::string res = "i123e";
     DefaultBtAnnounce(dctx_.get(), option_)
         .processAnnounceResponse(
-            reinterpret_cast<const unsigned char*>(res.c_str()), res.size());
+            std::as_bytes(std::span{res.data(), res.size()}));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {
@@ -547,7 +547,7 @@ void DefaultBtAnnounceTest::testProcessAnnounceResponse_failureReason()
     std::string res = "d14:failure reason11:hello worlde";
     DefaultBtAnnounce(dctx_.get(), option_)
         .processAnnounceResponse(
-            reinterpret_cast<const unsigned char*>(res.c_str()), res.size());
+            std::as_bytes(std::span{res.data(), res.size()}));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {
@@ -574,7 +574,7 @@ void DefaultBtAnnounceTest::testProcessAnnounceResponse()
   an.setPeerStorage(peerStorage_);
   an.setBtRuntime(btRuntime_);
   an.processAnnounceResponse(
-      reinterpret_cast<const unsigned char*>(res.c_str()), res.size());
+      std::as_bytes(std::span{res.data(), res.size()}));
   CPPUNIT_ASSERT_EQUAL(std::string("foo"), an.getTrackerID());
   CPPUNIT_ASSERT_EQUAL((int64_t)3000, an.getInterval().count());
   CPPUNIT_ASSERT_EQUAL((int64_t)1800, an.getMinInterval().count());

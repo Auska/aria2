@@ -48,16 +48,16 @@ BtAllowedFastMessage::BtAllowedFastMessage(size_t index)
 }
 
 std::unique_ptr<BtAllowedFastMessage>
-BtAllowedFastMessage::create(const unsigned char* data, size_t dataLength)
+BtAllowedFastMessage::create(std::span<const std::byte> data)
 {
-  return IndexBtMessage::create<BtAllowedFastMessage>(data, dataLength);
+  return IndexBtMessage::create<BtAllowedFastMessage>(data);
 }
 
 void BtAllowedFastMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
     throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
-                          toString().c_str()));
+                          toString()));
   }
   if (isMetadataGetMode()) {
     return;

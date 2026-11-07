@@ -37,6 +37,9 @@
 
 #include "ExtensionMessage.h"
 
+#include <cstddef>
+#include <span>
+
 #include <utility>
 #include <vector>
 #include <memory>
@@ -105,7 +108,7 @@ public:
   void setPeerStorage(PeerStorage* peerStorage);
 
   static std::unique_ptr<UTPexExtensionMessage>
-  create(const unsigned char* data, size_t len);
+  create(std::span<const std::byte> data);
 
   void setMaxFreshPeer(size_t maxFreshPeer);
 

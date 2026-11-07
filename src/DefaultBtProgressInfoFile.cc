@@ -105,7 +105,7 @@ bool DefaultBtProgressInfoFile::isTorrentDownload()
 #define WRITE_CHECK(fp, ptr, count)                                            \
   if (fp.write(std::span{reinterpret_cast<const std::byte*>(ptr),              \
                          static_cast<size_t>(count)}) != (count)) {            \
-    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_.c_str()));          \
+    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_));          \
   }
 
 // Since version 0001, Integers are saved in binary form, network byte order.
@@ -133,11 +133,11 @@ void DefaultBtProgressInfoFile::save(IOFile& fp)
 #ifdef ENABLE_BITTORRENT
     // infoHashLength:
     // length: 32 bits
-    const unsigned char* infoHash = bittorrent::getInfoHash(dctx_);
+    auto infoHash = bittorrent::getInfoHash(dctx_);
     uint32_t infoHashLengthNL = htonl(INFO_HASH_LENGTH);
     WRITE_CHECK(fp, &infoHashLengthNL, sizeof(infoHashLengthNL));
     // infoHash:
-    WRITE_CHECK(fp, infoHash, INFO_HASH_LENGTH);
+    WRITE_CHECK(fp, infoHash.data(), INFO_HASH_LENGTH);
 #endif // ENABLE_BITTORRENT
   }
   else {
@@ -187,7 +187,7 @@ void DefaultBtProgressInfoFile::save(IOFile& fp)
     WRITE_CHECK(fp, (*itr)->getBitfield(), (*itr)->getBitfieldLength());
   }
   if (fp.close() == EOF) {
-    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_.c_str()));
+    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_));
   }
 }
 
@@ -205,13 +205,13 @@ void DefaultBtProgressInfoFile::save()
 
   lastDigest_ = std::move(digest);
 
-  A2_LOG_INFO(fmt(MSG_SAVING_SEGMENT_FILE, filename_.c_str()));
+  A2_LOG_INFO(fmt(MSG_SAVING_SEGMENT_FILE, filename_));
   std::string filenameTemp = filename_;
   filenameTemp += "__temp";
   {
     BufferedFile fp(filenameTemp.c_str(), BufferedFile::WRITE);
     if (!fp) {
-      throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_.c_str()));
+      throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_));
     }
 
     save(fp);
@@ -220,14 +220,14 @@ void DefaultBtProgressInfoFile::save()
   A2_LOG_INFO(MSG_SAVED_SEGMENT_FILE);
 
   if (!File(filenameTemp).renameTo(filename_)) {
-    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_.c_str()));
+    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_));
   }
 }
 
 #define READ_CHECK(fp, ptr, count)                                             \
   if (fp.read(std::span{reinterpret_cast<std::byte*>(ptr),                     \
                         static_cast<size_t>(count)}) != (count)) {             \
-    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_READ, filename_.c_str()));           \
+    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_READ, filename_));           \
   }
 
 // It is assumed that integers are saved as:
@@ -235,10 +235,10 @@ void DefaultBtProgressInfoFile::save()
 // 2) network byte order if version == 0001
 void DefaultBtProgressInfoFile::load()
 {
-  A2_LOG_INFO(fmt(MSG_LOADING_SEGMENT_FILE, filename_.c_str()));
+  A2_LOG_INFO(fmt(MSG_LOADING_SEGMENT_FILE, filename_));
   BufferedFile fp(filename_.c_str(), BufferedFile::READ);
   if (!fp) {
-    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_READ, filename_.c_str()));
+    throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_READ, filename_));
   }
   unsigned char versionBuf[2];
   READ_CHECK(fp, versionBuf, sizeof(versionBuf));
@@ -252,7 +252,7 @@ void DefaultBtProgressInfoFile::load()
   }
   else {
     throw DL_ABORT_EX(
-        fmt("Unsupported ctrl file version: {}", versionHex.c_str()));
+        fmt("Unsupported ctrl file version: {}", versionHex));
   }
   unsigned char extension[4];
   READ_CHECK(fp, extension, sizeof(extension));
@@ -276,12 +276,12 @@ void DefaultBtProgressInfoFile::load()
     READ_CHECK(fp, savedInfoHash.data(), infoHashLength);
 #ifdef ENABLE_BITTORRENT
     if (infoHashCheckEnabled) {
-      const unsigned char* infoHash = bittorrent::getInfoHash(dctx_);
-      if (memcmp(savedInfoHash.data(), infoHash, INFO_HASH_LENGTH) != 0) {
+      auto infoHash = bittorrent::getInfoHash(dctx_);
+      if (memcmp(savedInfoHash.data(), infoHash.data(), INFO_HASH_LENGTH) != 0) {
         throw DL_ABORT_EX(
             fmt("info hash mismatch. expected: {}, actual: {}",
-                util::toHex(std::as_bytes(std::span{infoHash, INFO_HASH_LENGTH})).c_str(),
-                util::toHex(std::as_bytes(std::span{savedInfoHash.data(), infoHashLength})).c_str()));
+                util::toHex(std::as_bytes(std::span{infoHash})),
+                util::toHex(std::as_bytes(std::span{savedInfoHash.data(), infoHashLength}))));
       }
     }
 #endif // ENABLE_BITTORRENT
@@ -416,11 +416,11 @@ bool DefaultBtProgressInfoFile::exists()
 {
   File f(filename_);
   if (f.isFile()) {
-    A2_LOG_INFO(fmt(MSG_SEGMENT_FILE_EXISTS, filename_.c_str()));
+    A2_LOG_INFO(fmt(MSG_SEGMENT_FILE_EXISTS, filename_));
     return true;
   }
   else {
-    A2_LOG_INFO(fmt(MSG_SEGMENT_FILE_DOES_NOT_EXIST, filename_.c_str()));
+    A2_LOG_INFO(fmt(MSG_SEGMENT_FILE_DOES_NOT_EXIST, filename_));
     return false;
   }
 }

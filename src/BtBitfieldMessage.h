@@ -37,6 +37,9 @@
 
 #include "SimpleBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class BtBitfieldMessage : public SimpleBtMessage {
@@ -46,7 +49,7 @@ private:
 public:
   BtBitfieldMessage();
 
-  BtBitfieldMessage(const unsigned char* bitfield, size_t bitfieldLength);
+  BtBitfieldMessage(std::span<const unsigned char> bitfield);
 
   virtual ~BtBitfieldMessage();
 
@@ -54,14 +57,13 @@ public:
 
   static const char NAME[];
 
-  void setBitfield(const unsigned char* bitfield, size_t bitfieldLength);
+  void setBitfield(std::span<const unsigned char> bitfield);
 
   const unsigned char* getBitfield() const { return bitfield_.data(); }
 
   size_t getBitfieldLength() const { return bitfield_.size(); }
 
-  static std::unique_ptr<BtBitfieldMessage> create(const unsigned char* data,
-                                                   size_t dataLength);
+  static std::unique_ptr<BtBitfieldMessage> create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

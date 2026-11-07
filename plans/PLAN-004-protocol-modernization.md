@@ -312,7 +312,7 @@ API **一并换成枚举类型**（引擎层调用点做单行适配）。
      （`SERVER_PARSER` 加 `ParserMode::` 限定、`parse` 传 span）。
    - 门禁：见阶段 3 专项。
 
-4. [ ] **阶段 4：BT 簇（139 文件 / 16 429 行）**
+4. [x] **阶段 4：BT 簇（139 文件 / 16 429 行）**
    - 惯用法：`typedef`→`using` 1 处（`src/ExtensionMessageRegistry.h:44`）；
      `enum class` 2 个（`AnnounceEvent`、`InterestingExtension` + `MAX_EXTENSION`
      提 `constexpr size_t`）；`std::find` 5 处 → ranges。
@@ -569,6 +569,23 @@ BT 36（`AnnounceListTest`、`Bt*MessageTest`、`DefaultBt*Test`、
    `std::ranges::find` 不接受迭代器区间，保留 `std::find`。
    ③`src/LpdMessageReceiver.cc` 的跨组适配同时包含 `ParserMode::` 限定与
    `parse(std::as_bytes(std::span{buf}.first(length)))` 两处改动。
+
+9. **执行期修正（审查 #4）**：阶段 4 与计划文字的差异：
+   ①`src/bittorrent_helper.h` 只 span 化了真正携带长度的入口
+   （`loadFromMemory`×2、`checkBitfield`、`assertID`、`getInfoHash`、`getStaticPeerId`）；
+   计划里列的 `getLLIntParam/getIntParam/getShortIntParam/setLLIntParam/setIntParam/
+   setShortIntParam`、`getId`、`createPeerMessageString`、`packcompact`、`unpackcompact`
+   是 `(ptr, offset)` 形态的低位辅助函数，span 化要改 100+ 调用点且不增加任何越界保护，
+   故保持指针签名（它们不读长度，`offset` 语义与 span 不匹配）。
+   ②`src/BtPieceMessage.h:86` 的 `setMsgPayload(const unsigned char*)` 与 `getBlock()`
+   保留指针：该指针被 `BtExtendedMessage`/`BtPieceMessage` 长期持有至
+   `doReceivedAction()`，span 会暗示一个调用方并不保证的生命周期。
+   ③`getInfoHash` 返回 `std::array<unsigned char, INFO_HASH_LENGTH>`（按值，因为
+   `TorrentAttribute::infoHash` 是 `std::string`，无法返回引用），
+   `getStaticPeerId` 返回 `const std::array<...,PEER_ID_LENGTH>&`（函数内 static 初始化）。
+   连带 13 个调用点改 `.data()` / `auto`（含 DHT 的 `src/DHTPeerLookupTask.cc:61`）。
+   ④新增测试助手 `test/as_bytes_span.h`（`asBytesSpan(ptr, len)`），18 个测试文件引用；
+   已登记进 `test/Makefile.am` 的 `aria2c_SOURCES`。
 
 5. **反向修正**：初稿曾写「阶段 1 零跨组适配」「阶段 2 有 1 处适配」「`bittorrent_helper.h:301`
    的 `assertID`」，核对后分别改为 2 处、0 处、`:242`；初稿曾把

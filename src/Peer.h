@@ -36,6 +36,7 @@
 #define D_PEER_H
 
 #include "common.h"
+#include "ExtensionMessageRegistry.h"
 
 #include <cassert>
 #include <string>
@@ -239,11 +240,13 @@ public:
 
   bool hasPiece(size_t index) const;
 
-  uint8_t getExtensionMessageID(int key) const;
+  uint8_t getExtensionMessageID(
+      ExtensionMessageRegistry::InterestingExtension key) const;
 
   const char* getExtensionName(uint8_t id) const;
 
-  void setExtension(int key, uint8_t id);
+  void setExtension(ExtensionMessageRegistry::InterestingExtension key,
+                    uint8_t id);
 
   const Timer& getLastDownloadUpdate() const;
 

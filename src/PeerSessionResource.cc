@@ -174,7 +174,8 @@ void PeerSessionResource::extendedMessagingEnabled(bool b)
   extendedMessagingEnabled_ = b;
 }
 
-uint8_t PeerSessionResource::getExtensionMessageID(int key) const
+uint8_t PeerSessionResource::getExtensionMessageID(
+    ExtensionMessageRegistry::InterestingExtension key) const
 {
   return extreg_.getExtensionMessageID(key);
 }
@@ -184,7 +185,8 @@ const char* PeerSessionResource::getExtensionName(uint8_t id) const
   return extreg_.getExtensionName(id);
 }
 
-void PeerSessionResource::addExtension(int key, uint8_t id)
+void PeerSessionResource::addExtension(
+    ExtensionMessageRegistry::InterestingExtension key, uint8_t id)
 {
   extreg_.setExtensionMessageID(key, id);
 }

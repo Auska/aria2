@@ -118,9 +118,9 @@ PeerInteractionCommand::PeerInteractionCommand(
   bool metadataGetMode = torrentAttrs->metadata.empty();
 
   auto exMsgRegistry = make_unique<ExtensionMessageRegistry>();
-  exMsgRegistry->setExtensionMessageID(ExtensionMessageRegistry::UT_PEX, 8);
+  exMsgRegistry->setExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX, 8);
   // http://www.bittorrent.org/beps/bep_0009.html
-  exMsgRegistry->setExtensionMessageID(ExtensionMessageRegistry::UT_METADATA,
+  exMsgRegistry->setExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA,
                                        9);
 
   auto extensionMessageFactory = make_unique<DefaultExtensionMessageFactory>(

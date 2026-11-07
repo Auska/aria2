@@ -137,11 +137,11 @@ void PeerSessionResourceTest::testGetExtensionMessageID()
 {
   PeerSessionResource res(1_k, 1_m);
 
-  res.addExtension(ExtensionMessageRegistry::UT_PEX, 9);
+  res.addExtension(ExtensionMessageRegistry::InterestingExtension::UT_PEX, 9);
   CPPUNIT_ASSERT_EQUAL(
-      (uint8_t)9, res.getExtensionMessageID(ExtensionMessageRegistry::UT_PEX));
+      (uint8_t)9, res.getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX));
   CPPUNIT_ASSERT_EQUAL((uint8_t)0, res.getExtensionMessageID(
-                                       ExtensionMessageRegistry::UT_METADATA));
+                                       ExtensionMessageRegistry::InterestingExtension::UT_METADATA));
 
   CPPUNIT_ASSERT_EQUAL(std::string("ut_pex"),
                        std::string(res.getExtensionName(9)));

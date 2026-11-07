@@ -90,10 +90,10 @@ void UTMetadataPostDownloadHandler::getNextRequestGroups(
         util::applyDir(requestGroup->getOption()->get(PREF_DIR),
                        util::toHex(attrs->infoHash) + ".torrent");
     if (util::saveAs(filename, torrent)) {
-      A2_LOG_NOTICE(fmt(MSG_METADATA_SAVED, filename.c_str()));
+      A2_LOG_NOTICE(fmt(MSG_METADATA_SAVED, filename));
     }
     else {
-      A2_LOG_NOTICE(fmt(MSG_METADATA_NOT_SAVED, filename.c_str()));
+      A2_LOG_NOTICE(fmt(MSG_METADATA_NOT_SAVED, filename));
     }
   }
   if (!requestGroup->getOption()->getAsBool(PREF_BT_METADATA_ONLY)) {

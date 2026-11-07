@@ -101,8 +101,8 @@ public:
   /**
    * Processes the repsponse from the tracker.
    */
-  virtual void processAnnounceResponse(const unsigned char* trackerResponse,
-                                       size_t trackerResponseLength) = 0;
+  virtual void
+  processAnnounceResponse(std::span<const std::byte> trackerResponse) = 0;
 
   virtual void
   processUDPTrackerResponse(const std::shared_ptr<UDPTrackerRequest>& req) = 0;

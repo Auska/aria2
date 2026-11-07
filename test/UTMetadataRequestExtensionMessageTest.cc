@@ -45,7 +45,7 @@ public:
     dctx_->setAttribute(CTX_ATTR_BT, make_unique<TorrentAttribute>());
     peer_ = std::make_shared<Peer>("host", 6880);
     peer_->allocateSessionResource(0, 0);
-    peer_->setExtension(ExtensionMessageRegistry::UT_METADATA, 1);
+    peer_->setExtension(ExtensionMessageRegistry::InterestingExtension::UT_METADATA, 1);
   }
 
   template <typename T> const T* getFirstDispatchedMessage()

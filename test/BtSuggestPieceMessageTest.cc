@@ -1,5 +1,7 @@
 #include "BtSuggestPieceMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -31,7 +33,7 @@ void BtSuggestPieceMessageTest::testCreate()
   unsigned char msg[9];
   bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 13);
   bittorrent::setIntParam(&msg[5], 12345);
-  auto pm = BtSuggestPieceMessage::create(&msg[4], 5);
+  auto pm = BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 5));
   CPPUNIT_ASSERT(BtSuggestPieceMessage::ID == pm->getId());
   CPPUNIT_ASSERT_EQUAL((size_t)12345, pm->getIndex());
 
@@ -39,7 +41,7 @@ void BtSuggestPieceMessageTest::testCreate()
   try {
     unsigned char msg[10];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 6, 13);
-    BtSuggestPieceMessage::create(&msg[4], 2);
+    BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -48,7 +50,7 @@ void BtSuggestPieceMessageTest::testCreate()
   try {
     unsigned char msg[9];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 14);
-    BtSuggestPieceMessage::create(&msg[4], 1);
+    BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

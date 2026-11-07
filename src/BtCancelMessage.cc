@@ -45,9 +45,9 @@ BtCancelMessage::BtCancelMessage(size_t index, int32_t begin, int32_t length)
 }
 
 std::unique_ptr<BtCancelMessage>
-BtCancelMessage::create(const unsigned char* data, size_t dataLength)
+BtCancelMessage::create(std::span<const std::byte> data)
 {
-  return RangeBtMessage::create<BtCancelMessage>(data, dataLength);
+  return RangeBtMessage::create<BtCancelMessage>(data);
 }
 
 void BtCancelMessage::doReceivedAction()

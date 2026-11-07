@@ -317,7 +317,8 @@ void Peer::setAllBitfield()
 
 void Peer::startDrop() { dropStartTime_ = global::wallclock(); }
 
-uint8_t Peer::getExtensionMessageID(int key) const
+uint8_t Peer::getExtensionMessageID(
+    ExtensionMessageRegistry::InterestingExtension key) const
 {
   assert(res_);
   return res_->getExtensionMessageID(key);
@@ -329,7 +330,8 @@ const char* Peer::getExtensionName(uint8_t id) const
   return res_->getExtensionName(id);
 }
 
-void Peer::setExtension(int key, uint8_t id)
+void Peer::setExtension(
+    ExtensionMessageRegistry::InterestingExtension key, uint8_t id)
 {
   assert(res_);
   res_->addExtension(key, id);

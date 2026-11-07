@@ -83,12 +83,14 @@ BtPieceMessage::~BtPieceMessage() = default;
 void BtPieceMessage::setMsgPayload(const unsigned char* data) { data_ = data; }
 
 std::unique_ptr<BtPieceMessage>
-BtPieceMessage::create(const unsigned char* data, size_t dataLength)
+BtPieceMessage::create(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto dataLength = data.size();
   bittorrent::assertPayloadLengthGreater(9, dataLength, NAME);
   bittorrent::assertID(ID, data, NAME);
-  return make_unique<BtPieceMessage>(bittorrent::getIntParam(data, 1),
-                                     bittorrent::getIntParam(data, 5),
+  return make_unique<BtPieceMessage>(bittorrent::getIntParam(dataPtr, 1),
+                                     bittorrent::getIntParam(dataPtr, 5),
                                      dataLength - 9);
 }
 
@@ -133,7 +135,7 @@ void BtPieceMessage::doReceivedAction()
     piece->completeBlock(slot->getBlockIndex());
     A2_LOG_DEBUG(fmt(
         MSG_PIECE_BITFIELD, getCuid(),
-        util::toHex(std::as_bytes(std::span{piece->getBitfield(), piece->getBitfieldLength()})).c_str()));
+        util::toHex(std::as_bytes(std::span{piece->getBitfield(), piece->getBitfieldLength()}))));
     piece->updateHash(begin_, data_ + 9, blockLength_);
     getBtMessageDispatcher()->removeOutstandingRequest(slot);
     if (piece->pieceComplete()) {
@@ -206,8 +208,8 @@ void BtPieceMessage::send()
     return;
   }
   A2_LOG_INFO(fmt(MSG_SEND_PEER_MESSAGE, getCuid(),
-                  getPeer()->getIPAddress().c_str(), getPeer()->getPort(),
-                  toString().c_str()));
+                  getPeer()->getIPAddress(), getPeer()->getPort(),
+                  toString()));
   int64_t pieceDataOffset =
       static_cast<int64_t>(index_) * downloadContext_->getPieceLength() +
       begin_;

@@ -1154,8 +1154,8 @@ std::shared_ptr<DownloadResult> RequestGroup::createDownloadResult() const
   }
 #ifdef ENABLE_BITTORRENT
   if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
-    const unsigned char* p = bittorrent::getInfoHash(downloadContext_);
-    res->infoHash.assign(p, p + INFO_HASH_LENGTH);
+    auto infoHash = bittorrent::getInfoHash(downloadContext_);
+    res->infoHash.assign(infoHash.begin(), infoHash.end());
   }
 #endif // ENABLE_BITTORRENT
   res->pieceLength = downloadContext_->getPieceLength();

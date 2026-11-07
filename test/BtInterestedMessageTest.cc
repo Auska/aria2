@@ -1,5 +1,7 @@
 #include "BtInterestedMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -34,14 +36,14 @@ void BtInterestedMessageTest::testCreate()
   unsigned char msg[5];
   bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 2);
   std::shared_ptr<BtInterestedMessage> pm(
-      BtInterestedMessage::create(&msg[4], 1));
+      BtInterestedMessage::create(asBytesSpan(&msg[4], 1)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)2, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[6];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 2);
-    BtInterestedMessage::create(&msg[4], 2);
+    BtInterestedMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -50,7 +52,7 @@ void BtInterestedMessageTest::testCreate()
   try {
     unsigned char msg[5];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 3);
-    BtInterestedMessage::create(&msg[4], 1);
+    BtInterestedMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

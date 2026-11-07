@@ -43,9 +43,9 @@ const char BtUnchokeMessage::NAME[] = "unchoke";
 BtUnchokeMessage::BtUnchokeMessage() : ZeroBtMessage(ID, NAME) {}
 
 std::unique_ptr<BtUnchokeMessage>
-BtUnchokeMessage::create(const unsigned char* data, size_t dataLength)
+BtUnchokeMessage::create(std::span<const std::byte> data)
 {
-  return ZeroBtMessage::create<BtUnchokeMessage>(data, dataLength);
+  return ZeroBtMessage::create<BtUnchokeMessage>(data);
 }
 
 void BtUnchokeMessage::doReceivedAction()

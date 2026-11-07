@@ -1,5 +1,7 @@
 #include "BtHandshakeMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -56,7 +58,7 @@ void BtHandshakeMessageTest::testCreate()
   unsigned char msg[68];
   createHandshakeMessageData(msg);
   std::shared_ptr<BtHandshakeMessage> message =
-      BtHandshakeMessage::create(&msg[0], sizeof(msg));
+      BtHandshakeMessage::create(asBytesSpan(&msg[0], sizeof(msg)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)INT8_MAX, message->getId());
   CPPUNIT_ASSERT_EQUAL((uint8_t)19, message->getPstrlen());
   CPPUNIT_ASSERT_EQUAL(

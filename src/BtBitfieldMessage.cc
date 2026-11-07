@@ -50,27 +50,28 @@ const char BtBitfieldMessage::NAME[] = "bitfield";
 
 BtBitfieldMessage::BtBitfieldMessage() : SimpleBtMessage(ID, NAME) {}
 
-BtBitfieldMessage::BtBitfieldMessage(const unsigned char* bitfield,
-                                     size_t bitfieldLength)
-    : SimpleBtMessage(ID, NAME), bitfield_(bitfield, bitfield + bitfieldLength)
+BtBitfieldMessage::BtBitfieldMessage(std::span<const unsigned char> bitfield)
+    : SimpleBtMessage(ID, NAME), bitfield_(bitfield.begin(), bitfield.end())
 {
 }
 
 BtBitfieldMessage::~BtBitfieldMessage() = default;
 
-void BtBitfieldMessage::setBitfield(const unsigned char* bitfield,
-                                    size_t bitfieldLength)
+void BtBitfieldMessage::setBitfield(std::span<const unsigned char> bitfield)
 {
-  bitfield_.assign(bitfield, bitfield + bitfieldLength);
+  bitfield_.assign(bitfield.begin(), bitfield.end());
 }
 
 std::unique_ptr<BtBitfieldMessage>
-BtBitfieldMessage::create(const unsigned char* data, size_t dataLength)
+BtBitfieldMessage::create(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto dataLength = data.size();
   bittorrent::assertPayloadLengthGreater(1, dataLength, NAME);
   bittorrent::assertID(ID, data, NAME);
   auto message = make_unique<BtBitfieldMessage>();
-  message->setBitfield(data + 1, dataLength - 1);
+  message->setBitfield(
+      std::span{dataPtr + 1, dataLength - 1});
   return message;
 }
 

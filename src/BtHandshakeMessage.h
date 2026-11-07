@@ -37,6 +37,9 @@
 
 #include "SimpleBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 #include <array>
 
 #include "BtConstants.h"
@@ -65,11 +68,10 @@ public:
    * infoHash must be 20 byte length.
    * peerId must be 20 byte length.
    */
-  BtHandshakeMessage(const unsigned char* infoHash,
-                     const unsigned char* peerId);
+  BtHandshakeMessage(std::span<const unsigned char> infoHash,
+                     std::span<const unsigned char> peerId);
 
-  static std::unique_ptr<BtHandshakeMessage> create(const unsigned char* data,
-                                                    size_t dataLength);
+  static std::unique_ptr<BtHandshakeMessage> create(std::span<const std::byte> data);
 
   virtual ~BtHandshakeMessage();
 
@@ -107,11 +109,11 @@ public:
 
   const unsigned char* getInfoHash() const { return infoHash_.data(); }
 
-  void setInfoHash(const unsigned char* infoHash);
+  void setInfoHash(std::span<const unsigned char> infoHash);
 
   const unsigned char* getPeerId() const { return peerId_.data(); }
 
-  void setPeerId(const unsigned char* peerId);
+  void setPeerId(std::span<const unsigned char> peerId);
 };
 
 } // namespace aria2

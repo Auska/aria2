@@ -185,19 +185,19 @@ void AnnounceListTest::testNextEventIfAfterStarted()
   // ANNOUNCE_LIST
   // [ [ tracker1 ] ]
   AnnounceList announceList(toVector(downcast<List>(announcesList)));
-  announceList.setEvent(AnnounceTier::STOPPED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STOPPED);
   announceList.announceFailure();
   announceList.resetTier();
   CPPUNIT_ASSERT_EQUAL(std::string(""),
                        std::string(announceList.getEventString()));
-  CPPUNIT_ASSERT_EQUAL(AnnounceTier::HALTED, announceList.getEvent());
+  CPPUNIT_ASSERT_EQUAL(AnnounceTier::AnnounceEvent::HALTED, announceList.getEvent());
 
-  announceList.setEvent(AnnounceTier::COMPLETED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::COMPLETED);
   announceList.announceFailure();
   announceList.resetTier();
   CPPUNIT_ASSERT_EQUAL(std::string(""),
                        std::string(announceList.getEventString()));
-  CPPUNIT_ASSERT_EQUAL(AnnounceTier::SEEDING, announceList.getEvent());
+  CPPUNIT_ASSERT_EQUAL(AnnounceTier::AnnounceEvent::SEEDING, announceList.getEvent());
 }
 
 void AnnounceListTest::testEvent()
@@ -209,23 +209,23 @@ void AnnounceListTest::testEvent()
   // [ [ tracker1 ], [ tracker2 ], [ tracker3 ] ]
   AnnounceList announceList(toVector(downcast<List>(announcesList)));
 
-  announceList.setEvent(AnnounceTier::STOPPED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STOPPED);
   announceList.announceSuccess();
   CPPUNIT_ASSERT_EQUAL(std::string(""),
                        std::string(announceList.getEventString()));
-  CPPUNIT_ASSERT_EQUAL(AnnounceTier::HALTED, announceList.getEvent());
+  CPPUNIT_ASSERT_EQUAL(AnnounceTier::AnnounceEvent::HALTED, announceList.getEvent());
 
-  announceList.setEvent(AnnounceTier::COMPLETED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::COMPLETED);
   announceList.announceSuccess();
   CPPUNIT_ASSERT_EQUAL(std::string(""),
                        std::string(announceList.getEventString()));
-  CPPUNIT_ASSERT_EQUAL(AnnounceTier::SEEDING, announceList.getEvent());
+  CPPUNIT_ASSERT_EQUAL(AnnounceTier::AnnounceEvent::SEEDING, announceList.getEvent());
 
-  announceList.setEvent(AnnounceTier::STARTED_AFTER_COMPLETION);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
   CPPUNIT_ASSERT_EQUAL(std::string("started"),
                        std::string(announceList.getEventString()));
   announceList.announceSuccess();
-  CPPUNIT_ASSERT_EQUAL(AnnounceTier::SEEDING, announceList.getEvent());
+  CPPUNIT_ASSERT_EQUAL(AnnounceTier::AnnounceEvent::SEEDING, announceList.getEvent());
 }
 
 void AnnounceListTest::testCountStoppedAllowedTier()
@@ -238,20 +238,20 @@ void AnnounceListTest::testCountStoppedAllowedTier()
   AnnounceList announceList(toVector(downcast<List>(announcesList)));
 
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::STARTED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STARTED);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::STARTED_AFTER_COMPLETION);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::HALTED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::HALTED);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countStoppedAllowedTier());
 
-  announceList.setEvent(AnnounceTier::DOWNLOADING);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::DOWNLOADING);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::STOPPED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STOPPED);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::COMPLETED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::COMPLETED);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countStoppedAllowedTier());
-  announceList.setEvent(AnnounceTier::SEEDING);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::SEEDING);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countStoppedAllowedTier());
 }
 
@@ -265,20 +265,20 @@ void AnnounceListTest::testCountCompletedAllowedTier()
   AnnounceList announceList(toVector(downcast<List>(announcesList)));
 
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::STARTED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STARTED);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::STARTED_AFTER_COMPLETION);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::STOPPED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::STOPPED);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::SEEDING);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::SEEDING);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::HALTED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::HALTED);
   CPPUNIT_ASSERT_EQUAL((size_t)0, announceList.countCompletedAllowedTier());
 
-  announceList.setEvent(AnnounceTier::DOWNLOADING);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::DOWNLOADING);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countCompletedAllowedTier());
-  announceList.setEvent(AnnounceTier::COMPLETED);
+  announceList.setEvent(AnnounceTier::AnnounceEvent::COMPLETED);
   CPPUNIT_ASSERT_EQUAL((size_t)1, announceList.countCompletedAllowedTier());
 }
 
@@ -293,7 +293,7 @@ void AnnounceListTest::testMoveToStoppedAllowedTier()
 {
   std::shared_ptr<AnnounceTier> t1(new AnnounceTier(createUrls("tracker1")));
   std::shared_ptr<AnnounceTier> t2(new AnnounceTier(createUrls("tracker2")));
-  t2->event = AnnounceTier::COMPLETED;
+  t2->event = AnnounceTier::AnnounceEvent::COMPLETED;
   std::shared_ptr<AnnounceTier> t3(new AnnounceTier(createUrls("tracker3")));
 
   std::deque<std::shared_ptr<AnnounceTier>> tiers;
@@ -320,7 +320,7 @@ void AnnounceListTest::testMoveToCompletedAllowedTier()
 {
   std::shared_ptr<AnnounceTier> t1(new AnnounceTier(createUrls("tracker1")));
   std::shared_ptr<AnnounceTier> t2(new AnnounceTier(createUrls("tracker2")));
-  t2->event = AnnounceTier::COMPLETED;
+  t2->event = AnnounceTier::AnnounceEvent::COMPLETED;
   std::shared_ptr<AnnounceTier> t3(new AnnounceTier(createUrls("tracker3")));
 
   std::deque<std::shared_ptr<AnnounceTier>> tiers;

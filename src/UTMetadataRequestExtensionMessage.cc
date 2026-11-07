@@ -80,7 +80,7 @@ void UTMetadataRequestExtensionMessage::doReceivedAction()
 {
   auto attrs = bittorrent::getTorrentAttrs(dctx_);
   uint8_t id =
-      peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_METADATA);
+      peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA);
   if (attrs->metadata.empty()) {
     auto m = make_unique<UTMetadataRejectExtensionMessage>(id);
     m->setIndex(getIndex());

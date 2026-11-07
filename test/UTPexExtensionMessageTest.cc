@@ -207,7 +207,7 @@ void UTPexExtensionMessageTest::testCreate()
       "8:dropped618:" + std::string(&c6[0], &c6[COMPACT_LEN_IPV6]) + "e";
 
   auto msg = UTPexExtensionMessage::create(
-      reinterpret_cast<const unsigned char*>(data.c_str()), data.size());
+      std::as_bytes(std::span{data.data(), data.size()}));
   CPPUNIT_ASSERT_EQUAL((uint8_t)1, msg->getExtensionMessageID());
   CPPUNIT_ASSERT_EQUAL((size_t)3, msg->getFreshPeers().size());
   CPPUNIT_ASSERT_EQUAL(std::string("192.168.0.1"),
@@ -234,7 +234,7 @@ void UTPexExtensionMessageTest::testCreate()
     // 0 length data
     std::string in = "";
     UTPexExtensionMessage::create(
-        reinterpret_cast<const unsigned char*>(in.c_str()), in.size());
+        std::as_bytes(std::span{in.data(), in.size()}));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (Exception& e) {

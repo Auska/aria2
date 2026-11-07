@@ -52,7 +52,7 @@ private:
 
 public:
   BtHandshakeMessageValidator(const BtHandshakeMessage* message,
-                              const unsigned char* infoHash);
+                              std::span<const unsigned char> infoHash);
 
   ~BtHandshakeMessageValidator();
 

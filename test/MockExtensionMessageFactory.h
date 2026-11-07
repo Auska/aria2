@@ -11,10 +11,11 @@ public:
   virtual ~MockExtensionMessageFactory() {}
 
   virtual std::unique_ptr<ExtensionMessage>
-  createMessage(const unsigned char* data, size_t length) override
+  createMessage(std::span<const std::byte> data) override
   {
-    return make_unique<MockExtensionMessage>("a2_mock", *data, data + 1,
-                                             length - 1, nullptr);
+    auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+    return make_unique<MockExtensionMessage>("a2_mock", *dataPtr, dataPtr + 1,
+                                             data.size() - 1, nullptr);
   }
 };
 

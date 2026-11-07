@@ -73,7 +73,8 @@ DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
   if (handshakeSent_ || !quickReply ||
       peerConnection_->getBufferLength() < 48) {
     if (peerConnection_->receiveHandshake(data, dataLength)) {
-      auto msg = messageFactory_->createHandshakeMessage(data, dataLength);
+      auto msg = messageFactory_->createHandshakeMessage(std::as_bytes(
+          std::span{data, static_cast<size_t>(BtHandshakeMessage::MESSAGE_LENGTH)}));
       msg->validate();
       return msg;
     }
@@ -82,7 +83,7 @@ DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
     // Handle tracker's NAT-checking feature
     handshakeSent_ = true;
     // check info_hash
-    if (memcmp(bittorrent::getInfoHash(downloadContext_),
+    if (memcmp(bittorrent::getInfoHash(downloadContext_).data(),
                peerConnection_->getBuffer() + 28, INFO_HASH_LENGTH) == 0) {
       sendHandshake();
     }
@@ -90,12 +91,13 @@ DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
       throw DL_ABORT_EX(
           fmt("Bad Info Hash {}",
               util::toHex(std::as_bytes(std::span{peerConnection_->getBuffer() + 28, INFO_HASH_LENGTH}))
-                  .c_str()));
+                  ));
     }
     if (peerConnection_->getBufferLength() ==
             BtHandshakeMessage::MESSAGE_LENGTH &&
         peerConnection_->receiveHandshake(data, dataLength)) {
-      auto msg = messageFactory_->createHandshakeMessage(data, dataLength);
+      auto msg = messageFactory_->createHandshakeMessage(std::as_bytes(
+          std::span{data, static_cast<size_t>(BtHandshakeMessage::MESSAGE_LENGTH)}));
       msg->validate();
       return msg;
     }
@@ -124,8 +126,8 @@ std::unique_ptr<BtMessage> DefaultBtMessageReceiver::receiveMessage()
   if (!peerConnection_->receiveMessage(nullptr, dataLength)) {
     return nullptr;
   }
-  auto msg = messageFactory_->createBtMessage(
-      peerConnection_->getMsgPayloadBuffer(), dataLength);
+  auto msg = messageFactory_->createBtMessage(std::as_bytes(
+      std::span{peerConnection_->getMsgPayloadBuffer(), dataLength}));
   msg->validate();
   if (msg->getId() == BtPieceMessage::ID) {
     auto piecemsg = static_cast<BtPieceMessage*>(msg.get());

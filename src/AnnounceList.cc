@@ -140,7 +140,7 @@ AnnounceTier::AnnounceEvent AnnounceList::getEvent() const
     return (*currentTier_)->event;
   }
   else {
-    return AnnounceTier::STARTED;
+    return AnnounceTier::AnnounceEvent::STARTED;
   }
 }
 
@@ -155,12 +155,12 @@ const char* AnnounceList::getEventString() const
 {
   if (currentTrackerInitialized_) {
     switch ((*currentTier_)->event) {
-    case AnnounceTier::STARTED:
-    case AnnounceTier::STARTED_AFTER_COMPLETION:
+    case AnnounceTier::AnnounceEvent::STARTED:
+    case AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION:
       return "started";
-    case AnnounceTier::STOPPED:
+    case AnnounceTier::AnnounceEvent::STOPPED:
       return "stopped";
-    case AnnounceTier::COMPLETED:
+    case AnnounceTier::AnnounceEvent::COMPLETED:
       return "completed";
     default:
       return "";
@@ -177,10 +177,10 @@ public:
   bool operator()(const std::shared_ptr<AnnounceTier>& tier) const
   {
     switch (tier->event) {
-    case AnnounceTier::DOWNLOADING:
-    case AnnounceTier::STOPPED:
-    case AnnounceTier::COMPLETED:
-    case AnnounceTier::SEEDING:
+    case AnnounceTier::AnnounceEvent::DOWNLOADING:
+    case AnnounceTier::AnnounceEvent::STOPPED:
+    case AnnounceTier::AnnounceEvent::COMPLETED:
+    case AnnounceTier::AnnounceEvent::SEEDING:
       return true;
     default:
       return false;
@@ -195,8 +195,8 @@ public:
   bool operator()(const std::shared_ptr<AnnounceTier>& tier) const
   {
     switch (tier->event) {
-    case AnnounceTier::DOWNLOADING:
-    case AnnounceTier::COMPLETED:
+    case AnnounceTier::AnnounceEvent::DOWNLOADING:
+    case AnnounceTier::AnnounceEvent::COMPLETED:
       return true;
     default:
       return false;

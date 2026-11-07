@@ -1,5 +1,7 @@
 #include "BtPortMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -63,7 +65,7 @@ void BtPortMessageTest::testCreate()
   unsigned char msg[7];
   bittorrent::createPeerMessageString(msg, sizeof(msg), 3, 9);
   bittorrent::setShortIntParam(&msg[5], 12345);
-  std::shared_ptr<BtPortMessage> pm(BtPortMessage::create(&msg[4], 3));
+  std::shared_ptr<BtPortMessage> pm(BtPortMessage::create(asBytesSpan(&msg[4], 3)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)9, pm->getId());
   CPPUNIT_ASSERT_EQUAL((uint16_t)12345, pm->getPort());
 
@@ -71,7 +73,7 @@ void BtPortMessageTest::testCreate()
   try {
     unsigned char msg[8];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 4, 9);
-    BtPortMessage::create(&msg[4], 4);
+    BtPortMessage::create(asBytesSpan(&msg[4], 4));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -80,7 +82,7 @@ void BtPortMessageTest::testCreate()
   try {
     unsigned char msg[7];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 3, 10);
-    BtPortMessage::create(&msg[4], 3);
+    BtPortMessage::create(asBytesSpan(&msg[4], 3));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

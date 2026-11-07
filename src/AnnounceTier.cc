@@ -37,7 +37,7 @@
 namespace aria2 {
 
 AnnounceTier::AnnounceTier(std::deque<std::string> urls)
-    : event(STARTED), urls(std::move(urls))
+    : event(AnnounceEvent::STARTED), urls(std::move(urls))
 {
 }
 
@@ -46,17 +46,17 @@ AnnounceTier::~AnnounceTier() = default;
 void AnnounceTier::nextEvent()
 {
   switch (event) {
-  case STARTED:
-    event = DOWNLOADING;
+  case AnnounceEvent::STARTED:
+    event = AnnounceEvent::DOWNLOADING;
     break;
-  case STARTED_AFTER_COMPLETION:
-    event = SEEDING;
+  case AnnounceEvent::STARTED_AFTER_COMPLETION:
+    event = AnnounceEvent::SEEDING;
     break;
-  case STOPPED:
-    event = HALTED;
+  case AnnounceEvent::STOPPED:
+    event = AnnounceEvent::HALTED;
     break;
-  case COMPLETED:
-    event = SEEDING;
+  case AnnounceEvent::COMPLETED:
+    event = AnnounceEvent::SEEDING;
     break;
   default:
     break;
@@ -66,11 +66,11 @@ void AnnounceTier::nextEvent()
 void AnnounceTier::nextEventIfAfterStarted()
 {
   switch (event) {
-  case STOPPED:
-    event = HALTED;
+  case AnnounceEvent::STOPPED:
+    event = AnnounceEvent::HALTED;
     break;
-  case COMPLETED:
-    event = SEEDING;
+  case AnnounceEvent::COMPLETED:
+    event = AnnounceEvent::SEEDING;
     break;
   default:
     break;

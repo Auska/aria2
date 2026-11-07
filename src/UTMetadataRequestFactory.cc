@@ -73,7 +73,7 @@ UTMetadataRequestFactory::create(size_t num, PieceStorage* pieceStorage)
     A2_LOG_DEBUG(fmt("Creating ut_metadata request index={}",
                      static_cast<unsigned long>(p->getIndex())));
     auto m = make_unique<UTMetadataRequestExtensionMessage>(
-        peer_->getExtensionMessageID(ExtensionMessageRegistry::UT_METADATA));
+        peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA));
     m->setIndex(p->getIndex());
     m->setDownloadContext(dctx_);
     m->setBtMessageDispatcher(dispatcher_);

@@ -33,21 +33,20 @@ public:
   virtual ~MockBtMessageFactory() {}
 
   virtual std::unique_ptr<BtMessage>
-  createBtMessage(const unsigned char* msg, size_t msgLength) override
+  createBtMessage(std::span<const std::byte> msg) override
   {
     return nullptr;
   };
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* msg,
-                         size_t msgLength) override
+  createHandshakeMessage(std::span<const std::byte> msg) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* infoHash,
-                         const unsigned char* peerId) override
+  createHandshakeMessage(std::span<const unsigned char> infoHash,
+                         std::span<const unsigned char> peerId) override
   {
     return nullptr;
   }

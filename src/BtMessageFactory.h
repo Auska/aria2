@@ -37,6 +37,9 @@
 
 #include "common.h"
 
+#include <cstddef>
+#include <span>
+
 #include <memory>
 
 namespace aria2 {
@@ -66,15 +69,15 @@ class BtMessageFactory {
 public:
   virtual ~BtMessageFactory() = default;
 
-  virtual std::unique_ptr<BtMessage> createBtMessage(const unsigned char* msg,
-                                                     size_t msgLength) = 0;
+  virtual std::unique_ptr<BtMessage>
+  createBtMessage(std::span<const std::byte> msg) = 0;
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* msg, size_t msgLength) = 0;
+  createHandshakeMessage(std::span<const std::byte> msg) = 0;
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* infoHash,
-                         const unsigned char* peerId) = 0;
+  createHandshakeMessage(std::span<const unsigned char> infoHash,
+                         std::span<const unsigned char> peerId) = 0;
 
   virtual std::unique_ptr<BtRequestMessage>
   createRequestMessage(const std::shared_ptr<Piece>& piece,

@@ -46,16 +46,16 @@ const char BtHaveAllMessage::NAME[] = "have all";
 BtHaveAllMessage::BtHaveAllMessage() : ZeroBtMessage(ID, NAME) {}
 
 std::unique_ptr<BtHaveAllMessage>
-BtHaveAllMessage::create(const unsigned char* data, size_t dataLength)
+BtHaveAllMessage::create(std::span<const std::byte> data)
 {
-  return ZeroBtMessage::create<BtHaveAllMessage>(data, dataLength);
+  return ZeroBtMessage::create<BtHaveAllMessage>(data);
 }
 
 void BtHaveAllMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
     throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
-                          toString().c_str()));
+                          toString()));
   }
   if (isMetadataGetMode()) {
     return;

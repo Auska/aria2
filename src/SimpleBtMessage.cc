@@ -54,8 +54,8 @@ void SimpleBtMessage::send()
     return;
   }
   A2_LOG_INFO(fmt(MSG_SEND_PEER_MESSAGE, getCuid(),
-                  getPeer()->getIPAddress().c_str(), getPeer()->getPort(),
-                  toString().c_str()));
+                  getPeer()->getIPAddress(), getPeer()->getPort(),
+                  toString()));
   auto msg = createMessage();
   A2_LOG_DEBUG(
       fmt("msglength = {} bytes", static_cast<unsigned long>(msg.size())));

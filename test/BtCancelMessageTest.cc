@@ -1,5 +1,7 @@
 #include "BtCancelMessage.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -58,7 +60,7 @@ void BtCancelMessageTest::testCreate()
   bittorrent::setIntParam(&msg[5], 12345);
   bittorrent::setIntParam(&msg[9], 256);
   bittorrent::setIntParam(&msg[13], 1_k);
-  auto pm = BtCancelMessage::create(&msg[4], 13);
+  auto pm = BtCancelMessage::create(asBytesSpan(&msg[4], 13));
   CPPUNIT_ASSERT_EQUAL((uint8_t)8, pm->getId());
   CPPUNIT_ASSERT_EQUAL((size_t)12345, pm->getIndex());
   CPPUNIT_ASSERT_EQUAL(256, pm->getBegin());
@@ -68,7 +70,7 @@ void BtCancelMessageTest::testCreate()
   try {
     unsigned char msg[18];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 14, 8);
-    BtCancelMessage::create(&msg[4], 14);
+    BtCancelMessage::create(asBytesSpan(&msg[4], 14));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {
@@ -77,7 +79,7 @@ void BtCancelMessageTest::testCreate()
   try {
     unsigned char msg[17];
     bittorrent::createPeerMessageString(msg, sizeof(msg), 13, 9);
-    BtCancelMessage::create(&msg[4], 13);
+    BtCancelMessage::create(asBytesSpan(&msg[4], 13));
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (...) {

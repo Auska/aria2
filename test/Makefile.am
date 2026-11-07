@@ -135,6 +135,7 @@ aria2c_SOURCES += BtAllowedFastMessageTest.cc\
 	DefaultBtMessageDispatcherTest.cc\
 	DefaultBtRequestFactoryTest.cc\
 	MockBtMessage.h\
+	as_bytes_span.h\
 	MockBtMessageDispatcher.h\
 	MockBtMessageFactory.h\
 	AnnounceListTest.cc\

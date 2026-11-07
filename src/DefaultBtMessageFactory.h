@@ -36,6 +36,9 @@
 #define D_DEFAULT_BT_MESSAGE_FACTORY_H
 
 #include "BtMessageFactory.h"
+
+#include <cstddef>
+#include <span>
 #include "Command.h"
 
 namespace aria2 {
@@ -88,15 +91,14 @@ public:
   DefaultBtMessageFactory();
 
   virtual std::unique_ptr<BtMessage>
-  createBtMessage(const unsigned char* msg, size_t msgLength) override;
+  createBtMessage(std::span<const std::byte> msg) override;
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* msg,
-                         size_t msgLength) override;
+  createHandshakeMessage(std::span<const std::byte> msg) override;
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(const unsigned char* infoHash,
-                         const unsigned char* peerId) override;
+  createHandshakeMessage(std::span<const unsigned char> infoHash,
+                         std::span<const unsigned char> peerId) override;
 
   virtual std::unique_ptr<BtRequestMessage>
   createRequestMessage(const std::shared_ptr<Piece>& piece,

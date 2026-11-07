@@ -1,5 +1,7 @@
 #include "bittorrent_helper.h"
 
+#include "as_bytes_span.h"
+
 #include <cstring>
 #include <iostream>
 
@@ -766,9 +768,9 @@ void BittorrentHelperTest::testEtc()
 void BittorrentHelperTest::testCheckBitfield()
 {
   unsigned char bitfield[] = {0xff, 0xe0};
-  checkBitfield(bitfield, sizeof(bitfield), 11);
+  checkBitfield(asBytesSpan(bitfield, sizeof(bitfield)), 11);
   try {
-    checkBitfield(bitfield, sizeof(bitfield), 17);
+    checkBitfield(asBytesSpan(bitfield, sizeof(bitfield)), 17);
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (RecoverableException& e) {
@@ -777,7 +779,7 @@ void BittorrentHelperTest::testCheckBitfield()
   // Change last byte
   bitfield[1] = 0xf0;
   try {
-    checkBitfield(bitfield, sizeof(bitfield), 11);
+    checkBitfield(asBytesSpan(bitfield, sizeof(bitfield)), 11);
     CPPUNIT_FAIL("exception must be thrown.");
   }
   catch (RecoverableException& e) {

@@ -117,8 +117,7 @@ public:
   virtual void resetAnnounce() override;
 
   virtual void
-  processAnnounceResponse(const unsigned char* trackerResponse,
-                          size_t trackerResponseLength) override;
+  processAnnounceResponse(std::span<const std::byte> trackerResponse) override;
 
   virtual void processUDPTrackerResponse(
       const std::shared_ptr<UDPTrackerRequest>& req) override;

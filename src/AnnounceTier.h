@@ -44,7 +44,7 @@ namespace aria2 {
 
 class AnnounceTier {
 public:
-  enum AnnounceEvent {
+  enum class AnnounceEvent {
     STARTED,
     STARTED_AFTER_COMPLETION,
     DOWNLOADING,

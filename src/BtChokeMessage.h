@@ -37,6 +37,9 @@
 
 #include "ZeroBtMessage.h"
 
+#include <cstddef>
+#include <span>
+
 namespace aria2 {
 
 class BtChokeMessage : public ZeroBtMessage {
@@ -49,8 +52,7 @@ public:
 
   virtual void doReceivedAction() override;
 
-  static std::unique_ptr<BtChokeMessage> create(const unsigned char* data,
-                                                size_t dataLength);
+  static std::unique_ptr<BtChokeMessage> create(std::span<const std::byte> data);
 };
 
 } // namespace aria2

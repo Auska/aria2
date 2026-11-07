@@ -198,7 +198,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
       utf8Name = util::encodeNonUtf8(nameData->s());
       if (util::detectDirTraversal(utf8Name)) {
         throw DL_ABORT_EX2(
-            fmt(MSG_DIR_TRAVERSAL_DETECTED, nameData->s().c_str()),
+            fmt(MSG_DIR_TRAVERSAL_DETECTED, nameData->s()),
             error_code::BITTORRENT_PARSE_ERROR);
       }
     }
@@ -276,7 +276,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
           pathelem.begin(), pathelem.end(), "/",
           std::function<std::string(const std::string&)>(util::encodeNonUtf8));
       if (util::detectDirTraversal(utf8Path)) {
-        throw DL_ABORT_EX2(fmt(MSG_DIR_TRAVERSAL_DETECTED, utf8Path.c_str()),
+        throw DL_ABORT_EX2(fmt(MSG_DIR_TRAVERSAL_DETECTED, utf8Path),
                            error_code::BITTORRENT_PARSE_ERROR);
       }
       std::string pePath =
@@ -550,29 +550,26 @@ void load(const std::string& torrentFile,
                         torrentFile, overrideName, uris);
 }
 
-void loadFromMemory(const unsigned char* content, size_t length,
+void loadFromMemory(std::span<const std::byte> content,
                     const std::shared_ptr<DownloadContext>& ctx,
                     const std::shared_ptr<Option>& option,
                     const std::string& defaultName,
                     const std::string& overrideName)
 {
-  processRootDictionary(
-      ctx,
-      bencode2::decode(std::as_bytes(std::span{content, length})).get(), option,
-      defaultName, overrideName, std::vector<std::string>());
+  processRootDictionary(ctx, bencode2::decode(content).get(), option,
+                        defaultName, overrideName,
+                        std::vector<std::string>());
 }
 
-void loadFromMemory(const unsigned char* content, size_t length,
+void loadFromMemory(std::span<const std::byte> content,
                     const std::shared_ptr<DownloadContext>& ctx,
                     const std::shared_ptr<Option>& option,
                     const std::vector<std::string>& uris,
                     const std::string& defaultName,
                     const std::string& overrideName)
 {
-  processRootDictionary(
-      ctx,
-      bencode2::decode(std::as_bytes(std::span{content, length})).get(), option,
-      defaultName, overrideName, uris);
+  processRootDictionary(ctx, bencode2::decode(content).get(), option,
+                        defaultName, overrideName, uris);
 }
 
 void loadFromMemory(const std::string& context,
@@ -616,15 +613,19 @@ TorrentAttribute* getTorrentAttrs(DownloadContext* dctx)
   return static_cast<TorrentAttribute*>(dctx->getAttribute(CTX_ATTR_BT).get());
 }
 
-const unsigned char* getInfoHash(const std::shared_ptr<DownloadContext>& dctx)
+std::array<unsigned char, INFO_HASH_LENGTH>
+getInfoHash(const std::shared_ptr<DownloadContext>& dctx)
 {
   return getInfoHash(dctx.get());
 }
 
-const unsigned char* getInfoHash(DownloadContext* dctx)
+std::array<unsigned char, INFO_HASH_LENGTH> getInfoHash(DownloadContext* dctx)
 {
-  return reinterpret_cast<const unsigned char*>(
-      getTorrentAttrs(dctx)->infoHash.data());
+  std::array<unsigned char, INFO_HASH_LENGTH> infoHash;
+  std::copy_n(reinterpret_cast<const unsigned char*>(
+                  getTorrentAttrs(dctx)->infoHash.data()),
+              INFO_HASH_LENGTH, infoHash.begin());
+  return infoHash;
 }
 
 std::string getInfoHashString(const std::shared_ptr<DownloadContext>& dctx)
@@ -671,8 +672,7 @@ std::vector<size_t> computeFastSet(const std::string& ipaddr, size_t numPieces,
       memcpy(&ny, x + j, 4);
       uint32_t y = ntohl(ny);
       size_t index = y % numPieces;
-      if (std::find(std::begin(fastSet), std::end(fastSet), index) ==
-          std::end(fastSet)) {
+      if (std::ranges::find(fastSet, index) == fastSet.end()) {
 
         fastSet.push_back(index);
       }
@@ -732,15 +732,18 @@ void setStaticPeerAgent(const std::string& newPeerAgent)
 
 // If PeerID is not generated, it is created with default peerIdPrefix
 // (aria2-).
-const unsigned char* getStaticPeerId()
+const std::array<unsigned char, PEER_ID_LENGTH>& getStaticPeerId()
 {
-  if (peerId.empty()) {
-    return reinterpret_cast<const unsigned char*>(
-        generateStaticPeerId(DEFAULT_PEER_ID_PREFIX).data());
-  }
-  else {
-    return reinterpret_cast<const unsigned char*>(peerId.data());
-  }
+  static const std::array<unsigned char, PEER_ID_LENGTH> id = [] {
+    std::array<unsigned char, PEER_ID_LENGTH> buf;
+    const auto& src = peerId.empty()
+                          ? generateStaticPeerId(DEFAULT_PEER_ID_PREFIX)
+                          : peerId;
+    std::copy_n(reinterpret_cast<const unsigned char*>(src.data()),
+                PEER_ID_LENGTH, buf.begin());
+    return buf;
+  }();
+  return id;
 }
 
 // If PeerAgent is not generated, it is created with default agent
@@ -813,15 +816,16 @@ void checkRange(int32_t begin, int32_t length, int32_t pieceLength)
   }
 }
 
-void checkBitfield(const unsigned char* bitfield, size_t bitfieldLength,
-                   size_t pieces)
+void checkBitfield(std::span<const std::byte> bitfield, size_t pieces)
 {
+  auto bitfieldLength = bitfield.size();
   if (!(bitfieldLength == (pieces + 7) / 8)) {
     throw DL_ABORT_EX(fmt("Invalid bitfield length: {}",
                           static_cast<unsigned long>(bitfieldLength)));
   }
   // Check if last byte contains garbage set bit.
-  if (bitfield[bitfieldLength - 1] & ~bitfield::lastByteMask(pieces)) {
+  if (static_cast<unsigned char>(bitfield[bitfieldLength - 1]) &
+      ~bitfield::lastByteMask(pieces)) {
     throw DL_ABORT_EX("Invalid bitfield");
   }
 }
@@ -899,9 +903,10 @@ void assertPayloadLengthEqual(size_t expected, size_t actual,
   }
 }
 
-void assertID(uint8_t expected, const unsigned char* data, const char* msgName)
+void assertID(uint8_t expected, std::span<const std::byte> data,
+              const char* msgName)
 {
-  uint8_t id = getId(data);
+  uint8_t id = getId(reinterpret_cast<const unsigned char*>(data.data()));
   if (expected != id) {
     throw DL_ABORT_EX(fmt(EX_INVALID_BT_MESSAGE_ID, id, msgName, expected));
   }
@@ -1041,11 +1046,11 @@ void removeAnnounceUri(TorrentAttribute* attrs,
   if (uris.empty()) {
     return;
   }
-  if (std::find(uris.begin(), uris.end(), "*") == uris.end()) {
+  if (std::ranges::find(uris, "*") == uris.end()) {
     for (auto i = attrs->announceList.begin();
          i != attrs->announceList.end();) {
       for (auto j = (*i).begin(); j != (*i).end();) {
-        if (std::find(uris.begin(), uris.end(), *j) == uris.end()) {
+        if (std::ranges::find(uris, *j) == uris.end()) {
           ++j;
         }
         else {

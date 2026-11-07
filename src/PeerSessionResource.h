@@ -168,11 +168,13 @@ public:
 
   void extendedMessagingEnabled(bool b);
 
-  uint8_t getExtensionMessageID(int key) const;
+  uint8_t getExtensionMessageID(
+      ExtensionMessageRegistry::InterestingExtension key) const;
 
   const char* getExtensionName(uint8_t id) const;
 
-  void addExtension(int key, uint8_t id);
+  void addExtension(ExtensionMessageRegistry::InterestingExtension key,
+                    uint8_t id);
 
   bool dhtEnabled() const { return dhtEnabled_; }
 
