@@ -127,12 +127,14 @@ void IteratableChunkChecksumValidator::init()
 std::string IteratableChunkChecksumValidator::digest(int64_t offset,
                                                      size_t length)
 {
-  std::array<unsigned char, 4_k> buf;
+  std::array<std::byte, 4_k> buf;
   ctx_->reset();
   int64_t max = offset + length;
   while (offset < max) {
     size_t r = pieceStorage_->getDiskAdaptor()->readDataDropCache(
-        buf.data(), std::min(static_cast<int64_t>(buf.size()), max - offset),
+        std::span{buf}.first(
+            static_cast<size_t>(std::min(static_cast<int64_t>(buf.size()),
+                                         max - offset))),
         offset);
     if (r == 0) {
       throw DL_ABORT_EX(

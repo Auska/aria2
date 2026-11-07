@@ -58,14 +58,7 @@ SingleFileAllocationIterator::SingleFileAllocationIterator(BinaryStream* stream,
 {
 }
 
-SingleFileAllocationIterator::~SingleFileAllocationIterator()
-{
-#ifdef HAVE_POSIX_MEMALIGN
-  free(buffer_);
-#else
-  delete[] buffer_;
-#endif // HAVE_POSIX_MEMALIGN
-}
+SingleFileAllocationIterator::~SingleFileAllocationIterator() = default;
 
 void SingleFileAllocationIterator::init()
 {
@@ -77,17 +70,18 @@ void SingleFileAllocationIterator::init()
                     " more details."));
   }
 #ifdef HAVE_POSIX_MEMALIGN
-  buffer_ = reinterpret_cast<unsigned char*>(
-      util::allocateAlignedMemory(ALIGNMENT, BUFSIZE));
+  buffer_.reset(reinterpret_cast<unsigned char*>(
+      util::allocateAlignedMemory(ALIGNMENT, BUFSIZE)));
 #else
-  buffer_ = new unsigned char[BUFSIZE];
+  buffer_.reset(static_cast<unsigned char*>(std::malloc(BUFSIZE)));
 #endif // HAVE_POSIX_MEMALIGN
-  memset(buffer_, 0, BUFSIZE);
+  memset(buffer_.get(), 0, BUFSIZE);
 }
 
 void SingleFileAllocationIterator::allocateChunk()
 {
-  stream_->writeData(buffer_, BUFSIZE, offset_);
+  stream_->writeData(std::as_bytes(std::span{buffer_.get(), BUFSIZE}),
+                     offset_);
   offset_ += BUFSIZE;
 
   if (totalLength_ < offset_) {

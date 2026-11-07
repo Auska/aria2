@@ -52,9 +52,8 @@ private:
   unsigned char* mapaddr_;
   int64_t maplen_;
 
-  ssize_t writeDataInternal(const unsigned char* data, size_t len,
-                            int64_t offset);
-  ssize_t readDataInternal(unsigned char* data, size_t len, int64_t offset);
+  ssize_t writeDataInternal(std::span<const std::byte> data, int64_t offset);
+  ssize_t readDataInternal(std::span<std::byte> data, int64_t offset);
 
   void seek(int64_t offset);
 
@@ -73,11 +72,10 @@ public:
 
   virtual void openExistingFile(int64_t totalLength = 0) override;
 
-  virtual void writeData(const unsigned char* data, size_t len,
+  virtual void writeData(std::span<const std::byte> data,
                          int64_t offset) override;
 
-  virtual ssize_t readData(unsigned char* data, size_t len,
-                           int64_t offset) override;
+  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) override;
 
   virtual void truncate(int64_t length) override;
 

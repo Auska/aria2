@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include <span>
+
 #include <unistd.h>
 
 namespace aria2 {
@@ -45,10 +47,9 @@ class BinaryStream {
 public:
   virtual ~BinaryStream() = default;
 
-  virtual void writeData(const unsigned char* data, size_t len,
-                         int64_t offset) = 0;
+  virtual void writeData(std::span<const std::byte> data, int64_t offset) = 0;
 
-  virtual ssize_t readData(unsigned char* data, size_t len, int64_t offset) = 0;
+  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) = 0;
 
   // Truncates a file to given length. The default implementation does
   // nothing.

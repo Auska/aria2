@@ -74,23 +74,23 @@ void PieceTest::testGetCompletedLength()
 
 void PieceTest::testFlushWrCache()
 {
-  unsigned char* data;
+  std::unique_ptr<unsigned char[]> data;
   Piece p(0, 1_k);
   WrDiskCache dc(64);
   p.initWrCache(&dc, adaptor_);
-  data = new unsigned char[3];
-  memcpy(data, "foo", 3);
-  p.updateWrCache(&dc, data, 0, 3, 0);
-  data = new unsigned char[4];
-  memcpy(data, " bar", 4);
-  p.updateWrCache(&dc, data, 0, 4, 3);
+  data = std::make_unique<unsigned char[]>(3);
+  memcpy(data.get(), "foo", 3);
+  p.updateWrCache(&dc, std::move(data), 0, 3, 0);
+  data = std::make_unique<unsigned char[]>(4);
+  memcpy(data.get(), " bar", 4);
+  p.updateWrCache(&dc, std::move(data), 0, 4, 3);
   p.flushWrCache(&dc);
 
   CPPUNIT_ASSERT_EQUAL(std::string("foo bar"), writer_->getString());
 
-  data = new unsigned char[3];
-  memcpy(data, "foo", 3);
-  p.updateWrCache(&dc, data, 0, 3, 0);
+  data = std::make_unique<unsigned char[]>(3);
+  memcpy(data.get(), "foo", 3);
+  p.updateWrCache(&dc, std::move(data), 0, 3, 0);
   CPPUNIT_ASSERT_EQUAL((size_t)3, dc.getSize());
   p.clearWrCache(&dc);
   CPPUNIT_ASSERT_EQUAL((size_t)0, dc.getSize());
@@ -100,14 +100,14 @@ void PieceTest::testFlushWrCache()
 
 void PieceTest::testAppendWrCache()
 {
-  unsigned char* data;
+  std::unique_ptr<unsigned char[]> data;
   Piece p(0, 1_k);
   WrDiskCache dc(1_k);
   p.initWrCache(&dc, adaptor_);
   size_t capacity = 6;
-  data = new unsigned char[capacity];
-  memcpy(data, "foo", 3);
-  p.updateWrCache(&dc, data, 0, 3, capacity, 0);
+  data = std::make_unique<unsigned char[]>(capacity);
+  memcpy(data.get(), "foo", 3);
+  p.updateWrCache(&dc, std::move(data), 0, 3, capacity, 0);
   size_t alen = p.appendWrCache(
       &dc, 3, reinterpret_cast<const unsigned char*>("barbaz"), 6);
   CPPUNIT_ASSERT_EQUAL((size_t)3, alen);
@@ -117,22 +117,22 @@ void PieceTest::testAppendWrCache()
 
 void PieceTest::testGetDigestWithWrCache()
 {
-  unsigned char* data;
+  std::unique_ptr<unsigned char[]> data;
   Piece p(0, 26);
   p.setHashType("sha-1");
   WrDiskCache dc(64);
   //                  012345678901234567890123456
   writer_->setString("abcde...ijklmnopq...uvwx.z");
   p.initWrCache(&dc, adaptor_);
-  data = new unsigned char[3];
-  memcpy(data, "fgh", 3);
-  p.updateWrCache(&dc, data, 0, 3, 5);
-  data = new unsigned char[3];
-  memcpy(data, "rst", 3);
-  p.updateWrCache(&dc, data, 0, 3, 17);
-  data = new unsigned char[1];
-  memcpy(data, "y", 1);
-  p.updateWrCache(&dc, data, 0, 1, 24);
+  data = std::make_unique<unsigned char[]>(3);
+  memcpy(data.get(), "fgh", 3);
+  p.updateWrCache(&dc, std::move(data), 0, 3, 5);
+  data = std::make_unique<unsigned char[]>(3);
+  memcpy(data.get(), "rst", 3);
+  p.updateWrCache(&dc, std::move(data), 0, 3, 17);
+  data = std::make_unique<unsigned char[]>(1);
+  memcpy(data.get(), "y", 1);
+  p.updateWrCache(&dc, std::move(data), 0, 1, 24);
 
   CPPUNIT_ASSERT_EQUAL(
       std::string("32d10c7b8cf96570ca04ce37f2a19d84240d3a89"),

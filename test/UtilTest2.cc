@@ -8,6 +8,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "FixedNumberRandomizer.h"
+
+#include <span>
 #include "DlAbortEx.h"
 #include "BitfieldMan.h"
 #include "ByteArrayDiskWriter.h"
@@ -476,7 +478,7 @@ void UtilTest2::testToString_binaryStream()
   std::shared_ptr<DiskWriter> dw(new ByteArrayDiskWriter());
   std::string data(16_k + 256, 'a');
   dw->initAndOpenFile();
-  dw->writeData((const unsigned char*)data.c_str(), data.size(), 0);
+  dw->writeData(std::as_bytes(std::span{data}), 0);
 
   std::string readData = util::toString(dw);
 

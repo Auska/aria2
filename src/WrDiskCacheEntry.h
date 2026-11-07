@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include <set>
+#include <vector>
 #include <memory>
 
 #include "a2functional.h"
@@ -55,7 +56,7 @@ public:
     int64_t goff;
     // data must be len+offset bytes. Thus, the cached data is
     // [data+offset, data+offset+len).
-    unsigned char* data;
+    std::unique_ptr<unsigned char[]> data;
     size_t offset;
     size_t len;
     // valid memory range from data+offset
@@ -63,7 +64,7 @@ public:
     bool operator<(const DataCell& rhs) const { return goff < rhs.goff; }
   };
 
-  typedef std::set<DataCell*, DerefLess<DataCell*>> DataCellSet;
+  using DataCellSet = std::set<DataCell*, DerefLess<DataCell*>>;
 
   WrDiskCacheEntry(const std::shared_ptr<DiskAdaptor>& diskAdaptor);
   ~WrDiskCacheEntry();

@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "MultiDiskAdaptor.h"
 
+#include <ranges>
+
 #include <cassert>
 #include <algorithm>
 #include <map>
@@ -334,11 +336,12 @@ void throwOnDiskWriterNotOpened(DiskWriterEntry* e, int64_t offset)
 }
 } // namespace
 
-void MultiDiskAdaptor::writeData(const unsigned char* data, size_t len,
+void MultiDiskAdaptor::writeData(std::span<const std::byte> data,
                                  int64_t offset)
 {
   auto first = findFirstDiskWriterEntry(diskWriterEntries_, offset);
-  ssize_t rem = len;
+  ssize_t rem = data.size();
+  const auto len = data.size();
   int64_t fileOffset = offset - (*first)->getFileEntry()->getOffset();
   for (auto i = first, eoi = diskWriterEntries_.cend(); i != eoi; ++i) {
     ssize_t writeLength = calculateLength((*i).get(), fileOffset, rem);
@@ -347,8 +350,8 @@ void MultiDiskAdaptor::writeData(const unsigned char* data, size_t len,
       throwOnDiskWriterNotOpened((*i).get(), offset + (len - rem));
     }
 
-    (*i)->getDiskWriter()->writeData(data + (len - rem), writeLength,
-                                     fileOffset);
+    (*i)->getDiskWriter()->writeData(
+        data.subspan(len - rem, static_cast<size_t>(writeLength)), fileOffset);
     rem -= writeLength;
     fileOffset = 0;
     if (rem == 0) {
@@ -357,23 +360,23 @@ void MultiDiskAdaptor::writeData(const unsigned char* data, size_t len,
   }
 }
 
-ssize_t MultiDiskAdaptor::readData(unsigned char* data, size_t len,
-                                   int64_t offset)
+ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset)
 {
-  return readData(data, len, offset, false);
+  return readData(data, offset, false);
 }
 
-ssize_t MultiDiskAdaptor::readDataDropCache(unsigned char* data, size_t len,
+ssize_t MultiDiskAdaptor::readDataDropCache(std::span<std::byte> data,
                                             int64_t offset)
 {
-  return readData(data, len, offset, true);
+  return readData(data, offset, true);
 }
 
-ssize_t MultiDiskAdaptor::readData(unsigned char* data, size_t len,
-                                   int64_t offset, bool dropCache)
+ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
+                                   bool dropCache)
 {
   auto first = findFirstDiskWriterEntry(diskWriterEntries_, offset);
-  ssize_t rem = len;
+  ssize_t rem = data.size();
+  const auto len = data.size();
   ssize_t totalReadLength = 0;
   int64_t fileOffset = offset - (*first)->getFileEntry()->getOffset();
   for (auto i = first, eoi = diskWriterEntries_.cend(); i != eoi; ++i) {
@@ -384,8 +387,9 @@ ssize_t MultiDiskAdaptor::readData(unsigned char* data, size_t len,
     }
 
     while (readLength > 0) {
-      auto nread = (*i)->getDiskWriter()->readData(data + (len - rem),
-                                                   readLength, fileOffset);
+      auto nread = (*i)->getDiskWriter()->readData(
+          data.subspan(len - rem, static_cast<size_t>(readLength)),
+          fileOffset);
 
       if (nread == 0) {
         return totalReadLength;
@@ -415,7 +419,8 @@ void MultiDiskAdaptor::writeCache(const WrDiskCacheEntry* entry)
   for (auto& d : entry->getDataSet()) {
     A2_LOG_DEBUG(fmt("Cache flush goff={}, len={}", d->goff,
                      static_cast<unsigned long>(d->len)));
-    writeData(d->data + d->offset, d->len, d->goff);
+    writeData(std::as_bytes(std::span{d->data.get() + d->offset, d->len}),
+              d->goff);
   }
 }
 
@@ -432,9 +437,8 @@ void MultiDiskAdaptor::flushOSBuffers()
 
 bool MultiDiskAdaptor::fileExists()
 {
-  return std::find_if(std::begin(getFileEntries()), std::end(getFileEntries()),
-                      std::mem_fn(&FileEntry::exists)) !=
-         std::end(getFileEntries());
+  return std::ranges::any_of(getFileEntries(),
+                             std::mem_fn(&FileEntry::exists));
 }
 
 int64_t MultiDiskAdaptor::size()

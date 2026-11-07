@@ -1763,12 +1763,11 @@ void convertBitfield(BitfieldMan* dest, const BitfieldMan* src)
 std::string toString(const std::shared_ptr<BinaryStream>& binaryStream)
 {
   std::string result;
-  std::array<char, 2048> data;
+  std::array<std::byte, 2048> data;
   while (true) {
-    int32_t dataLength = binaryStream->readData(
-        reinterpret_cast<unsigned char*>(data.data()), data.size(),
-        static_cast<int64_t>(result.size()));
-    result.append(data.data(), dataLength);
+    int32_t dataLength = static_cast<int32_t>(binaryStream->readData(
+        data, static_cast<int64_t>(result.size())));
+    result.append(reinterpret_cast<const char*>(data.data()), dataLength);
     if (dataLength == 0) {
       break;
     }

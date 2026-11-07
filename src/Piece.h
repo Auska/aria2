@@ -178,12 +178,14 @@ public:
                    const std::shared_ptr<DiskAdaptor>& diskAdaptor);
   void flushWrCache(WrDiskCache* diskCache);
   void clearWrCache(WrDiskCache* diskCache);
-  void updateWrCache(WrDiskCache* diskCache, unsigned char* data, size_t offset,
+  void updateWrCache(WrDiskCache* diskCache,
+                     std::unique_ptr<unsigned char[]> data, size_t offset,
                      size_t len, size_t capacity, int64_t goff);
-  void updateWrCache(WrDiskCache* diskCache, unsigned char* data, size_t offset,
+  void updateWrCache(WrDiskCache* diskCache,
+                     std::unique_ptr<unsigned char[]> data, size_t offset,
                      size_t len, int64_t goff)
   {
-    updateWrCache(diskCache, data, offset, len, len, goff);
+    updateWrCache(diskCache, std::move(data), offset, len, len, goff);
   }
   size_t appendWrCache(WrDiskCache* diskCache, int64_t goff,
                        const unsigned char* data, size_t len);

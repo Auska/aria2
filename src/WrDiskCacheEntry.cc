@@ -67,7 +67,6 @@ WrDiskCacheEntry::~WrDiskCacheEntry()
 void WrDiskCacheEntry::deleteDataCells()
 {
   for (auto& e : set_) {
-    delete[] e->data;
     delete e;
   }
   set_.clear();
@@ -112,7 +111,7 @@ size_t WrDiskCacheEntry::append(int64_t goff, const unsigned char* data,
   --i;
   if (static_cast<int64_t>((*i)->goff + (*i)->len) == goff) {
     size_t wlen = std::min((*i)->capacity - (*i)->len, len);
-    memcpy((*i)->data + (*i)->offset + (*i)->len, data, wlen);
+    memcpy((*i)->data.get() + (*i)->offset + (*i)->len, data, wlen);
     (*i)->len += wlen;
     size_ += wlen;
     return wlen;

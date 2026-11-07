@@ -118,14 +118,17 @@ void BtPieceMessage::doReceivedAction()
     if (piece->getWrDiskCacheEntry()) {
       // Write Disk Cache enabled. Unfortunately, it incurs extra data
       // copy.
-      auto dataCopy = new unsigned char[blockLength_];
-      memcpy(dataCopy, data_ + 9, blockLength_);
-      piece->updateWrCache(getPieceStorage()->getWrDiskCache(), dataCopy, 0,
-                           blockLength_, blockLength_, offset);
+      auto dataCopy = std::make_unique<unsigned char[]>(blockLength_);
+      memcpy(dataCopy.get(), data_ + 9, blockLength_);
+      piece->updateWrCache(getPieceStorage()->getWrDiskCache(),
+                           std::move(dataCopy), 0, blockLength_, blockLength_,
+                           offset);
     }
     else {
-      getPieceStorage()->getDiskAdaptor()->writeData(data_ + 9, blockLength_,
-                                                     offset);
+      getPieceStorage()->getDiskAdaptor()->writeData(
+          std::as_bytes(std::span{data_ + 9,
+                                  static_cast<size_t>(blockLength_)}),
+          offset);
     }
     piece->completeBlock(slot->getBlockIndex());
     A2_LOG_DEBUG(fmt(
@@ -218,7 +221,10 @@ void BtPieceMessage::pushPieceData(int64_t offset, int32_t length) const
   createMessageHeader(buf.data());
   ssize_t r;
   r = getPieceStorage()->getDiskAdaptor()->readData(
-      buf.data() + MESSAGE_HEADER_LENGTH, length, offset);
+      std::as_writable_bytes(
+          std::span{buf}.subspan(MESSAGE_HEADER_LENGTH,
+                                 static_cast<size_t>(length))),
+      offset);
   if (r == length) {
     const auto& peer = getPeer();
     getPeerConnection()->pushBytes(

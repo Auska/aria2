@@ -107,15 +107,15 @@ bool HTTPAnnRequest::processResponse(
 {
   try {
     std::stringstream strm;
-    unsigned char data[2048];
+    std::array<std::byte, 2048> data;
     rg_->getPieceStorage()->getDiskAdaptor()->openFile();
     while (1) {
       ssize_t dataLength = rg_->getPieceStorage()->getDiskAdaptor()->readData(
-          data, sizeof(data), strm.tellp());
+          data, strm.tellp());
       if (dataLength == 0) {
         break;
       }
-      strm.write(reinterpret_cast<const char*>(data), dataLength);
+      strm.write(reinterpret_cast<const char*>(data.data()), dataLength);
     }
     std::string res = strm.str();
     btAnnounce->processAnnounceResponse(

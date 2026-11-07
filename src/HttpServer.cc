@@ -238,7 +238,8 @@ bool HttpServer::receiveBody()
       std::min(socketRecvBuffer_->getBufferLength(),
                static_cast<size_t>(lastContentLength_ - bodyConsumed_));
   if (lastBody_) {
-    lastBody_->writeData(socketRecvBuffer_->getBuffer(), length, 0);
+    lastBody_->writeData(
+        std::as_bytes(std::span{socketRecvBuffer_->getBuffer(), length}), 0);
   }
   socketRecvBuffer_->drain(length);
   bodyConsumed_ += length;

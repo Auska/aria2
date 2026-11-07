@@ -70,25 +70,25 @@ void AbstractSingleDiskAdaptor::openExistingFile()
   diskWriter_->openExistingFile(totalLength_);
 }
 
-void AbstractSingleDiskAdaptor::writeData(const unsigned char* data, size_t len,
+void AbstractSingleDiskAdaptor::writeData(std::span<const std::byte> data,
                                           int64_t offset)
 {
-  diskWriter_->writeData(data, len, offset);
+  diskWriter_->writeData(data, offset);
 }
 
-ssize_t AbstractSingleDiskAdaptor::readData(unsigned char* data, size_t len,
+ssize_t AbstractSingleDiskAdaptor::readData(std::span<std::byte> data,
                                             int64_t offset)
 {
-  return diskWriter_->readData(data, len, offset);
+  return diskWriter_->readData(data, offset);
 }
 
-ssize_t AbstractSingleDiskAdaptor::readDataDropCache(unsigned char* data,
-                                                     size_t len, int64_t offset)
+ssize_t AbstractSingleDiskAdaptor::readDataDropCache(std::span<std::byte> data,
+                                                     int64_t offset)
 {
-  auto rv = readData(data, len, offset);
+  auto rv = readData(data, offset);
 
   if (rv > 0) {
-    diskWriter_->dropCache(len, offset);
+    diskWriter_->dropCache(data.size(), offset);
   }
 
   return rv;
@@ -99,7 +99,8 @@ void AbstractSingleDiskAdaptor::writeCache(const WrDiskCacheEntry* entry)
   for (auto& d : entry->getDataSet()) {
     A2_LOG_DEBUG(fmt("Cache flush goff={}, len={}", d->goff,
                      static_cast<unsigned long>(d->len)));
-    writeData(d->data + d->offset, d->len, d->goff);
+    writeData(std::as_bytes(std::span{d->data.get() + d->offset, d->len}),
+              d->goff);
   }
 }
 
@@ -125,11 +126,11 @@ AbstractSingleDiskAdaptor::fileAllocationIterator()
 {
   switch (getFileAllocationMethod()) {
 #ifdef HAVE_SOME_FALLOCATE
-  case (DiskAdaptor::FILE_ALLOC_FALLOC):
+  case DiskAdaptor::FileAllocationMethod::FALLOC:
     return make_unique<FallocFileAllocationIterator>(diskWriter_.get(), size(),
                                                      totalLength_);
 #endif // HAVE_SOME_FALLOCATE
-  case (DiskAdaptor::FILE_ALLOC_TRUNC):
+  case DiskAdaptor::FileAllocationMethod::TRUNC:
     return make_unique<TruncFileAllocationIterator>(diskWriter_.get(), size(),
                                                     totalLength_);
   default:

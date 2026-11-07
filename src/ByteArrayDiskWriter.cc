@@ -56,10 +56,10 @@ void ByteArrayDiskWriter::closeFile() {}
 
 void ByteArrayDiskWriter::openExistingFile(int64_t totalLength) { openFile(); }
 
-void ByteArrayDiskWriter::writeData(const unsigned char* data,
-                                    size_t dataLength, int64_t offset)
+void ByteArrayDiskWriter::writeData(std::span<const std::byte> data,
+                                    int64_t offset)
 {
-  if (offset + dataLength > maxLength_) {
+  if (offset + data.size() > maxLength_) {
     throw DL_ABORT_EX(fmt("Maximum length({}) exceeded.",
                           static_cast<unsigned long>(maxLength_)));
   }
@@ -73,14 +73,14 @@ void ByteArrayDiskWriter::writeData(const unsigned char* data,
   else {
     buf_.seekp(offset, std::ios::beg);
   }
-  buf_.write(reinterpret_cast<const char*>(data), dataLength);
+  buf_.write(reinterpret_cast<const char*>(data.data()), data.size());
 }
 
-ssize_t ByteArrayDiskWriter::readData(unsigned char* data, size_t len,
+ssize_t ByteArrayDiskWriter::readData(std::span<std::byte> data,
                                       int64_t offset)
 {
   buf_.seekg(offset, std::ios::beg);
-  buf_.read(reinterpret_cast<char*>(data), len);
+  buf_.read(reinterpret_cast<char*>(data.data()), data.size());
   buf_.clear();
   return buf_.gcount();
 }

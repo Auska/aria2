@@ -54,8 +54,8 @@ void WrDiskCacheEntryTest::testAppend()
   cell->goff = 0;
   size_t capacity = 6;
   size_t offset = 2;
-  cell->data = new unsigned char[offset + capacity];
-  memcpy(cell->data, "??foo", 3);
+  cell->data.reset(new unsigned char[offset + capacity]);
+  memcpy(cell->data.get(), "??foo", 3);
   cell->offset = offset;
   cell->len = 3;
   cell->capacity = capacity;

@@ -69,15 +69,14 @@ public:
 
   virtual int64_t size() override { return 0; }
 
-  virtual void writeData(const unsigned char* data, size_t len,
+  virtual void writeData(std::span<const std::byte> data,
                          int64_t offset) override
   {
     // Return value is ignored here but handled in finalize()
-    parser_.parseUpdate(std::as_bytes(std::span{data, len}));
+    parser_.parseUpdate(data);
   }
 
-  virtual ssize_t readData(unsigned char* data, size_t len,
-                           int64_t offset) override
+  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) override
   {
     return 0;
   }

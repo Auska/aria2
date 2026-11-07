@@ -85,9 +85,8 @@ void UTMetadataDataExtensionMessage::doReceivedAction()
     A2_LOG_DEBUG(fmt("ut_metadata index={} found in tracking list",
                      static_cast<unsigned long>(getIndex())));
     tracker_->remove(getIndex());
-    pieceStorage_->getDiskAdaptor()->writeData(
-        reinterpret_cast<const unsigned char*>(data_.c_str()), data_.size(),
-        getIndex() * METADATA_PIECE_SIZE);
+    pieceStorage_->getDiskAdaptor()->writeData(std::as_bytes(std::span{data_}),
+                                               getIndex() * METADATA_PIECE_SIZE);
     pieceStorage_->completePiece(pieceStorage_->getPiece(getIndex()));
     if (pieceStorage_->downloadFinished()) {
       std::string metadata = util::toString(pieceStorage_->getDiskAdaptor());

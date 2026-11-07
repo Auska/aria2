@@ -95,8 +95,7 @@ void UTMetadataPostDownloadHandlerTest::testGetNextRequestGroups()
       std::shared_ptr<DiskWriterFactory>(new ByteArrayDiskWriterFactory()));
   requestGroup_->initPieceStorage();
   requestGroup_->getPieceStorage()->getDiskAdaptor()->writeData(
-      reinterpret_cast<const unsigned char*>(metadata.data()), metadata.size(),
-      0);
+      std::as_bytes(std::span{metadata}), 0);
 
   UTMetadataPostDownloadHandler handler;
   std::vector<std::shared_ptr<RequestGroup>> results;
@@ -133,8 +132,7 @@ void UTMetadataPostDownloadHandlerTest::testGetNextRequestGroups()
   metadata = "d6:lengthi384e4:name19:aria2-0.8.2.tar.bz212:piece lengthi128e";
   requestGroup_->initPieceStorage();
   requestGroup_->getPieceStorage()->getDiskAdaptor()->writeData(
-      reinterpret_cast<const unsigned char*>(metadata.data()), metadata.size(),
-      0);
+      std::as_bytes(std::span{metadata}), 0);
   try {
     handler.getNextRequestGroups(results, requestGroup_.get());
     CPPUNIT_FAIL("exception must be thrown.");

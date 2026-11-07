@@ -52,26 +52,24 @@ namespace message_digest {
 std::string digest(MessageDigest* ctx, const std::shared_ptr<BinaryStream>& bs,
                    int64_t offset, int64_t length)
 {
-  std::array<unsigned char, 4_k> buf;
+  std::array<std::byte, 4_k> buf;
   lldiv_t res = lldiv(length, buf.size());
   int64_t iteration = res.quot;
   size_t tail = res.rem;
   for (int64_t i = 0; i < iteration; ++i) {
-    ssize_t readLength = bs->readData(buf.data(), buf.size(), offset);
+    ssize_t readLength = bs->readData(buf, offset);
     if (static_cast<size_t>(readLength) != buf.size()) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    ctx->update(std::as_bytes(
-        std::span{buf.data(), static_cast<size_t>(readLength)}));
+    ctx->update(std::span{buf}.first(static_cast<size_t>(readLength)));
     offset += readLength;
   }
   if (tail) {
-    ssize_t readLength = bs->readData(buf.data(), tail, offset);
+    ssize_t readLength = bs->readData(std::span{buf}.first(tail), offset);
     if (static_cast<size_t>(readLength) != tail) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    ctx->update(std::as_bytes(
-        std::span{buf.data(), static_cast<size_t>(readLength)}));
+    ctx->update(std::span{buf}.first(static_cast<size_t>(readLength)));
   }
   return ctx->digest();
 }

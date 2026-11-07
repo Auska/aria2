@@ -63,9 +63,9 @@ void IteratableChecksumValidator::validateChunk()
 {
   // Don't guard with !finished() to allow zero-length file to be
   // verified.
-  std::array<unsigned char, 4_k> buf;
+  std::array<std::byte, 4_k> buf;
   size_t length = pieceStorage_->getDiskAdaptor()->readDataDropCache(
-      buf.data(), buf.size(), currentOffset_);
+      buf, currentOffset_);
   ctx_->update(std::as_bytes(std::span{buf.data(), static_cast<size_t>(length)}));
   currentOffset_ += length;
   if (finished()) {

@@ -1,3 +1,6 @@
+#include <array>
+#include <span>
+
 #include "MultiDiskAdaptor.h"
 
 #include <string>
@@ -292,7 +295,7 @@ void MultiDiskAdaptorTest::testWriteData()
 
   adaptor->openFile();
   std::string msg = "12345";
-  adaptor->writeData((const unsigned char*)msg.c_str(), msg.size(), 0);
+  adaptor->writeData(std::as_bytes(std::span{msg}), 0);
   adaptor->closeFile();
 
   CPPUNIT_ASSERT(File(A2_TEST_OUT_DIR "/file0.txt").isFile());
@@ -303,7 +306,7 @@ void MultiDiskAdaptorTest::testWriteData()
 
   adaptor->openFile();
   std::string msg2 = "67890ABCDEF";
-  adaptor->writeData((const unsigned char*)msg2.c_str(), msg2.size(), 5);
+  adaptor->writeData(std::as_bytes(std::span{msg2}), 5);
   adaptor->closeFile();
 
   readFile(A2_TEST_OUT_DIR "/file1.txt", buf, 15);
@@ -315,7 +318,7 @@ void MultiDiskAdaptorTest::testWriteData()
 
   adaptor->openFile();
   std::string msg3 = "12345123456712";
-  adaptor->writeData((const unsigned char*)msg3.c_str(), msg3.size(), 10);
+  adaptor->writeData(std::as_bytes(std::span{msg3}), 10);
   adaptor->closeFile();
 
   readFile(A2_TEST_OUT_DIR "/file1.txt", buf, 15);
@@ -344,20 +347,23 @@ void MultiDiskAdaptorTest::testReadData()
   adaptor->setFileEntries(std::begin(entries), std::end(entries));
   adaptor->enableReadOnly();
   adaptor->openFile();
-  unsigned char buf[128];
-  adaptor->readData(buf, 15, 0);
-  buf[15] = '\0';
-  CPPUNIT_ASSERT_EQUAL(std::string("1234567890ABCDE"), std::string((char*)buf));
-  adaptor->readData(buf, 10, 6);
-  buf[10] = '\0';
-  CPPUNIT_ASSERT_EQUAL(std::string("7890ABCDEF"), std::string((char*)buf));
-  adaptor->readData(buf, 4, 20);
-  buf[4] = '\0';
-  CPPUNIT_ASSERT_EQUAL(std::string("KLMN"), std::string((char*)buf));
-  adaptor->readData(buf, 25, 0);
-  buf[25] = '\0';
+  std::array<std::byte, 128> buf;
+  adaptor->readData(std::span{buf}.first(15), 0);
+  buf[15] = std::byte{'\0'};
+  CPPUNIT_ASSERT_EQUAL(std::string("1234567890ABCDE"),
+                       std::string(reinterpret_cast<const char*>(buf.data())));
+  adaptor->readData(std::span{buf}.first(10), 6);
+  buf[10] = std::byte{'\0'};
+  CPPUNIT_ASSERT_EQUAL(std::string("7890ABCDEF"),
+                       std::string(reinterpret_cast<const char*>(buf.data())));
+  adaptor->readData(std::span{buf}.first(4), 20);
+  buf[4] = std::byte{'\0'};
+  CPPUNIT_ASSERT_EQUAL(std::string("KLMN"),
+                       std::string(reinterpret_cast<const char*>(buf.data())));
+  adaptor->readData(std::span{buf}.first(25), 0);
+  buf[25] = std::byte{'\0'};
   CPPUNIT_ASSERT_EQUAL(std::string("1234567890ABCDEFGHIJKLMNO"),
-                       std::string((char*)buf));
+                       std::string(reinterpret_cast<const char*>(buf.data())));
 }
 
 void MultiDiskAdaptorTest::testCutTrailingGarbage()

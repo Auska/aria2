@@ -37,6 +37,8 @@
 
 #include "BinaryStream.h"
 
+#include <span>
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -52,10 +54,10 @@ class OpenedFileCounter;
 
 class DiskAdaptor : public BinaryStream {
 public:
-  enum FileAllocationMethod {
-    FILE_ALLOC_ADAPTIVE,
-    FILE_ALLOC_FALLOC,
-    FILE_ALLOC_TRUNC
+  enum class FileAllocationMethod {
+    ADAPTIVE,
+    FALLOC,
+    TRUNC,
   };
 
   DiskAdaptor();
@@ -108,7 +110,7 @@ public:
   virtual size_t utime(const Time& actime, const Time& modtime) = 0;
 
   // Just like readData(), but drop cache after read.
-  virtual ssize_t readDataDropCache(unsigned char* data, size_t len,
+  virtual ssize_t readDataDropCache(std::span<std::byte> data,
                                     int64_t offset) = 0;
 
   // Writes cached data to the underlying disk.
@@ -122,7 +124,10 @@ public:
     fileAllocationMethod_ = method;
   }
 
-  int getFileAllocationMethod() const { return fileAllocationMethod_; }
+  FileAllocationMethod getFileAllocationMethod() const
+  {
+    return fileAllocationMethod_;
+  }
 
   // Closes at most |numClose| files if possible. This method is used to
   // ensure that global number of open file stays under certain limit.

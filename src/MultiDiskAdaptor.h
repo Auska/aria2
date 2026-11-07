@@ -90,7 +90,7 @@ public:
   void needsDiskWriter(bool f) { needsDiskWriter_ = f; }
 };
 
-typedef std::vector<std::unique_ptr<DiskWriterEntry>> DiskWriterEntries;
+using DiskWriterEntries = std::vector<std::unique_ptr<DiskWriterEntry>>;
 
 class MultiDiskAdaptor : public DiskAdaptor {
   friend class MultiFileAllocationIterator;
@@ -107,8 +107,7 @@ private:
 
   void openIfNot(DiskWriterEntry* entry, void (DiskWriterEntry::*f)());
 
-  ssize_t readData(unsigned char* data, size_t len, int64_t offset,
-                   bool dropCache);
+  ssize_t readData(std::span<std::byte> data, int64_t offset, bool dropCache);
 
   static const int DEFAULT_MAX_OPEN_FILES = 100;
 
@@ -124,13 +123,12 @@ public:
 
   virtual void closeFile() override;
 
-  virtual void writeData(const unsigned char* data, size_t len,
+  virtual void writeData(std::span<const std::byte> data,
                          int64_t offset) override;
 
-  virtual ssize_t readData(unsigned char* data, size_t len,
-                           int64_t offset) override;
+  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) override;
 
-  virtual ssize_t readDataDropCache(unsigned char* data, size_t len,
+  virtual ssize_t readDataDropCache(std::span<std::byte> data,
                                     int64_t offset) override;
 
   virtual void writeCache(const WrDiskCacheEntry* entry) override;

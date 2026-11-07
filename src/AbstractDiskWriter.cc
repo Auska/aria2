@@ -159,20 +159,20 @@ void AbstractDiskWriter::createFile(int addFlags)
                           error_code::FILE_CREATE_ERROR);
 }
 
-ssize_t AbstractDiskWriter::writeDataInternal(const unsigned char* data,
-                                              size_t len, int64_t offset)
+ssize_t AbstractDiskWriter::writeDataInternal(std::span<const std::byte> data,
+                                              int64_t offset)
 {
   if (mapaddr_) {
-    std::copy_n(data, len, mapaddr_ + offset);
-    return len;
+    memcpy(mapaddr_ + offset, data.data(), data.size());
+    return data.size();
   }
   else {
     ssize_t writtenLength = 0;
     seek(offset);
-    while ((size_t)writtenLength < len) {
+    while (static_cast<size_t>(writtenLength) < data.size()) {
       ssize_t ret = 0;
-      while ((ret = write(fd_, data + writtenLength, len - writtenLength)) ==
-                 -1 &&
+      while ((ret = write(fd_, data.data() + writtenLength,
+                          data.size() - writtenLength)) == -1 &&
              errno == EINTR)
         ;
       if (ret == -1) {
@@ -184,21 +184,21 @@ ssize_t AbstractDiskWriter::writeDataInternal(const unsigned char* data,
   }
 }
 
-ssize_t AbstractDiskWriter::readDataInternal(unsigned char* data, size_t len,
+ssize_t AbstractDiskWriter::readDataInternal(std::span<std::byte> data,
                                              int64_t offset)
 {
   if (mapaddr_) {
     if (offset >= maplen_) {
       return 0;
     }
-    auto readlen = std::min(maplen_ - offset, static_cast<int64_t>(len));
-    std::copy_n(mapaddr_ + offset, readlen, data);
+    auto readlen = std::min<std::int64_t>(maplen_ - offset, data.size());
+    memcpy(data.data(), mapaddr_ + offset, readlen);
     return readlen;
   }
   else {
     seek(offset);
     ssize_t ret = 0;
-    while ((ret = read(fd_, data, len)) == -1 && errno == EINTR)
+    while ((ret = read(fd_, data.data(), data.size())) == -1 && errno == EINTR)
       ;
     return ret;
   }
@@ -284,11 +284,11 @@ namespace {
 bool isDiskFullError(int errNum) { return errNum == ENOSPC; }
 } // namespace
 
-void AbstractDiskWriter::writeData(const unsigned char* data, size_t len,
+void AbstractDiskWriter::writeData(std::span<const std::byte> data,
                                    int64_t offset)
 {
-  ensureMmapWrite(len, offset);
-  if (writeDataInternal(data, len, offset) < 0) {
+  ensureMmapWrite(data.size(), offset);
+  if (writeDataInternal(data, offset) < 0) {
     int errNum = fileError();
     // If the error indicates disk full situation, throw
     // DownloadFailureException and abort download instantly.
@@ -307,11 +307,10 @@ void AbstractDiskWriter::writeData(const unsigned char* data, size_t len,
   }
 }
 
-ssize_t AbstractDiskWriter::readData(unsigned char* data, size_t len,
-                                     int64_t offset)
+ssize_t AbstractDiskWriter::readData(std::span<std::byte> data, int64_t offset)
 {
   ssize_t ret;
-  if ((ret = readDataInternal(data, len, offset)) < 0) {
+  if ((ret = readDataInternal(data, offset)) < 0) {
     int errNum = fileError();
     throw DL_ABORT_EX3(
         errNum,

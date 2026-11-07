@@ -79,14 +79,15 @@ ssize_t SinkStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       if (alen < wlen) {
         size_t len = wlen - alen;
         size_t capacity = std::max(len, static_cast<size_t>(4_k));
-        auto dataCopy = new unsigned char[capacity];
-        memcpy(dataCopy, inbuf + alen, len);
-        piece->updateWrCache(wrDiskCache_, dataCopy, 0, len, capacity,
+        auto dataCopy = std::make_unique<unsigned char[]>(capacity);
+        memcpy(dataCopy.get(), inbuf + alen, len);
+        piece->updateWrCache(wrDiskCache_, std::move(dataCopy), 0, len, capacity,
                              segment->getPositionToWrite() + alen);
       }
     }
     else {
-      out->writeData(inbuf, wlen, segment->getPositionToWrite());
+      out->writeData(std::as_bytes(std::span{inbuf, wlen}),
+                     segment->getPositionToWrite());
     }
     if (hashUpdate_) {
       segment->updateHash(segment->getWrittenLength(), inbuf, wlen);

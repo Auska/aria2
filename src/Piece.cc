@@ -235,24 +235,22 @@ void updateHashWithRead(MessageDigest* mdctx,
                         const std::shared_ptr<DiskAdaptor>& adaptor,
                         int64_t offset, size_t len)
 {
-  std::array<unsigned char, 4_k> buf;
+  std::array<std::byte, 4_k> buf;
   ldiv_t res = ldiv(len, buf.size());
   for (int j = 0; j < res.quot; ++j) {
-    ssize_t nread = adaptor->readData(buf.data(), buf.size(), offset);
+    ssize_t nread = adaptor->readData(buf, offset);
     if ((size_t)nread != buf.size()) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    mdctx->update(
-        std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
+    mdctx->update(std::span{buf}.first(static_cast<size_t>(nread)));
     offset += nread;
   }
   if (res.rem) {
-    ssize_t nread = adaptor->readData(buf.data(), res.rem, offset);
+    ssize_t nread = adaptor->readData(std::span{buf}.first(res.rem), offset);
     if (nread != res.rem) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    mdctx->update(
-        std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
+    mdctx->update(std::span{buf}.first(static_cast<size_t>(nread)));
   }
 }
 } // namespace
@@ -270,7 +268,7 @@ Piece::getDigestWithWrCache(size_t pieceLength,
       if (goff < d->goff) {
         updateHashWithRead(mdctx.get(), adaptor, goff, d->goff - goff);
       }
-      mdctx->update(std::as_bytes(std::span{d->data + d->offset, d->len}));
+      mdctx->update(std::as_bytes(std::span{d->data.get() + d->offset, d->len}));
       goff = d->goff + d->len;
     }
     updateHashWithRead(mdctx.get(), adaptor, goff, start + length_ - goff);
@@ -338,9 +336,9 @@ void Piece::clearWrCache(WrDiskCache* diskCache)
   wrCache_->clear();
 }
 
-void Piece::updateWrCache(WrDiskCache* diskCache, unsigned char* data,
-                          size_t offset, size_t len, size_t capacity,
-                          int64_t goff)
+void Piece::updateWrCache(WrDiskCache* diskCache,
+                          std::unique_ptr<unsigned char[]> data, size_t offset,
+                          size_t len, size_t capacity, int64_t goff)
 {
   if (!diskCache) {
     return;
@@ -350,7 +348,7 @@ void Piece::updateWrCache(WrDiskCache* diskCache, unsigned char* data,
                    static_cast<const void*>(wrCache_.get())));
   auto cell = new WrDiskCacheEntry::DataCell();
   cell->goff = goff;
-  cell->data = data;
+  cell->data = std::move(data);
   cell->offset = offset;
   cell->len = len;
   cell->capacity = capacity;

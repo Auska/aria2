@@ -37,6 +37,9 @@
 
 #include "FileAllocationIterator.h"
 
+#include <cstdlib>
+#include <memory>
+
 namespace aria2 {
 
 class BinaryStream;
@@ -49,7 +52,10 @@ private:
 
   int64_t totalLength_;
 
-  unsigned char* buffer_;
+  struct FreeDeleter {
+    void operator()(unsigned char* p) const { std::free(p); }
+  };
+  std::unique_ptr<unsigned char, FreeDeleter> buffer_;
 
 public:
   SingleFileAllocationIterator(BinaryStream* stream, int64_t offset,

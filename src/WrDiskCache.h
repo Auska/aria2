@@ -65,7 +65,7 @@ public:
   size_t getSize() const { return total_; }
 
 private:
-  typedef std::set<WrDiskCacheEntry*, DerefLess<WrDiskCacheEntry*>> EntrySet;
+  using EntrySet = std::set<WrDiskCacheEntry*, DerefLess<WrDiskCacheEntry*>>;
   // Maximum number of bytes the storage can cache.
   size_t limit_;
   // Current number of bytes cached.

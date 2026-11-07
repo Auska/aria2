@@ -405,7 +405,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
      'src/MessageDigestImpl.h' 'src/crypto_hash.h' 'src/message_digest_helper.h'`
      无命中。
 
-4. [ ] **阶段 4：磁盘IO 簇（46 文件 / 4 679 行）**
+4. [x] **阶段 4：磁盘IO 簇（46 文件 / 4 679 行）**
    - span 化：`BinaryStream::writeData/readData`（`BinaryStream.h:48,51`）、
      `DiskAdaptor::readDataDropCache`（`DiskAdaptor.h:111`），
      6 个实现类（`AbstractDiskWriter`、`ByteArrayDiskWriter`、`MultiDiskAdaptor`、
