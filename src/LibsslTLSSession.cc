@@ -70,21 +70,21 @@ OpenSSLTLSSession::~OpenSSLTLSSession()
   }
 }
 
-int OpenSSLTLSSession::init(sock_t sockfd)
+TLSErrorCode OpenSSLTLSSession::init(sock_t sockfd)
 {
   ERR_clear_error();
   ssl_ = SSL_new(tlsContext_->getSSLCtx());
   if (!ssl_) {
-    return TLS_ERR_ERROR;
+    return TLSErrorCode::ERROR;
   }
   rv_ = SSL_set_fd(ssl_, sockfd);
   if (rv_ == 0) {
-    return TLS_ERR_ERROR;
+    return TLSErrorCode::ERROR;
   }
-  return TLS_ERR_OK;
+  return TLSErrorCode::OK;
 }
 
-int OpenSSLTLSSession::setSNIHostname(const std::string& hostname)
+TLSErrorCode OpenSSLTLSSession::setSNIHostname(const std::string& hostname)
 {
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   ERR_clear_error();
@@ -93,26 +93,26 @@ int OpenSSLTLSSession::setSNIHostname(const std::string& hostname)
   // wrapping SSL_ctrl at the time of this writing).
   SSL_set_tlsext_host_name(ssl_, hostname.c_str());
 #endif // SSL_CTRL_SET_TLSEXT_HOSTNAME
-  return TLS_ERR_OK;
+  return TLSErrorCode::OK;
 }
 
-int OpenSSLTLSSession::closeConnection()
+TLSErrorCode OpenSSLTLSSession::closeConnection()
 {
   ERR_clear_error();
   SSL_shutdown(ssl_);
   // TODO handle return value
-  return TLS_ERR_OK;
+  return TLSErrorCode::OK;
 }
 
-int OpenSSLTLSSession::checkDirection()
+TLSDirection OpenSSLTLSSession::checkDirection()
 {
   int error = SSL_get_error(ssl_, rv_);
   if (error == SSL_ERROR_WANT_WRITE) {
-    return TLS_WANT_WRITE;
+    return TLSDirection::WANT_WRITE;
   }
   else {
     // TODO We ignore error other than SSL_ERR_WANT_READ here for now
-    return TLS_WANT_READ;
+    return TLSDirection::WANT_READ;
   }
 }
 
@@ -124,16 +124,16 @@ bool wouldblock(SSL* ssl, int rv)
 }
 } // namespace
 
-ssize_t OpenSSLTLSSession::writeData(const void* data, size_t len)
+ssize_t OpenSSLTLSSession::writeData(std::span<const std::byte> data)
 {
   ERR_clear_error();
-  rv_ = SSL_write(ssl_, data, len);
+  rv_ = SSL_write(ssl_, data.data(), data.size());
   if (rv_ <= 0) {
     if (wouldblock(ssl_, rv_)) {
-      return TLS_ERR_WOULDBLOCK;
+      return static_cast<ssize_t>(TLSErrorCode::WOULDBLOCK);
     }
     else {
-      return TLS_ERR_ERROR;
+      return static_cast<ssize_t>(TLSErrorCode::ERROR);
     }
   }
   else {
@@ -143,13 +143,13 @@ ssize_t OpenSSLTLSSession::writeData(const void* data, size_t len)
   }
 }
 
-ssize_t OpenSSLTLSSession::readData(void* data, size_t len)
+ssize_t OpenSSLTLSSession::readData(std::span<std::byte> data)
 {
   ERR_clear_error();
-  rv_ = SSL_read(ssl_, data, len);
+  rv_ = SSL_read(ssl_, data.data(), data.size());
   if (rv_ <= 0) {
     if (wouldblock(ssl_, rv_)) {
-      return TLS_ERR_WOULDBLOCK;
+      return static_cast<ssize_t>(TLSErrorCode::WOULDBLOCK);
     }
 
     if (rv_ == 0) {
@@ -160,7 +160,7 @@ ssize_t OpenSSLTLSSession::readData(void* data, size_t len)
       }
     }
 
-    return TLS_ERR_ERROR;
+    return static_cast<ssize_t>(TLSErrorCode::ERROR);
   }
 
   ssize_t ret = rv_;
@@ -168,10 +168,10 @@ ssize_t OpenSSLTLSSession::readData(void* data, size_t len)
   return ret;
 }
 
-int OpenSSLTLSSession::handshake(TLSVersion& version)
+TLSErrorCode OpenSSLTLSSession::handshake(TLSVersion& version)
 {
   ERR_clear_error();
-  if (tlsContext_->getSide() == TLS_CLIENT) {
+  if (tlsContext_->getSide() == TLSSessionSide::CLIENT) {
     rv_ = SSL_connect(ssl_);
   }
   else {
@@ -188,50 +188,49 @@ int OpenSSLTLSSession::handshake(TLSVersion& version)
       break;
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
-      return TLS_ERR_WOULDBLOCK;
+      return TLSErrorCode::WOULDBLOCK;
     default:
-      return TLS_ERR_ERROR;
+      return TLSErrorCode::ERROR;
     }
   }
 
   switch (SSL_version(ssl_)) {
 #ifdef TLS1_1_VERSION
   case TLS1_1_VERSION:
-    version = TLS_PROTO_TLS11;
+    version = TLSVersion::TLS11;
     break;
 #endif // TLS1_1_VERSION
 
 #ifdef TLS1_2_VERSION
   case TLS1_2_VERSION:
-    version = TLS_PROTO_TLS12;
+    version = TLSVersion::TLS12;
     break;
 #endif // TLS1_2_VERSION
 
 #ifdef TLS1_3_VERSION
   case TLS1_3_VERSION:
-    version = TLS_PROTO_TLS13;
+    version = TLSVersion::TLS13;
     break;
 #endif // TLS1_3_VERSION
 
   default:
-    version = TLS_PROTO_NONE;
+    version = TLSVersion::NONE;
     break;
   }
 
-  return TLS_ERR_OK;
+  return TLSErrorCode::OK;
 }
 
-int OpenSSLTLSSession::tlsConnect(const std::string& hostname,
-                                  TLSVersion& version,
-                                  std::string& handshakeErr)
+TLSErrorCode OpenSSLTLSSession::tlsConnect(const std::string& hostname,
+                                           TLSVersion& version,
+                                           std::string& handshakeErr)
 {
   handshakeErr = "";
-  int ret;
-  ret = handshake(version);
-  if (ret != TLS_ERR_OK) {
+  auto ret = handshake(version);
+  if (ret != TLSErrorCode::OK) {
     return ret;
   }
-  if (tlsContext_->getSide() == TLS_CLIENT && tlsContext_->getVerifyPeer()) {
+  if (tlsContext_->getSide() == TLSSessionSide::CLIENT && tlsContext_->getVerifyPeer()) {
     // verify peer
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
     auto peerCert = SSL_get1_peer_certificate(ssl_);
@@ -240,21 +239,21 @@ int OpenSSLTLSSession::tlsConnect(const std::string& hostname,
 #endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
     if (!peerCert) {
       handshakeErr = "certificate not found";
-      return TLS_ERR_ERROR;
+      return TLSErrorCode::ERROR;
     }
     std::unique_ptr<X509, decltype(&X509_free)> certDeleter(peerCert,
                                                             X509_free);
     long verifyResult = SSL_get_verify_result(ssl_);
     if (verifyResult != X509_V_OK) {
       handshakeErr = X509_verify_cert_error_string(verifyResult);
-      return TLS_ERR_ERROR;
+      return TLSErrorCode::ERROR;
     }
     std::string commonName;
     std::vector<std::string> dnsNames;
     std::vector<std::string> ipAddrs;
     GENERAL_NAMES* altNames;
     altNames = reinterpret_cast<GENERAL_NAMES*>(
-        X509_get_ext_d2i(peerCert, NID_subject_alt_name, nullptr, NULL));
+        X509_get_ext_d2i(peerCert, NID_subject_alt_name, nullptr, nullptr));
     if (altNames) {
       std::unique_ptr<GENERAL_NAMES, decltype(&GENERAL_NAMES_free)>
           altNamesDeleter(altNames, GENERAL_NAMES_free);
@@ -292,7 +291,7 @@ int OpenSSLTLSSession::tlsConnect(const std::string& hostname,
     X509_NAME* subjectName = X509_get_subject_name(peerCert);
     if (!subjectName) {
       handshakeErr = "could not get X509 name object from the certificate.";
-      return TLS_ERR_ERROR;
+      return TLSErrorCode::ERROR;
     }
     int lastpos = -1;
     while (1) {
@@ -324,14 +323,14 @@ int OpenSSLTLSSession::tlsConnect(const std::string& hostname,
     }
     if (!net::verifyHostname(hostname, dnsNames, ipAddrs, commonName)) {
       handshakeErr = "hostname does not match";
-      return TLS_ERR_ERROR;
+      return TLSErrorCode::ERROR;
     }
   }
 
-  return TLS_ERR_OK;
+  return TLSErrorCode::OK;
 }
 
-int OpenSSLTLSSession::tlsAccept(TLSVersion& version)
+TLSErrorCode OpenSSLTLSSession::tlsAccept(TLSVersion& version)
 {
   return handshake(version);
 }

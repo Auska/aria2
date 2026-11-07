@@ -51,11 +51,12 @@ class AsyncNameResolver;
 class EventPoll {
 
 public:
-  enum EventType {
-    EVENT_READ = 1,
-    EVENT_WRITE = 1 << 1,
-    EVENT_ERROR = 1 << 2,
-    EVENT_HUP = 1 << 3,
+  enum class EventType {
+    NONE = 0,
+    READ = 1,
+    WRITE = 1 << 1,
+    ERROR = 1 << 2,
+    HUP = 1 << 3,
   };
 
   virtual ~EventPoll() = default;
@@ -76,6 +77,45 @@ public:
                      Command* command) = 0;
 #endif // ENABLE_ASYNC_DNS
 };
+
+// EventType is a flag set. | combines flags, & only ever tests them, so it
+// yields bool: `events & mask` keeps reading like a plain boolean test.
+constexpr EventPoll::EventType operator|(EventPoll::EventType lhs,
+                                         EventPoll::EventType rhs)
+{
+  return static_cast<EventPoll::EventType>(static_cast<int>(lhs) |
+                                           static_cast<int>(rhs));
+}
+
+constexpr bool operator&(EventPoll::EventType lhs, EventPoll::EventType rhs)
+{
+  return (static_cast<int>(lhs) & static_cast<int>(rhs)) != 0;
+}
+
+constexpr bool operator!(EventPoll::EventType events)
+{
+  return events == EventPoll::EventType::NONE;
+}
+
+constexpr EventPoll::EventType operator~(EventPoll::EventType events)
+{
+  return static_cast<EventPoll::EventType>(~static_cast<int>(events));
+}
+
+constexpr EventPoll::EventType& operator|=(EventPoll::EventType& lhs,
+                                           EventPoll::EventType rhs)
+{
+  lhs = lhs | rhs;
+  return lhs;
+}
+
+constexpr EventPoll::EventType& operator&=(EventPoll::EventType& lhs,
+                                           EventPoll::EventType rhs)
+{
+  lhs = static_cast<EventPoll::EventType>(static_cast<int>(lhs) &
+                                          static_cast<int>(rhs));
+  return lhs;
+}
 
 } // namespace aria2
 

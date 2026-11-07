@@ -98,7 +98,7 @@ void AsyncNameResolverMan::getResolvedAddress(
 {
   for (size_t i = 0; i < numResolver_; ++i) {
     if (asyncNameResolver_[i]->getStatus() ==
-        AsyncNameResolver::STATUS_SUCCESS) {
+        AsyncNameResolver::Status::SUCCESS) {
       auto& addrs = asyncNameResolver_[i]->getResolvedAddresses();
       res.insert(std::end(res), std::begin(addrs), std::end(addrs));
     }
@@ -149,13 +149,13 @@ int AsyncNameResolverMan::getStatus() const
   bool ipv4Success = false;
   for (size_t i = 0; i < numResolver_; ++i) {
     switch (asyncNameResolver_[i]->getStatus()) {
-    case AsyncNameResolver::STATUS_SUCCESS:
+    case AsyncNameResolver::Status::SUCCESS:
       ++success;
       if (asyncNameResolver_[i]->getFamily() == AF_INET) {
         ipv4Success = true;
       }
       break;
-    case AsyncNameResolver::STATUS_ERROR:
+    case AsyncNameResolver::Status::ERROR:
       ++error;
       break;
     default:
@@ -181,7 +181,7 @@ int AsyncNameResolverMan::getStatus() const
 const std::string& AsyncNameResolverMan::getLastError() const
 {
   for (size_t i = 0; i < numResolver_; ++i) {
-    if (asyncNameResolver_[i]->getStatus() == AsyncNameResolver::STATUS_ERROR) {
+    if (asyncNameResolver_[i]->getStatus() == AsyncNameResolver::Status::ERROR) {
       // TODO This is not last error chronologically.
       return asyncNameResolver_[i]->getError();
     }

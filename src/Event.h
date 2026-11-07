@@ -325,10 +325,10 @@ public:
 
     for (const auto& ent : socks) {
       int events = 0;
-      if (ent.events & EventPoll::EVENT_READ) {
+      if (static_cast<bool>(ent.events & EventPoll::EventType::READ)) {
         events |= EventPoll::IEV_READ;
       }
-      if (ent.events & EventPoll::EVENT_WRITE) {
+      if (static_cast<bool>(ent.events & EventPoll::EventType::WRITE)) {
         events |= EventPoll::IEV_WRITE;
       }
       e->addEvents(ent.fd, command_, events, nameResolver_);

@@ -52,31 +52,32 @@ private:
   class CommandEvent {
   private:
     Command* command_;
-    int events_;
+    EventPoll::EventType events_;
 
   public:
-    CommandEvent(Command* command, int events);
+    CommandEvent(Command* command, EventPoll::EventType events);
 
     Command* getCommand() const { return command_; }
 
-    void addEvents(int events) { events_ |= events; }
+    void addEvents(EventPoll::EventType events) { events_ |= events; }
 
-    void removeEvents(int events) { events_ &= (~events); }
+    void removeEvents(EventPoll::EventType events) { events_ &= ~events; }
 
-    bool eventsEmpty() const { return events_ == 0; }
+    bool eventsEmpty() const { return events_ == EventPoll::EventType::NONE; }
 
     bool operator==(const CommandEvent& commandEvent) const
     {
       return command_ == commandEvent.command_;
     }
 
-    int getEvents() const { return events_; }
+    EventPoll::EventType getEvents() const { return events_; }
 
-    void processEvents(int events);
+    void processEvents(EventPoll::EventType events);
   };
 
-  friend int accumulateEvent(int events,
-                             const SelectEventPoll::CommandEvent& event);
+  friend EventPoll::EventType
+  accumulateEvent(EventPoll::EventType events,
+                  const SelectEventPoll::CommandEvent& event);
 
   class SocketEntry {
   private:
@@ -100,17 +101,17 @@ private:
       return socket_ < entry.socket_;
     }
 
-    void addCommandEvent(Command* command, int events);
+    void addCommandEvent(Command* command, EventPoll::EventType events);
 
-    void removeCommandEvent(Command* command, int events);
+    void removeCommandEvent(Command* command, EventPoll::EventType events);
 
-    int getEvents();
+    EventPoll::EventType getEvents();
 
     sock_t getSocket() const { return socket_; }
 
     bool eventEmpty() const { return commandEvents_.empty(); }
 
-    void processEvents(int events);
+    void processEvents(EventPoll::EventType events);
   };
 
 #ifdef ENABLE_ASYNC_DNS
@@ -152,12 +153,11 @@ private:
   fd_set wfdset_;
   sock_t fdmax_;
 
-  typedef std::map<sock_t, SocketEntry> SocketEntrySet;
+  using SocketEntrySet = std::map<sock_t, SocketEntry>;
   SocketEntrySet socketEntries_;
 #ifdef ENABLE_ASYNC_DNS
-  typedef std::map<std::pair<AsyncNameResolver*, Command*>,
-                   AsyncNameResolverEntry>
-      AsyncNameResolverEntrySet;
+  using AsyncNameResolverEntrySet =
+      std::map<std::pair<AsyncNameResolver*, Command*>, AsyncNameResolverEntry>;
   AsyncNameResolverEntrySet nameResolverEntries_;
 #endif // ENABLE_ASYNC_DNS
 

@@ -203,28 +203,28 @@ bool DownloadEngine::addSocketForReadCheck(
     const std::shared_ptr<SocketCore>& socket, Command* command)
 {
   return eventPoll_->addEvents(socket->getSockfd(), command,
-                               EventPoll::EVENT_READ);
+                               EventPoll::EventType::READ);
 }
 
 bool DownloadEngine::deleteSocketForReadCheck(
     const std::shared_ptr<SocketCore>& socket, Command* command)
 {
   return eventPoll_->deleteEvents(socket->getSockfd(), command,
-                                  EventPoll::EVENT_READ);
+                                  EventPoll::EventType::READ);
 }
 
 bool DownloadEngine::addSocketForWriteCheck(
     const std::shared_ptr<SocketCore>& socket, Command* command)
 {
   return eventPoll_->addEvents(socket->getSockfd(), command,
-                               EventPoll::EVENT_WRITE);
+                               EventPoll::EventType::WRITE);
 }
 
 bool DownloadEngine::deleteSocketForWriteCheck(
     const std::shared_ptr<SocketCore>& socket, Command* command)
 {
   return eventPoll_->deleteEvents(socket->getSockfd(), command,
-                                  EventPoll::EVENT_WRITE);
+                                  EventPoll::EventType::WRITE);
 }
 
 void DownloadEngine::calculateStatistics()

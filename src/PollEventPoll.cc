@@ -131,16 +131,16 @@ void PollEventPoll::poll(const struct timeval& tv)
 int PollEventPoll::translateEvents(EventPoll::EventType events)
 {
   int newEvents = 0;
-  if (EventPoll::EVENT_READ & events) {
+  if (EventPoll::EventType::READ & events) {
     newEvents |= IEV_READ;
   }
-  if (EventPoll::EVENT_WRITE & events) {
+  if (EventPoll::EventType::WRITE & events) {
     newEvents |= IEV_WRITE;
   }
-  if (EventPoll::EVENT_ERROR & events) {
+  if (EventPoll::EventType::ERROR & events) {
     newEvents |= IEV_ERROR;
   }
-  if (EventPoll::EVENT_HUP & events) {
+  if (EventPoll::EventType::HUP & events) {
     newEvents |= IEV_HUP;
   }
   return newEvents;

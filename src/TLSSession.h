@@ -35,18 +35,20 @@
 #ifndef TLS_SESSION_H
 #define TLS_SESSION_H
 
+#include <span>
+
 #include "common.h"
 #include "a2netcompat.h"
 #include "TLSContext.h"
 
 namespace aria2 {
 
-enum TLSDirection { TLS_WANT_READ = 1, TLS_WANT_WRITE };
+enum class TLSDirection { WANT_READ = 1, WANT_WRITE };
 
-enum TLSErrorCode {
-  TLS_ERR_OK = 0,
-  TLS_ERR_ERROR = -1,
-  TLS_ERR_WOULDBLOCK = -2
+enum class TLSErrorCode {
+  OK = 0,
+  ERROR = -1,
+  WOULDBLOCK = -2
 };
 
 // To create another SSL/TLS backend, implement TLSSession class below.
@@ -61,34 +63,34 @@ public:
   // Initializes SSL/TLS session. The |sockfd| is the underlying
   // transport socket. This function returns TLS_ERR_OK if it
   // succeeds, or TLS_ERR_ERROR.
-  virtual int init(sock_t sockfd) = 0;
+  virtual TLSErrorCode init(sock_t sockfd) = 0;
 
   // Sets |hostname| for TLS SNI extension. This is only meaningful for
   // client side session. This function returns TLS_ERR_OK if it
   // succeeds, or TLS_ERR_ERROR.
-  virtual int setSNIHostname(const std::string& hostname) = 0;
+  virtual TLSErrorCode setSNIHostname(const std::string& hostname) = 0;
 
   // Closes the SSL/TLS session. Don't close underlying transport
   // socket. This function returns TLS_ERR_OK if it succeeds, or
   // TLS_ERR_ERROR.
-  virtual int closeConnection() = 0;
+  virtual TLSErrorCode closeConnection() = 0;
 
   // Returns TLS_WANT_READ if SSL/TLS session needs more data from
   // remote endpoint to proceed, or TLS_WANT_WRITE if SSL/TLS session
   // needs to write more data to proceed. If SSL/TLS session needs
   // neither read nor write data at the moment, TLS_WANT_READ must be
   // returned.
-  virtual int checkDirection() = 0;
+  virtual TLSDirection checkDirection() = 0;
 
   // Sends |data| with length |len|. This function returns the number
   // of bytes sent if it succeeds, or TLS_ERR_WOULDBLOCK if the
   // underlying transport blocks, or TLS_ERR_ERROR.
-  virtual ssize_t writeData(const void* data, size_t len) = 0;
+  virtual ssize_t writeData(std::span<const std::byte> data) = 0;
 
   // Receives data into |data| with length |len|. This function returns
   // the number of bytes received if it succeeds, or TLS_ERR_WOULDBLOCK
   // if the underlying transport blocks, or TLS_ERR_ERROR.
-  virtual ssize_t readData(void* data, size_t len) = 0;
+  virtual ssize_t readData(std::span<std::byte> data) = 0;
 
   // Performs client side handshake. The |hostname| is the hostname of
   // the remote endpoint and is used to verify its certificate. This
@@ -96,13 +98,14 @@ public:
   // if the underlying transport blocks, or TLS_ERR_ERROR.
   // When returning TLS_ERR_ERROR, provide certificate validation error
   // in |handshakeErr|.
-  virtual int tlsConnect(const std::string& hostname, TLSVersion& version,
-                         std::string& handshakeErr) = 0;
+  virtual TLSErrorCode tlsConnect(const std::string& hostname,
+                                  TLSVersion& version,
+                                  std::string& handshakeErr) = 0;
 
   // Performs server side handshake. This function returns TLS_ERR_OK
   // if it succeeds, or TLS_ERR_WOULDBLOCK if the underlying transport
   // blocks, or TLS_ERR_ERROR.
-  virtual int tlsAccept(TLSVersion& version) = 0;
+  virtual TLSErrorCode tlsAccept(TLSVersion& version) = 0;
 
   // Returns last error string
   virtual std::string getLastErrorString() = 0;
@@ -115,8 +118,8 @@ protected:
   TLSSession() = default;
 
 private:
-  TLSSession(const TLSSession&);
-  TLSSession& operator=(const TLSSession&);
+  TLSSession(const TLSSession&) = delete;
+  TLSSession& operator=(const TLSSession&) = delete;
 };
 } // namespace aria2
 

@@ -79,11 +79,11 @@ bool LpdMessageReceiver::init(const std::string& localAddr)
 std::unique_ptr<LpdMessage> LpdMessageReceiver::receiveMessage()
 {
   while (1) {
-    unsigned char buf[200];
+    std::array<std::byte, 200> buf;
     Endpoint remoteEndpoint;
     ssize_t length;
     try {
-      length = socket_->readDataFrom(buf, sizeof(buf), remoteEndpoint);
+      length = socket_->readDataFrom(std::span{buf}, remoteEndpoint);
       if (length == 0) {
         return nullptr;
       }
@@ -94,7 +94,8 @@ std::unique_ptr<LpdMessage> LpdMessageReceiver::receiveMessage()
     }
     HttpHeaderProcessor proc(HttpHeaderProcessor::SERVER_PARSER);
     try {
-      if (!proc.parse(buf, length)) {
+      if (!proc.parse(reinterpret_cast<const unsigned char*>(buf.data()),
+                      length)) {
         // UDP packet must contain whole HTTP header block.
         continue;
       }

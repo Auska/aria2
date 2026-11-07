@@ -43,12 +43,13 @@
 #include <ares.h>
 
 #include "a2netcompat.h"
+#include "EventPoll.h"
 
 namespace aria2 {
 
 struct AsyncNameResolverSocketEntry {
   ares_socket_t fd;
-  int events;
+  EventPoll::EventType events;
 };
 
 class AsyncNameResolver {
@@ -56,16 +57,16 @@ class AsyncNameResolver {
                        ares_addrinfo* result);
 
 public:
-  enum STATUS {
-    STATUS_READY,
-    STATUS_QUERYING,
-    STATUS_SUCCESS,
-    STATUS_ERROR,
+  enum class Status {
+    READY,
+    QUERYING,
+    SUCCESS,
+    ERROR,
   };
 
 private:
   std::vector<AsyncNameResolverSocketEntry> socks_;
-  STATUS status_;
+  Status status_;
   int family_;
   ares_channel channel_;
 
@@ -87,7 +88,7 @@ public:
 
   const std::string& getError() const { return error_; }
 
-  STATUS getStatus() const { return status_; }
+  Status getStatus() const { return status_; }
 
   ares_socket_t getFds(fd_set* rfdsPtr, fd_set* wfdsPtr) const;
 

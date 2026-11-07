@@ -177,7 +177,8 @@ bool PeerConnection::receiveMessage(unsigned char* data, size_t& dataLength)
       else {
         nread = bufferCapacity_ - resbufLength_;
       }
-      readData(resbuf_.get() + resbufLength_, nread, encryptionEnabled_);
+      nread = readData(std::span{resbuf_.get() + resbufLength_, nread},
+                       encryptionEnabled_);
       if (nread == 0) {
         if (socket_->wantRead() || socket_->wantWrite()) {
           break;
@@ -206,7 +207,10 @@ bool PeerConnection::receiveHandshake(unsigned char* data, size_t& dataLength,
   size_t remaining = BtHandshakeMessage::MESSAGE_LENGTH - resbufLength_;
   if (remaining > 0) {
     size_t temp = remaining;
-    readData(resbuf_.get() + resbufLength_, remaining, encryptionEnabled_);
+    remaining = readData(
+        std::span{resbuf_.get() + resbufLength_,
+                  BtHandshakeMessage::MESSAGE_LENGTH - resbufLength_},
+        encryptionEnabled_);
     if (remaining == 0 && !socket_->wantRead() && !socket_->wantWrite()) {
       // we got EOF
       A2_LOG_DEBUG(fmt("CUID#{} - In PeerConnection::receiveHandshake(), remain={}",
@@ -228,13 +232,15 @@ bool PeerConnection::receiveHandshake(unsigned char* data, size_t& dataLength,
   return retval;
 }
 
-void PeerConnection::readData(unsigned char* data, size_t& length,
-                              bool encryption)
+size_t PeerConnection::readData(std::span<unsigned char> data,
+                               bool encryption)
 {
-  socket_->readData(data, length);
+  auto length =
+      static_cast<size_t>(socket_->readData(std::as_writable_bytes(data)));
   if (encryption) {
-    decryptor_->encrypt(length, data, data);
+    decryptor_->encrypt(length, data.data(), data.data());
   }
+  return length;
 }
 
 void PeerConnection::enableEncryption(std::unique_ptr<ARC4Encryptor> encryptor,

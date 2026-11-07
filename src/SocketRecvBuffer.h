@@ -39,6 +39,7 @@
 
 #include <memory>
 #include <array>
+#include <cstddef>
 
 #include "a2functional.h"
 

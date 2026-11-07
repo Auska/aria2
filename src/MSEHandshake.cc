@@ -142,8 +142,8 @@ void MSEHandshake::read()
     assert(!wantRead_);
     return;
   }
-  size_t len = MAX_BUFFER_LENGTH - rbufLength_;
-  socket_->readData(rbuf_ + rbufLength_, len);
+  auto len = static_cast<size_t>(socket_->readData(std::as_writable_bytes(
+      std::span{rbuf_ + rbufLength_, MAX_BUFFER_LENGTH - rbufLength_})));
   if (len == 0 && !socket_->wantRead() && !socket_->wantWrite()) {
     // TODO Should we set graceful in peer?
     throw DL_ABORT_EX(EX_EOF_FROM_PEER);

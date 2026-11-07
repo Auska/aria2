@@ -92,7 +92,9 @@ ssize_t DHTConnectionImpl::receiveMessage(unsigned char* data, size_t len,
                                           std::string& host, uint16_t& port)
 {
   Endpoint remoteEndpoint;
-  ssize_t length = socket_->readDataFrom(data, len, remoteEndpoint);
+  ssize_t length = socket_->readDataFrom(std::as_writable_bytes(
+                                              std::span{data, len}),
+                                          remoteEndpoint);
   if (length == 0) {
     return length;
   }
@@ -105,7 +107,7 @@ ssize_t DHTConnectionImpl::receiveMessage(unsigned char* data, size_t len,
 ssize_t DHTConnectionImpl::sendMessage(const unsigned char* data, size_t len,
                                        const std::string& host, uint16_t port)
 {
-  return socket_->writeData(data, len, host, port);
+  return socket_->writeData(std::as_bytes(std::span{data, len}), host, port);
 }
 
 } // namespace aria2

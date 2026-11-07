@@ -36,6 +36,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <ranges>
 #include <numeric>
 
 #include "Command.h"
@@ -47,37 +48,39 @@
 
 namespace aria2 {
 
-SelectEventPoll::CommandEvent::CommandEvent(Command* command, int events)
+SelectEventPoll::CommandEvent::CommandEvent(Command* command,
+                                            EventPoll::EventType events)
     : command_(command), events_(events)
 {
 }
 
-void SelectEventPoll::CommandEvent::processEvents(int events)
+void SelectEventPoll::CommandEvent::processEvents(EventPoll::EventType events)
 {
   if ((events_ & events) ||
-      ((EventPoll::EVENT_ERROR | EventPoll::EVENT_HUP) & events)) {
+      ((EventPoll::EventType::ERROR | EventPoll::EventType::HUP) & events)) {
     command_->setStatusActive();
   }
-  if (EventPoll::EVENT_READ & events) {
+  if (EventPoll::EventType::READ & events) {
     command_->readEventReceived();
   }
-  if (EventPoll::EVENT_WRITE & events) {
+  if (EventPoll::EventType::WRITE & events) {
     command_->writeEventReceived();
   }
-  if (EventPoll::EVENT_ERROR & events) {
+  if (EventPoll::EventType::ERROR & events) {
     command_->errorEventReceived();
   }
-  if (EventPoll::EVENT_HUP & events) {
+  if (EventPoll::EventType::HUP & events) {
     command_->hupEventReceived();
   }
 }
 
 SelectEventPoll::SocketEntry::SocketEntry(sock_t socket) : socket_(socket) {}
 
-void SelectEventPoll::SocketEntry::addCommandEvent(Command* command, int events)
+void SelectEventPoll::SocketEntry::addCommandEvent(Command* command,
+                                                  EventPoll::EventType events)
 {
   CommandEvent cev(command, events);
-  auto i = std::find(commandEvents_.begin(), commandEvents_.end(), cev);
+  auto i = std::ranges::find(commandEvents_, cev);
   if (i == commandEvents_.end()) {
     commandEvents_.push_back(cev);
   }
@@ -86,10 +89,10 @@ void SelectEventPoll::SocketEntry::addCommandEvent(Command* command, int events)
   }
 }
 void SelectEventPoll::SocketEntry::removeCommandEvent(Command* command,
-                                                      int events)
+                                                      EventPoll::EventType events)
 {
   CommandEvent cev(command, events);
-  auto i = std::find(commandEvents_.begin(), commandEvents_.end(), cev);
+  auto i = std::ranges::find(commandEvents_, cev);
   if (i == commandEvents_.end()) {
     // not found
   }
@@ -100,22 +103,23 @@ void SelectEventPoll::SocketEntry::removeCommandEvent(Command* command,
     }
   }
 }
-void SelectEventPoll::SocketEntry::processEvents(int events)
+void SelectEventPoll::SocketEntry::processEvents(EventPoll::EventType events)
 {
   using namespace std::placeholders;
   std::for_each(commandEvents_.begin(), commandEvents_.end(),
                 std::bind(&CommandEvent::processEvents, _1, events));
 }
 
-int accumulateEvent(int events, const SelectEventPoll::CommandEvent& event)
+EventPoll::EventType accumulateEvent(EventPoll::EventType events,
+                                     const SelectEventPoll::CommandEvent& event)
 {
   return events | event.getEvents();
 }
 
-int SelectEventPoll::SocketEntry::getEvents()
+EventPoll::EventType SelectEventPoll::SocketEntry::getEvents()
 {
-  return std::accumulate(commandEvents_.begin(), commandEvents_.end(), 0,
-                         accumulateEvent);
+  return std::accumulate(commandEvents_.begin(), commandEvents_.end(),
+                         EventPoll::EventType::NONE, accumulateEvent);
 }
 
 #ifdef ENABLE_ASYNC_DNS
@@ -137,8 +141,8 @@ void SelectEventPoll::AsyncNameResolverEntry::process(fd_set* rfdsPtr,
 {
   nameResolver_->process(rfdsPtr, wfdsPtr);
   switch (nameResolver_->getStatus()) {
-  case AsyncNameResolver::STATUS_SUCCESS:
-  case AsyncNameResolver::STATUS_ERROR:
+  case AsyncNameResolver::Status::SUCCESS:
+  case AsyncNameResolver::Status::ERROR:
     command_->setStatusActive();
     break;
   default:
@@ -180,12 +184,12 @@ void SelectEventPoll::poll(const struct timeval& tv)
   if (retval > 0) {
     for (auto& i : socketEntries_) {
       auto& e = i.second;
-      int events = 0;
+      auto events = EventPoll::EventType::NONE;
       if (FD_ISSET(e.getSocket(), &rfds)) {
-        events |= EventPoll::EVENT_READ;
+        events |= EventPoll::EventType::READ;
       }
       if (FD_ISSET(e.getSocket(), &wfds)) {
-        events |= EventPoll::EVENT_WRITE;
+        events |= EventPoll::EventType::WRITE;
       }
       e.processEvents(events);
     }
@@ -218,11 +222,11 @@ void SelectEventPoll::updateFdSet()
                   "Download may slow down or fail.");
       continue;
     }
-    int events = e.getEvents();
-    if (events & EventPoll::EVENT_READ) {
+    auto events = e.getEvents();
+    if (events & EventPoll::EventType::READ) {
       FD_SET(fd, &rfdset_);
     }
-    if (events & EventPoll::EVENT_WRITE) {
+    if (events & EventPoll::EventType::WRITE) {
       FD_SET(fd, &wfdset_);
     }
     if (fdmax_ < fd) {

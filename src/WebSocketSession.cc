@@ -64,7 +64,7 @@ ssize_t sendCallback(wslay_event_context_ptr wsctx, const uint8_t* data,
   WebSocketSession* session = reinterpret_cast<WebSocketSession*>(userData);
   const std::shared_ptr<SocketCore>& socket = session->getSocket();
   try {
-    ssize_t r = socket->writeData(data, len);
+    ssize_t r = socket->writeData(std::as_bytes(std::span{data, len}));
     if (r == 0) {
       if (socket->wantRead() || socket->wantWrite()) {
         wslay_event_set_error(wsctx, WSLAY_ERR_WOULDBLOCK);
@@ -92,7 +92,8 @@ ssize_t recvCallback(wslay_event_context_ptr wsctx, uint8_t* buf, size_t len,
   const std::shared_ptr<SocketCore>& socket = session->getSocket();
   try {
     ssize_t r;
-    socket->readData(buf, len);
+    len = static_cast<size_t>(
+        socket->readData(std::as_writable_bytes(std::span{buf, len})));
     if (len == 0) {
       if (socket->wantRead() || socket->wantWrite()) {
         wslay_event_set_error(wsctx, WSLAY_ERR_WOULDBLOCK);

@@ -39,6 +39,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <span>
 #include <utility>
 #include <vector>
 #include <memory>
@@ -232,8 +233,7 @@ public:
   bool isReadable(time_t timeout);
 
   /**
-   * Writes data into this socket. data is a pointer pointing the first
-   * byte of the data and len is the length of data.
+   * Writes data into this socket.
    * If the underlying socket is in blocking mode, this method may block until
    * all data is sent.
    * If the underlying socket is in non-blocking mode, this method may return
@@ -241,25 +241,20 @@ public:
    * underlying socket gets EAGAIN, wantRead_ or wantWrite_ is set accordingly.
    * This method sets wantRead_ and wantWrite_ to false before do anything else.
    * @param data data to write
-   * @param len length of data
    */
-  ssize_t writeData(const void* data, size_t len);
+  ssize_t writeData(std::span<const std::byte> data);
   ssize_t writeData(const std::string& msg)
   {
-    return writeData(msg.c_str(), msg.size());
+    return writeData(std::as_bytes(std::span{msg}));
   }
 
-  ssize_t writeData(const void* data, size_t len, const std::string& host,
+  ssize_t writeData(std::span<const std::byte> data, const std::string& host,
                     uint16_t port);
 
   ssize_t writeVector(a2iovec* iov, size_t iovcnt);
 
   /**
-   * Reads up to len bytes from this socket.
-   * data is a pointer pointing the first
-   * byte of the data, which must be allocated before this method is called.
-   * len is the size of the allocated memory. When this method returns
-   * successfully, len is replaced by the size of the read data.
+   * Reads up to data.size() bytes from this socket into data.
    * If the underlying socket is in blocking mode, this method may block until
    * at least 1byte is received.
    * If the underlying socket is in non-blocking mode, this method may return
@@ -267,13 +262,12 @@ public:
    * wantRead_ or wantWrite_ is set accordingly.
    * This method sets wantRead_ and wantWrite_ to false before do anything else.
    * @param data holder to store data.
-   * @param len the maximum size data can store. This method assigns
-   * the number of bytes read to len.
+   * @return the number of bytes read, always <= data.size().
    */
-  void readData(void* data, size_t& len);
+  ssize_t readData(std::span<std::byte> data);
 
   // sender.addr will be numerihost assigned.
-  ssize_t readDataFrom(void* data, size_t len, Endpoint& sender);
+  ssize_t readDataFrom(std::span<std::byte> data, Endpoint& sender);
 
 #ifdef ENABLE_SSL
   // Performs TLS server side handshake. If handshake is completed,

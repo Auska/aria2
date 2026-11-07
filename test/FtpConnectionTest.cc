@@ -1,7 +1,10 @@
 #include "FtpConnection.h"
 
+#include <array>
+#include <cstddef>
 #include <iostream>
 #include <cstring>
+#include <span>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -147,12 +150,11 @@ void FtpConnectionTest::testReceiveResponse()
 void FtpConnectionTest::testSendMdtm()
 {
   ftp_->sendMdtm();
-  char data[32];
-  size_t len = sizeof(data);
-  serverSocket_->readData(data, len);
-  data[len] = '\0';
+  std::array<std::byte, 32> buf;
+  auto len = static_cast<size_t>(serverSocket_->readData(std::span{buf}));
+  auto data = reinterpret_cast<const char*>(buf.data());
   CPPUNIT_ASSERT_EQUAL(std::string("MDTM hello world.img\r\n"),
-                       std::string(data));
+                       std::string(data, len));
 }
 
 void FtpConnectionTest::testReceiveMdtmResponse()
@@ -211,11 +213,11 @@ void FtpConnectionTest::testReceiveResponse_overflow()
   memset(data, 0, sizeof(data));
   memcpy(data, "213 ", 4);
   for (int i = 0; i < 64; ++i) {
-    serverSocket_->writeData(data, sizeof(data));
+    serverSocket_->writeData(std::as_bytes(std::span{data}));
     waitRead(clientSocket_);
     CPPUNIT_ASSERT_EQUAL(0, ftp_->receiveResponse());
   }
-  serverSocket_->writeData(data, sizeof(data));
+  serverSocket_->writeData(std::as_bytes(std::span{data}));
   waitRead(clientSocket_);
   try {
     ftp_->receiveResponse();
@@ -229,12 +231,11 @@ void FtpConnectionTest::testReceiveResponse_overflow()
 void FtpConnectionTest::testSendPwd()
 {
   ftp_->sendPwd();
-  char data[32];
-  size_t len = sizeof(data);
-  serverSocket_->readData(data, len);
+  std::array<std::byte, 32> buf;
+  auto len = static_cast<size_t>(serverSocket_->readData(std::span{buf}));
+  auto data = reinterpret_cast<const char*>(buf.data());
   CPPUNIT_ASSERT_EQUAL((size_t)5, len);
-  data[len] = '\0';
-  CPPUNIT_ASSERT_EQUAL(std::string("PWD\r\n"), std::string(data));
+  CPPUNIT_ASSERT_EQUAL(std::string("PWD\r\n"), std::string(data, len));
 }
 
 void FtpConnectionTest::testReceivePwdResponse()
@@ -276,21 +277,21 @@ void FtpConnectionTest::testReceivePwdResponse_badStatus()
 void FtpConnectionTest::testSendCwd()
 {
   ftp_->sendCwd("%2Fdir%20sp");
-  char data[32];
-  size_t len = sizeof(data);
-  serverSocket_->readData(data, len);
-  data[len] = '\0';
-  CPPUNIT_ASSERT_EQUAL(std::string("CWD /dir sp\r\n"), std::string(data));
+  std::array<std::byte, 32> buf;
+  auto len = static_cast<size_t>(serverSocket_->readData(std::span{buf}));
+  auto data = reinterpret_cast<const char*>(buf.data());
+  CPPUNIT_ASSERT_EQUAL(std::string("CWD /dir sp\r\n"),
+                       std::string(data, len));
 }
 
 void FtpConnectionTest::testSendSize()
 {
   ftp_->sendSize();
-  char data[32];
-  size_t len = sizeof(data);
-  serverSocket_->readData(data, len);
-  CPPUNIT_ASSERT_EQUAL(std::string("SIZE hello world.img\r\n"),
-                       std::string(&data[0], &data[len]));
+  std::array<std::byte, 32> buf;
+  auto len = static_cast<size_t>(serverSocket_->readData(std::span{buf}));
+  CPPUNIT_ASSERT_EQUAL(
+      std::string("SIZE hello world.img\r\n"),
+      std::string(reinterpret_cast<const char*>(buf.data()), len));
 }
 
 void FtpConnectionTest::testReceiveSizeResponse()
@@ -305,11 +306,11 @@ void FtpConnectionTest::testReceiveSizeResponse()
 void FtpConnectionTest::testSendRetr()
 {
   ftp_->sendRetr();
-  char data[32];
-  size_t len = sizeof(data);
-  serverSocket_->readData(data, len);
-  CPPUNIT_ASSERT_EQUAL(std::string("RETR hello world.img\r\n"),
-                       std::string(&data[0], &data[len]));
+  std::array<std::byte, 32> buf;
+  auto len = static_cast<size_t>(serverSocket_->readData(std::span{buf}));
+  CPPUNIT_ASSERT_EQUAL(
+      std::string("RETR hello world.img\r\n"),
+      std::string(reinterpret_cast<const char*>(buf.data()), len));
 }
 
 void FtpConnectionTest::testReceiveEpsvResponse()

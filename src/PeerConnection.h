@@ -84,7 +84,7 @@ private:
 
   bool prevPeek_;
 
-  void readData(unsigned char* data, size_t& length, bool encryption);
+  size_t readData(std::span<unsigned char> data, bool encryption);
 
   ssize_t sendData(const unsigned char* data, size_t length, bool encryption);
 

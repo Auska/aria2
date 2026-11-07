@@ -34,7 +34,9 @@
 /* copyright --> */
 #include "AsyncNameResolver.h"
 
+#include <algorithm>
 #include <cstring>
+#include <ranges>
 
 #include "A2STR.h"
 #include "LogFactory.h"
@@ -49,7 +51,7 @@ void callback(void* arg, int status, int timeouts, ares_addrinfo* result)
   AsyncNameResolver* resolverPtr = reinterpret_cast<AsyncNameResolver*>(arg);
   if (status != ARES_SUCCESS) {
     resolverPtr->error_ = ares_strerror(status);
-    resolverPtr->status_ = AsyncNameResolver::STATUS_ERROR;
+    resolverPtr->status_ = AsyncNameResolver::Status::ERROR;
     return;
   }
   for (auto ap = result->nodes; ap; ap = ap->ai_next) {
@@ -63,10 +65,10 @@ void callback(void* arg, int status, int timeouts, ares_addrinfo* result)
   ares_freeaddrinfo(result);
   if (resolverPtr->resolvedAddresses_.empty()) {
     resolverPtr->error_ = "no address returned or address conversion failed";
-    resolverPtr->status_ = AsyncNameResolver::STATUS_ERROR;
+    resolverPtr->status_ = AsyncNameResolver::Status::ERROR;
   }
   else {
-    resolverPtr->status_ = AsyncNameResolver::STATUS_SUCCESS;
+    resolverPtr->status_ = AsyncNameResolver::Status::SUCCESS;
   }
 }
 
@@ -81,21 +83,22 @@ void sock_state_cb(void* arg, ares_socket_t fd, int read, int write)
 
 void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)
 {
-  int events = 0;
+  auto events = EventPoll::EventType::NONE;
 
   if (read) {
-    events |= EventPoll::EVENT_READ;
+    events |= EventPoll::EventType::READ;
   }
 
   if (write) {
-    events |= EventPoll::EVENT_WRITE;
+    events |= EventPoll::EventType::WRITE;
   }
 
-  auto it = std::find_if(
-      std::begin(socks_), std::end(socks_),
-      [fd](const AsyncNameResolverSocketEntry& ent) { return ent.fd == fd; });
+  auto it = std::ranges::find_if(
+      socks_, [fd](const AsyncNameResolverSocketEntry& ent) {
+        return ent.fd == fd;
+      });
   if (it == std::end(socks_)) {
-    if (!events) {
+    if (events == EventPoll::EventType::NONE) {
       return;
     }
 
@@ -113,7 +116,7 @@ void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)
 }
 
 AsyncNameResolver::AsyncNameResolver(int family, const std::string& servers)
-    : status_(STATUS_READY), family_(family)
+    : status_(Status::READY), family_(family)
 {
   ares_options opts{};
   opts.sock_state_cb = sock_state_cb;
@@ -134,7 +137,7 @@ AsyncNameResolver::~AsyncNameResolver() { ares_destroy(channel_); }
 void AsyncNameResolver::resolve(const std::string& name)
 {
   hostname_ = name;
-  status_ = STATUS_QUERYING;
+  status_ = Status::QUERYING;
 
   ares_addrinfo_hints hints{};
   hints.ai_family = family_;
@@ -147,12 +150,12 @@ ares_socket_t AsyncNameResolver::getFds(fd_set* rfdsPtr, fd_set* wfdsPtr) const
   ares_socket_t nfds = 0;
 
   for (const auto& ent : socks_) {
-    if (ent.events & EventPoll::EVENT_READ) {
+    if (ent.events & EventPoll::EventType::READ) {
       FD_SET(ent.fd, rfdsPtr);
       nfds = std::max(nfds, ent.fd + 1);
     }
 
-    if (ent.events & EventPoll::EVENT_WRITE) {
+    if (ent.events & EventPoll::EventType::WRITE) {
       FD_SET(ent.fd, wfdsPtr);
       nfds = std::max(nfds, ent.fd + 1);
     }
@@ -167,11 +170,11 @@ void AsyncNameResolver::process(fd_set* rfdsPtr, fd_set* wfdsPtr)
     ares_socket_t readfd = ARES_SOCKET_BAD;
     ares_socket_t writefd = ARES_SOCKET_BAD;
 
-    if (FD_ISSET(ent.fd, rfdsPtr) && (ent.events & EventPoll::EVENT_READ)) {
+    if (FD_ISSET(ent.fd, rfdsPtr) && (ent.events & EventPoll::EventType::READ)) {
       readfd = ent.fd;
     }
 
-    if (FD_ISSET(ent.fd, wfdsPtr) && (ent.events & EventPoll::EVENT_WRITE)) {
+    if (FD_ISSET(ent.fd, wfdsPtr) && (ent.events & EventPoll::EventType::WRITE)) {
       writefd = ent.fd;
     }
 

@@ -55,10 +55,10 @@ class LibuvEventPoll : public EventPoll {
 private:
   class KSocketEntry;
 
-  typedef Event<KSocketEntry> KEvent;
-  typedef CommandEvent<KSocketEntry, LibuvEventPoll> KCommandEvent;
-  typedef ADNSEvent<KSocketEntry, LibuvEventPoll> KADNSEvent;
-  typedef AsyncNameResolverEntry<LibuvEventPoll> KAsyncNameResolverEntry;
+  using KEvent = Event<KSocketEntry>;
+  using KCommandEvent = CommandEvent<KSocketEntry, LibuvEventPoll>;
+  using KADNSEvent = ADNSEvent<KSocketEntry, LibuvEventPoll>;
+  using KAsyncNameResolverEntry = AsyncNameResolverEntry<LibuvEventPoll>;
 
   friend class AsyncNameResolverEntry<LibuvEventPoll>;
   friend int accumulateEvent(int events, const KEvent& event);
@@ -109,14 +109,14 @@ private:
     }
   };
 
-  typedef std::map<sock_t, KSocketEntry> KSocketEntrySet;
+  using KSocketEntrySet = std::map<sock_t, KSocketEntry>;
 
-  typedef std::map<sock_t, KPoll*> KPolls;
+  using KPolls = std::map<sock_t, KPoll*>;
 
 #ifdef ENABLE_ASYNC_DNS
-  typedef std::map<std::pair<AsyncNameResolver*, Command*>,
-                   KAsyncNameResolverEntry>
-      KAsyncNameResolverEntrySet;
+  using KAsyncNameResolverEntrySet =
+      std::map<std::pair<AsyncNameResolver*, Command*>,
+               KAsyncNameResolverEntry>;
 #endif // ENABLE_ASYNC_DNS
 
   uv_loop_t* loop_;

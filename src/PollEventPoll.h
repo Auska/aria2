@@ -53,10 +53,10 @@ class PollEventPoll : public EventPoll {
 private:
   class KSocketEntry;
 
-  typedef Event<KSocketEntry> KEvent;
-  typedef CommandEvent<KSocketEntry, PollEventPoll> KCommandEvent;
-  typedef ADNSEvent<KSocketEntry, PollEventPoll> KADNSEvent;
-  typedef AsyncNameResolverEntry<PollEventPoll> KAsyncNameResolverEntry;
+  using KEvent = Event<KSocketEntry>;
+  using KCommandEvent = CommandEvent<KSocketEntry, PollEventPoll>;
+  using KADNSEvent = ADNSEvent<KSocketEntry, PollEventPoll>;
+  using KAsyncNameResolverEntry = AsyncNameResolverEntry<PollEventPoll>;
   friend class AsyncNameResolverEntry<PollEventPoll>;
 
   class KSocketEntry : public SocketEntry<KCommandEvent, KADNSEvent> {
@@ -72,12 +72,12 @@ private:
   friend int accumulateEvent(int events, const KEvent& event);
 
 private:
-  typedef std::map<sock_t, KSocketEntry> KSocketEntrySet;
+  using KSocketEntrySet = std::map<sock_t, KSocketEntry>;
   KSocketEntrySet socketEntries_;
 #ifdef ENABLE_ASYNC_DNS
-  typedef std::map<std::pair<AsyncNameResolver*, Command*>,
-                   KAsyncNameResolverEntry>
-      KAsyncNameResolverEntrySet;
+  using KAsyncNameResolverEntrySet =
+      std::map<std::pair<AsyncNameResolver*, Command*>,
+               KAsyncNameResolverEntry>;
   KAsyncNameResolverEntrySet nameResolverEntries_;
 #endif // ENABLE_ASYNC_DNS
 

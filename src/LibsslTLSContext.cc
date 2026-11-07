@@ -114,14 +114,14 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
   long ver_opts = 0;
   switch (minVer) {
 #ifdef TLS1_3_VERSION
-  case TLS_PROTO_TLS13:
+  case TLSVersion::TLS13:
     ver_opts |= SSL_OP_NO_TLSv1_2;
     // fall through
 #endif // TLS1_3_VERSION
-  case TLS_PROTO_TLS12:
+  case TLSVersion::TLS12:
     ver_opts |= SSL_OP_NO_TLSv1_1;
   // fall through
-  case TLS_PROTO_TLS11:
+  case TLSVersion::TLS11:
     ver_opts |= SSL_OP_NO_TLSv1;
     ver_opts |= SSL_OP_NO_SSLv3;
     break;
@@ -211,7 +211,7 @@ bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
   }
   p12_t p12(d2i_PKCS12_bio(bio.get(), nullptr));
   if (!p12) {
-    if (side_ == TLS_SERVER) {
+    if (side_ == TLSSessionSide::SERVER) {
       A2_LOG_ERROR(fmt("Failed to open PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--rpc-private-key. See the manual.",
@@ -229,7 +229,7 @@ bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
   X509* cert;
   STACK_OF(X509)* ca = nullptr;
   if (!PKCS12_parse(p12.get(), "", &pkey, &cert, &ca)) {
-    if (side_ == TLS_SERVER) {
+    if (side_ == TLSSessionSide::SERVER) {
       A2_LOG_ERROR(fmt("Failed to parse PKCS12 file: {}. "
                        "If you meant to use PEM, you'll also have to specify "
                        "--rpc-private-key. See the manual.",

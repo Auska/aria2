@@ -35,6 +35,8 @@
 #ifndef LIBSSL_TLS_SESSION_H
 #define LIBSSL_TLS_SESSION_H
 
+#include <span>
+
 #include "common.h"
 
 #include <openssl/ssl.h>
@@ -50,20 +52,20 @@ class OpenSSLTLSSession : public TLSSession {
 public:
   OpenSSLTLSSession(OpenSSLTLSContext* tlsContext);
   virtual ~OpenSSLTLSSession();
-  virtual int init(sock_t sockfd) override;
-  virtual int setSNIHostname(const std::string& hostname) override;
-  virtual int closeConnection() override;
-  virtual int checkDirection() override;
-  virtual ssize_t writeData(const void* data, size_t len) override;
-  virtual ssize_t readData(void* data, size_t len) override;
-  virtual int tlsConnect(const std::string& hostname, TLSVersion& version,
-                         std::string& handshakeErr) override;
-  virtual int tlsAccept(TLSVersion& version) override;
+  TLSErrorCode init(sock_t sockfd) override;
+  TLSErrorCode setSNIHostname(const std::string& hostname) override;
+  TLSErrorCode closeConnection() override;
+  TLSDirection checkDirection() override;
+  ssize_t writeData(std::span<const std::byte> data) override;
+  ssize_t readData(std::span<std::byte> data) override;
+  TLSErrorCode tlsConnect(const std::string& hostname, TLSVersion& version,
+                          std::string& handshakeErr) override;
+  TLSErrorCode tlsAccept(TLSVersion& version) override;
   virtual std::string getLastErrorString() override;
   virtual size_t getRecvBufferedLength() override { return 0; }
 
 private:
-  int handshake(TLSVersion& version);
+  TLSErrorCode handshake(TLSVersion& version);
   SSL* ssl_;
   OpenSSLTLSContext* tlsContext_;
   // Last error code from openSSL library functions

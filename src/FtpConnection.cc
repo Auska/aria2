@@ -315,10 +315,9 @@ FtpConnection::findEndOfResponse(int status, const std::string& buf) const
 
 bool FtpConnection::bulkReceiveResponse(std::pair<int, std::string>& response)
 {
-  std::array<char, 1_k> buf;
+  std::array<std::byte, 1_k> buf;
   while (1) {
-    size_t size = buf.size();
-    socket_->readData(buf.data(), size);
+    auto size = static_cast<size_t>(socket_->readData(std::span{buf}));
     if (size == 0) {
       if (socket_->wantRead() || socket_->wantWrite()) {
         break;
@@ -331,7 +330,7 @@ bool FtpConnection::bulkReceiveResponse(std::pair<int, std::string>& response)
       throw DL_RETRY_EX(fmt("Max FTP recv buffer reached. length={}",
                             static_cast<unsigned long>(strbuf_.size() + size)));
     }
-    strbuf_.append(std::begin(buf), std::begin(buf) + size);
+    strbuf_.append(reinterpret_cast<const char*>(buf.data()), size);
   }
   int status;
   if (strbuf_.size() >= 4) {

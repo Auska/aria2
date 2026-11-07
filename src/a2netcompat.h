@@ -116,7 +116,7 @@ struct Endpoint {
 #  define A2_IOV_MAX A2_DEFAULT_IOV_MAX
 #endif
 
-typedef struct iovec a2iovec;
+using a2iovec = struct iovec;
 #define A2IOVEC_BASE iov_base
 #define A2IOVEC_LEN iov_len
 

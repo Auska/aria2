@@ -59,7 +59,8 @@ ssize_t
 SocketBuffer::ByteArrayBufEntry::send(const std::shared_ptr<SocketCore>& socket,
                                       size_t offset)
 {
-  return socket->writeData(bytes_.data() + offset, bytes_.size() - offset);
+  return socket->writeData(std::as_bytes(
+      std::span{bytes_.data() + offset, bytes_.size() - offset}));
 }
 
 bool SocketBuffer::ByteArrayBufEntry::final(size_t offset) const
@@ -87,7 +88,8 @@ ssize_t
 SocketBuffer::StringBufEntry::send(const std::shared_ptr<SocketCore>& socket,
                                    size_t offset)
 {
-  return socket->writeData(str_.data() + offset, str_.size() - offset);
+  return socket->writeData(
+      std::as_bytes(std::span{str_.data() + offset, str_.size() - offset}));
 }
 
 bool SocketBuffer::StringBufEntry::final(size_t offset) const

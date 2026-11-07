@@ -45,7 +45,6 @@
 #include <cerrno>
 #include <cstring>
 #include <cassert>
-#include <sstream>
 #include <array>
 
 #include "message.h"
@@ -717,7 +716,9 @@ ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
     // For SSL/TLS, we could not use writev, so just iterate vector
     // and write the data in normal way.
     for (size_t i = 0; i < iovcnt; ++i) {
-      ssize_t rv = writeData(iov[i].A2IOVEC_BASE, iov[i].A2IOVEC_LEN);
+      ssize_t rv = writeData(
+          std::span{static_cast<const std::byte*>(iov[i].A2IOVEC_BASE),
+                    iov[i].A2IOVEC_LEN});
       if (rv == 0) {
         break;
       }
@@ -727,7 +728,7 @@ ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
   return ret;
 }
 
-ssize_t SocketCore::writeData(const void* data, size_t len)
+ssize_t SocketCore::writeData(std::span<const std::byte> data)
 {
   ssize_t ret = 0;
   wantRead_ = false;
@@ -735,8 +736,8 @@ ssize_t SocketCore::writeData(const void* data, size_t len)
 
   if (!secure_) {
     // Cast for Windows send()
-    while ((ret = send(sockfd_, reinterpret_cast<const char*>(data), len, 0)) ==
-               -1 &&
+    while ((ret = send(sockfd_, reinterpret_cast<const char*>(data.data()),
+                       data.size(), 0)) == -1 &&
            SOCKET_ERRNO == A2_EINTR)
       ;
     int errNum = SOCKET_ERRNO;
@@ -750,13 +751,13 @@ ssize_t SocketCore::writeData(const void* data, size_t len)
   }
   else {
 #ifdef ENABLE_SSL
-    ret = tlsSession_->writeData(data, len);
+    ret = tlsSession_->writeData(data);
     if (ret < 0) {
-      if (ret != TLS_ERR_WOULDBLOCK) {
+      if (ret != static_cast<ssize_t>(TLSErrorCode::WOULDBLOCK)) {
         throw DL_RETRY_EX(
             fmt(EX_SOCKET_SEND, tlsSession_->getLastErrorString().c_str()));
       }
-      if (tlsSession_->checkDirection() == TLS_WANT_READ) {
+      if (tlsSession_->checkDirection() == TLSDirection::WANT_READ) {
         wantRead_ = true;
       }
       else {
@@ -769,7 +770,7 @@ ssize_t SocketCore::writeData(const void* data, size_t len)
   return ret;
 }
 
-void SocketCore::readData(void* data, size_t& len)
+ssize_t SocketCore::readData(std::span<std::byte> data)
 {
   ssize_t ret = 0;
   wantRead_ = false;
@@ -777,8 +778,8 @@ void SocketCore::readData(void* data, size_t& len)
 
   if (!secure_) {
       // Cast for Windows recv()
-      while ((ret = recv(sockfd_, reinterpret_cast<char*>(data), len, 0)) ==
-                 -1 &&
+      while ((ret = recv(sockfd_, reinterpret_cast<char*>(data.data()),
+                         data.size(), 0)) == -1 &&
              SOCKET_ERRNO == A2_EINTR)
         ;
       int errNum = SOCKET_ERRNO;
@@ -792,13 +793,13 @@ void SocketCore::readData(void* data, size_t& len)
     }
     else {
 #ifdef ENABLE_SSL
-      ret = tlsSession_->readData(data, len);
+      ret = tlsSession_->readData(data);
       if (ret < 0) {
-        if (ret != TLS_ERR_WOULDBLOCK) {
+        if (ret != static_cast<ssize_t>(TLSErrorCode::WOULDBLOCK)) {
           throw DL_RETRY_EX(
               fmt(EX_SOCKET_RECV, tlsSession_->getLastErrorString().c_str()));
         }
-        if (tlsSession_->checkDirection() == TLS_WANT_READ) {
+        if (tlsSession_->checkDirection() == TLSDirection::WANT_READ) {
           wantRead_ = true;
         }
         else {
@@ -809,7 +810,7 @@ void SocketCore::readData(void* data, size_t& len)
 #endif // ENABLE_SSL
     }
 
-  len = ret;
+  return ret;
 }
 
 #ifdef ENABLE_SSL
@@ -839,16 +840,17 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
     A2_LOG_DEBUG("Creating TLS session");
     tlsSession_.reset(TLSSession::make(tlsctx));
     auto rv = tlsSession_->init(sockfd_);
-    if (rv != TLS_ERR_OK) {
+    if (rv != TLSErrorCode::OK) {
       std::string error = tlsSession_->getLastErrorString();
       tlsSession_.reset();
       throw DL_ABORT_EX(fmt(EX_SSL_INIT_FAILURE, error.c_str()));
     }
     // Check hostname is not numeric and it includes ".".
-    if (tlsctx->getSide() == TLS_CLIENT && !util::isNumericHost(hostname) &&
+    if (tlsctx->getSide() == TLSSessionSide::CLIENT &&
+        !util::isNumericHost(hostname) &&
         hostname.find(".") != std::string::npos) {
       rv = tlsSession_->setSNIHostname(hostname);
-      if (rv != TLS_ERR_OK) {
+      if (rv != TLSErrorCode::OK) {
         throw DL_ABORT_EX(fmt(EX_SSL_INIT_FAILURE,
                               tlsSession_->getLastErrorString().c_str()));
       }
@@ -860,39 +862,34 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
   if (secure_ == A2_TLS_HANDSHAKING) {
     // Starting handshake after initial setup or still handshaking.
-    TLSVersion ver = TLS_PROTO_NONE;
-    int rv = 0;
+    TLSVersion ver = TLSVersion::NONE;
+    auto rv = TLSErrorCode::OK;
     std::string handshakeError;
 
-    if (tlsctx->getSide() == TLS_CLIENT) {
+    if (tlsctx->getSide() == TLSSessionSide::CLIENT) {
       rv = tlsSession_->tlsConnect(hostname, ver, handshakeError);
     }
     else {
       rv = tlsSession_->tlsAccept(ver);
     }
 
-    if (rv == TLS_ERR_OK) {
+    if (rv == TLSErrorCode::OK) {
       // We're good, more or less.
       // 1. Construct peerinfo
-      std::stringstream ss;
-      if (!hostname.empty()) {
-        ss << hostname << " (";
-      }
       auto peerEndpoint = getPeerInfo();
-      ss << peerEndpoint.addr << ":" << peerEndpoint.port;
-      if (!hostname.empty()) {
-        ss << ")";
-      }
+      auto endpoint = fmt("{}:{}", peerEndpoint.addr, peerEndpoint.port);
+      auto peerInfo =
+          hostname.empty() ? endpoint : fmt("{} ({})", hostname, endpoint);
 
       std::string tlsVersion;
       switch (ver) {
-      case TLS_PROTO_TLS11:
+      case TLSVersion::TLS11:
         tlsVersion = A2_V_TLS11;
         break;
-      case TLS_PROTO_TLS12:
+      case TLSVersion::TLS12:
         tlsVersion = A2_V_TLS12;
         break;
-      case TLS_PROTO_TLS13:
+      case TLSVersion::TLS13:
         tlsVersion = A2_V_TLS13;
         break;
       default:
@@ -900,19 +897,17 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
         abort();
       }
 
-      auto peerInfo = ss.str();
-
-      A2_LOG_DEBUG(fmt("Securely connected to {} with {}", peerInfo.c_str(),
-                       tlsVersion.c_str()));
+      A2_LOG_DEBUG(fmt("Securely connected to {} with {}", peerInfo,
+                       tlsVersion));
 
       // 2. We're connected now!
       secure_ = A2_TLS_CONNECTED;
       return true;
     }
 
-    if (rv == TLS_ERR_WOULDBLOCK) {
+    if (rv == TLSErrorCode::WOULDBLOCK) {
       // We're not done yet...
-      if (tlsSession_->checkDirection() == TLS_WANT_READ) {
+      if (tlsSession_->checkDirection() == TLSDirection::WANT_READ) {
         // ... but read buffers are empty.
         wantRead_ = true;
       }
@@ -925,7 +920,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
       return false;
     }
 
-    if (rv == TLS_ERR_ERROR) {
+    if (rv == TLSErrorCode::ERROR) {
       // Damn those error.
       throw DL_ABORT_EX(fmt("SSL/TLS handshake failure: {}",
                             handshakeError.empty()
@@ -946,7 +941,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
 #endif // ENABLE_SSL
 
-ssize_t SocketCore::writeData(const void* data, size_t len,
+ssize_t SocketCore::writeData(std::span<const std::byte> data,
                               const std::string& host, uint16_t port)
 {
   wantRead_ = false;
@@ -966,12 +961,12 @@ ssize_t SocketCore::writeData(const void* data, size_t len,
   int errNum = 0;
   for (rp = res; rp; rp = rp->ai_next) {
     // Cast for Windows sendto()
-    while ((r = sendto(sockfd_, reinterpret_cast<const char*>(data), len, 0,
-                       rp->ai_addr, rp->ai_addrlen)) == -1 &&
+    while ((r = sendto(sockfd_, reinterpret_cast<const char*>(data.data()),
+                       data.size(), 0, rp->ai_addr, rp->ai_addrlen)) == -1 &&
            A2_EINTR == SOCKET_ERRNO)
       ;
     errNum = SOCKET_ERRNO;
-    if (r == static_cast<ssize_t>(len)) {
+    if (r == static_cast<ssize_t>(data.size())) {
       break;
     }
     if (r == -1 && A2_WOULDBLOCK(errNum)) {
@@ -986,7 +981,7 @@ ssize_t SocketCore::writeData(const void* data, size_t len,
   return r;
 }
 
-ssize_t SocketCore::readDataFrom(void* data, size_t len, Endpoint& sender)
+ssize_t SocketCore::readDataFrom(std::span<std::byte> data, Endpoint& sender)
 {
   wantRead_ = false;
   wantWrite_ = false;
@@ -994,8 +989,8 @@ ssize_t SocketCore::readDataFrom(void* data, size_t len, Endpoint& sender)
   socklen_t sockaddrlen = sizeof(sockaddr);
   ssize_t r;
   // Cast for Windows recvfrom()
-  while ((r = recvfrom(sockfd_, reinterpret_cast<char*>(data), len, 0,
-                       &sockaddr.sa, &sockaddrlen)) == -1 &&
+  while ((r = recvfrom(sockfd_, reinterpret_cast<char*>(data.data()),
+                       data.size(), 0, &sockaddr.sa, &sockaddrlen)) == -1 &&
          A2_EINTR == SOCKET_ERRNO)
     ;
   int errNum = SOCKET_ERRNO;

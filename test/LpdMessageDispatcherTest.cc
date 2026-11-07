@@ -1,7 +1,10 @@
 #include "LpdMessageDispatcher.h"
 
+#include <array>
+#include <cstddef>
 #include <cstring>
 #include <sstream>
+#include <span>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -54,13 +57,13 @@ void LpdMessageDispatcherTest::testSendMessage()
 
   CPPUNIT_ASSERT(d.sendMessage());
 
-  unsigned char buf[200];
+  std::array<std::byte, 200> buf;
 
   Endpoint remoteEndpoint;
   ssize_t nbytes;
   int trycnt;
   for (trycnt = 0; trycnt < 5; ++trycnt) {
-    nbytes = recvsock->readDataFrom(buf, sizeof(buf), remoteEndpoint);
+    nbytes = recvsock->readDataFrom(std::span{buf}, remoteEndpoint);
     if (nbytes == 0) {
       util::sleep(1);
     }
@@ -71,14 +74,15 @@ void LpdMessageDispatcherTest::testSendMessage()
   if (trycnt == 5) {
     CPPUNIT_FAIL("[TIMEOUT] No Multicast packet received.");
   }
-  buf[nbytes] = '\0';
   std::stringstream temp;
   temp << "BT-SEARCH * HTTP/1.1\r\n"
        << "Host: " << LPD_MULTICAST_ADDR << ":" << LPD_MULTICAST_PORT << "\r\n"
        << "Port: " << d.getPort() << "\r\n"
        << "Infohash: " << util::toHex(d.getInfoHash()) << "\r\n"
        << "\r\n\r\n";
-  CPPUNIT_ASSERT_EQUAL(temp.str(), std::string(&buf[0], &buf[nbytes]));
+  CPPUNIT_ASSERT_EQUAL(
+      temp.str(), std::string(reinterpret_cast<const char*>(buf.data()),
+                              nbytes));
 }
 
 } // namespace aria2

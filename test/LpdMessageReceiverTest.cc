@@ -1,6 +1,7 @@
 #include "LpdMessageReceiver.h"
 
 #include <cstring>
+#include <span>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -44,7 +45,7 @@ void LpdMessageReceiverTest::testReceiveMessage()
   std::string request = bittorrent::createLpdRequest(
       LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT, infoHash, 6000);
 
-  sendsock->writeData(request.c_str(), request.size(), LPD_MULTICAST_ADDR,
+  sendsock->writeData(std::as_bytes(std::span{request}), LPD_MULTICAST_ADDR,
                       LPD_MULTICAST_PORT);
 
   rcv.getSocket()->isReadable(5);
@@ -58,7 +59,7 @@ void LpdMessageReceiverTest::testReceiveMessage()
   std::string badInfoHashString = "cd41c7fdddfd034a15a04d7ff881216e01c4ce";
   request = bittorrent::createLpdRequest(LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT,
                                          fromHex(badInfoHashString), 6000);
-  sendsock->writeData(request.c_str(), request.size(), LPD_MULTICAST_ADDR,
+  sendsock->writeData(std::as_bytes(std::span{request}), LPD_MULTICAST_ADDR,
                       LPD_MULTICAST_PORT);
 
   rcv.getSocket()->isReadable(5);
@@ -68,7 +69,7 @@ void LpdMessageReceiverTest::testReceiveMessage()
   // Bad port
   request = bittorrent::createLpdRequest(LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT,
                                          infoHash, 0);
-  sendsock->writeData(request.c_str(), request.size(), LPD_MULTICAST_ADDR,
+  sendsock->writeData(std::as_bytes(std::span{request}), LPD_MULTICAST_ADDR,
                       LPD_MULTICAST_PORT);
 
   rcv.getSocket()->isReadable(5);

@@ -146,16 +146,16 @@ namespace {
 int translateEvents(EventPoll::EventType events)
 {
   int newEvents = 0;
-  if (EventPoll::EVENT_READ & events) {
+  if (EventPoll::EventType::READ & events) {
     newEvents |= EPOLLIN;
   }
-  if (EventPoll::EVENT_WRITE & events) {
+  if (EventPoll::EventType::WRITE & events) {
     newEvents |= EPOLLOUT;
   }
-  if (EventPoll::EVENT_ERROR & events) {
+  if (EventPoll::EventType::ERROR & events) {
     newEvents |= EPOLLERR;
   }
-  if (EventPoll::EVENT_HUP & events) {
+  if (EventPoll::EventType::HUP & events) {
     newEvents |= EPOLLHUP;
   }
   return newEvents;

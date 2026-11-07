@@ -427,7 +427,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
    - 门禁：同上；`git grep -n 'unsigned char\s*\*[^)]*size_t' -- 'src/BinaryStream.h'
      'src/DiskAdaptor.h'` 无命中。
 
-5. [ ] **阶段 5：网络簇（32 文件 / 6 652 行）**
+5. [x] **阶段 5：网络簇（32 文件 / 6 652 行）**
    - span 化：`SocketCore::writeData/readData/readDataFrom`
      （`SocketCore.h:246,252,273,276`）、`TLSSession::writeData/readData`
      （`TLSSession.h:86,91`）、`LibsslTLSSession` 两个 override。
