@@ -43,8 +43,6 @@ ARIA2_ARG_WITHOUT([libgmp])
 ARIA2_ARG_WITHOUT([libgcrypt])
 ARIA2_ARG_WITHOUT([openssl])
 ARIA2_ARG_WITHOUT([sqlite3])
-ARIA2_ARG_WITHOUT([libxml2])
-ARIA2_ARG_WITHOUT([libexpat])
 ARIA2_ARG_WITHOUT([libcares])
 ARIA2_ARG_WITHOUT([libz])
 ARIA2_ARG_WITH([tcmalloc])
@@ -53,7 +51,6 @@ ARIA2_ARG_WITHOUT([libssh2])
 
 ARIA2_ARG_DISABLE([ssl])
 ARIA2_ARG_DISABLE([bittorrent])
-ARIA2_ARG_DISABLE([metalink])
 ARIA2_ARG_DISABLE([websocket])
 ARIA2_ARG_DISABLE([epoll])
 ARIA2_ARG_ENABLE([libaria2])
@@ -221,26 +218,6 @@ if test "x$with_libuv" = "xyes"; then
   fi
 fi
 AM_CONDITIONAL([HAVE_LIBUV], [test "x$have_libuv" = "xyes"])
-
-have_libxml2=no
-if test "x$with_libxml2" = "xyes"; then
-  PKG_CHECK_MODULES([LIBXML2],[libxml-2.0 >= 2.6.24],[have_libxml2=yes],[have_libxml2=no])
-  if test "x$have_libxml2" = "xyes"; then
-    AC_DEFINE([HAVE_LIBXML2], [1], [Define to 1 if you have libxml2.])
-  elif test "x$with_libxml2_requested" = "xyes"; then
-    ARIA2_DEP_NOT_MET([libxml2])
-  fi
-fi
-
-have_libexpat=no
-if test "x$with_libexpat" = "xyes" && test "x$have_libxml2" != "xyes"; then
-  PKG_CHECK_MODULES([EXPAT],[expat],[have_libexpat=yes],[have_libexpat=no])
-  if test "x$have_libexpat" = "xyes"; then
-    AC_DEFINE([HAVE_LIBEXPAT], [1], [Define to 1 if you have libexpat.])
-  elif test "x$with_libexpat_requested" = "xyes"; then
-    ARIA2_DEP_NOT_MET([libexpat])
-  fi
-fi
 
 have_sqlite3=no
 if test "x$with_sqlite3" = "xyes"; then
@@ -470,37 +447,6 @@ else
   enable_bittorrent=no
   AM_CONDITIONAL([ENABLE_BITTORRENT], false)
 fi
-
-if (test "x$have_libxml2" = "xyes" || test "x$have_libexpat" = "xyes") &&
-   test "x$enable_metalink" = "xyes"; then
-  AC_DEFINE([ENABLE_METALINK], [1],
-            [Define to 1 if Metalink support is enabled.])
-  AM_CONDITIONAL([ENABLE_METALINK], true)
-else
-  if test "x$enable_metalink_requested" = "xyes"; then
-    ARIA2_FET_NOT_SUPPORTED([metalink])
-  fi
-  enable_metalink=no
-  AM_CONDITIONAL([ENABLE_METALINK], false)
-fi
-
-AM_CONDITIONAL([HAVE_SOME_XMLLIB],
-  [test "x$have_libxml2" = "xyes" || test "x$have_libexpat" = "xyes"])
-
-if test "x$have_libxml2" = "xyes" || test "x$have_libexpat" = "xyes"; then
-  enable_xml_rpc=yes
-else
-  enable_xml_rpc=no
-fi
-
-if test "x$enable_xml_rpc" = "xyes"; then
-  AC_DEFINE([ENABLE_XML_RPC], [1],
-            [Define to 1 if XML-RPC support is enabled.])
-fi
-AM_CONDITIONAL([ENABLE_XML_RPC], [test "x$enable_xml_rpc" = "xyes"])
-
-AM_CONDITIONAL([HAVE_LIBXML2], [test "x$have_libxml2" = "xyes"])
-AM_CONDITIONAL([HAVE_LIBEXPAT], [test "x$have_libexpat" = "xyes"])
 
 if test "x$have_libcares" = "xyes"; then
   AC_DEFINE([ENABLE_ASYNC_DNS], [1],
@@ -833,10 +779,6 @@ AC_CONFIG_FILES([Makefile
                 doc/manual-src/Makefile
                 doc/manual-src/en/Makefile
                 doc/manual-src/en/conf.py
-                doc/manual-src/ru/Makefile
-                doc/manual-src/ru/conf.py
-                doc/manual-src/pt/Makefile
-                doc/manual-src/pt/conf.py
                 deps/Makefile])
 AC_OUTPUT
 
@@ -871,8 +813,6 @@ CA Bundle:      $ca_bundle
 LibNettle:      $have_libnettle (CFLAGS='$LIBNETTLE_CFLAGS' LIBS='$LIBNETTLE_LIBS')
 LibGmp:         $have_libgmp (CFLAGS='$LIBGMP_CFLAGS' LIBS='$LIBGMP_LIBS')
 LibGcrypt:      $have_libgcrypt (CFLAGS='$LIBGCRYPT_CFLAGS' LIBS='$LIBGCRYPT_LIBS')
-LibXML2:        $have_libxml2 (CFLAGS='$LIBXML2_CFLAGS' LIBS='$LIBXML2_LIBS')
-LibExpat:       $have_libexpat (CFLAGS='$EXPAT_CFLAGS' LIBS='$EXPAT_LIBS')
 LibCares:       $have_libcares (CFLAGS='$LIBCARES_CFLAGS' LIBS='$LIBCARES_LIBS')
 Zlib:           $have_zlib (CFLAGS='$ZLIB_CFLAGS' LIBS='$ZLIB_LIBS')
 Libssh2:        $have_libssh2 (CFLAGS='$LIBSSH2_CFLAGS' LIBS='$LIBSSH2_LIBS')
@@ -880,8 +820,6 @@ Tcmalloc:       $have_tcmalloc (CFLAGS='$TCMALLOC_CFLAGS' LIBS='$TCMALLOC_LIBS')
 Jemalloc:       $have_jemalloc (CFLAGS='$JEMALLOC_CFLAGS' LIBS='$JEMALLOC_LIBS')
 Epoll:          $have_epoll
 Bittorrent:     $enable_bittorrent
-Metalink:       $enable_metalink
-XML-RPC:        $enable_xml_rpc
 Message Digest: $use_md
 WebSocket:      $enable_websocket (CFLAGS='$WSLAY_CFLAGS' LIBS='$WSLAY_LIBS')
 Libaria2:       $enable_libaria2 (shared=${enable_shared} static=${enable_static})

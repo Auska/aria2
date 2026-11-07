@@ -60,11 +60,6 @@
 #include "rpc_helper.h"
 #include "JsonDiskWriter.h"
 #include "ValueBaseJsonParser.h"
-#ifdef ENABLE_XML_RPC
-#  include "XmlRpcRequestParserStateMachine.h"
-#  include "XmlRpcDiskWriter.h"
-#endif // ENABLE_XML_RPC
-
 namespace aria2 {
 
 HttpServerBodyCommand::HttpServerBodyCommand(
@@ -220,37 +215,6 @@ bool HttpServerBodyCommand::execute()
 
         // Do something for requestpath and body
         switch (httpServer_->getRequestType()) {
-        case RPC_TYPE_XML: {
-#ifdef ENABLE_XML_RPC
-          auto dw = static_cast<rpc::XmlRpcDiskWriter*>(httpServer_->getBody());
-          int error;
-          error = dw->finalize();
-          rpc::RpcRequest req;
-          if (error == 0) {
-            req = dw->getResult();
-          }
-          dw->reset();
-          if (error < 0) {
-            A2_LOG_INFO(fmt("CUID#%" PRId64
-                            " - Failed to parse XML-RPC request",
-                            getCuid()));
-            httpServer_->feedResponse(400);
-            addHttpServerResponseCommand(false);
-            return true;
-          }
-          A2_LOG_INFO(fmt("Executing RPC method %s", req.methodName.c_str()));
-          auto method = rpc::getMethod(req.methodName);
-          auto res = method->execute(std::move(req), e_);
-          bool gzip = httpServer_->supportsGZip();
-          std::string responseData = rpc::toXml(res, gzip);
-          httpServer_->feedResponse(std::move(responseData), "text/xml");
-          addHttpServerResponseCommand(false);
-#else  // !ENABLE_XML_RPC
-          httpServer_->feedResponse(404);
-          addHttpServerResponseCommand(false);
-#endif // !ENABLE_XML_RPC
-          return true;
-        }
         case RPC_TYPE_JSON:
         case RPC_TYPE_JSONP: {
           std::string callback;

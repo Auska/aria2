@@ -567,27 +567,4 @@ PrefPtr PREF_BT_ENABLE_HOOK_AFTER_HASH_CHECK =
 // values: true | false
 PrefPtr PREF_BT_LOAD_SAVED_METADATA = makePref("bt-load-saved-metadata");
 
-/**
- * Metalink related preferences
- */
-// values: a string that your file system recognizes as a file name.
-PrefPtr PREF_METALINK_FILE = makePref("metalink-file");
-// values: a string
-PrefPtr PREF_METALINK_VERSION = makePref("metalink-version");
-// values: a string
-PrefPtr PREF_METALINK_LANGUAGE = makePref("metalink-language");
-// values: a string
-PrefPtr PREF_METALINK_OS = makePref("metalink-os");
-// values: a string
-PrefPtr PREF_METALINK_LOCATION = makePref("metalink-location");
-// values: true | false | mem
-PrefPtr PREF_FOLLOW_METALINK = makePref("follow-metalink");
-// values: http | https | ftp | none
-PrefPtr PREF_METALINK_PREFERRED_PROTOCOL =
-    makePref("metalink-preferred-protocol");
-// values: true | false
-PrefPtr PREF_METALINK_ENABLE_UNIQUE_PROTOCOL =
-    makePref("metalink-enable-unique-protocol");
-PrefPtr PREF_METALINK_BASE_URI = makePref("metalink-base-uri");
-
 } // namespace aria2

@@ -13,7 +13,6 @@ class ProtocolDetectorTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testIsStreamProtocol);
   CPPUNIT_TEST(testGuessTorrentFile);
   CPPUNIT_TEST(testGuessTorrentMagnet);
-  CPPUNIT_TEST(testGuessMetalinkFile);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,7 +23,6 @@ public:
   void testIsStreamProtocol();
   void testGuessTorrentFile();
   void testGuessTorrentMagnet();
-  void testGuessMetalinkFile();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ProtocolDetectorTest);
@@ -42,7 +40,7 @@ void ProtocolDetectorTest::testGuessTorrentFile()
   ProtocolDetector detector;
   CPPUNIT_ASSERT(detector.guessTorrentFile(A2_TEST_DIR "/test.torrent"));
   CPPUNIT_ASSERT(!detector.guessTorrentFile("http://localhost/test.torrent"));
-  CPPUNIT_ASSERT(!detector.guessTorrentFile(A2_TEST_DIR "/test.xml"));
+  CPPUNIT_ASSERT(!detector.guessTorrentFile(A2_TEST_DIR "/sample.netrc"));
 }
 
 void ProtocolDetectorTest::testGuessTorrentMagnet()
@@ -58,12 +56,5 @@ void ProtocolDetectorTest::testGuessTorrentMagnet()
 #endif // !ENABLE_BITTORRENT
 }
 
-void ProtocolDetectorTest::testGuessMetalinkFile()
-{
-  ProtocolDetector detector;
-  CPPUNIT_ASSERT(detector.guessMetalinkFile(A2_TEST_DIR "/test.xml"));
-  CPPUNIT_ASSERT(!detector.guessMetalinkFile("http://localhost/test.xml"));
-  CPPUNIT_ASSERT(!detector.guessMetalinkFile(A2_TEST_DIR "/test.torrent"));
-}
 
 } // namespace aria2

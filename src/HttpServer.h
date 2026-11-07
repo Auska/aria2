@@ -60,7 +60,7 @@ class HMACResult;
 } // namespace security
 } // namespace util
 
-enum RequestType { RPC_TYPE_NONE, RPC_TYPE_XML, RPC_TYPE_JSON, RPC_TYPE_JSONP };
+enum RequestType { RPC_TYPE_NONE, RPC_TYPE_JSON, RPC_TYPE_JSONP };
 
 // HTTP server class handling RPC request from the client.  It is not
 // intended to be a generic HTTP server.

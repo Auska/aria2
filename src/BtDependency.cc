@@ -124,8 +124,7 @@ bool BtDependency::resolve()
       const std::vector<std::shared_ptr<FileEntry>>& dependantFileEntries =
           dependant_->getDownloadContext()->getFileEntries();
       // If dependant's FileEntry::getOriginalName() is empty, we
-      // assume that torrent is single file. In Metalink3, this is
-      // always assumed.
+      // assume that torrent is single file.
       if (fileEntries.size() == 1 && dependantFileEntries.size() == 1 &&
           dependantFileEntries[0]->getOriginalName().empty()) {
         // TODO this may be dead code

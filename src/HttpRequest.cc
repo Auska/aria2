@@ -51,7 +51,6 @@
 #include "TimeA2.h"
 #include "array_fun.h"
 #include "Request.h"
-#include "DownloadHandlerConstants.h"
 #include "MessageDigest.h"
 
 namespace aria2 {
@@ -65,7 +64,6 @@ HttpRequest::HttpRequest()
       endOffsetOverride_(0),
       userAgent_(USER_AGENT),
       contentEncodingEnabled_(true),
-      acceptMetalink_(false),
       noCache_(true),
       acceptGzip_(false),
       noWantDigest_(false)
@@ -169,16 +167,7 @@ std::string HttpRequest::createRequest()
   std::vector<std::pair<std::string, std::string>> builtinHds;
   builtinHds.reserve(20);
   builtinHds.emplace_back("User-Agent:", userAgent_);
-  std::string acceptTypes = "*/*";
-  if (acceptMetalink_) {
-    // The mime types of Metalink are used for "transparent metalink".
-    const auto metalinkTypes = getMetalinkContentTypes();
-    for (size_t i = 0; metalinkTypes[i]; ++i) {
-      acceptTypes += ',';
-      acceptTypes += metalinkTypes[i];
-    }
-  }
-  builtinHds.emplace_back("Accept:", acceptTypes);
+  builtinHds.emplace_back("Accept:", "*/*");
   if (contentEncodingEnabled_) {
     std::string acceptableEncodings;
 #ifdef HAVE_ZLIB

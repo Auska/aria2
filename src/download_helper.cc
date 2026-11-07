@@ -40,7 +40,6 @@
 #include "RequestGroup.h"
 #include "Option.h"
 #include "prefs.h"
-#include "Metalink2RequestGroup.h"
 #include "ProtocolDetector.h"
 #include "paramed_string.h"
 #include "UriListParser.h"
@@ -162,7 +161,7 @@ createRequestGroup(const std::shared_ptr<Option>& optionTemplate,
 }
 } // namespace
 
-#if defined(ENABLE_BITTORRENT) || defined(ENABLE_METALINK)
+#ifdef ENABLE_BITTORRENT
 namespace {
 std::shared_ptr<MetadataInfo>
 createMetadataInfo(const std::shared_ptr<GroupId>& gid, const std::string& uri)
@@ -177,7 +176,7 @@ std::shared_ptr<MetadataInfo> createMetadataInfoDataOnly()
   return std::make_shared<MetadataInfo>();
 }
 } // namespace
-#endif // ENABLE_BITTORRENT || ENABLE_METALINK
+#endif // ENABLE_BITTORRENT
 
 #ifdef ENABLE_BITTORRENT
 
@@ -224,9 +223,6 @@ createBtRequestGroup(const std::string& metaInfoUri,
     rg->setPauseRequested(option->getAsBool(PREF_PAUSE));
   }
 
-  // Remove "metalink" from Accept Type list to avoid server from
-  // responding Metalink file for web-seeding URIs.
-  dctx->setAcceptMetalink(false);
   removeOneshotOption(option);
   return rg;
 }
@@ -348,25 +344,6 @@ void createRequestGroupForBitTorrent(
 
 #endif // ENABLE_BITTORRENT
 
-#ifdef ENABLE_METALINK
-void createRequestGroupForMetalink(
-    std::vector<std::shared_ptr<RequestGroup>>& result,
-    const std::shared_ptr<Option>& option, const std::string& metalinkData)
-{
-  if (metalinkData.empty()) {
-    Metalink2RequestGroup().generate(result, option->get(PREF_METALINK_FILE),
-                                     option,
-                                     option->get(PREF_METALINK_BASE_URI));
-  }
-  else {
-    auto dw = std::make_shared<ByteArrayDiskWriter>();
-    dw->setString(metalinkData);
-    Metalink2RequestGroup().generate(result, dw, option,
-                                     option->get(PREF_METALINK_BASE_URI));
-  }
-}
-#endif // ENABLE_METALINK
-
 namespace {
 class AccRequestGroup {
 private:
@@ -428,24 +405,6 @@ public:
       }
     }
 #endif // ENABLE_BITTORRENT
-#ifdef ENABLE_METALINK
-    else if (!ignoreLocalPath_ && detector_.guessMetalinkFile(uri)) {
-      try {
-        Metalink2RequestGroup().generate(requestGroups_, uri, option_,
-                                         option_->get(PREF_METALINK_BASE_URI));
-      }
-      catch (RecoverableException& e) {
-        if (throwOnError_) {
-          throw;
-        }
-        else {
-          // error occurred while parsing metalink file.
-          // We simply ignore it.
-          A2_LOG_ERROR_EX(EX_EXCEPTION_CAUGHT, e);
-        }
-      }
-    }
-#endif // ENABLE_METALINK
     else {
       if (throwOnError_) {
         throw DL_ABORT_EX(fmt(MSG_UNRECOGNIZED_URI, uri.c_str()));
@@ -512,7 +471,7 @@ void createRequestGroupForUri(
         }
       }
     }
-    // process remaining URIs(local metalink, BitTorrent files)
+    // process remaining URIs (local BitTorrent files)
     std::for_each(
         strmProtoEnd, std::end(nargs),
         AccRequestGroup(result, option, ignoreLocalPath, throwOnError));

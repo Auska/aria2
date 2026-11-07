@@ -52,9 +52,6 @@
 #include "TimeA2.h"
 #include "array_fun.h"
 #include "JsonDiskWriter.h"
-#ifdef ENABLE_XML_RPC
-#  include "XmlRpcDiskWriter.h"
-#endif // ENABLE_XML_RPC
 
 namespace aria2 {
 
@@ -384,15 +381,6 @@ int HttpServer::setupResponseRecv()
       }
       return 0;
     }
-#ifdef ENABLE_XML_RPC
-    if (path == "/rpc") {
-      if (reqType_ != RPC_TYPE_XML) {
-        reqType_ = RPC_TYPE_XML;
-        lastBody_ = make_unique<rpc::XmlRpcDiskWriter>();
-      }
-      return 0;
-    }
-#endif // ENABLE_XML_RPC
   }
   reqType_ = RPC_TYPE_NONE;
   lastBody_.reset();

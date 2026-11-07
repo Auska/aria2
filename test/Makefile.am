@@ -83,7 +83,6 @@ aria2c_SOURCES = AllTest.cc\
 	GeomStreamPieceSelectorTest.cc\
 	SegListTest.cc\
 	ParamedStringTest.cc\
-	RpcHelperTest.cc\
 	AbstractCommandTest.cc\
 	SinkStreamFilterTest.cc\
 	WrDiskCacheTest.cc\
@@ -91,10 +90,6 @@ aria2c_SOURCES = AllTest.cc\
 	GroupIdTest.cc\
 	IndexedListTest.cc \
 	SimpleRandomizerTest.cc
-
-if ENABLE_XML_RPC
-aria2c_SOURCES += XmlRpcRequestParserControllerTest.cc
-endif # ENABLE_XML_RPC
 
 if HAVE_SOME_FALLOCATE
 aria2c_SOURCES += FallocFileAllocationIteratorTest.cc
@@ -219,16 +214,6 @@ aria2c_SOURCES += BtAllowedFastMessageTest.cc\
 	UDPTrackerClientTest.cc
 endif # ENABLE_BITTORRENT
 
-if ENABLE_METALINK
-aria2c_SOURCES += MetalinkerTest.cc\
-	MetalinkEntryTest.cc\
-	Metalink2RequestGroupTest.cc\
-	MetalinkPostDownloadHandlerTest.cc\
-	MetalinkHelperTest.cc\
-	MetalinkParserControllerTest.cc\
-	MetalinkProcessorTest.cc
-endif # ENABLE_METALINK
-
 if ENABLE_ASYNC_DNS
 aria2c_SOURCES += AsyncNameResolverTest.cc
 endif # ENABLE_ASYNC_DNS
@@ -246,8 +231,6 @@ aria2c_LDADD = \
 	@EXTRALIBS@ \
 	@ZLIB_LIBS@ \
 	@LIBUV_LIBS@ \
-	@LIBXML2_LIBS@ \
-	@EXPAT_LIBS@ \
 	@SQLITE3_LIBS@ \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
@@ -271,8 +254,6 @@ AM_CPPFLAGS = \
 	@EXTRACPPFLAGS@ \
 	@ZLIB_CFLAGS@ \
 	@LIBUV_CFLAGS@ \
-	@LIBXML2_CFLAGS@ \
-	@EXPAT_CFLAGS@ \
 	@SQLITE3_CFLAGS@ \
 	@LIBGNUTLS_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
@@ -312,19 +293,11 @@ EXTRA_DIST = 4096chunk.txt\
 	sample.netrc\
 	single.torrent\
 	test.torrent\
-	test.xml\
 	url-list-multiFile.torrent\
 	url-list-singleFile.torrent\
 	url-list-singleFileEndsWithSlash.torrent\
 	input_uris.txt\
-	2files.metalink\
-	utf8.torrent\
-	metalink4.xml\
-	metalink3-dirtraversal.xml\
-	metalink4-groupbymetaurl.xml\
-	serialize_session.meta4\
-	base_uri.xml\
-	local-metaurl.meta4
+	utf8.torrent
 
 clean-local:
 	-rm -rf ${a2_test_outdir}

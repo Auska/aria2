@@ -160,7 +160,6 @@ SRCS =  \
 	MessageDigestImpl.h\
 	message_digest_helper.cc message_digest_helper.h\
 	MetadataInfo.cc MetadataInfo.h\
-	MetalinkHttpEntry.cc MetalinkHttpEntry.h\
 	MultiDiskAdaptor.cc MultiDiskAdaptor.h\
 	MultiFileAllocationIterator.cc MultiFileAllocationIterator.h\
 	MultiUrlRequestInfo.cc MultiUrlRequestInfo.h\
@@ -259,6 +258,7 @@ SRCS =  \
 	ValueBase.cc ValueBase.h\
 	ValueBaseDiskWriter.h\
 	ValueBaseJsonParser.h\
+	ValueBaseParserController.cc ValueBaseParserController.h\
 	ValueBaseStructParserState.h\
 	ValueBaseStructParserStateImpl.cc ValueBaseStructParserStateImpl.h\
 	ValueBaseStructParserStateMachine.cc ValueBaseStructParserStateMachine.h\
@@ -267,7 +267,6 @@ SRCS =  \
 	WatchProcessCommand.cc WatchProcessCommand.h\
 	WrDiskCache.cc WrDiskCache.h\
 	WrDiskCacheEntry.cc WrDiskCacheEntry.h\
-	XmlRpcRequestParserController.cc XmlRpcRequestParserController.h\
 	OpenedFileCounter.cc OpenedFileCounter.h \
 	SHA1IOFile.cc SHA1IOFile.h \
 	EvictSocketPoolCommand.cc EvictSocketPoolCommand.h\
@@ -284,30 +283,6 @@ endif # ENABLE_WEBSOCKET
 if !ENABLE_WEBSOCKET
 SRCS += NullWebSocketSessionMan.h
 endif # !ENABLE_WEBSOCKET
-
-if HAVE_SOME_XMLLIB
-SRCS += \
-	ParserStateMachine.h\
-	XmlAttr.cc XmlAttr.h\
-	XmlParser.cc XmlParser.h
-endif # HAVE_SOME_XMLLIB
-
-if HAVE_LIBXML2
-SRCS +=  Xml2XmlParser.cc Xml2XmlParser.h
-endif # HAVE_LIBXML2
-
-if HAVE_LIBEXPAT
-SRCS +=  ExpatXmlParser.cc ExpatXmlParser.h
-endif # HAVE_LIBEXPAT
-
-if ENABLE_XML_RPC
-SRCS += \
-	XmlRpcDiskWriter.cc XmlRpcDiskWriter.h\
-	XmlRpcRequestParserState.h\
-	XmlRpcRequestParserStateImpl.cc XmlRpcRequestParserStateImpl.h\
-	XmlRpcRequestParserStateMachine.cc XmlRpcRequestParserStateMachine.h
-
-endif # ENABLE_XML_RPC
 
 if HAVE_SOME_FALLOCATE
 SRCS += FallocFileAllocationIterator.cc FallocFileAllocationIterator.h
@@ -585,24 +560,6 @@ SRCS += \
 	ZeroBtMessage.cc ZeroBtMessage.h
 endif # ENABLE_BITTORRENT
 
-if ENABLE_METALINK
-SRCS += \
-	Metalink2RequestGroup.cc Metalink2RequestGroup.h\
-	MetalinkEntry.cc MetalinkEntry.h\
-	Metalinker.cc Metalinker.h\
-	MetalinkMetaurl.cc MetalinkMetaurl.h\
-	MetalinkParserController.cc MetalinkParserController.h\
-	MetalinkParserState.cc MetalinkParserState.h\
-	MetalinkParserStateImpl.cc MetalinkParserStateImpl.h\
-	MetalinkParserStateMachine.cc MetalinkParserStateMachine.h\
-	MetalinkParserStateV3Impl.cc MetalinkParserStateV3Impl.h\
-	MetalinkParserStateV4Impl.cc MetalinkParserStateV4Impl.h\
-	MetalinkPostDownloadHandler.cc MetalinkPostDownloadHandler.h\
-	MetalinkResource.cc MetalinkResource.h\
-	metalink_helper.cc metalink_helper.h
-
-endif # ENABLE_METALINK
-
 if !HAVE_BASENAME
 SRCS += libgen.c libgen.h
 endif # !HAVE_BASENAME
@@ -660,8 +617,6 @@ AM_CPPFLAGS = \
 	@EXTRACPPFLAGS@ \
 	@ZLIB_CFLAGS@ \
 	@LIBUV_CFLAGS@ \
-	@LIBXML2_CFLAGS@ \
-	@EXPAT_CFLAGS@ \
 	@SQLITE3_CFLAGS@ \
 	@LIBGNUTLS_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
@@ -681,8 +636,6 @@ EXTLDADD = @ALLOCA@ \
 	@EXTRALIBS@ \
 	@ZLIB_LIBS@ \
 	@LIBUV_LIBS@ \
-	@LIBXML2_LIBS@ \
-	@EXPAT_LIBS@ \
 	@SQLITE3_LIBS@ \
 	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \

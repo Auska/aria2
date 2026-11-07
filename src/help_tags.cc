@@ -42,9 +42,9 @@ namespace aria2 {
 
 namespace {
 constexpr const char* HELP_TAG_NAMES[] = {
-    "#basic",    "#advanced",   "#http",         "#https",      "#ftp",
-    "#metalink", "#bittorrent", "#cookie",       "#hook",       "#file",
-    "#rpc",      "#checksum",   "#experimental", "#deprecated", "#help"};
+    "#basic",  "#advanced",   "#http",   "#https",      "#ftp",
+    "#bittorrent", "#cookie", "#hook",   "#file",       "#rpc",
+    "#checksum", "#experimental", "#deprecated", "#help"};
 } // namespace
 
 const char* strHelpTag(uint32_t tag)

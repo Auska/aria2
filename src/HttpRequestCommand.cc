@@ -98,7 +98,6 @@ createHttpRequest(const std::shared_ptr<Request>& req,
   httpRequest->setAuthConfigFactory(e->getAuthConfigFactory().get());
   httpRequest->setOption(option.get());
   httpRequest->setProxyRequest(proxyRequest);
-  httpRequest->setAcceptMetalink(rg->getDownloadContext()->getAcceptMetalink());
   httpRequest->setNoWantDigest(option->getAsBool(PREF_NO_WANT_DIGEST_HEADER));
 
   if (option->getAsBool(PREF_HTTP_ACCEPT_GZIP)) {

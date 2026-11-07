@@ -397,7 +397,6 @@ TrackerWatcherCommand::createHTTPAnnRequest(const std::string& uri)
   // RequestGroup is not handled by RequestGroupMan.
   rg->clearPreDownloadHandler();
   rg->clearPostDownloadHandler();
-  dctx->setAcceptMetalink(false);
   A2_LOG_INFO(fmt("Creating tracker request group GID#%s",
                   GroupId::toHex(rg->getGID()).c_str()));
   return make_unique<HTTPAnnRequest>(std::move(rg));

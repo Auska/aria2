@@ -3,19 +3,17 @@ aria2c(1)
 
 SYNOPSIS
 --------
-**aria2c** [<OPTIONS>] [<URI>|<MAGNET>|<TORRENT_FILE>|<METALINK_FILE>] ...
+**aria2c** [<OPTIONS>] [<URI>|<MAGNET>|<TORRENT_FILE>] ...
 
 DESCRIPTION
 -----------
 
 aria2 is a utility for downloading files. The supported protocols are
-HTTP(S), FTP, SFTP, BitTorrent, and Metalink. aria2 can download a
+HTTP(S), FTP, SFTP and BitTorrent. aria2 can download a
 file from multiple sources/protocols and tries to utilize your maximum
 download bandwidth. It supports downloading a file from HTTP(S)/FTP
 /SFTP and BitTorrent at the same time, while the data downloaded from
-HTTP(S)/FTP/SFTP is uploaded to the BitTorrent swarm. Using Metalink
-chunk checksums, aria2 automatically validates chunks of data while
-downloading a file.
+HTTP(S)/FTP/SFTP is uploaded to the BitTorrent swarm.
 
 OPTIONS
 -------
@@ -79,7 +77,7 @@ Basic Options
 .. option:: -V, --check-integrity [true|false]
 
   Check file integrity by validating piece hashes or a hash of entire
-  file.  This option has effect only in BitTorrent, Metalink downloads
+  file.  This option has effect only in BitTorrent downloads
   with checksums or HTTP(S)/FTP downloads with
   :option:`--checksum` option.  If
   piece hashes are provided, this option can detect damaged portions
@@ -104,7 +102,7 @@ Basic Options
    options tagged with ``#http``. If non-tag word is given, print the
    usage for the options whose name includes that word.  Available
    Values: ``#basic``, ``#advanced``, ``#http``, ``#https``, ``#ftp``,
-   ``#metalink``, ``#bittorrent``, ``#cookie``, ``#hook``, ``#file``, ``#rpc``,
+   ``#bittorrent``, ``#cookie``, ``#hook``, ``#file``, ``#rpc``,
    ``#checksum``, ``#experimental``, ``#deprecated``, ``#help``, ``#all``
    Default: ``#basic``
 
@@ -258,7 +256,7 @@ HTTP/FTP/SFTP Options
 
   .. note::
 
-    You cannot specify a file name for Metalink or BitTorrent downloads.
+    You cannot specify a file name for BitTorrent downloads.
     The file name specified here is only used when the URIs fed to aria2
     are given on the command line directly, but not when using
     :option:`--input-file <-i>`, :option:`--force-sequential <-Z>` option.
@@ -325,12 +323,6 @@ HTTP/FTP/SFTP Options
   See also the :option:`--min-split-size <-k>` option.
   Default: ``5``
 
-  .. note::
-
-    Some Metalinks regulate the number of servers to connect.  aria2
-    strictly respects them.  This means that if Metalink defines the
-    ``maxconnections`` attribute lower than N, then aria2 uses the
-    value of this lower value instead of N.
 
 .. option:: --stream-piece-selector=<SELECTOR>
 
@@ -631,8 +623,8 @@ FTP/SFTP Specific Options
   be used to validate server's public key when SFTP is used. If this
   option is not set, which is default, no validation takes place.
 
-BitTorrent/Metalink Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BitTorrent Options
+~~~~~~~~~~~~~~~~~
 .. option:: --select-file=<INDEX>...
 
   Set file to download by specifying its index.
@@ -640,9 +632,6 @@ BitTorrent/Metalink Options
   Multiple indexes can be specified by using ``,``, for example: ``3,6``.
   You can also use ``-`` to specify a range: ``1-5``.
   ``,`` and ``-`` can be used together: ``1-5,8,9``.
-  When used with the -M option, index may vary depending on the query
-  (see *--metalink-\** options).
-
   .. note::
 
     In multi file torrent, the adjacent files specified by this option may
@@ -652,9 +641,8 @@ BitTorrent/Metalink Options
 
 .. option:: -S, --show-files [true|false]
 
-  Print file listing of ".torrent", ".meta4" and ".metalink" file and exit.
-  In case of ".torrent" file, additional information
-  (infohash, piece length, etc) is also printed.
+  Print file listing of ".torrent" file and exit.
+  Additional information (infohash, piece length, etc) is also printed.
 
 BitTorrent Specific Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -735,7 +723,7 @@ BitTorrent Specific Options
 .. option:: --bt-max-open-files=<NUM>
 
   Specify maximum number of files to open in multi-file
-  BitTorrent/Metalink download globally.
+  BitTorrent download globally.
   Default: ``100``
 
 .. option:: --bt-max-peers=<NUM>
@@ -991,70 +979,12 @@ BitTorrent Specific Options
   The path to the ".torrent" file.  You are not required to use this
   option because you can specify ".torrent" files without :option:`--torrent-file <-T>`.
 
-Metalink Specific Options
-~~~~~~~~~~~~~~~~~~~~~~~~~
-.. option:: --follow-metalink=true|false|mem
-
-  If ``true`` or ``mem`` is specified, when a file whose suffix is ``.meta4`` or ``.metalink`` or content
-  type of ``application/metalink4+xml`` or ``application/metalink+xml`` is downloaded, aria2 parses it as a metalink
-  file and downloads files mentioned in it.
-  If ``mem`` is specified, a metalink file is not written to the disk, but is just
-  kept in memory.
-  If ``false`` is specified, the ``.metalink`` file is downloaded to
-  the disk, but is not parsed as a metalink file and its contents are not
-  downloaded.
-  Default: ``true``
-
-.. option:: --metalink-base-uri=<URI>
-
-  Specify base URI to resolve relative URI in metalink:url and
-  metalink:metaurl element in a metalink file stored in local disk. If
-  URI points to a directory, URI must end with ``/``.
-
-.. option:: -M, --metalink-file=<METALINK_FILE>
-
-  The file path to ".meta4" and ".metalink" file. Reads input from ``stdin`` when ``-`` is
-  specified.  You are not required to use this option because you can
-  specify ".metalink" files without :option:`--metalink-file <-M>`.
-
-.. option:: --metalink-language=<LANGUAGE>
-
-  The language of the file to download.
-
-.. option:: --metalink-location=<LOCATION>[,...]
-
-  The location of the preferred server.
-  A comma-delimited list of locations is acceptable, for example, ``jp,us``.
-
-.. option:: --metalink-os=<OS>
-
-  The operating system of the file to download.
-
-.. option:: --metalink-version=<VERSION>
-
-  The version of the file to download.
-
-.. option:: --metalink-preferred-protocol=<PROTO>
-
-  Specify preferred protocol.
-  The possible values are ``http``, ``https``, ``ftp`` and ``none``.
-  Specify ``none`` to disable this feature.
-  Default: ``none``
-
-.. option:: --metalink-enable-unique-protocol [true|false]
-
-  If ``true`` is given and several protocols are available for a mirror in a
-  metalink file, aria2 uses one of them.
-  Use :option:`--metalink-preferred-protocol` option to specify the preference of
-  protocol.
-  Default: ``true``
-
 RPC Options
 ~~~~~~~~~~~
 
 .. option:: --enable-rpc [true|false]
 
-  Enable JSON-RPC/XML-RPC server.  It is strongly recommended to set
+  Enable JSON-RPC server.  It is strongly recommended to set
   secret authorization token using :option:`--rpc-secret` option.  See
   also :option:`--rpc-listen-port` option.  Default: ``false``
 
@@ -1069,7 +999,7 @@ RPC Options
   Pause downloads created as a result of metadata download. There are
   3 types of metadata downloads in aria2: (1) downloading .torrent
   file. (2) downloading torrent metadata using magnet link. (3)
-  downloading metalink file.  These metadata downloads will generate
+  metadata downloads will generate
   downloads using their metadata. This option pauses these subsequent
   downloads. This option is effective only when
   :option:`--enable-rpc=true <--enable-rpc>` is given.
@@ -1109,22 +1039,22 @@ RPC Options
 
 .. option:: --rpc-listen-all [true|false]
 
-  Listen incoming JSON-RPC/XML-RPC requests on all network interfaces. If false
+  Listen incoming JSON-RPC requests on all network interfaces. If false
   is given, listen only on local loopback interface.  Default: ``false``
 
 .. option:: --rpc-listen-port=<PORT>
 
-  Specify a port number for JSON-RPC/XML-RPC server to listen to.  Possible
+  Specify a port number for JSON-RPC server to listen to.  Possible
   Values: ``1024`` -``65535`` Default: ``6800``
 
 .. option:: --rpc-max-request-size=<SIZE>
 
-  Set max size of JSON-RPC/XML-RPC request. If aria2 detects the request is
+  Set max size of JSON-RPC request. If aria2 detects the request is
   more than SIZE bytes, it drops connection. Default: ``2M``
 
 .. option:: --rpc-passwd=<PASSWD>
 
-  Set JSON-RPC/XML-RPC password.
+  Set JSON-RPC password.
 
   .. Warning::
 
@@ -1140,12 +1070,12 @@ RPC Options
 
 .. option:: --rpc-save-upload-metadata [true|false]
 
-  Save the uploaded torrent or metalink metadata in the directory
+  Save the uploaded torrent metadata in the directory
   specified by :option:`--dir` option. The file name consists of SHA-1
   hash hex string of metadata plus extension. For torrent, the
-  extension is '.torrent'. For metalink, it is '.meta4'.  If false is
+  extension is '.torrent'. If false is
   given to this option, the downloads added by
-  :func:`aria2.addTorrent` or :func:`aria2.addMetalink` will not be
+  :func:`aria2.addTorrent` will not be
   saved by :option:`--save-session` option. Default: ``true``
 
 .. option:: --rpc-secret=<TOKEN>
@@ -1163,7 +1093,7 @@ RPC Options
 
 .. option:: --rpc-user=<USER>
 
-  Set JSON-RPC/XML-RPC user.
+  Set JSON-RPC user.
 
   .. Warning::
 
@@ -1231,7 +1161,7 @@ Advanced Options
 
   Download file only when the local file is older than remote
   file. This function only works with HTTP(S) downloads only.  It does
-  not work if file size is specified in Metalink. It also ignores
+  not work if the file size is fixed. It also ignores
   Content-Disposition header.  If a control file exists, this option
   will be ignored.  This function uses If-Modified-Since header to get
   only newer file conditionally. When getting modification time of
@@ -1560,7 +1490,7 @@ Advanced Options
   Set a piece length for HTTP/FTP downloads. This is the boundary when
   aria2 splits a file. All splits occur at multiple of this
   length. This option will be ignored in BitTorrent downloads.  It
-  will be also ignored if Metalink file contains piece hashes.
+
   Default: ``1M``
 
   .. note::
@@ -1653,7 +1583,7 @@ Advanced Options
   restart. If you like the output to be gzipped append a .gz extension to
   the file name.
   Please note that downloads added by
-  :func:`aria2.addTorrent` and :func:`aria2.addMetalink` RPC method
+  :func:`aria2.addTorrent` RPC method
   and whose metadata could not be saved as a file are not saved.
   Downloads removed using :func:`aria2.remove` and
   :func:`aria2.forceRemove` will not be saved. GID is also saved with
@@ -1662,19 +1592,15 @@ Advanced Options
   .. note::
 
     Normally, GID of the download itself is saved. But some downloads
-    use metadata (e.g., BitTorrent and Metalink). In this case, there
+    use metadata (e.g., BitTorrent). In this case, there
     are some restrictions.
 
     magnet URI, and followed by torrent download
        GID of BitTorrent metadata download is saved.
     URI to torrent file, and followed by torrent download
        GID of torrent file download is saved.
-    URI to metalink file, and followed by file downloads described in metalink file
-       GID of metalink file download is saved.
     local torrent file
        GID of torrent download is saved.
-    local metalink file
-       Any meaningful GID is not saved.
 
 .. option:: --save-session-interval=<SEC>
 
@@ -1734,7 +1660,7 @@ Some options takes ``K`` and ``M`` to conveniently represent 1024 and
 case-insensitive way. In other words, ``k`` and ``m`` can be used as
 well as ``K`` and ``M`` respectively.
 
-URI, MAGNET, TORRENT_FILE, METALINK_FILE
+URI, MAGNET, TORRENT_FILE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can specify multiple URIs in command-line.  Unless you specify
@@ -1751,10 +1677,9 @@ It is strongly recommended to enable DHT especially when ``tr``
 parameter is missing. See http://www.bittorrent.org/beps/bep_0009.html
 for more details about BitTorrent Magnet URI.
 
-You can also specify arbitrary number of torrent files and Metalink
-documents stored on a local drive. Please note that they are always
-treated as a separate download. Both Metalink4 and Metalink version
-3.0 are supported.
+You can also specify arbitrary number of torrent files stored on a
+local drive. Please note that they are always treated as a separate
+download.
 
 You can specify both torrent file with -T option and URIs. By doing
 this, you can download a file from both torrent swarm and
@@ -1798,7 +1723,7 @@ BitTorrent download can contain multiple files.  If number of files is
 more than one, file path is first one.  In other words, this is the
 value of path key of first struct whose selected key is true in the
 response of :func:`aria2.getFiles` RPC method.  If you want to get all
-file paths, consider to use JSON-RPC/XML-RPC.  Please note that file
+file paths, consider to use JSON-RPC.  Please note that file
 path may change during download in HTTP because of redirection or
 Content-Disposition header.
 
@@ -1889,7 +1814,7 @@ based on the last error encountered.
   If name resolution failed.
 
 20
-  If aria2 could not parse Metalink document.
+  If aria2 could not parse a document.
 
 21
   If FTP command failed.
@@ -2017,7 +1942,6 @@ user's home directory:
 * :option:`input-file <--input-file>`
 * :option:`load-cookies <--load-cookies>`
 * :option:`log <--log>`
-* :option:`metalink-file <--metalink-file>`
 * :option:`netrc-path <--netrc-path>`
 * :option:`on-bt-download-complete <--on-bt-download-complete>`
 * :option:`on-download-complete <--on-download-complete>`
@@ -2089,7 +2013,7 @@ a file from a HTTP server which doesn't support resume), a control
 file is not created.
 
 Normally if you lose a control file, you cannot resume download.  But
-if you have a torrent or metalink with chunk checksums for the file,
+if you have a torrent with chunk checksums for the file,
 you can resume the download without a control file by giving -V option
 to aria2c in command-line.
 
@@ -2158,7 +2082,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`enable-mmap <--enable-mmap>`
   * :option:`enable-peer-exchange <--enable-peer-exchange>`
   * :option:`file-allocation <--file-allocation>`
-  * :option:`follow-metalink <--follow-metalink>`
   * :option:`follow-torrent <--follow-torrent>`
   * :option:`force-save <--force-save>`
   * :option:`ftp-passwd <--ftp-passwd>`
@@ -2192,13 +2115,6 @@ of URIs. These optional lines must start with white space(s).
   * :option:`max-resume-failure-tries <--max-resume-failure-tries>`
   * :option:`max-tries <-m>`
   * :option:`max-upload-limit <-u>`
-  * :option:`metalink-base-uri <--metalink-base-uri>`
-  * :option:`metalink-enable-unique-protocol <--metalink-enable-unique-protocol>`
-  * :option:`metalink-language <--metalink-language>`
-  * :option:`metalink-location <--metalink-location>`
-  * :option:`metalink-os <--metalink-os>`
-  * :option:`metalink-preferred-protocol <--metalink-preferred-protocol>`
-  * :option:`metalink-version <--metalink-version>`
   * :option:`min-split-size <-k>`
   * :option:`no-file-allocation-limit <--no-file-allocation-limit>`
   * :option:`no-netrc <-n>`
@@ -2303,16 +2219,14 @@ An example follows::
 RPC INTERFACE
 -------------
 
-aria2 provides JSON-RPC over HTTP and XML-RPC over HTTP interfaces that offer
-basically the same functionality.  aria2 also provides JSON-RPC
+aria2 provides JSON-RPC over HTTP interface.  aria2 also provides JSON-RPC
 over WebSocket. JSON-RPC over WebSocket uses the same method signatures
 and response format as JSON-RPC over HTTP, but additionally provides
 server-initiated notifications. See `JSON-RPC over WebSocket`_ section for more
 information.
 
 The request path of the JSON-RPC interface (for both over HTTP and over
-WebSocket) is ``/jsonrpc``.  The request path of the XML-RPC interface is
-``/rpc``.
+WebSocket) is ``/jsonrpc``.
 
 The WebSocket URI for JSON-RPC over WebSocket is
 ``ws://HOST:PORT/jsonrpc``. If you enabled SSL/TLS encryption, use
@@ -2365,16 +2279,12 @@ calling `aria2.addUri` RPC method would have to look like this::
 
   aria2.addUri("token:$$secret$$", ["http://example.org/file"])
 
-The `system.multicall` RPC method is treated specially. Since the XML-RPC
-specification only allows a single array as a parameter for this method, we
-don't specify the token in the call. Instead, each nested method call has
-to provide the token as the first parameter as described above.
 
 .. note::
 
   The secret token validation in aria2 is designed to take at least a certain
   amount of time to mitigate brute-force/dictionary attacks against the RPC
-  interface. Therefore it is recommended to prefer Batch or `system.multicall`
+  interface. Therefore it is recommended to prefer Batch
   requests when appropriate.
 
   `system.listMethods` and `system.listNotifications` can be executed without token. Since they just
@@ -2414,26 +2324,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> c.read()
     '{"id":"qwer","jsonrpc":"2.0","result":"2089b05ecca3d829"}'
 
-  **XML-RPC Example**
-
-  The following example adds ``http://example.org/file``::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.addUri(['http://example.org/file'])
-    '2089b05ecca3d829'
-
-  The following example adds a new download with two sources and some options::
-
-    >>> s.aria2.addUri(['http://example.org/file', 'http://mirror/file'],
-                        dict(dir="/tmp"))
-    'd2703803b52216d1'
-
-  The following example adds a download and inserts it to the front of the
-  queue::
-
-    >>> s.aria2.addUri(['http://example.org/file'], {}, 0)
-    'ca3d829cee549a4d'
 
 .. function:: aria2.addTorrent([secret], torrent[, uris[, options[, position]]])
 
@@ -2476,60 +2366,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> c.read()
     '{"id":"asdf","jsonrpc":"2.0","result":"2089b05ecca3d829"}'
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.addTorrent(xmlrpclib.Binary(open('file.torrent', mode='rb').read()))
-    '2089b05ecca3d829'
-
-.. function:: aria2.addMetalink([secret], metalink[, options[, position]])
-
-  This method adds a Metalink download by uploading a ".metalink" file.
-  *metalink* is a base64-encoded string which contains the contents of the
-  ".metalink" file.
-  *options* is a struct and its members are pairs of option name and value.
-  See :ref:`rpc_options` below for more details.
-  If *position* is given, it must be an integer starting from 0. The new
-  download will be inserted at *position* in the waiting queue. If
-  *position* is omitted or *position* is larger than the current size of the
-  queue, the new download is appended to the end of the queue.
-  This method returns an array of GIDs of newly registered downloads.
-  If :option:`--rpc-save-upload-metadata` is ``true``, the uploaded data
-  is saved as a file named hex string of SHA-1 hash of data plus
-  ".metalink" in the directory specified by :option:`--dir <-d>`
-  option.  E.g. a file name might be
-  ``0a3893293e27ac0490424c06de4d09242215f0a6.metalink``.  If a file with the
-  same name already exists, it is overwritten!  If the file cannot be saved
-  successfully or :option:`--rpc-save-upload-metadata` is ``false``,
-  the downloads added by this method are not saved by
-  :option:`--save-session`.
-
-  The following examples add local file file.meta4.
-
-  **JSON-RPC Example**
-
-  ::
-
-    >>> import urllib2, json, base64
-    >>> metalink = base64.b64encode(open('file.meta4').read())
-    >>> jsonreq = json.dumps({'jsonrpc':'2.0', 'id':'qwer',
-    ...                       'method':'aria2.addMetalink',
-    ...                       'params':[metalink]})
-    >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
-    >>> c.read()
-    '{"id":"qwer","jsonrpc":"2.0","result":["2089b05ecca3d829"]}'
-
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.addMetalink(xmlrpclib.Binary(open('file.meta4', mode='rb').read()))
-    ['2089b05ecca3d829']
 
 .. function:: aria2.remove([secret], gid)
 
@@ -2552,14 +2388,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> c.read()
     '{"id":"qwer","jsonrpc":"2.0","result":"2089b05ecca3d829"}'
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.remove('2089b05ecca3d829')
-    '2089b05ecca3d829'
 
 .. function:: aria2.forceRemove([secret], gid)
 
@@ -2679,9 +2507,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``followedBy``
     List of GIDs which are generated as the result of this
-    download. For example, when aria2 downloads a Metalink file, it
-    generates downloads described in the Metalink (see the
-    :option:`--follow-metalink` option). This value is useful to track
+    download. For example, when aria2 downloads a torrent file, it
+    generates downloads described in it. This value is useful to track
     auto-generated downloads. If there are no such downloads, this key will not
     be included in the response.
 
@@ -2691,8 +2518,8 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``belongsTo``
     GID of a parent download. Some downloads are a part of another
-    download.  For example, if a file in a Metalink has BitTorrent
-    resources, the downloads of ".torrent" files are parts of that parent.
+    download.  For example, the downloads of ".torrent" files may be
+    parts of a parent BitTorrent download.
     If this download has no parent, this key will not be included in the
     response.
 
@@ -2787,41 +2614,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                  u'gid': u'2089b05ecca3d829',
                  u'totalLength': u'34896138'}}
 
-  **XML-RPC Example**
-
-  The following example gets information about a download with GID#2089b05ecca3d829::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.tellStatus('2089b05ecca3d829')
-    >>> pprint(r)
-    {'bitfield': 'ffff80',
-     'completedLength': '34896138',
-     'connections': '0',
-     'dir': '/downloads',
-     'downloadSpeed': '0',
-     'errorCode': '0',
-     'files': [{'index': '1',
-                'length': '34896138',
-                'completedLength': '34896138',
-                'path': '/downloads/file',
-                'selected': 'true',
-                'uris': [{'status': 'used',
-                          'uri': 'http://example.org/file'}]}],
-     'gid': '2089b05ecca3d829',
-     'numPieces': '17',
-     'pieceLength': '2097152',
-     'status': 'complete',
-     'totalLength': '34896138',
-     'uploadLength': '0',
-     'uploadSpeed': '0'}
-
-  The following example gets only specific keys::
-
-    >>> r = s.aria2.tellStatus('2089b05ecca3d829', ['gid', 'totalLength', 'completedLength'])
-    >>> pprint(r)
-    {'completedLength': '34896138', 'gid': '2089b05ecca3d829', 'totalLength': '34896138'}
 
 .. function:: aria2.getUris([secret], gid)
 
@@ -2851,15 +2643,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
      u'result': [{u'status': u'used',
                   u'uri': u'http://example.org/file'}]}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getUris('2089b05ecca3d829')
-    >>> pprint(r)
-    [{'status': 'used', 'uri': 'http://example.org/file'}]
 
 .. function:: aria2.getFiles([secret], gid)
 
@@ -2916,21 +2699,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                   u'uris': [{u'status': u'used',
                              u'uri': u'http://example.org/file'}]}]}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getFiles('2089b05ecca3d829')
-    >>> pprint(r)
-    [{'index': '1',
-      'length': '34896138',
-      'completedLength': '34896138',
-      'path': '/downloads/file',
-      'selected': 'true',
-      'uris': [{'status': 'used',
-                'uri': 'http://example.org/file'}]}]
 
 .. function:: aria2.getPeers([secret], gid)
 
@@ -2999,32 +2767,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                   u'seeder': u'false',
                   u'uploadSpeed': u'6890'}]}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getPeers('2089b05ecca3d829')
-    >>> pprint(r)
-    [{'amChoking': 'true',
-      'bitfield': 'ffffffffffffffffffffffffffffffffffffffff',
-      'downloadSpeed': '10602',
-      'ip': '10.0.0.9',
-      'peerChoking': 'false',
-      'peerId': 'aria2%2F1%2E10%2E5%2D%87%2A%EDz%2F%F7%E6',
-      'port': '6881',
-      'seeder': 'true',
-      'uploadSpeed': '0'},
-     {'amChoking': 'false',
-      'bitfield': 'ffffeff0fffffffbfffffff9fffffcfff7f4ffff',
-      'downloadSpeed': '8654',
-      'ip': '10.0.0.30',
-      'peerChoking': 'false',
-      'peerId': 'bittorrent client758',
-      'port': '37842',
-      'seeder': 'false,
-      'uploadSpeed': '6890'}]
 
 .. function:: aria2.getServers([secret], gid)
 
@@ -3034,7 +2776,7 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
 
   ``index``
     Index of the file, starting at 1, in the same order as files appear in the
-    multi-file metalink.
+    multi-file torrent.
 
   ``servers``
     A list of structs which contain the following keys.
@@ -3066,18 +2808,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                                 u'downloadSpeed': u'10467',
                                 u'uri': u'http://example.org/file'}]}]}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getServers('2089b05ecca3d829')
-    >>> pprint(r)
-    [{'index': '1',
-      'servers': [{'currentUri': 'http://example.org/dl/file',
-                   'downloadSpeed': '20285',
-                   'uri': 'http://example.org/file'}]}]
 
 .. function:: aria2.tellActive([secret], [keys])
 
@@ -3160,14 +2890,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> pprint(json.loads(c.read()))
     {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': 0}
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.changePosition('2089b05ecca3d829', 0, 'POS_SET')
-    0
 
 .. function:: aria2.changeUri([secret], gid, fileIndex, delUris, addUris[, position])
 
@@ -3207,15 +2929,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> pprint(json.loads(c.read()))
     {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': [0, 1]}
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.changeUri('2089b05ecca3d829', 1, [],
-                          ['http://example.org/file'])
-    [0, 1]
 
 .. function:: aria2.getOption([secret], gid)
 
@@ -3248,20 +2961,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                  u'async-dns': u'true',
      ...
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getOption('2089b05ecca3d829')
-    >>> pprint(r)
-    {'allow-overwrite': 'false',
-     'allow-piece-length-change': 'false',
-     'always-resume': 'true',
-     'async-dns': 'true',
-     ....
 
 .. function:: aria2.changeOption([secret], gid, options)
 
@@ -3271,7 +2970,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   **except** for following options:
 
   * :option:`dry-run <--dry-run>`
-  * :option:`metalink-base-uri <--metalink-base-uri>`
   * :option:`parameterized-uri <-P>`
   * :option:`pause <--pause>`
   * :option:`piece-length <--piece-length>`
@@ -3308,14 +3006,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> pprint(json.loads(c.read()))
     {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': u'OK'}
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.changeOption('2089b05ecca3d829', {'max-download-limit':'20K'})
-    'OK'
 
 .. function:: aria2.getGlobalOption([secret])
 
@@ -3402,19 +3092,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                  u'numWaiting': u'0',
                  u'uploadSpeed': u'0'}}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getGlobalStat()
-    >>> pprint(r)
-    {'downloadSpeed': '23136',
-     'numActive': '2',
-     'numStopped': '0',
-     'numWaiting': '0',
-     'uploadSpeed': '0'}
 
 .. function:: aria2.purgeDownloadResult([secret])
 
@@ -3442,14 +3119,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
     >>> pprint(json.loads(c.read()))
     {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': u'OK'}
 
-  **XML-RPC Example**
-
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.removeDownloadResult('2089b05ecca3d829')
-    'OK'
 
 .. function:: aria2.getVersion([secret])
 
@@ -3478,28 +3147,9 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                                       u'Firefox3 Cookie',
                                       u'GZip',
                                       u'HTTPS',
-                                      u'Message Digest',
-                                      u'Metalink',
-                                      u'XML-RPC'],
+                                      u'Message Digest'],
                  u'version': u'1.11.0'}}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> from pprint import pprint
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> r = s.aria2.getVersion()
-    >>> pprint(r)
-    {'enabledFeatures': ['Async DNS',
-                         'BitTorrent',
-                         'Firefox3 Cookie',
-                         'GZip',
-                         'HTTPS',
-                         'Message Digest',
-                         'Metalink',
-                         'XML-RPC'],
-     'version': '1.11.0'}
 
 .. function:: aria2.getSessionInfo([secret])
 
@@ -3522,13 +3172,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
      u'jsonrpc': u'2.0',
      u'result': {u'sessionId': u'cd6a3bc6a1de28eb5bfa181e5f6b916d44af31a9'}}
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.aria2.getSessionInfo()
-    {'sessionId': 'cd6a3bc6a1de28eb5bfa181e5f6b916d44af31a9'}
 
 .. function:: aria2.shutdown([secret])
 
@@ -3547,61 +3190,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
   This method saves the current session to a file specified by the
   :option:`--save-session` option. This method returns ``OK`` if it
   succeeds.
-
-.. function:: system.multicall(methods)
-
-  This methods encapsulates multiple method calls in a single request.
-  *methods* is an array of structs.  The structs contain two keys:
-  ``methodName`` and ``params``.  ``methodName`` is the
-  method name to call and ``params`` is array containing parameters to the
-  method call.  This method returns an array of responses.  The elements
-  will be either a one-item array containing the return value of the
-  method call or a struct of fault element if an encapsulated method call
-  fails.
-
-  In the following examples, we add 2 downloads. The first one is
-  ``http://example.org/file`` and the second one is ``file.torrent``.
-
-  **JSON-RPC Example**
-  ::
-
-    >>> import urllib2, json, base64
-    >>> from pprint import pprint
-    >>> jsonreq = json.dumps({'jsonrpc':'2.0', 'id':'qwer',
-    ...                       'method':'system.multicall',
-    ...                       'params':[[{'methodName':'aria2.addUri',
-    ...                                   'params':[['http://example.org']]},
-    ...                                  {'methodName':'aria2.addTorrent',
-    ...                                   'params':[base64.b64encode(open('file.torrent').read())]}]]})
-    >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
-    >>> pprint(json.loads(c.read()))
-    {u'id': u'qwer', u'jsonrpc': u'2.0', u'result': [[u'2089b05ecca3d829'], [u'd2703803b52216d1']]}
-
-  JSON-RPC additionally supports Batch requests as described in the
-  JSON-RPC 2.0 Specification::
-
-    >>> jsonreq = json.dumps([{'jsonrpc':'2.0', 'id':'qwer',
-    ...                        'method':'aria2.addUri',
-    ...                        'params':[['http://example.org']]},
-    ...                       {'jsonrpc':'2.0', 'id':'asdf',
-    ...                        'method':'aria2.addTorrent',
-    ...                        'params':[base64.b64encode(open('file.torrent').read())]}])
-    >>> c = urllib2.urlopen('http://localhost:6800/jsonrpc', jsonreq)
-    >>> pprint(json.loads(c.read()))
-    [{u'id': u'qwer', u'jsonrpc': u'2.0', u'result': u'2089b05ecca3d829'},
-     {u'id': u'asdf', u'jsonrpc': u'2.0', u'result': u'd2703803b52216d1'}]
-
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> mc = xmlrpclib.MultiCall(s)
-    >>> mc.aria2.addUri(['http://example.org/file'])
-    >>> mc.aria2.addTorrent(xmlrpclib.Binary(open('file.torrent', mode='rb').read()))
-    >>> r = mc()
-    >>> tuple(r)
-    ('2089b05ecca3d829', 'd2703803b52216d1')
 
 .. function:: system.listMethods()
 
@@ -3625,13 +3213,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
                  u'aria2.addTorrent',
     ...
 
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.system.listMethods()
-    ['aria2.addUri', 'aria2.addTorrent', ...
 
 .. function:: system.listNotifications()
 
@@ -3654,167 +3235,6 @@ For information on the *secret* parameter, see :ref:`rpc_auth`.
      u'result': [u'aria2.onDownloadStart',
                  u'aria2.onDownloadPause',
     ...
-
-  **XML-RPC Example**
-  ::
-
-    >>> import xmlrpclib
-    >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-    >>> s.system.listNotifications()
-    ['aria2.onDownloadStart', 'aria2.onDownloadPause', ...
-
-Error Handling
-~~~~~~~~~~~~~~
-
-Over JSON-RPC, aria2 returns a JSON object which contains an error code in
-``code`` and the error message in ``message``.
-
-Over XML-RPC, aria2 returns ``faultCode=1`` and the error message in
-``faultString``.
-
-.. _rpc_options:
-
-Options
-~~~~~~~
-
-The same options as for :option:`--input-file <-i>` are available. See the
-`Input File`_ subsection for a complete list of options.
-
-In the option struct, the name element is the option name (without the preceding
-``--``) and the value element is the argument as a string.
-
-JSON-RPC Example
-^^^^^^^^^^^^^^^^
-::
-
-  {'split':'1', 'http-proxy':'http://proxy/'}
-
-
-XML-RPC Example
-^^^^^^^^^^^^^^^
-.. code-block:: xml
-
-  <struct>
-    <member>
-      <name>split</name>
-      <value><string>1</string></value>
-    </member>
-    <member>
-      <name>http-proxy</name>
-      <value><string>http://proxy/</string></value>
-    </member>
-  </struct>
-
-
-The :option:`header <--header>` and :option:`index-out <-O>`
-options are allowed multiple times on the command-line. Since the name should be
-unique in a struct (many XML-RPC library implementations use a hash or dict for
-struct), a single string is not enough. To overcome this limitation, you may use
-an array as the value as well as a string.
-
-JSON-RPC Example
-^^^^^^^^^^^^^^^^
-::
-
-  {'header':['Accept-Language: ja', 'Accept-Charset: utf-8']}
-
-
-XML-RPC Example
-^^^^^^^^^^^^^^^
-.. code-block:: xml
-
-  <struct>
-    <member>
-      <name>header</name>
-      <value>
-        <array>
-          <data>
-            <value><string>Accept-Language: ja</string></value>
-            <value><string>Accept-Charset: utf-8</string></value>
-          </data>
-        </array>
-      </value>
-    </member>
-  </struct>
-
-
-The following example adds a download with two options: ``dir`` and ``header``.
-The ``header`` option requires two values, so it uses a list::
-
-  >>> import xmlrpclib
-  >>> s = xmlrpclib.ServerProxy('http://localhost:6800/rpc')
-  >>> opts = dict(dir='/tmp',
-  ...             header=['Accept-Language: ja',
-  ...                     'Accept-Charset: utf-8'])
-  >>> s.aria2.addUri(['http://example.org/file'], opts)
-  '1'
-
-
-JSON-RPC using HTTP GET
-~~~~~~~~~~~~~~~~~~~~~~~
-
-The JSON-RPC interface also supports requests via HTTP GET.
-The encoding scheme in GET parameters is based on JSON-RPC over HTTP Specification [2008-1-15(RC1)].
-The encoding of GET parameters are follows::
-
-  /jsonrpc?method=METHOD_NAME&id=ID&params=BASE64_ENCODED_PARAMS
-
-
-The ``method`` and ``id`` are always treated as JSON string and their
-encoding must be UTF-8.
-
-For example, The encoded string of
-``aria2.tellStatus('2089b05ecca3d829')`` with ``id='foo'`` looks like
-this::
-
-  /jsonrpc?method=aria2.tellStatus&id=foo&params=WyIyMDg5YjA1ZWNjYTNkODI5Il0%3D
-
-
-The ``params`` parameter is Base64-encoded JSON array which usually
-appears in ``params`` attribute in JSON-RPC request object.  In the
-above example, the params is ``["2089b05ecca3d829"]``, therefore::
-
-  ["2089b05ecca3d829"] --(Base64)--> WyIyMDg5YjA1ZWNjYTNkODI5Il0=
-               --(Percent Encode)--> WyIyMDg5YjA1ZWNjYTNkODI5Il0%3D
-
-
-The JSON-RPC interface also supports JSONP. You can specify the callback
-function in the ``jsoncallback`` parameter::
-
-  /jsonrpc?method=aria2.tellStatus&id=foo&params=WyIyMDg5YjA1ZWNjYTNkODI5Il0%3D&jsoncallback=cb
-
-For Batch requests, the ``method`` and ``id`` parameters must not be specified.
-The whole request must be specified in the ``params`` parameter. For example,
-a Batch request::
-
-  [{'jsonrpc':'2.0', 'id':'qwer', 'method':'aria2.getVersion'},
-   {'jsonrpc':'2.0', 'id':'asdf', 'method':'aria2.tellActive'}]
-
-
-must be encoded like this::
-
-  /jsonrpc?params=W3sianNvbnJwYyI6ICIyLjAiLCAiaWQiOiAicXdlciIsICJtZXRob2QiOiAiYXJpYTIuZ2V0VmVyc2lvbiJ9LCB7Impzb25ycGMiOiAiMi4wIiwgImlkIjogImFzZGYiLCAibWV0aG9kIjogImFyaWEyLnRlbGxBY3RpdmUifV0%3D
-
-
-JSON-RPC over WebSocket
-~~~~~~~~~~~~~~~~~~~~~~~
-
-JSON-RPC over WebSocket uses same method signatures and response
-format as JSON-RPC over HTTP. The supported WebSocket version is 13
-which is detailed in :rfc:`6455`.
-
-To send a RPC request to the RPC server, send a serialized JSON string
-in a Text frame. The response from the RPC server is delivered also in
-a Text frame.
-
-Notifications
-^^^^^^^^^^^^^
-The RPC server might send notifications to the client. Notifications is
-unidirectional, therefore the client which receives the notification must not
-respond to it. The method signature of a notification is much like a normal
-method request but lacks the id key. The value of the params key is the data
-which this notification carries. The format of the value varies depending on the
-notification method. Following notification methods are defined.
 
 
 .. function:: aria2.onDownloadStart(event)
@@ -3865,38 +3285,6 @@ notification method. Following notification methods are defined.
   This notification will be sent when a torrent download is complete but seeding
   is still going on.  The *event* is the same struct as the *event* argument of
   :func:`aria2.onDownloadStart` method.
-
-Sample XML-RPC Client Code
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The following Ruby script adds ``http://localhost/aria2.tar.bz2`` to
-aria2c (running on localhost) with option :option:`--dir=/downloads <-d>` and
-prints the RPC response:
-
-.. code-block:: ruby
-
-  #!/usr/bin/env ruby
-
-  require 'xmlrpc/client'
-  require 'pp'
-
-  client=XMLRPC::Client.new2("http://localhost:6800/rpc")
-
-  options={ "dir" => "/downloads" }
-  result=client.call("aria2.addUri", [ "http://localhost/aria2.tar.bz2" ], options)
-
-  pp result
-
-
-If you are a Python lover, you can use xmlrpclib (Python3 uses
-xmlrpc.client instead) to interact with aria2::
-
-  import xmlrpclib
-  from pprint import pprint
-
-  s = xmlrpclib.ServerProxy("http://localhost:6800/rpc")
-  r = s.aria2.addUri(["http://localhost/aria2.tar.bz2"], {"dir":"/downloads"})
-  pprint(r)
 
 MISC
 ----
@@ -4043,383 +3431,9 @@ Using a Proxy with authorization
   $ aria2c --http-proxy="http://proxy:8080" --http-proxy-user="username" --http-proxy-passwd="password" "http://host/file"
 
 
-Metalink Download
-~~~~~~~~~~~~~~~~~
-Download files with remote Metalink
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --follow-metalink=mem "http://host/file.metalink"
-
-
-Download using a local metalink file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -p --lowest-speed-limit=4000 file.metalink
-
-.. note::
-
-  To stop a download, press :kbd:`Ctrl-C`.
-  You can resume the transfer by running aria2c with the same argument in the same
-  directory.
-
-Download several local metalink files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -j2 file1.metalink file2.metalink
-
-
-Download only selected files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --select-file=1-4,8 file.metalink
-
-.. note::
-
-  The index is printed to the console using -S option.
-
-Download a file using a local metalink file with user preference
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --metalink-location=jp,us --metalink-version=1.1 --metalink-language=en-US file.metalink
-
-
-BitTorrent Download
-~~~~~~~~~~~~~~~~~~~
-Download files using a remote BitTorrent file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --follow-torrent=mem "http://host/file.torrent"
-
-
-Download using a local torrent file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --max-upload-limit=40K file.torrent
-
-.. note::
-
-  --max-upload-limit specifies the max of upload rate.
-
-.. note::
-
-  To stop a download, press :kbd:`Ctrl-C`. You can resume the transfer later by
-  running aria2c with the same argument in the same directory.
-
-Download using BitTorrent Magnet URI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c "magnet:?xt=urn:btih:248D0A1CD08284299DE78D5C1ED359BB46717D8C&dn=aria2"
-
-
-.. note::
-
-  Don't forget to quote BitTorrent Magnet URIs which include ``&``
-  characters with single(``'``) or double(``"``) quotes when specifying URIs on
-  the command-line.
-
-Download 2 torrents
-^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -j2 file1.torrent file2.torrent
-
-
-Download a file via torrent and HTTP/FTP server in parallel
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -Ttest.torrent "http://host1/file" "ftp://host2/file"
-
-Only download specific files (usually called "selected download")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --select-file=1-4,8 file.torrent
-
-.. note::
-
-  The index is printed to the console using -S option.
-
-Download a .torrent file, but do not download the torrent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --follow-torrent=false "http://host/file.torrent"
-
-Specify the output file name
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To specify the output file name for BitTorrent downloads, you need to know
-the index of file in the torrent (see :option:`--show-files <-S>`). For
-example, the output looks like this:
-
-.. code-block:: text
-
-  idx|path/length
-  ===+======================
-    1|dist/base-2.6.18.iso
-     |99.9MiB
-  ---+----------------------
-    2|dist/driver-2.6.18.iso
-     |169.0MiB
-  ---+----------------------
-
-
-To save 'dist/base-2.6.18.iso' in '/tmp/mydir/base.iso' and
-'dist/driver-2.6.18.iso' in '/tmp/dir/driver.iso', use the following
-command:
-
-.. code-block:: console
-
-  $ aria2c --dir=/tmp --index-out=1=mydir/base.iso --index-out=2=dir/driver.iso file.torrent
-
-
-Change the listening ports for incoming peer connections
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --listen-port=7000-7001,8000 file.torrent
-
-.. note::
-
-  Since aria2 doesn't configure firewalls or routers for port forwarding, it's
-  up to you to do so manually.
-
-Specify conditions to stop seeding after torrent downloads finish
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --seed-time=120 --seed-ratio=1.0 file.torrent
-
-.. note::
-
-  In the above example, the program stops seeding after 120 minutes since
-  download completed or seed ratio reaches 1.0.
-
-Throttle upload speed
-^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --max-upload-limit=100K file.torrent
-
-Enable IPv4 DHT
-^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --enable-dht --dht-listen-port=6881 file.torrent
-
-.. note::
-
-  DHT uses UDP. Since aria2 doesn't configure firewalls or routers for port
-  forwarding, it's up to you to do it manually.
-
-Enable IPv6 DHT
-^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --enable-dht6 --dht-listen-port=6881 --dht-listen-addr6=YOUR_GLOBAL_UNICAST_IPV6_ADDR
-
-.. note::
-
-  aria2 uses the same ports as IPv4 for IPv6.
-
-Add and remove tracker URIs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ignore all tracker announce URIs defined in file.torrent and use
-``http://tracker1/announce`` and ``http://tracker2/announce`` instead:
-
-.. code-block:: console
-
-  $ aria2c --bt-exclude-tracker="*" --bt-tracker="http://tracker1/announce,http://tracker2/announce" file.torrent
-
-
-More advanced HTTP features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Load cookies
-^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --load-cookies=cookies.txt "http://host/file.zip"
-
-.. note::
-
-  You can use Firefox/Mozilla/Chromium's cookie files without modification.
-
-Resume download started by web browsers or other programs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -c -s2 "http://host/partiallydownloadedfile.zip"
-
-.. note::
-
-  This will only work when the initial download was not multi-segmented.
-
-Client certificate authorization for SSL/TLS
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Specify a PKCS12 file as follows:
-
-.. code-block:: console
-
-  $ aria2c --certificate=/path/to/mycert.p12
-
-.. note::
-
-  The file specified in :option:`--certificate` must be contain one PKCS12 encoded
-  certificate and key. The password must be blank.
-
-Alternatively, if PEM files are supported, use a command like the following:
-
-.. code-block:: console
-
-  $ aria2c --certificate=/path/to/mycert.pem --private-key=/path/to/mykey.pem https://host/file
-
-.. note::
-
-  The file specified in :option:`--private-key` must be decrypted; an encrypted
-  key may cause undefined behavior.
-
-Verify SSL/TLS servers using given CA certificates
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --ca-certificate=/path/to/ca-certificates.crt --check-certificate https://host/file
-
-.. note::
-
-  This option is only available when aria2 was compiled against GnuTLS or
-  OpenSSL.
-  WinTLS and AppleTLS will always use the system certificate store. Instead of
-  ```--ca-certificate`` install the certificate in that store.
-
-RPC
-~~~
-
-Encrypt RPC traffic with SSL/TLS
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Specify a server PKC12 file:
-
-.. code-block:: console
-
-  $ aria2c --enable-rpc --rpc-certificate=/path/to/server.p12 --rpc-secure
-
-.. note::
-
-  The file specified in :option:`--rpc-certificate` must be contain one PKCS12
-  encoded certificate and key. The password must be blank.
-
-Alternatively, when PEM files are supported (GnuTLS and OpenSSL), specify the
-server certificate file and private key file as follows:
-
-.. code-block:: console
-
-  $ aria2c --enable-rpc --rpc-certificate=/path/to/server.crt --rpc-private-key=/path/to/server.key --rpc-secure
-
-And more advanced features
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-Throttle the download speed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Per-download:
-
-.. code-block:: console
-
-  $ aria2c --max-download-limit=100K file.metalink
-
-Overall:
-
-.. code-block:: console
-
-  $ aria2c --max-overall-download-limit=100K file.metalink
-
-
-Repair a damaged download
-^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -V file.metalink
-
-.. note::
-
-  Repairing damaged downloads can be done efficiently when used with
-  BitTorrent or Metalink with chunk checksums.
-
-Drop connections if download speed is lower than a specified limit
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --lowest-speed-limit=10K file.metalink
-
-
-Parameterized URI support
-^^^^^^^^^^^^^^^^^^^^^^^^^
-You can specify set of parts:
-
-.. code-block:: console
-
-  $ aria2c -P "http://{host1,host2,host3}/file.iso"
-
-
-You can specify numeric sequence:
-
-.. code-block:: console
-
-  $ aria2c -Z -P "http://host/image[000-100].png"
-
-
-.. note::
-
-  The -Z option is required if the URIs don't point to the same file, such as in
-  the above example.
-
-You can specify step counter:
-
-.. code-block:: console
-
-  $ aria2c -Z -P "http://host/image[A-Z:2].png"
-
-
-Verifying checksums
-^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c --checksum=sha-1=0192ba11326fe2298c8cb4de616f4d4140213837 http://example.org/file
-
-
-Parallel downloads of an arbitrary number of URIs, metalink, torrent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: console
-
-  $ aria2c -j3 -Z "http://host/file1" file2.torrent file3.metalink
-
-
-BitTorrent Encryption
-^^^^^^^^^^^^^^^^^^^^^
-Encrypt the whole payload using ARC4 (obfuscation):
-
-.. code-block:: console
-
-  $ aria2c --bt-min-crypto-level=arc4 --bt-require-crypto=true file.torrent
-
-
 SEE ALSO
 --------
 Project Web Site: https://aria2.github.io/
-
-Metalink Homepage: http://www.metalinker.org/
-
-The Metalink Download Description Format: :rfc:`5854`
 
 COPYRIGHT
 ---------

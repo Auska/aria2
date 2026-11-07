@@ -18,7 +18,6 @@
 #include "AuthConfigFactory.h"
 #include "AuthConfig.h"
 #include "StreamFilter.h"
-#include "MetalinkHttpEntry.h"
 #include "Option.h"
 #include "Checksum.h"
 
@@ -52,7 +51,6 @@ class HttpResponseTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testProcessRedirect);
   CPPUNIT_TEST(testRetrieveCookie);
   CPPUNIT_TEST(testSupportsPersistentConnection);
-  CPPUNIT_TEST(testGetMetalinKHttpEntries);
   CPPUNIT_TEST(testGetDigest);
   CPPUNIT_TEST_SUITE_END();
 
@@ -84,7 +82,6 @@ public:
   void testProcessRedirect();
   void testRetrieveCookie();
   void testSupportsPersistentConnection();
-  void testGetMetalinKHttpEntries();
   void testGetDigest();
 };
 
@@ -129,10 +126,10 @@ void HttpResponseTest::testGetContentType()
   HttpResponse httpResponse;
   auto httpHeader = make_unique<HttpHeader>();
   httpHeader->put(HttpHeader::CONTENT_TYPE,
-                  "application/metalink+xml; charset=UTF-8");
+                  "application/octet-stream; charset=UTF-8");
   httpResponse.setHttpHeader(std::move(httpHeader));
   // See parameter is ignored.
-  CPPUNIT_ASSERT_EQUAL(std::string("application/metalink+xml"),
+  CPPUNIT_ASSERT_EQUAL(std::string("application/octet-stream"),
                        httpResponse.getContentType());
 }
 
@@ -602,59 +599,6 @@ void HttpResponseTest::testSupportsPersistentConnection()
   httpResponse.getHttpHeader()->clearField();
 }
 
-void HttpResponseTest::testGetMetalinKHttpEntries()
-{
-  HttpResponse httpResponse;
-  httpResponse.setHttpHeader(make_unique<HttpHeader>());
-  std::shared_ptr<Option> option(new Option());
-
-  httpResponse.getHttpHeader()->put(
-      HttpHeader::LINK, "<http://uri1/>; rel=duplicate; pri=1; pref; geo=JP");
-  httpResponse.getHttpHeader()->put(HttpHeader::LINK,
-                                    "<http://uri2/>; rel=duplicate");
-  httpResponse.getHttpHeader()->put(
-      HttpHeader::LINK, "<http://uri3/>;;;;;;;;rel=duplicate;;;;;pri=2;;;;;");
-  httpResponse.getHttpHeader()->put(HttpHeader::LINK,
-                                    "<http://uri4/>;rel=duplicate;=pri=1;pref");
-  httpResponse.getHttpHeader()->put(HttpHeader::LINK,
-                                    "<http://describedby>; rel=describedby");
-  httpResponse.getHttpHeader()->put(HttpHeader::LINK, "<http://norel/>");
-  httpResponse.getHttpHeader()->put(HttpHeader::LINK,
-                                    "<baduri>; rel=duplicate; pri=-1;");
-  std::vector<MetalinkHttpEntry> result;
-  httpResponse.getMetalinKHttpEntries(result, option);
-  CPPUNIT_ASSERT_EQUAL((size_t)5, result.size());
-
-  MetalinkHttpEntry e = result[0];
-  CPPUNIT_ASSERT_EQUAL(std::string("http://uri1/"), e.uri);
-  CPPUNIT_ASSERT_EQUAL(1, e.pri);
-  CPPUNIT_ASSERT(e.pref);
-  CPPUNIT_ASSERT_EQUAL(std::string("jp"), e.geo);
-
-  e = result[1];
-  CPPUNIT_ASSERT_EQUAL(std::string("http://uri4/"), e.uri);
-  CPPUNIT_ASSERT_EQUAL(999999, e.pri);
-  CPPUNIT_ASSERT(e.pref);
-  CPPUNIT_ASSERT(e.geo.empty());
-
-  e = result[2];
-  CPPUNIT_ASSERT_EQUAL(std::string("http://uri3/"), e.uri);
-  CPPUNIT_ASSERT_EQUAL(2, e.pri);
-  CPPUNIT_ASSERT(!e.pref);
-  CPPUNIT_ASSERT(e.geo.empty());
-
-  e = result[3];
-  CPPUNIT_ASSERT_EQUAL(std::string("http://uri2/"), e.uri);
-  CPPUNIT_ASSERT_EQUAL(999999, e.pri);
-  CPPUNIT_ASSERT(!e.pref);
-  CPPUNIT_ASSERT(e.geo.empty());
-
-  e = result[4];
-  CPPUNIT_ASSERT_EQUAL(std::string("baduri"), e.uri);
-  CPPUNIT_ASSERT_EQUAL(999999, e.pri);
-  CPPUNIT_ASSERT(!e.pref);
-  CPPUNIT_ASSERT(e.geo.empty());
-}
 
 void HttpResponseTest::testGetDigest()
 {

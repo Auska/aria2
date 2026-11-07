@@ -85,10 +85,6 @@ private:
 
   bool knowsTotalLength_;
 
-  // This member variable is required to avoid to use parse Metalink
-  // (including both Metalink XML and Metalink/HTTP) twice.
-  bool acceptMetalink_;
-
 public:
   DownloadContext();
 
@@ -219,9 +215,6 @@ public:
   std::shared_ptr<FileEntry> findFileEntryByOffset(int64_t offset) const;
 
   void releaseRuntimeResource();
-
-  void setAcceptMetalink(bool f) { acceptMetalink_ = f; }
-  bool getAcceptMetalink() const { return acceptMetalink_; }
 
   NetStat& getNetStat() { return netStat_; }
 

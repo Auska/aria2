@@ -10,21 +10,17 @@ Introduction
 ------------
 
 aria2 is a utility for downloading files. The supported protocols are
-HTTP(S), FTP, SFTP, BitTorrent, and Metalink. aria2 can download a
+HTTP(S), FTP, SFTP and BitTorrent. aria2 can download a
 file from multiple sources/protocols and tries to utilize your maximum
 download bandwidth. It supports downloading a file from
 HTTP(S)/FTP/SFTP and BitTorrent at the same time, while the data
 downloaded from HTTP(S)/FTP/SFTP is uploaded to the BitTorrent
-swarm. Using Metalink's chunk checksums, aria2 automatically validates
-chunks of data while downloading a file like BitTorrent.
+swarm.
 
 The project page is located at https://aria2.github.io/.
 
 See the `aria2 Online Manual
-<https://aria2.github.io/manual/en/html/>`_ (`Russian translation
-<https://aria2.github.io/manual/ru/html/>`_, `Portuguese
-translation <https://aria2.github.io/manual/pt/html/>`_) to learn
-how to use aria2.
+<https://aria2.github.io/manual/en/html/>`_ to learn how to use aria2.
 
 Features
 --------
@@ -34,9 +30,6 @@ Here is a list of features:
 * Command-line interface
 * Download files through HTTP(S)/FTP/SFTP/BitTorrent
 * Segmented downloading
-* Metalink version 4 (RFC 5854) support(HTTP/FTP/SFTP/BitTorrent)
-* Metalink version 3.0 support(HTTP/FTP/SFTP/BitTorrent)
-* Metalink/HTTP (RFC 6249) support
 * HTTP/1.1 implementation
 * HTTP Proxy support
 * HTTP BASIC authentication support
@@ -63,11 +56,8 @@ Here is a list of features:
 * BitTorrent Local Peer Discovery
 * Rename/change the directory structure of BitTorrent downloads
   completely
-* JSON-RPC (over HTTP and WebSocket)/XML-RPC interface
+* JSON-RPC (over HTTP and WebSocket) interface
 * Run as a daemon process
-* Selective download in multi-file torrent/Metalink
-* Chunk checksum validation in Metalink
-* Can disable segmented downloading in Metalink
 * Netrc support
 * Configuration file support
 * Download URIs found in a text file or stdin and the destination
@@ -116,21 +106,14 @@ HTTPS                    GnuTLS or OpenSSL
 SFTP                     libssh2
 BitTorrent               None. Optional: libnettle+libgmp or libgcrypt
                          or OpenSSL (see note)
-Metalink                 libxml2 or Expat.
 Checksum                 None. Optional: libnettle or libgcrypt
                          or OpenSSL (see note)
 gzip, deflate in HTTP    zlib
 Async DNS                C-Ares
 Firefox3/Chromium cookie libsqlite3
-XML-RPC                  libxml2 or Expat.
 JSON-RPC over WebSocket  libnettle or libgcrypt or OpenSSL
 ======================== ========================================
 
-
-.. note::
-
-  libxml2 has precedence over Expat if both libraries are installed.
-  If you prefer Expat, run configure with ``--without-libxml2``.
 
 .. note::
 
@@ -155,9 +138,8 @@ libraries:
 * GnuTLS + libgcrypt
 * GnuTLS + libnettle
 
-You can disable BitTorrent and Metalink support by providing
-``--disable-bittorrent`` and ``--disable-metalink`` to the configure
-script respectively.
+You can disable BitTorrent support by providing
+``--disable-bittorrent`` to the configure script.
 
 To enable async DNS support, you need c-ares.
 
@@ -181,7 +163,6 @@ distribution you use):
 * libgmp-dev       (Required for BitTorrent)
 * libssh2-1-dev    (Required for SFTP support)
 * libc-ares-dev    (Required for async DNS support)
-* libxml2-dev      (Required for Metalink support)
 * zlib1g-dev       (Required for gzip, deflate decoding support in HTTP)
 * libsqlite3-dev   (Required for Firefox3/Chromium cookie support)
 * pkg-config       (Required to detect installed libraries)
@@ -196,17 +177,12 @@ libgnutls-dev, nettle-dev, libgmp-dev, libgpg-error-dev and libgcrypt-dev:
 
 * libssl-dev       (Required for HTTPS, BitTorrent, Checksum support)
 
-You can use libexpat1-dev instead of libxml2-dev:
-
-* libexpat1-dev    (Required for Metalink support)
-
 On Fedora you need the following packages: gcc, gcc-c++, kernel-devel,
-libgcrypt-devel, libxml2-devel, openssl-devel, cppunit
+libgcrypt-devel, openssl-devel, cppunit
 
 If you downloaded source code from a git repository, you have to install
 the following packages to get autoconf macros:
 
-* libxml2-dev
 * libcppunit-dev
 * autoconf
 * automake
@@ -276,9 +252,7 @@ Building documentation
 documentation. aria2 man pages will be build when you run ``make`` if
 they are not up-to-date.  You can also build an HTML version of the aria2
 man page by ``make html``. The HTML version manual is also available
-`online <https://aria2.github.io/manual/en/html/>`_ (`Russian
-translation <https://aria2.github.io/manual/ru/html/>`_, `Portuguese
-translation <https://aria2.github.io/manual/pt/html/>`_).
+`online <https://aria2.github.io/manual/en/html/>`_.
 
 BitTorrent
 -----------
@@ -339,55 +313,6 @@ Other things should be noted
 * As of release 0.10.0, aria2 stops sending request messages after
   selective download completes.
 
-Metalink
---------
-
-The current implementation supports HTTP(S)/FTP/SFTP/BitTorrent.  The
-other P2P protocols are ignored. Both Metalink4 (RFC 5854) and
-Metalink version 3.0 documents are supported.
-
-For checksum verification, md5, sha-1, sha-224, sha-256, sha-384, and
-sha-512 are supported. If multiple hash algorithms are provided, aria2
-uses a stronger one. If whole file checksum verification fails, aria2
-doesn't retry the download and just exits with a non-zero return code.
-
-The supported user preferences are version, language, location,
-protocol, and os.
-
-If chunk checksums are provided in the Metalink file, aria2 automatically
-validates chunks of data during download. This behavior can be turned
-off by a command-line option.
-
-If a signature is included in a Metalink file, aria2 saves it as a file
-after the completion of the download.  The file name is download
-file name + ".sig". If the same file already exists, the signature file is
-not saved.
-
-In Metalink4, a multi-file torrent could appear in metalink:metaurl
-element.  Since aria2 cannot download 2 same torrents at the same
-time, aria2 groups files in metalink:file element which has the same
-BitTorrent metaurl, and downloads them from a single BitTorrent swarm.
-This is a basically multi-file torrent download with file selection, so
-the adjacent files which are not in Metalink document but share the same
-piece with the selected file are also created.
-
-If relative URI is specified in metalink:url or metalink:metaurl
-element, aria2 uses the URI of Metalink file as base URI to resolve
-the relative URI. If relative URI is found in the Metalink file which is
-read from the local disk, aria2 uses the value of ``--metalink-base-uri``
-option as base URI. If this option is not specified, the relative URI
-will be ignored.
-
-Metalink/HTTP
--------------
-
-The current implementation only uses rel=duplicate links.  aria2
-understands Digest header fields and check whether it matches the
-digest value from other sources. If it differs, drop the connection.
-aria2 also uses this digest value to perform checksum verification
-after the download is finished. aria2 recognizes geo value. To tell aria2
-which location you prefer, you can use ``--metalink-location`` option.
-
 netrc
 -----
 
@@ -423,8 +348,6 @@ References
 * `RFC 3659 Extensions to FTP <http://tools.ietf.org/html/rfc3659>`_
 * `RFC 3986 Uniform Resource Identifier (URI): Generic Syntax <http://tools.ietf.org/html/rfc3986>`_
 * `RFC 4038 Application Aspects of IPv6 Transition <http://tools.ietf.org/html/rfc4038>`_
-* `RFC 5854 The Metalink Download Description Format <http://tools.ietf.org/html/rfc5854>`_
-* `RFC 6249 Metalink/HTTP: Mirrors and Hashes <http://tools.ietf.org/html/rfc6249>`_
 * `RFC 6265 HTTP State Management Mechanism <http://tools.ietf.org/html/rfc6265>`_
 * `RFC 6266 Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP) <http://tools.ietf.org/html/rfc6266>`_
 * `RFC 6455 The WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_

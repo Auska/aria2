@@ -91,9 +91,6 @@ private:
 
   bool contentEncodingEnabled_;
 
-  // If true, metalink content types are sent in Accept header field.
-  bool acceptMetalink_;
-
   bool noCache_;
 
   bool acceptGzip_;
@@ -174,8 +171,6 @@ public:
   void clearHeader();
 
   void addAcceptType(const std::string& type);
-
-  void setAcceptMetalink(bool f) { acceptMetalink_ = f; }
 
   void setCookieStorage(CookieStorage* cookieStorage);
 

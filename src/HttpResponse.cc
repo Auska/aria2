@@ -56,7 +56,6 @@
 #include "Option.h"
 #include "Checksum.h"
 #include "uri.h"
-#include "MetalinkHttpEntry.h"
 #include "base64.h"
 #include "array_fun.h"
 #include "MessageDigest.h"
@@ -276,111 +275,6 @@ Time HttpResponse::getLastModifiedTime() const
 bool HttpResponse::supportsPersistentConnection() const
 {
   return httpHeader_->isKeepAlive();
-}
-
-namespace {
-
-bool parseMetalinkHttpLink(MetalinkHttpEntry& result, const std::string& s)
-{
-  const auto first = std::find(s.begin(), s.end(), '<');
-  if (first == s.end()) {
-    return false;
-  }
-
-  auto last = std::find(first, s.end(), '>');
-  if (last == s.end()) {
-    return false;
-  }
-
-  auto p = util::stripIter(first + 1, last);
-  if (p.first == p.second) {
-    return false;
-  }
-
-  result.uri.assign(p.first, p.second);
-  last = std::find(last, s.end(), ';');
-  if (last != s.end()) {
-    ++last;
-  }
-  bool ok = false;
-  while (1) {
-    std::string name, value;
-    auto r = util::nextParam(name, value, last, s.end(), ';');
-    last = r.first;
-
-    if (!r.second) {
-      break;
-    }
-
-    if (value.empty()) {
-      if (name == "pref") {
-        result.pref = true;
-      }
-      continue;
-    }
-
-    if (name == "rel") {
-      if (value == "duplicate") {
-        ok = true;
-      }
-      else {
-        ok = false;
-      }
-      continue;
-    }
-
-    if (name == "pri") {
-      int32_t priValue;
-      if (util::parseIntNoThrow(priValue, value)) {
-        if (1 <= priValue && priValue <= 999999) {
-          result.pri = priValue;
-        }
-      }
-      continue;
-    }
-
-    if (name == "geo") {
-      util::lowercase(value);
-      result.geo = value;
-      continue;
-    }
-  }
-  return ok;
-}
-
-} // namespace
-
-// Metalink/HTTP is defined by http://tools.ietf.org/html/rfc6249.
-// Link header field is defined by http://tools.ietf.org/html/rfc5988.
-void HttpResponse::getMetalinKHttpEntries(
-    std::vector<MetalinkHttpEntry>& result,
-    const std::shared_ptr<Option>& option) const
-{
-  auto p = httpHeader_->equalRange(HttpHeader::LINK);
-  for (; p.first != p.second; ++p.first) {
-    MetalinkHttpEntry e;
-    if (parseMetalinkHttpLink(e, (*p.first).second)) {
-      result.push_back(e);
-    }
-  }
-
-  if (!result.empty()) {
-    std::vector<std::string> locs;
-    if (option->defined(PREF_METALINK_LOCATION)) {
-      const std::string& loc = option->get(PREF_METALINK_LOCATION);
-      util::split(loc.begin(), loc.end(), std::back_inserter(locs), ',', true);
-      for (auto& l : locs) {
-        util::lowercase(l);
-      }
-    }
-    for (auto& r : result) {
-      if (std::find(locs.begin(), locs.end(), r.geo) != locs.end()) {
-        r.pri -= 999999;
-      }
-    }
-  }
-
-  std::sort(result.begin(), result.end());
 }
 
 // Digest header field is defined by

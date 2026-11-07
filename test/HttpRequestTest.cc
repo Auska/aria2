@@ -37,7 +37,6 @@ class HttpRequestTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testIsRangeSatisfied);
   CPPUNIT_TEST(testUserAgent);
   CPPUNIT_TEST(testAddHeader);
-  CPPUNIT_TEST(testAcceptMetalink);
   CPPUNIT_TEST(testEnableAcceptEncoding);
   CPPUNIT_TEST(testConditionalRequest);
   CPPUNIT_TEST_SUITE_END();
@@ -68,7 +67,6 @@ public:
   void testIsRangeSatisfied();
   void testUserAgent();
   void testAddHeader();
-  void testAcceptMetalink();
   void testEnableAcceptEncoding();
   void testConditionalRequest();
 };
@@ -826,31 +824,6 @@ void HttpRequestTest::testAddHeader()
   CPPUNIT_ASSERT_EQUAL(expectedText, httpRequest.createRequest());
 }
 
-void HttpRequestTest::testAcceptMetalink()
-{
-  auto request = std::make_shared<Request>();
-  request->setUri("http://localhost/archives/aria2-1.0.0.tar.bz2");
-
-  HttpRequest httpRequest;
-  httpRequest.disableContentEncoding();
-  httpRequest.setRequest(request);
-  httpRequest.setAuthConfigFactory(authConfigFactory_.get());
-  httpRequest.setOption(option_.get());
-  httpRequest.setAcceptMetalink(true);
-  httpRequest.setNoWantDigest(true);
-
-  std::string expectedText =
-      "GET /archives/aria2-1.0.0.tar.bz2 HTTP/1.1\r\n"
-      "User-Agent: aria2\r\n"
-      "Accept: */*,application/metalink4+xml,application/metalink+xml\r\n"
-      "Host: localhost\r\n"
-      "Pragma: no-cache\r\n"
-      "Cache-Control: no-cache\r\n"
-      "Connection: close\r\n"
-      "\r\n";
-
-  CPPUNIT_ASSERT_EQUAL(expectedText, httpRequest.createRequest());
-}
 
 void HttpRequestTest::testEnableAcceptEncoding()
 {

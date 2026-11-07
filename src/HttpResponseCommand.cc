@@ -73,7 +73,6 @@
 #include "ChunkedDecodingStreamFilter.h"
 #include "uri.h"
 #include "SocketRecvBuffer.h"
-#include "MetalinkHttpEntry.h"
 #include "NullProgressInfoFile.h"
 #include "Checksum.h"
 #include "ChecksumCheckIntegrityEntry.h"
@@ -206,19 +205,6 @@ bool HttpResponseCommand::executeInternal()
   }
 
   if (!getPieceStorage()) {
-    // Metalink/HTTP
-    if (ctx->getAcceptMetalink()) {
-      if (httpHeader->defined(HttpHeader::LINK)) {
-        ctx->setAcceptMetalink(false);
-        std::vector<MetalinkHttpEntry> entries;
-        httpResponse->getMetalinKHttpEntries(entries, getOption());
-        for (const auto& e : entries) {
-          fe->addUri(e.uri);
-          A2_LOG_DEBUG(fmt("Adding URI=%s", e.uri.c_str()));
-        }
-      }
-    }
-
     if (httpHeader->defined(HttpHeader::DIGEST)) {
       std::vector<Checksum> checksums;
       httpResponse->getDigest(checksums);
@@ -257,7 +243,6 @@ bool HttpResponseCommand::executeInternal()
   }
 
   if (!getPieceStorage()) {
-    ctx->setAcceptMetalink(false);
     int64_t totalLength = httpResponse->getEntityLength();
     fe->setLength(totalLength);
     if (fe->getPath().empty()) {

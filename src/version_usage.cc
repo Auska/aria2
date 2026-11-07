@@ -84,8 +84,7 @@ void showVersion()
 void showUsage(const std::string& keyword,
                const std::shared_ptr<OptionParser>& oparser, const Console& out)
 {
-  out->printf(_("Usage: aria2c [OPTIONS] [URI | MAGNET | TORRENT_FILE |"
-                " METALINK_FILE]..."));
+  out->printf(_("Usage: aria2c [OPTIONS] [URI | MAGNET | TORRENT_FILE]..."));
   out->printf("\n");
   if (keyword.empty()) {
     // Very short version of usage.
@@ -139,15 +138,15 @@ void showUsage(const std::string& keyword,
     }
   }
   if (keyword == strHelpTag(TAG_BASIC)) {
-    out->printf("URI, MAGNET, TORRENT_FILE, METALINK_FILE:\n");
+    out->printf("URI, MAGNET, TORRENT_FILE:\n");
     out->printf(
         _(" You can specify multiple HTTP(S)/FTP URIs. Unless you specify -Z "
           "option, all\n"
           " URIs must point to the same file or downloading will fail."));
     out->printf("\n");
     out->printf(_(" You can also specify arbitrary number of BitTorrent Magnet "
-                  "URIs, torrent/\n"
-                  " metalink files stored in a local drive. Please note that "
+                  "URIs and torrent\n"
+                  " files stored in a local drive. Please note that "
                   "they are always\n"
                   " treated as a separate download."));
     out->printf("\n\n");

@@ -32,7 +32,7 @@
  * files in the program, then also delete it here.
  */
 /* copyright --> */
-#include "XmlRpcRequestParserController.h"
+#include "ValueBaseParserController.h"
 
 #include <cassert>
 
@@ -40,13 +40,13 @@ namespace aria2 {
 
 namespace rpc {
 
-void XmlRpcRequestParserController::pushFrame()
+void ValueBaseParserController::pushFrame()
 {
   frameStack_.push(std::move(currentFrame_));
   currentFrame_ = StateFrame();
 }
 
-void XmlRpcRequestParserController::popStructFrame()
+void ValueBaseParserController::popStructFrame()
 {
   assert(!frameStack_.empty());
 
@@ -60,7 +60,7 @@ void XmlRpcRequestParserController::popStructFrame()
   currentFrame_ = std::move(parentFrame);
 }
 
-void XmlRpcRequestParserController::popArrayFrame()
+void ValueBaseParserController::popArrayFrame()
 {
   assert(!frameStack_.empty());
 
@@ -74,29 +74,29 @@ void XmlRpcRequestParserController::popArrayFrame()
   currentFrame_ = std::move(parentFrame);
 }
 
-void XmlRpcRequestParserController::setCurrentFrameValue(
+void ValueBaseParserController::setCurrentFrameValue(
     std::unique_ptr<ValueBase> value)
 {
   currentFrame_.value_ = std::move(value);
 }
 
-void XmlRpcRequestParserController::setCurrentFrameName(std::string name)
+void ValueBaseParserController::setCurrentFrameName(std::string name)
 {
   currentFrame_.name_ = std::move(name);
 }
 
 const std::unique_ptr<ValueBase>&
-XmlRpcRequestParserController::getCurrentFrameValue() const
+ValueBaseParserController::getCurrentFrameValue() const
 {
   return currentFrame_.value_;
 }
 
-std::unique_ptr<ValueBase> XmlRpcRequestParserController::popCurrentFrameValue()
+std::unique_ptr<ValueBase> ValueBaseParserController::popCurrentFrameValue()
 {
   return std::move(currentFrame_.value_);
 }
 
-void XmlRpcRequestParserController::reset()
+void ValueBaseParserController::reset()
 {
   while (!frameStack_.empty()) {
     frameStack_.pop();
@@ -105,12 +105,12 @@ void XmlRpcRequestParserController::reset()
   methodName_.clear();
 }
 
-void XmlRpcRequestParserController::setMethodName(std::string methodName)
+void ValueBaseParserController::setMethodName(std::string methodName)
 {
   methodName_ = std::move(methodName);
 }
 
-void XmlRpcRequestParserController::setAllowEmptyMemberName(bool b)
+void ValueBaseParserController::setAllowEmptyMemberName(bool b)
 {
   allowEmptyMemberName_ = b;
 }

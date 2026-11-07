@@ -49,7 +49,6 @@ namespace aria2 {
 class HttpRequest;
 class HttpHeader;
 class StreamFilter;
-struct MetalinkHttpEntry;
 class Option;
 class Checksum;
 
@@ -120,9 +119,6 @@ public:
   Time getLastModifiedTime() const;
 
   bool supportsPersistentConnection() const;
-
-  void getMetalinKHttpEntries(std::vector<MetalinkHttpEntry>& result,
-                              const std::shared_ptr<Option>& option) const;
 
   // Returns all digests specified in Digest header field.  Sort
   // strong algorithm first. Strength is defined in MessageDigest. If

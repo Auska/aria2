@@ -2,7 +2,7 @@
 /*
  * aria2 - The high speed download utility
  *
- * Copyright (C) 2012 Tatsuhiro Tsujikawa
+ * Copyright (C) 2009 Tatsuhiro Tsujikawa
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,39 +32,78 @@
  * files in the program, then also delete it here.
  */
 /* copyright --> */
-#ifndef D_XML2_XML_PARSER_H
-#define D_XML2_XML_PARSER_H
+#ifndef D_VALUE_BASE_PARSER_CONTROLLER_H
+#define D_VALUE_BASE_PARSER_CONTROLLER_H
 
 #include "common.h"
 
-#include <sys/types.h>
+#include <stack>
+#include <string>
 
-#include <libxml/parser.h>
-
-#include "XmlParser.h"
+#include "ValueBase.h"
 
 namespace aria2 {
 
-namespace xml {
+namespace rpc {
 
-class XmlParser {
-public:
-  // This object does not delete psm.
-  XmlParser(ParserStateMachine* psm);
-  ~XmlParser();
-  ssize_t parseUpdate(const char* data, size_t size);
-  ssize_t parseFinal(const char* data, size_t size);
-  int reset();
-
+class ValueBaseParserController {
 private:
-  ParserStateMachine* psm_;
-  SessionData sessionData_;
-  xmlParserCtxtPtr ctx_;
-  int lastError_;
+  struct StateFrame {
+    std::unique_ptr<ValueBase> value_;
+    std::string name_;
+
+    bool validMember(bool allowEmptyMemberName) const
+    {
+      return value_ && (allowEmptyMemberName || !name_.empty());
+    }
+
+    void reset()
+    {
+      value_.reset();
+      name_.clear();
+    }
+  };
+
+  std::stack<StateFrame> frameStack_;
+
+  StateFrame currentFrame_;
+
+  std::string methodName_;
+
+  bool allowEmptyMemberName_;
+
+public:
+  ValueBaseParserController() : allowEmptyMemberName_(false) {}
+
+  void pushFrame();
+
+  // Pops StateFrame p from frameStack_ and set p[currentFrame_.name_]
+  // = currentFrame_.value_ and currentFrame_ = p;
+  void popStructFrame();
+
+  // Pops StateFrame p from frameStack_ and add currentFrame_.value_
+  // to p and currentFrame_ = p;
+  void popArrayFrame();
+
+  void setCurrentFrameValue(std::unique_ptr<ValueBase> value);
+
+  void setCurrentFrameName(std::string name);
+
+  const std::unique_ptr<ValueBase>& getCurrentFrameValue() const;
+
+  std::unique_ptr<ValueBase> popCurrentFrameValue();
+
+  void setMethodName(std::string methodName);
+
+  const std::string& getMethodName() const { return methodName_; }
+
+  void setAllowEmptyMemberName(bool b);
+
+  void reset();
 };
 
-} // namespace xml
+} // namespace rpc
 
 } // namespace aria2
 
-#endif // D_XML2_XML_PARSER_H
+#endif // D_VALUE_BASE_PARSER_CONTROLLER_H
