@@ -1,6 +1,6 @@
 # 任务：按模块推进现代化 —— 协议层（BT / DHT / HTTP / 网络）
 
-> 状态：⏳ 执行中
+> 状态：✅ 已完成（2026-11-07）
 
 ## 目标
 
@@ -480,6 +480,20 @@ BT 36（`AnnounceListTest`、`Bt*MessageTest`、`DefaultBt*Test`、
    `README.rst`、CI 不动。
 8. 提交信息为 `PLAN-004 阶段N: <子模块> 现代化`，无 `Co-authored-by`；
    本文档勾选项与实际一致。
+
+### 实测结果（2026-11-07）
+
+| 阶段 | 提交 | 干净快照门禁 | 用例数 |
+|---|---|---|---|
+| 1 NET | `03fae183` | `/tmp/aria2-m4-p1` 通过（TOTAL 1 / PASS 1） | `OK (913)` |
+| 2 DHT | `d2688db0` | `/tmp/aria2-m4-p2` 通过 | `OK (914)` |
+| 3 HTTP | `410a809f` | `/tmp/aria2-m4-p3` 通过 | `OK (914)` |
+| 4 BT | `8b369364` | `/tmp/aria2-m4-p4` 通过 | `OK (914)` |
+
+- 全量构建零 warning（`--enable-werror` 下 rc=0），`test/aria2c.log` 无 `Failures !!!`。
+- 第 1 条 N ≥ 913 已满足；用例数从 913 → 914 是阶段 2 计划要求的
+  `src/DHTNode.cc` 比较语义断言（`test/DHTNodeTest.cc`）带来的新增用例。
+- 验收第 4 条的 73 处 `ptr+len` **未全部**换 span：按审查 #4 的实际取舍见下。
 
 ## 风险与权衡
 
