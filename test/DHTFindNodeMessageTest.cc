@@ -55,7 +55,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTFindNodeMessageTest);
 void DHTFindNodeMessageTest::testGetBencodedMessage()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   auto targetNode = std::make_shared<DHTNode>();
@@ -81,7 +81,7 @@ void DHTFindNodeMessageTest::testGetBencodedMessage()
 void DHTFindNodeMessageTest::testDoReceivedAction()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   auto targetNode = std::make_shared<DHTNode>();

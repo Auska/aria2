@@ -171,14 +171,12 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
           "key=%s&"
           "numwant=%d&"
           "no_peer_id=1",
-          util::percentEncode(bittorrent::getInfoHash(downloadContext_),
-                              INFO_HASH_LENGTH)
+          util::percentEncode(std::as_bytes(std::span{bittorrent::getInfoHash(downloadContext_), INFO_HASH_LENGTH}))
               .c_str(),
-          util::percentEncode(bittorrent::getStaticPeerId(), PEER_ID_LENGTH)
+          util::percentEncode(std::as_bytes(std::span{bittorrent::getStaticPeerId(), PEER_ID_LENGTH}))
               .c_str(),
           stat.getSessionUploadLength(), stat.getSessionDownloadLength(), left,
-          util::percentEncode(
-              bittorrent::getStaticPeerId() + PEER_ID_LENGTH - keyLen, keyLen)
+          util::percentEncode(std::as_bytes(std::span{bittorrent::getStaticPeerId() + PEER_ID_LENGTH - keyLen, keyLen}))
               .c_str(),
           numWant);
   if (tcpPort_) {

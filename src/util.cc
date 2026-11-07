@@ -307,15 +307,16 @@ bool isUtf8(const std::string& str)
   return true;
 }
 
-std::string percentEncode(const unsigned char* target, size_t len)
+std::string percentEncode(std::span<const std::byte> target)
 {
   std::string dest;
-  for (size_t i = 0; i < len; ++i) {
-    if (inRFC3986UnreservedChars(target[i])) {
-      dest += target[i];
+  for (auto b : target) {
+    auto c = static_cast<unsigned char>(b);
+    if (inRFC3986UnreservedChars(c)) {
+      dest += static_cast<char>(c);
     }
     else {
-      dest.append(fmt("%%%02X", target[i]));
+      dest.append(fmt("%%%02X", c));
     }
   }
   return dest;
@@ -327,8 +328,8 @@ std::string percentEncode(const std::string& target)
                        inRFC3986UnreservedChars) == target.end()) {
     return target;
   }
-  return percentEncode(reinterpret_cast<const unsigned char*>(target.c_str()),
-                       target.size());
+  return percentEncode(
+      std::as_bytes(std::span{target.data(), target.size()}));
 }
 
 std::string percentEncodeMini(const std::string& src)
@@ -349,15 +350,16 @@ std::string percentEncodeMini(const std::string& src)
   return result;
 }
 
-std::string torrentPercentEncode(const unsigned char* target, size_t len)
+std::string torrentPercentEncode(std::span<const std::byte> target)
 {
   std::string dest;
-  for (size_t i = 0; i < len; ++i) {
-    if (isAlpha(target[i]) || isDigit(target[i])) {
-      dest += target[i];
+  for (auto b : target) {
+    auto c = static_cast<unsigned char>(b);
+    if (isAlpha(c) || isDigit(c)) {
+      dest += static_cast<char>(c);
     }
     else {
-      dest.append(fmt("%%%02X", target[i]));
+      dest.append(fmt("%%%02X", c));
     }
   }
   return dest;
@@ -366,7 +368,7 @@ std::string torrentPercentEncode(const unsigned char* target, size_t len)
 std::string torrentPercentEncode(const std::string& target)
 {
   return torrentPercentEncode(
-      reinterpret_cast<const unsigned char*>(target.c_str()), target.size());
+      std::as_bytes(std::span{target.data(), target.size()}));
 }
 
 std::string percentDecode(std::string::const_iterator first,
@@ -392,14 +394,14 @@ std::string percentDecode(std::string::const_iterator first,
   return result;
 }
 
-std::string toHex(const unsigned char* src, size_t len)
+std::string toHex(std::span<const std::byte> src)
 {
-  std::string out(len * 2, '\0');
+  std::string out(src.size() * 2, '\0');
   std::string::iterator o = out.begin();
-  const unsigned char* last = src + len;
-  for (const unsigned char* i = src; i != last; ++i) {
-    *o = (*i >> 4);
-    *(o + 1) = (*i) & 0x0fu;
+  for (auto b : src) {
+    auto c = static_cast<unsigned char>(b);
+    *o = (c >> 4);
+    *(o + 1) = c & 0x0fu;
     for (int j = 0; j < 2; ++j) {
       if (*o < 10) {
         *o += '0';
@@ -413,14 +415,9 @@ std::string toHex(const unsigned char* src, size_t len)
   return out;
 }
 
-std::string toHex(const char* src, size_t len)
-{
-  return toHex(reinterpret_cast<const unsigned char*>(src), len);
-}
-
 std::string toHex(const std::string& src)
 {
-  return toHex(reinterpret_cast<const unsigned char*>(src.c_str()), src.size());
+  return toHex(std::as_bytes(std::span{src.data(), src.size()}));
 }
 
 unsigned int hexCharToUInt(unsigned char ch)
@@ -674,11 +671,11 @@ void parsePrioritizePieceRange(
 
 // Converts ISO/IEC 8859-1 string to UTF-8 string.  If there is a
 // character not in ISO/IEC 8859-1, returns empty string.
-std::string iso8859p1ToUtf8(const char* src, size_t len)
+std::string iso8859p1ToUtf8(std::span<const std::byte> src)
 {
   std::string dest;
-  for (const char *p = src, *last = src + len; p != last; ++p) {
-    unsigned char c = *p;
+  for (auto b : src) {
+    auto c = static_cast<unsigned char>(b);
     if (0xa0u <= c) {
       if (c <= 0xbfu) {
         dest += 0xc2u;
@@ -692,7 +689,7 @@ std::string iso8859p1ToUtf8(const char* src, size_t len)
       return "";
     }
     else {
-      dest += c;
+      dest += static_cast<char>(c);
     }
   }
   return dest;
@@ -700,7 +697,7 @@ std::string iso8859p1ToUtf8(const char* src, size_t len)
 
 std::string iso8859p1ToUtf8(const std::string& src)
 {
-  return iso8859p1ToUtf8(src.c_str(), src.size());
+  return iso8859p1ToUtf8(std::as_bytes(std::span{src.data(), src.size()}));
 }
 
 /* Start of utf8 dfa */
@@ -1151,26 +1148,29 @@ typedef enum {
   CD_ENC_ISO_8859_1
 } content_disposition_charset;
 
-ssize_t parse_content_disposition(char* dest, size_t destlen,
-                                  const char** charsetp, size_t* charsetlenp,
-                                  const char* in, size_t len, bool defaultUTF8)
+ssize_t parse_content_disposition(std::span<std::byte> dest,
+                                  std::span<const std::byte>* charsetp,
+                                  std::span<const std::byte> in,
+                                  bool defaultUTF8)
 {
-  const char *p = in, *eop = in + len, *mark_first = nullptr,
-             *mark_last = nullptr;
+  const size_t destlen = dest.size();
+  const char* const in_base = reinterpret_cast<const char*>(in.data());
+  const char *p = in_base, *eop = in_base + in.size(),
+             *mark_first = nullptr, *mark_last = nullptr;
   int state = CD_BEFORE_DISPOSITION_TYPE;
   int in_file_parm = 0;
   int flags = 0;
   int quoted_seen = 0;
   int charset = 0;
   /* To suppress warnings */
-  char* dp = dest;
+  char* const dest_base = reinterpret_cast<char*>(dest.data());
+  char* dp = dest_base;
   size_t dlen = destlen;
   uint32_t dfa_state = UTF8_ACCEPT;
   uint32_t dfa_code = 0;
   uint8_t pctval = 0;
 
-  *charsetp = nullptr;
-  *charsetlenp = 0;
+  *charsetp = std::span<const std::byte>();
 
   for (; p != eop; ++p) {
     switch (state) {
@@ -1238,7 +1238,7 @@ ssize_t parse_content_disposition(char* dest, size_t destlen,
           }
         }
         if (in_file_parm) {
-          dp = dest;
+          dp = dest_base;
           dlen = destlen;
         }
       }
@@ -1365,8 +1365,7 @@ ssize_t parse_content_disposition(char* dest, size_t destlen,
     case CD_CHARSET:
       if (*p == '\'') {
         mark_last = p;
-        *charsetp = mark_first;
-        *charsetlenp = mark_last - mark_first;
+        *charsetp = in.subspan(mark_first - in_base, mark_last - mark_first);
         if (strieq(mark_first, mark_last, "utf-8")) {
           charset = CD_ENC_UTF8;
           dfa_state = UTF8_ACCEPT;
@@ -1387,7 +1386,7 @@ ssize_t parse_content_disposition(char* dest, size_t destlen,
     case CD_LANGUAGE:
       if (*p == '\'') {
         if (in_file_parm) {
-          dp = dest;
+          dp = dest_base;
           dlen = destlen;
         }
         state = CD_VALUE_CHARS;
@@ -1496,20 +1495,22 @@ std::string getContentDispositionFilename(const std::string& header,
                                           bool defaultUTF8)
 {
   std::array<char, 1_k> cdval;
-  size_t cdvallen = cdval.size();
-  const char* charset;
-  size_t charsetlen;
-  ssize_t rv =
-      parse_content_disposition(cdval.data(), cdvallen, &charset, &charsetlen,
-                                header.c_str(), header.size(), defaultUTF8);
+  std::span<const std::byte> charset;
+  ssize_t rv = parse_content_disposition(
+      std::as_writable_bytes(std::span{cdval.data(), cdval.size()}), &charset,
+      std::as_bytes(std::span{header.data(), header.size()}), defaultUTF8);
   if (rv == -1) {
     return "";
   }
 
   std::string res;
-  if ((charset && strieq(charset, charset + charsetlen, "iso-8859-1")) ||
-      (!charset && !defaultUTF8)) {
-    res = iso8859p1ToUtf8(cdval.data(), rv);
+  if ((!charset.empty() &&
+       strieq(reinterpret_cast<const char*>(charset.data()),
+              reinterpret_cast<const char*>(charset.data()) + charset.size(),
+              "iso-8859-1")) ||
+      (charset.empty() && !defaultUTF8)) {
+    res = iso8859p1ToUtf8(
+        std::as_bytes(std::span{cdval.data(), static_cast<size_t>(rv)}));
   }
   else {
     res.assign(cdval.data(), rv);
@@ -1853,10 +1854,11 @@ std::vector<std::pair<size_t, std::string>> createIndexPaths(std::istream& i)
   return indexPaths;
 }
 
-void generateRandomData(unsigned char* data, size_t length)
+void generateRandomData(std::span<std::byte> data)
 {
   const auto& rd = SimpleRandomizer::getInstance();
-  return rd->getRandomBytes(data, length);
+  return rd->getRandomBytes(
+      reinterpret_cast<unsigned char*>(data.data()), data.size());
 }
 
 bool saveAs(const std::string& filename, const std::string& data,
@@ -1910,7 +1912,8 @@ std::string fixTaintedBasename(const std::string& src)
 void generateRandomKey(unsigned char* key)
 {
   unsigned char bytes[40];
-  generateRandomData(bytes, sizeof(bytes));
+  generateRandomData(
+      std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
   message_digest::digest(key, 20, MessageDigest::sha1().get(), bytes,
                          sizeof(bytes));
 }

@@ -70,7 +70,7 @@ void DHKeyExchange::init(const unsigned char* prime, size_t primeBits,
 
   size_t pbytes = (privateKeyBits + 7) / 8;
   unsigned char buf[pbytes];
-  util::generateRandomData(buf, pbytes);
+  util::generateRandomData(std::as_writable_bytes(std::span{buf, pbytes}));
   privateKey_ = n(buf, pbytes);
 
   keyLength_ = (primeBits + 7) / 8;
@@ -95,7 +95,7 @@ size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
 
 void DHKeyExchange::generateNonce(unsigned char* out, size_t outLength) const
 {
-  util::generateRandomData(out, outLength);
+  util::generateRandomData(std::as_writable_bytes(std::span{out, outLength}));
 }
 
 size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,

@@ -129,7 +129,7 @@ std::unique_ptr<HMAC> HMAC::createRandom(const std::string& algorithm)
     return nullptr;
   }
   auto buf = make_unique<char[]>(len);
-  generateRandomData((unsigned char*)buf.get(), len);
+  generateRandomData(std::as_writable_bytes(std::span{(unsigned char*)buf.get(), len}));
   return create(algorithm, buf.get(), len);
 }
 

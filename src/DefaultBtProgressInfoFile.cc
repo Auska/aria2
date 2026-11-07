@@ -240,7 +240,7 @@ void DefaultBtProgressInfoFile::load()
   }
   unsigned char versionBuf[2];
   READ_CHECK(fp, versionBuf, sizeof(versionBuf));
-  std::string versionHex = util::toHex(versionBuf, sizeof(versionBuf));
+  std::string versionHex = util::toHex(std::as_bytes(std::span{versionBuf, sizeof(versionBuf)}));
   int version;
   if ("0000" == versionHex) {
     version = 0;
@@ -278,8 +278,8 @@ void DefaultBtProgressInfoFile::load()
       if (memcmp(savedInfoHash.data(), infoHash, INFO_HASH_LENGTH) != 0) {
         throw DL_ABORT_EX(
             fmt("info hash mismatch. expected: %s, actual: %s",
-                util::toHex(infoHash, INFO_HASH_LENGTH).c_str(),
-                util::toHex(savedInfoHash.data(), infoHashLength).c_str()));
+                util::toHex(std::as_bytes(std::span{infoHash, INFO_HASH_LENGTH})).c_str(),
+                util::toHex(std::as_bytes(std::span{savedInfoHash.data(), infoHashLength})).c_str()));
       }
     }
 #endif // ENABLE_BITTORRENT

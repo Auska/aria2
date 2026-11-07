@@ -685,7 +685,7 @@ std::string generatePeerId(const std::string& peerIdPrefix)
   unsigned char buf[20];
   int len = 20 - peerIdPrefix.size();
   if (len > 0) {
-    util::generateRandomData(buf, len);
+    util::generateRandomData(std::as_writable_bytes(std::span{buf, len}));
     peerId.append(&buf[0], &buf[len]);
   }
   if (peerId.size() > 20) {

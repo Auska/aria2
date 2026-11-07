@@ -52,11 +52,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTAnnouncePeerMessageTest);
 void DHTAnnouncePeerMessageTest::testGetBencodedMessage()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(infoHash, DHT_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
 
   std::string token = "token";
   uint16_t port = 6881;
@@ -88,11 +88,11 @@ void DHTAnnouncePeerMessageTest::testDoReceivedAction()
   remoteNode_->setPort(6881);
 
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(infoHash, DHT_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
 
   std::string token = "token";
   uint16_t port = 6882;

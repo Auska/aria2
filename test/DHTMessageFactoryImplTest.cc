@@ -105,7 +105,7 @@ void DHTMessageFactoryImplTest::testCreatePingMessage()
 
   CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
-  CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
 }
 
@@ -124,7 +124,7 @@ void DHTMessageFactoryImplTest::testCreatePingReplyMessage()
 
   CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
-  CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
 }
 
@@ -146,10 +146,10 @@ void DHTMessageFactoryImplTest::testCreateFindNodeMessage()
 
   CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
-  CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
-  CPPUNIT_ASSERT_EQUAL(util::toHex(targetNodeID, DHT_ID_LENGTH),
-                       util::toHex(m->getTargetNodeID(), DHT_ID_LENGTH));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{targetNodeID, DHT_ID_LENGTH})),
+                       util::toHex(std::as_bytes(std::span{m->getTargetNodeID(), DHT_ID_LENGTH})));
 }
 
 void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage()
@@ -188,7 +188,7 @@ void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage()
     CPPUNIT_ASSERT_EQUAL((size_t)DHTBucket::K, m->getClosestKNodes().size());
     CPPUNIT_ASSERT(*nodes[0] == *m->getClosestKNodes()[0]);
     CPPUNIT_ASSERT(*nodes[7] == *m->getClosestKNodes()[7]);
-    CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
   }
   catch (Exception& e) {
@@ -235,7 +235,7 @@ void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage6()
     CPPUNIT_ASSERT_EQUAL((size_t)DHTBucket::K, m->getClosestKNodes().size());
     CPPUNIT_ASSERT(*nodes[0] == *m->getClosestKNodes()[0]);
     CPPUNIT_ASSERT(*nodes[7] == *m->getClosestKNodes()[7]);
-    CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
   }
   catch (Exception& e) {
@@ -261,10 +261,10 @@ void DHTMessageFactoryImplTest::testCreateGetPeersMessage()
 
   CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
-  CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
-  CPPUNIT_ASSERT_EQUAL(util::toHex(infoHash, DHT_ID_LENGTH),
-                       util::toHex(m->getInfoHash(), DHT_ID_LENGTH));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})),
+                       util::toHex(std::as_bytes(std::span{m->getInfoHash(), DHT_ID_LENGTH})));
 }
 
 void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage()
@@ -325,7 +325,7 @@ void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage()
                            m->getValues()[i]->getIPAddress());
       CPPUNIT_ASSERT_EQUAL(peers[i]->getPort(), m->getValues()[i]->getPort());
     }
-    CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
   }
   catch (Exception& e) {
@@ -394,7 +394,7 @@ void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage6()
                            m->getValues()[i]->getIPAddress());
       CPPUNIT_ASSERT_EQUAL(peers[i]->getPort(), m->getValues()[i]->getPort());
     }
-    CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
   }
   catch (Exception& e) {
@@ -428,10 +428,10 @@ void DHTMessageFactoryImplTest::testCreateAnnouncePeerMessage()
     CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
     CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
     CPPUNIT_ASSERT_EQUAL(token, m->getToken());
-    CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
-    CPPUNIT_ASSERT_EQUAL(util::toHex(infoHash, DHT_ID_LENGTH),
-                         util::toHex(m->getInfoHash(), DHT_ID_LENGTH));
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})),
+                         util::toHex(std::as_bytes(std::span{m->getInfoHash(), DHT_ID_LENGTH})));
     CPPUNIT_ASSERT_EQUAL(port, m->getTCPPort());
   }
   catch (Exception& e) {
@@ -455,7 +455,7 @@ void DHTMessageFactoryImplTest::testCreateAnnouncePeerReplyMessage()
 
   CPPUNIT_ASSERT(*localNode == *m->getLocalNode());
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
-  CPPUNIT_ASSERT_EQUAL(util::toHex(transactionID, DHT_TRANSACTION_ID_LENGTH),
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
 }
 

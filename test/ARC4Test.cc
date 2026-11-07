@@ -31,7 +31,7 @@ void ARC4Test::testEncrypt()
   const size_t LEN = 20;
   unsigned char key[LEN];
   memset(key, 0, LEN);
-  util::generateRandomData(key, sizeof(key));
+  util::generateRandomData(std::as_writable_bytes(std::span{key, sizeof(key)}));
   enc.init(key, sizeof(key));
   dec.init(key, sizeof(key));
 

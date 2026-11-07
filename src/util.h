@@ -43,6 +43,8 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cstddef>
+#include <span>
 #include <string>
 #include <utility>
 #include <iosfwd>
@@ -201,7 +203,7 @@ int32_t difftvsec(struct timeval tv1, struct timeval tv2);
 std::string replace(const std::string& target, const std::string& oldstr,
                     const std::string& newstr);
 
-std::string percentEncode(const unsigned char* target, size_t len);
+std::string percentEncode(std::span<const std::byte> target);
 
 std::string percentEncode(const std::string& target);
 
@@ -225,13 +227,11 @@ bool isUtf8(const std::string& str);
 std::string percentDecode(std::string::const_iterator first,
                           std::string::const_iterator last);
 
-std::string torrentPercentEncode(const unsigned char* target, size_t len);
+std::string torrentPercentEncode(std::span<const std::byte> target);
 
 std::string torrentPercentEncode(const std::string& target);
 
-std::string toHex(const unsigned char* src, size_t len);
-
-std::string toHex(const char* src, size_t len);
+std::string toHex(std::span<const std::byte> src);
 
 std::string toHex(const std::string& src);
 
@@ -293,30 +293,30 @@ void parsePrioritizePieceRange(
     size_t pieceLength, int64_t defaultSize = 1048576 /* 1MiB */);
 
 // Converts ISO/IEC 8859-1 string src to utf-8.
-std::string iso8859p1ToUtf8(const char* src, size_t len);
+std::string iso8859p1ToUtf8(std::span<const std::byte> src);
 std::string iso8859p1ToUtf8(const std::string& src);
 
-// Parses Content-Disposition header field value |in| with its length
-// |len| in a manner conforming to RFC 6266 and extracts filename
-// value and copies it to the region pointed by |dest|. The |destlen|
-// specifies the capacity of the |dest|. This function does not store
-// NUL character after filename in |dest|. This function does not
-// support RFC 2231 Continuation. If the function sees RFC 2231/5987
-// encoding and charset, it stores its first pointer to |*charsetp|
-// and its length in |*charsetlenp|. Otherwise, they are NULL and 0
-// respectively.  In RFC 2231/5987 encoding, percent-encoded string
-// will be decoded to original form and stored in |dest|.
+// Parses Content-Disposition header field value |in| in a manner
+// conforming to RFC 6266 and extracts filename value and copies it to
+// |dest|. The size of |dest| specifies the capacity. This function
+// does not store NUL character after filename in |dest|. This
+// function does not support RFC 2231 Continuation. If the function
+// sees RFC 2231/5987 encoding and charset, it stores its byte range
+// in |*charsetp|. Otherwise, it is empty.  In RFC 2231/5987 encoding,
+// percent-encoded string will be decoded to original form and stored
+// in |dest|.
 //
 // This function returns the number of written bytes in |dest| if it
 // succeeds, or -1. If there is enough room to store filename in
 // |dest|, this function returns -1. If this function returns -1, the
-// |dest|, |*charsetp| and |*charsetlenp| are undefined.
+// |dest| and |*charsetp| are undefined.
 //
 // It will handle quoted string(as in RFC 7230 section 3.2.6) as
 // ISO-8859-1 by default, or UTF-8 if defaultUTF8 == true.
-ssize_t parse_content_disposition(char* dest, size_t destlen,
-                                  const char** charsetp, size_t* charsetlenp,
-                                  const char* in, size_t len, bool defaultUTF8);
+ssize_t parse_content_disposition(std::span<std::byte> dest,
+                                  std::span<const std::byte>* charsetp,
+                                  std::span<const std::byte> in,
+                                  bool defaultUTF8);
 
 std::string getContentDispositionFilename(const std::string& header,
                                           bool defaultUTF8);
@@ -696,7 +696,7 @@ bool iendsWith(const std::string& a, const std::string& b);
 // Returns true if strcmp(a, b) < 0
 bool strless(const char* a, const char* b);
 
-void generateRandomData(unsigned char* data, size_t length);
+void generateRandomData(std::span<std::byte> data);
 
 // Saves data to file whose name is filename. If overwrite is true,
 // existing file is overwritten. Otherwise, this function doesn't do

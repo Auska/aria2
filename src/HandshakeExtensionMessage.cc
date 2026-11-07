@@ -168,7 +168,7 @@ HandshakeExtensionMessage::create(const unsigned char* data, size_t length)
                           static_cast<unsigned long>(length)));
   }
   A2_LOG_DEBUG(fmt("Creating HandshakeExtensionMessage from %s",
-                   util::percentEncode(data, length).c_str()));
+                   util::percentEncode(std::as_bytes(std::span{data, length})).c_str()));
   auto decoded = bencode2::decode(data + 1, length - 1);
   const Dict* dict = downcast<Dict>(decoded);
   if (!dict) {

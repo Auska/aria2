@@ -89,7 +89,7 @@ DefaultBtMessageReceiver::receiveHandshake(bool quickReply)
     else {
       throw DL_ABORT_EX(
           fmt("Bad Info Hash %s",
-              util::toHex(peerConnection_->getBuffer() + 28, INFO_HASH_LENGTH)
+              util::toHex(std::as_bytes(std::span{peerConnection_->getBuffer() + 28, INFO_HASH_LENGTH}))
                   .c_str()));
     }
     if (peerConnection_->getBufferLength() ==

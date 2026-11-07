@@ -96,8 +96,8 @@ std::vector<unsigned char> BtHandshakeMessage::createMessage()
 std::string BtHandshakeMessage::toString() const
 {
   return fmt("%s peerId=%s, reserved=%s", NAME,
-             util::percentEncode(peerId_.data(), peerId_.size()).c_str(),
-             util::toHex(reserved_.data(), reserved_.size()).c_str());
+             util::percentEncode(std::as_bytes(std::span{peerId_.data(), peerId_.size()})).c_str(),
+             util::toHex(std::as_bytes(std::span{reserved_.data(), reserved_.size()})).c_str());
 }
 
 bool BtHandshakeMessage::isFastExtensionSupported() const

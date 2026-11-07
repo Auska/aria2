@@ -87,7 +87,7 @@ void DHTPeerAnnounceStorage::addPeerAnnounce(const unsigned char* infoHash,
 {
   A2_LOG_DEBUG(fmt("Adding %s:%u to peer announce list: infoHash=%s",
                    ipaddr.c_str(), port,
-                   util::toHex(infoHash, DHT_ID_LENGTH).c_str()));
+                   util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})).c_str()));
   getPeerAnnounceEntry(infoHash)->addPeerAddrEntry(PeerAddrEntry(ipaddr, port));
 }
 
@@ -142,7 +142,7 @@ void DHTPeerAnnounceStorage::announcePeer()
     auto task = taskFactory_->createPeerAnnounceTask(e->getInfoHash());
     taskQueue_->addPeriodicTask2(task);
     A2_LOG_DEBUG(fmt("Added 1 peer announce: infoHash=%s",
-                     util::toHex(e->getInfoHash(), DHT_ID_LENGTH).c_str()));
+                     util::toHex(std::as_bytes(std::span{e->getInfoHash(), DHT_ID_LENGTH})).c_str()));
   }
 }
 

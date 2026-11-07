@@ -51,8 +51,8 @@ void DHKeyExchangeTest::testHandshake()
   dhA.computeSecret(secretA, sizeof(secretA), publicKeyB, sizeof(publicKeyB));
   dhB.computeSecret(secretB, sizeof(secretB), publicKeyA, sizeof(publicKeyA));
 
-  CPPUNIT_ASSERT_EQUAL(util::toHex(secretA, sizeof(secretA)),
-                       util::toHex(secretB, sizeof(secretB)));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{secretA, sizeof(secretA)})),
+                       util::toHex(std::as_bytes(std::span{secretB, sizeof(secretB)})));
 }
 
 } // namespace aria2

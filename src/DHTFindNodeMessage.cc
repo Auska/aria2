@@ -83,7 +83,7 @@ const std::string& DHTFindNodeMessage::getMessageType() const
 
 std::string DHTFindNodeMessage::toStringOptional() const
 {
-  return "targetNodeID=" + util::toHex(targetNodeID_, DHT_ID_LENGTH);
+  return "targetNodeID=" + util::toHex(std::as_bytes(std::span{targetNodeID_, DHT_ID_LENGTH}));
 }
 
 } // namespace aria2

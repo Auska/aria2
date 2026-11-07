@@ -65,11 +65,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTGetPeersMessageTest);
 void DHTGetPeersMessageTest::testGetBencodedMessage()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(infoHash, DHT_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
 
   DHTGetPeersMessage msg(localNode_, remoteNode_, infoHash, transactionID);
   msg.setVersion("A200");
@@ -96,11 +96,11 @@ void DHTGetPeersMessageTest::testDoReceivedAction()
   remoteNode_->setPort(6881);
 
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(infoHash, DHT_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
 
   DHTTokenTracker tokenTracker;
   MockDHTMessageDispatcher dispatcher;

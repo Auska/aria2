@@ -98,8 +98,8 @@ DHTMessageTracker::messageArrived(const Dict* dict, const std::string& ipaddr,
           // DHTRoutingTable
           A2_LOG_DEBUG(
               fmt("Node ID has changed: old:%s, new:%s",
-                  util::toHex(targetNode->getID(), DHT_ID_LENGTH).c_str(),
-                  util::toHex(message->getRemoteNode()->getID(), DHT_ID_LENGTH)
+                  util::toHex(std::as_bytes(std::span{targetNode->getID(), DHT_ID_LENGTH})).c_str(),
+                  util::toHex(std::as_bytes(std::span{message->getRemoteNode()->getID(), DHT_ID_LENGTH}))
                       .c_str()));
           routingTable_->dropNode(targetNode);
         }

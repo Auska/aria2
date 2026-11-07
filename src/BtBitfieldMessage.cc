@@ -107,7 +107,7 @@ std::string BtBitfieldMessage::toString() const
 {
   std::string s = NAME;
   s += ' ';
-  s += util::toHex(bitfield_.data(), bitfield_.size());
+  s += util::toHex(std::as_bytes(std::span{bitfield_.data(), bitfield_.size()}));
   return s;
 }
 

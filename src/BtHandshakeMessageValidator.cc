@@ -61,13 +61,13 @@ void BtHandshakeMessageValidator::validate()
   if (memcmp(BtHandshakeMessage::BT_PSTR, message_->getPstr(), 19) != 0) {
     throw DL_ABORT_EX(
         fmt("invalid handshake pstr=%s",
-            util::percentEncode(message_->getPstr(), 19).c_str()));
+            util::percentEncode(std::as_bytes(std::span{message_->getPstr(), 19})).c_str()));
   }
   if (memcmp(infoHash_, message_->getInfoHash(), sizeof(infoHash_)) != 0) {
     throw DL_ABORT_EX(
         fmt("invalid handshake info hash: expected:%s, actual:%s",
-            util::toHex(infoHash_, sizeof(infoHash_)).c_str(),
-            util::toHex(message_->getInfoHash(), INFO_HASH_LENGTH).c_str()));
+            util::toHex(std::as_bytes(std::span{infoHash_, sizeof(infoHash_)})).c_str(),
+            util::toHex(std::as_bytes(std::span{message_->getInfoHash(), INFO_HASH_LENGTH})).c_str()));
   }
 }
 

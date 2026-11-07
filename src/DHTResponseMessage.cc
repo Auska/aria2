@@ -66,7 +66,7 @@ std::string DHTResponseMessage::toString() const
              getMessageType().c_str(), util::toHex(getTransactionID()).c_str(),
              getRemoteNode()->getIPAddress().c_str(),
              getRemoteNode()->getPort(),
-             util::toHex(getRemoteNode()->getID(), DHT_ID_LENGTH).c_str(),
+             util::toHex(std::as_bytes(std::span{getRemoteNode()->getID(), DHT_ID_LENGTH})).c_str(),
              util::torrentPercentEncode(getVersion()).c_str(),
              toStringOptional().c_str());
 }

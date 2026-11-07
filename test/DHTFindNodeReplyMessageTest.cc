@@ -36,7 +36,7 @@ void DHTFindNodeReplyMessageTest::testGetBencodedMessage()
   std::shared_ptr<DHTNode> remoteNode(new DHTNode());
 
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   DHTFindNodeReplyMessage msg(AF_INET, localNode, remoteNode, transactionID);
@@ -79,7 +79,7 @@ void DHTFindNodeReplyMessageTest::testGetBencodedMessage6()
   std::shared_ptr<DHTNode> remoteNode(new DHTNode());
 
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(tid, DHT_TRANSACTION_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   DHTFindNodeReplyMessage msg(AF_INET6, localNode, remoteNode, transactionID);

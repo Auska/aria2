@@ -87,8 +87,8 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
     }
     else if (bucket->splitAllowed()) {
       A2_LOG_DEBUG(fmt("Splitting bucket. Range:%s-%s",
-                       util::toHex(bucket->getMinID(), DHT_ID_LENGTH).c_str(),
-                       util::toHex(bucket->getMaxID(), DHT_ID_LENGTH).c_str()));
+                       util::toHex(std::as_bytes(std::span{bucket->getMinID(), DHT_ID_LENGTH})).c_str(),
+                       util::toHex(std::as_bytes(std::span{bucket->getMaxID(), DHT_ID_LENGTH})).c_str()));
       treeNode->split();
       ++numBucket_;
       if (treeNode->getLeft()->isInRange(node->getID())) {

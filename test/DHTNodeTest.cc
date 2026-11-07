@@ -25,7 +25,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTNodeTest);
 void DHTNodeTest::testGenerateID()
 {
   DHTNode node;
-  std::cerr << util::toHex(node.getID(), DHT_ID_LENGTH) << std::endl;
+  std::cerr << util::toHex(std::as_bytes(std::span{node.getID(), DHT_ID_LENGTH})) << std::endl;
 }
 
 } // namespace aria2

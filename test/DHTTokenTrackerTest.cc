@@ -27,7 +27,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTTokenTrackerTest);
 void DHTTokenTrackerTest::testGenerateToken()
 {
   unsigned char infohash[DHT_ID_LENGTH];
-  util::generateRandomData(infohash, DHT_ID_LENGTH);
+  util::generateRandomData(std::as_writable_bytes(std::span{infohash, DHT_ID_LENGTH}));
   std::string ipaddr = "192.168.0.1";
   uint16_t port = 6881;
 

@@ -63,8 +63,7 @@ DHTMessage::~DHTMessage() = default;
 void DHTMessage::generateTransactionID()
 {
   transactionID_.resize(DHT_TRANSACTION_ID_LENGTH);
-  util::generateRandomData(reinterpret_cast<unsigned char*>(&transactionID_[0]),
-                           transactionID_.size());
+  util::generateRandomData(std::as_writable_bytes(std::span{reinterpret_cast<unsigned char*>(&transactionID_[0]), transactionID_.size()}));
 }
 
 } // namespace aria2

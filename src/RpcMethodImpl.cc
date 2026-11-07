@@ -261,7 +261,7 @@ std::string getHexSha1(const std::string& s)
   unsigned char hash[20];
   message_digest::digest(hash, sizeof(hash), MessageDigest::sha1().get(),
                          s.data(), s.size());
-  return util::toHex(hash, sizeof(hash));
+  return util::toHex(std::as_bytes(std::span{hash, sizeof(hash)}));
 }
 } // namespace
 
@@ -582,7 +582,7 @@ void gatherProgressCommon(Dict* entryDict,
     if (ps) {
       if (ps->getBitfieldLength() > 0) {
         entryDict->put(KEY_BITFIELD,
-                       util::toHex(ps->getBitfield(), ps->getBitfieldLength()));
+                       util::toHex(std::as_bytes(std::span{ps->getBitfield(), ps->getBitfieldLength()})));
       }
     }
   }
@@ -695,8 +695,7 @@ void gatherPeer(List* peers, const std::shared_ptr<PeerStorage>& ps)
       continue;
     }
     auto peerEntry = Dict::g();
-    peerEntry->put(KEY_PEER_ID, util::torrentPercentEncode(peer->getPeerId(),
-                                                           PEER_ID_LENGTH));
+    peerEntry->put(KEY_PEER_ID, util::torrentPercentEncode(std::as_bytes(std::span{peer->getPeerId(), PEER_ID_LENGTH})));
     peerEntry->put(KEY_IP, peer->getIPAddress());
     if (peer->isIncomingPeer()) {
       peerEntry->put(KEY_PORT, VLB_ZERO);
@@ -705,7 +704,7 @@ void gatherPeer(List* peers, const std::shared_ptr<PeerStorage>& ps)
       peerEntry->put(KEY_PORT, util::uitos(peer->getPort()));
     }
     peerEntry->put(KEY_BITFIELD,
-                   util::toHex(peer->getBitfield(), peer->getBitfieldLength()));
+                   util::toHex(std::as_bytes(std::span{peer->getBitfield(), peer->getBitfieldLength()})));
     peerEntry->put(KEY_AM_CHOKING, peer->amChoking() ? VLB_TRUE : VLB_FALSE);
     peerEntry->put(KEY_PEER_CHOKING,
                    peer->peerChoking() ? VLB_TRUE : VLB_FALSE);

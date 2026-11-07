@@ -82,7 +82,7 @@ std::string DHTUnknownMessage::toString() const
   }
   return fmt("dht unknown Remote:%s(%u) length=%lu, first 8 bytes(hex)=%s",
              ipaddr_.c_str(), port_, static_cast<unsigned long>(length_),
-             util::toHex(data_, sampleLength).c_str());
+             util::toHex(std::as_bytes(std::span{data_, sampleLength})).c_str());
 }
 
 } // namespace aria2

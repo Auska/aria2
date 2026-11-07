@@ -46,7 +46,7 @@ std::shared_ptr<GroupId> GroupId::create()
 {
   a2_gid_t n;
   for (;;) {
-    util::generateRandomData(reinterpret_cast<unsigned char*>(&n), sizeof(n));
+    util::generateRandomData(std::as_writable_bytes(std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
     if (n != 0 && !set_.contains(n)) {
       break;
     }
@@ -125,7 +125,7 @@ int GroupId::toNumericId(a2_gid_t& n, const char* hex)
 std::string GroupId::toHex(a2_gid_t gid)
 {
   a2_gid_t n = hton64(gid);
-  return util::toHex(reinterpret_cast<unsigned char*>(&n), sizeof(n));
+  return util::toHex(std::as_bytes(std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
 }
 
 std::string GroupId::toAbbrevHex(a2_gid_t gid)

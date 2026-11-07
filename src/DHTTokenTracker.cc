@@ -48,7 +48,7 @@ namespace aria2 {
 
 DHTTokenTracker::DHTTokenTracker()
 {
-  util::generateRandomData(secret_[0], SECRET_SIZE);
+  util::generateRandomData(std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
   memcpy(secret_[1], secret_[0], SECRET_SIZE);
 }
 
@@ -103,7 +103,7 @@ bool DHTTokenTracker::validateToken(const std::string& token,
 void DHTTokenTracker::updateTokenSecret()
 {
   memcpy(secret_[1], secret_[0], SECRET_SIZE);
-  util::generateRandomData(secret_[0], SECRET_SIZE);
+  util::generateRandomData(std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
 }
 
 } // namespace aria2

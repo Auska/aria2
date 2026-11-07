@@ -159,7 +159,7 @@ void DHTGetPeersMessage::setFamily(int family) { family_ = family; }
 
 std::string DHTGetPeersMessage::toStringOptional() const
 {
-  return "info_hash=" + util::toHex(infoHash_, INFO_HASH_LENGTH);
+  return "info_hash=" + util::toHex(std::as_bytes(std::span{infoHash_, INFO_HASH_LENGTH}));
 }
 
 } // namespace aria2

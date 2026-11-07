@@ -427,7 +427,7 @@ bool MSEHandshake::receiveReceiverHashAndPadCLength(
     createReq23Hash(md, infohash);
     if (memcmp(md, rbufptr, sizeof(md)) == 0) {
       A2_LOG_DEBUG(fmt("CUID#%" PRId64 " - info hash found: %s", cuid_,
-                       util::toHex(infohash, INFO_HASH_LENGTH).c_str()));
+                       util::toHex(std::as_bytes(std::span{infohash, INFO_HASH_LENGTH})).c_str()));
       downloadContext = ctx;
       break;
     }
@@ -545,7 +545,7 @@ void MSEHandshake::verifyVC(unsigned char* vcbuf)
   decryptor_->encrypt(VC_LENGTH, vcbuf, vcbuf);
   if (!std::equal(std::begin(VC), std::end(VC), vcbuf)) {
     throw DL_ABORT_EX(
-        fmt("Invalid VC: %s", util::toHex(vcbuf, VC_LENGTH).c_str()));
+        fmt("Invalid VC: %s", util::toHex(std::as_bytes(std::span{vcbuf, VC_LENGTH})).c_str()));
   }
 }
 

@@ -54,8 +54,8 @@ void ValueBaseTest::testString()
 
   const unsigned char uc[] = {0x08, 0x19, 0x2a, 0x3b};
   String data(uc, sizeof(uc));
-  CPPUNIT_ASSERT_EQUAL(util::toHex(uc, sizeof(uc)),
-                       util::toHex(data.uc(), data.s().size()));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{uc, sizeof(uc)})),
+                       util::toHex(std::as_bytes(std::span{data.uc(), data.s().size()})));
 }
 
 void ValueBaseTest::testDowncast()
