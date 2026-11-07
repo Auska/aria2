@@ -237,7 +237,7 @@ AuthConfigFactory::findBasicCred(const std::string& host, uint16_t port,
   for (;
        i != std::end(basicCreds_) && (*i)->host_ == host && (*i)->port_ == port;
        ++i) {
-    if (util::startsWith(bc->path_, (*i)->path_)) {
+    if (bc->path_.starts_with((*i)->path_)) {
       return i;
     }
   }

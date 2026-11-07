@@ -211,12 +211,12 @@ void DefaultPeerStorageTest::testReturnPeer()
 
   ps.returnPeer(peer2); // peer2 removed from the container
   CPPUNIT_ASSERT_EQUAL((size_t)2, ps.getUsedPeers().size());
-  CPPUNIT_ASSERT(ps.getUsedPeers().count(peer2) == 0);
+  CPPUNIT_ASSERT(!ps.getUsedPeers().contains(peer2));
   CPPUNIT_ASSERT_EQUAL((size_t)1, ps.getDroppedPeers().size());
 
   ps.returnPeer(peer1); // peer1 is removed from the container
   CPPUNIT_ASSERT_EQUAL((size_t)1, ps.getUsedPeers().size());
-  CPPUNIT_ASSERT(ps.getUsedPeers().count(peer1) == 0);
+  CPPUNIT_ASSERT(!ps.getUsedPeers().contains(peer1));
   CPPUNIT_ASSERT_EQUAL((size_t)1, ps.getDroppedPeers().size());
 }
 

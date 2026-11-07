@@ -1923,11 +1923,10 @@ void generateRandomKey(unsigned char* key)
 // 192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
 bool inPrivateAddress(const std::string& ipv4addr)
 {
-  if (util::startsWith(ipv4addr, "10.") ||
-      util::startsWith(ipv4addr, "192.168.")) {
+  if (ipv4addr.starts_with("10.") || ipv4addr.starts_with("192.168.")) {
     return true;
   }
-  if (util::startsWith(ipv4addr, "172.")) {
+  if (ipv4addr.starts_with("172.")) {
     for (int i = 16; i <= 31; ++i) {
       std::string t(fmt("%d.", i));
       if (util::startsWith(ipv4addr.begin() + 4, ipv4addr.end(), t.begin(),
@@ -1950,10 +1949,10 @@ bool detectDirTraversal(const std::string& s)
       return true;
     }
   }
-  return s == "." || s == ".." || s[0] == '/' || util::startsWith(s, "./") ||
-         util::startsWith(s, "../") || s.find("/../") != std::string::npos ||
+  return s == "." || s == ".." || s[0] == '/' || s.starts_with("./") ||
+         s.starts_with("../") || s.find("/../") != std::string::npos ||
          s.find("/./") != std::string::npos || s[s.size() - 1] == '/' ||
-         util::endsWith(s, "/.") || util::endsWith(s, "/..");
+         s.ends_with("/.") || s.ends_with("/..");
 }
 
 std::string escapePath(const std::string& s)
@@ -2082,7 +2081,7 @@ std::string safeStrerror(int errNum) { return makeString(strerror(errNum)); }
 bool noProxyDomainMatch(const std::string& hostname, const std::string& domain)
 {
   if (!domain.empty() && domain[0] == '.' && !util::isNumericHost(hostname)) {
-    return util::endsWith(hostname, domain);
+    return hostname.ends_with(domain);
   }
   return hostname == domain;
 }
@@ -2137,16 +2136,6 @@ bool strieq(const std::string& a, const std::string& b)
   return strieq(a.begin(), a.end(), b.begin(), b.end());
 }
 
-bool startsWith(const std::string& a, const char* b)
-{
-  return startsWith(a.begin(), a.end(), b);
-}
-
-bool startsWith(const std::string& a, const std::string& b)
-{
-  return startsWith(a.begin(), a.end(), b.begin(), b.end());
-}
-
 bool istartsWith(const std::string& a, const char* b)
 {
   return istartsWith(a.begin(), a.end(), b);
@@ -2155,16 +2144,6 @@ bool istartsWith(const std::string& a, const char* b)
 bool istartsWith(const std::string& a, const std::string& b)
 {
   return istartsWith(std::begin(a), std::end(a), std::begin(b), std::end(b));
-}
-
-bool endsWith(const std::string& a, const char* b)
-{
-  return endsWith(a.begin(), a.end(), b, b + strlen(b));
-}
-
-bool endsWith(const std::string& a, const std::string& b)
-{
-  return endsWith(a.begin(), a.end(), b.begin(), b.end());
 }
 
 bool iendsWith(const std::string& a, const char* b)

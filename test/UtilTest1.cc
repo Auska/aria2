@@ -582,6 +582,11 @@ void UtilTest1::testEndsWith()
   part = "g";
   CPPUNIT_ASSERT(
       !util::endsWith(target.begin(), target.end(), part.begin(), part.end()));
+
+  CPPUNIT_ASSERT(target.ends_with(""));
+  CPPUNIT_ASSERT(!target.ends_with("g"));
+  CPPUNIT_ASSERT(!std::string("g").ends_with("eg"));
+  CPPUNIT_ASSERT(std::string("abc").ends_with("abc"));
 }
 
 void UtilTest1::testIendsWith()
@@ -725,6 +730,11 @@ void UtilTest1::testStartsWith()
   CPPUNIT_ASSERT(
       util::startsWith(target.begin(), target.end(), part.begin(), part.end()));
   CPPUNIT_ASSERT(util::startsWith(target.begin(), target.end(), part.c_str()));
+
+  CPPUNIT_ASSERT(target.starts_with(""));
+  CPPUNIT_ASSERT(!std::string("a").starts_with("aa"));
+  CPPUNIT_ASSERT(std::string("abc").starts_with("abc"));
+  CPPUNIT_ASSERT(!std::string("").starts_with("a"));
 }
 
 void UtilTest1::testIstartsWith()

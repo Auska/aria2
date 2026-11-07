@@ -294,7 +294,7 @@ void Piece::addUser(cuid_t cuid)
 
 void Piece::removeUser(cuid_t cuid)
 {
-  users_.erase(std::remove(users_.begin(), users_.end(), cuid), users_.end());
+  std::erase(users_, cuid);
 }
 
 void Piece::initWrCache(WrDiskCache* diskCache,

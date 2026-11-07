@@ -92,17 +92,13 @@ void DefaultBtRequestFactory::removeCompletedPiece()
 {
   std::for_each(pieces_.begin(), pieces_.end(),
                 AbortCompletedPieceRequest(dispatcher_));
-  pieces_.erase(std::remove_if(pieces_.begin(), pieces_.end(),
-                               std::mem_fn(&Piece::pieceComplete)),
-                pieces_.end());
+  std::erase_if(pieces_, std::mem_fn(&Piece::pieceComplete));
 }
 
 void DefaultBtRequestFactory::removeTargetPiece(
     const std::shared_ptr<Piece>& piece)
 {
-  pieces_.erase(
-      std::remove_if(pieces_.begin(), pieces_.end(), derefEqual(piece)),
-      pieces_.end());
+  std::erase_if(pieces_, derefEqual(piece));
   dispatcher_->doAbortOutstandingRequestAction(piece);
   pieceStorage_->cancelPiece(piece, cuid_);
 }
@@ -149,9 +145,7 @@ void DefaultBtRequestFactory::doChokedAction()
 {
   std::for_each(pieces_.begin(), pieces_.end(),
                 ProcessChokedPiece(peer_, pieceStorage_, cuid_));
-  pieces_.erase(
-      std::remove_if(pieces_.begin(), pieces_.end(), FindChokedPiece(peer_)),
-      pieces_.end());
+  std::erase_if(pieces_, FindChokedPiece(peer_));
 }
 
 void DefaultBtRequestFactory::removeAllTargetPiece()

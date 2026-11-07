@@ -156,7 +156,7 @@ void PeerSessionResource::addPeerAllowedIndex(size_t index)
 
 bool PeerSessionResource::peerAllowedIndexSetContains(size_t index) const
 {
-  return peerAllowedIndexSet_.count(index) == 1;
+  return peerAllowedIndexSet_.contains(index);
 }
 
 void PeerSessionResource::addAmAllowedIndex(size_t index)
@@ -166,7 +166,7 @@ void PeerSessionResource::addAmAllowedIndex(size_t index)
 
 bool PeerSessionResource::amAllowedIndexSetContains(size_t index) const
 {
-  return amAllowedIndexSet_.count(index) == 1;
+  return amAllowedIndexSet_.contains(index);
 }
 
 void PeerSessionResource::extendedMessagingEnabled(bool b)

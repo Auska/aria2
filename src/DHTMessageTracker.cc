@@ -142,18 +142,16 @@ void DHTMessageTracker::handleTimeoutEntry(DHTMessageTrackerEntry* entry)
 
 void DHTMessageTracker::handleTimeout()
 {
-  entries_.erase(
-      std::remove_if(std::begin(entries_), std::end(entries_),
-                     [&](const std::unique_ptr<DHTMessageTrackerEntry>& ent) {
-                       if (ent->isTimeout()) {
-                         handleTimeoutEntry(ent.get());
-                         return true;
-                       }
-                       else {
-                         return false;
-                       }
-                     }),
-      std::end(entries_));
+  std::erase_if(entries_,
+                [&](const std::unique_ptr<DHTMessageTrackerEntry>& ent) {
+                  if (ent->isTimeout()) {
+                    handleTimeoutEntry(ent.get());
+                    return true;
+                  }
+                  else {
+                    return false;
+                  }
+                });
 }
 
 const DHTMessageTrackerEntry*

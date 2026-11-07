@@ -104,10 +104,7 @@ bool DomainNode::addCookie(std::unique_ptr<Cookie> cookie, time_t now)
     }
     else {
       if (cookies_->size() >= CookieStorage::MAX_COOKIE_PER_DOMAIN) {
-        cookies_->erase(std::remove_if(std::begin(*cookies_),
-                                       std::end(*cookies_),
-                                       std::bind(&Cookie::isExpired, _1, now)),
-                        std::end(*cookies_));
+        std::erase_if(*cookies_, std::bind(&Cookie::isExpired, _1, now));
         if (cookies_->size() >= CookieStorage::MAX_COOKIE_PER_DOMAIN) {
           auto m = std::min_element(std::begin(*cookies_), std::end(*cookies_),
                                     [](const std::unique_ptr<Cookie>& lhs,

@@ -77,7 +77,7 @@ void RpcMethod::authorize(RpcRequest& req, DownloadEngine* e)
   if (req.params && !req.params->empty()) {
     auto t = downcast<String>(req.params->get(0));
     if (t) {
-      if (util::startsWith(t->s(), "token:")) {
+      if (t->s().starts_with("token:")) {
         token = t->s().substr(6);
         req.params->pop_front();
       }

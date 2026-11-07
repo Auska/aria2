@@ -69,13 +69,9 @@ size_t DHTPeerAnnounceEntry::countPeerAddrEntry() const
 void DHTPeerAnnounceEntry::removeStalePeerAddrEntry(
     const std::chrono::seconds& timeout)
 {
-  peerAddrEntries_.erase(
-      std::remove_if(std::begin(peerAddrEntries_), std::end(peerAddrEntries_),
-                     [&timeout](const PeerAddrEntry& entry) {
-                       return entry.getLastUpdated().difference(
-                                  global::wallclock()) >= timeout;
-                     }),
-      std::end(peerAddrEntries_));
+  std::erase_if(peerAddrEntries_, [&timeout](const PeerAddrEntry& entry) {
+    return entry.getLastUpdated().difference(global::wallclock()) >= timeout;
+  });
 }
 
 bool DHTPeerAnnounceEntry::empty() const { return peerAddrEntries_.empty(); }

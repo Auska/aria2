@@ -375,7 +375,7 @@ void FileEntry::removeURIWhoseHostnameIs(const std::string& hostname)
 
 void FileEntry::removeIdenticalURI(const std::string& uri)
 {
-  uris_.erase(std::remove(uris_.begin(), uris_.end(), uri), uris_.end());
+  std::erase(uris_, uri);
 }
 
 void FileEntry::addURIResult(std::string uri, error_code::Value result)

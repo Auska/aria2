@@ -645,9 +645,6 @@ bool startsWith(InputIterator first, InputIterator last, const char* b)
   return *b == '\0';
 }
 
-bool startsWith(const std::string& a, const char* b);
-bool startsWith(const std::string& a, const std::string& b);
-
 template <typename InputIterator1, typename InputIterator2>
 bool istartsWith(InputIterator1 first1, InputIterator1 last1,
                  InputIterator2 first2, InputIterator2 last2)
@@ -682,9 +679,6 @@ bool endsWith(InputIterator1 first1, InputIterator1 last1,
   }
   return std::equal(first2, last2, last1 - (last2 - first2));
 }
-
-bool endsWith(const std::string& a, const char* b);
-bool endsWith(const std::string& a, const std::string& b);
 
 template <typename InputIterator1, typename InputIterator2>
 bool iendsWith(InputIterator1 first1, InputIterator1 last1,

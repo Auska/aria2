@@ -204,7 +204,7 @@ error_code::Value option_processing(Option& op, bool standalone,
           }
           else {
             keyword = op.get(PREF_HELP);
-            if (util::startsWith(keyword, "--")) {
+            if (keyword.starts_with("--")) {
               keyword.erase(keyword.begin(), keyword.begin() + 2);
             }
             std::string::size_type eqpos = keyword.find("=");

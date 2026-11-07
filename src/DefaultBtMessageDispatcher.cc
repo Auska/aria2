@@ -166,12 +166,9 @@ void DefaultBtMessageDispatcher::doAbortOutstandingRequestAction(
       abortOutstandingRequest(slot.get(), piece, cuid_);
     }
   }
-  requestSlots_.erase(
-      std::remove_if(std::begin(requestSlots_), std::end(requestSlots_),
-                     [&](const std::unique_ptr<RequestSlot>& slot) {
-                       return slot->getIndex() == piece->getIndex();
-                     }),
-      std::end(requestSlots_));
+  std::erase_if(requestSlots_, [&](const std::unique_ptr<RequestSlot>& slot) {
+    return slot->getIndex() == piece->getIndex();
+  });
 
   BtAbortOutstandingRequestEvent event(piece);
 
@@ -193,12 +190,9 @@ void DefaultBtMessageDispatcher::doChokedAction()
       slot->getPiece()->cancelBlock(slot->getBlockIndex());
     }
   }
-  requestSlots_.erase(
-      std::remove_if(std::begin(requestSlots_), std::end(requestSlots_),
-                     [&](const std::unique_ptr<RequestSlot>& slot) {
-                       return !peer_->isInPeerAllowedIndexSet(slot->getIndex());
-                     }),
-      std::end(requestSlots_));
+  std::erase_if(requestSlots_, [&](const std::unique_ptr<RequestSlot>& slot) {
+    return !peer_->isInPeerAllowedIndexSet(slot->getIndex());
+  });
 }
 
 // localhost dispatched choke message to the peer.
@@ -232,13 +226,10 @@ void DefaultBtMessageDispatcher::checkRequestSlotAndDoNecessaryThing()
           slot->getIndex(), slot->getBegin(), slot->getLength()));
     }
   }
-  requestSlots_.erase(
-      std::remove_if(std::begin(requestSlots_), std::end(requestSlots_),
-                     [&](const std::unique_ptr<RequestSlot>& slot) {
-                       return slot->isTimeout(requestTimeout_) ||
-                              slot->getPiece()->hasBlock(slot->getBlockIndex());
-                     }),
-      std::end(requestSlots_));
+  std::erase_if(requestSlots_, [&](const std::unique_ptr<RequestSlot>& slot) {
+    return slot->isTimeout(requestTimeout_) ||
+           slot->getPiece()->hasBlock(slot->getBlockIndex());
+  });
 }
 
 bool DefaultBtMessageDispatcher::isSendingInProgress()

@@ -42,7 +42,7 @@ namespace magnet {
 
 std::unique_ptr<Dict> parse(const std::string& magnet)
 {
-  if (!util::startsWith(magnet, "magnet:?")) {
+  if (!magnet.starts_with("magnet:?")) {
     return nullptr;
   }
   auto dict = Dict::g();

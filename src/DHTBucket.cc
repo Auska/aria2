@@ -215,9 +215,7 @@ void DHTBucket::getGoodNodes(
     std::vector<std::shared_ptr<DHTNode>>& goodNodes) const
 {
   goodNodes.insert(goodNodes.end(), nodes_.begin(), nodes_.end());
-  goodNodes.erase(std::remove_if(goodNodes.begin(), goodNodes.end(),
-                                 std::mem_fn(&DHTNode::isBad)),
-                  goodNodes.end());
+  std::erase_if(goodNodes, std::mem_fn(&DHTNode::isBad));
 }
 
 std::shared_ptr<DHTNode> DHTBucket::getNode(const unsigned char* nodeID,

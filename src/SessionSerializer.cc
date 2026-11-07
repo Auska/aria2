@@ -76,7 +76,7 @@ bool SessionSerializer::save(const std::string& filename) const
   {
     std::unique_ptr<IOFile> fp;
 #if HAVE_ZLIB
-    if (util::endsWith(filename, ".gz")) {
+    if (filename.ends_with(".gz")) {
       fp = make_unique<GZipFile>(tempFilename.c_str(), IOFile::WRITE);
     }
     else
@@ -200,7 +200,7 @@ bool writeDownloadResult(IOFile& fp, std::set<a2_gid_t>& metainfoCache,
     // Downloading .meta4 followed by its content download. First
     // .meta4 download is saved and second content download is also
     // saved with the same gid.)
-    if (metainfoCache.count(dr->gid->getNumericId()) != 0) {
+    if (metainfoCache.contains(dr->gid->getNumericId())) {
       return true;
     }
     else {
@@ -239,7 +239,7 @@ bool writeDownloadResult(IOFile& fp, std::set<a2_gid_t>& metainfoCache,
     }
   }
   else {
-    if (metainfoCache.count(mi->getGID()) != 0) {
+    if (metainfoCache.contains(mi->getGID())) {
       return true;
     }
     else {

@@ -162,10 +162,8 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
     // Now we have connection ID, push requests which are waiting for
     // it.
     std::vector<std::shared_ptr<UDPTrackerRequest>> reqs;
-    connectRequests_.erase(
-        std::remove_if(connectRequests_.begin(), connectRequests_.end(),
-                       CollectAddrPortMatch(reqs, remoteAddr, remotePort)),
-        connectRequests_.end());
+    std::erase_if(connectRequests_,
+                  CollectAddrPortMatch(reqs, remoteAddr, remotePort));
     pendingRequests_.insert(pendingRequests_.begin(), reqs.begin(), reqs.end());
 
     recvReq = std::move(req);
@@ -454,10 +452,7 @@ struct TimeoutCheck {
 void UDPTrackerClient::handleTimeout(const Timer& now)
 {
   std::vector<std::shared_ptr<UDPTrackerRequest>> dest;
-  inflightRequests_.erase(std::remove_if(inflightRequests_.begin(),
-                                         inflightRequests_.end(),
-                                         TimeoutCheck(dest, this, now)),
-                          inflightRequests_.end());
+  std::erase_if(inflightRequests_, TimeoutCheck(dest, this, now));
   pendingRequests_.insert(pendingRequests_.begin(), dest.begin(), dest.end());
 }
 
@@ -530,14 +525,10 @@ void UDPTrackerClient::failConnect(const std::string& remoteAddr,
 {
   connectionIdCache_.erase(std::make_pair(remoteAddr, remotePort));
   // Fail all requests which are waiting for connection ID of the host.
-  connectRequests_.erase(
-      std::remove_if(connectRequests_.begin(), connectRequests_.end(),
-                     FailConnectDelete(remoteAddr, remotePort, error)),
-      connectRequests_.end());
-  pendingRequests_.erase(
-      std::remove_if(pendingRequests_.begin(), pendingRequests_.end(),
-                     FailConnectDelete(remoteAddr, remotePort, error)),
-      pendingRequests_.end());
+  std::erase_if(connectRequests_,
+                FailConnectDelete(remoteAddr, remotePort, error));
+  std::erase_if(pendingRequests_,
+                FailConnectDelete(remoteAddr, remotePort, error));
 }
 
 void UDPTrackerClient::failAll()

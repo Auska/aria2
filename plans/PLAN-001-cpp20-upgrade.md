@@ -1,5 +1,7 @@
 # 任务：将 aria2 从 C++11 升级到 C++20
 
+> 状态：✅ 已完成（2026-11-07）
+
 ## 目标
 
 把构建标准从 C++11 切到严格 `-std=c++20`，清理 C++11 兼容层，引入一组低风险的
@@ -120,7 +122,10 @@ C++20 容器/字符串惯用法，同步 CI 工具链与文档；公共 libaria2
 | 旧字符串工具 | **删 string 重载** / 保留重载内部转发 / 完全不动 | 删 | 已确认：用户第 3 轮；口径收敛见「备注 审查 #1」 |
 | 变量命名 | **重命名为 `CXXSTDCXXFLAGS`** / 保留 `CXX1XCXXFLAGS` | 重命名 | 已确认：用户第 3 轮；同步 3 个引用点 |
 
-无待确认项。
+无待确认项。执行结果与上述选择一致：严格 `-std=c++20` 已生效、CI 已换
+24.04/g++14/clang18、惯用法只做到容器/字符串、验收为单次
+`--enable-werror`（另含用户在执行期追加授权的 `UtilTest2.cc` UB 修复）、
+公共头哈希不变、`CXXSTDCXXFLAGS` 与 string 重载删除均已落地。
 
 ## 提议的方法
 
@@ -194,7 +199,7 @@ C++20 容器/字符串惯用法，同步 CI 工具链与文档；公共 libaria2
      'src/*.h' 'src/*.cc' 'test/*.h' 'test/*.cc'` 均无命中；
      `config.h` 里也不再由 configure 定义 `CXX11_OVERRIDE`；
      全新构建 `make -j check` 通过。
-3. [ ] **阶段 3：C++20 容器/字符串惯用法（即最终验收）**
+3. [x] **阶段 3：C++20 容器/字符串惯用法（即最终验收）**
    - `.contains()` 11 处、`std::erase`/`std::erase_if` 18 处、
      `starts_with`/`ends_with` 24 处；删 4 个 `std::string` 重载声明与
      4 个定义。
@@ -378,3 +383,18 @@ C++20 容器/字符串惯用法，同步 CI 工具链与文档；公共 libaria2
   `--enable-werror`，不额外再跑一次复核构建。
 - 执行前仓库检查：`git rev-parse --is-inside-work-tree` 已确认为 true；
   `.gitignore` 已覆盖构建产物、依赖目录与生成文件，无需补充。
+- 审查 #10（执行期）：阶段 3 的 `--enable-werror` 暴露出一处**既有 UB**：
+  `test/UtilTest2.cc:599-600` 用 `const std::string empty[] = {};` 后取
+  `&empty[0]`，GCC 14 的 `-Warray-bounds=` 将其升级为错误。经用户确认
+  「修测试 UB」后，先试 `std::begin/end(empty)` —— 零长度数组在 C++ 中
+  本身就不是合法类型，GCC 报 `no matching function for call to begin(...)`；
+  最终改为 `const std::string* none = nullptr; util::joinPath(none, none)`，
+  保持「空区间」语义且无 UB。该修复并入阶段 3 提交。
+- 执行结果：三阶段各一次提交（`5c5ad9de`、`e663aaae`、阶段 3 提交）；
+  每阶段均在 `git worktree` 干净副本上 `autoreconf -i && ./configure &&
+  make -j check` 通过（`OK (911)`、`# PASS: 1`、无 `Failures !!!`）；
+  最终验收带 `--enable-werror`（`-Wall -Werror -Wformat-security`），
+  `CXX = g++ -std=c++20`、`config.h` 只有 `HAVE_CXX20`、
+  公共头哈希与规划时一致（`2216641161b15acb3c3ddf2600dc19e3decd59d5`）。
+- 实际偏差：`UtilTest2.cc` 的既有 UB 修复超出原「预计修改的文件」清单；
+  属用户明确授权的附带修复，已在此记录。其余范围与计划一致。

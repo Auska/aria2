@@ -53,9 +53,7 @@ DHTTaskExecutor::~DHTTaskExecutor() = default;
 
 void DHTTaskExecutor::update()
 {
-  execTasks_.erase(std::remove_if(execTasks_.begin(), execTasks_.end(),
-                                  std::mem_fn(&DHTTask::finished)),
-                   execTasks_.end());
+  std::erase_if(execTasks_, std::mem_fn(&DHTTask::finished));
   int r;
   if (static_cast<size_t>(numConcurrent_) > execTasks_.size()) {
     r = numConcurrent_ - execTasks_.size();

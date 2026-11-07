@@ -77,7 +77,7 @@ size_t DefaultPeerStorage::countAllPeer() const
 
 bool DefaultPeerStorage::isPeerAlreadyAdded(const std::shared_ptr<Peer>& peer)
 {
-  return uniqPeers_.count(
+  return uniqPeers_.contains(
       std::make_pair(peer->getIPAddress(), peer->getOrigPort()));
 }
 

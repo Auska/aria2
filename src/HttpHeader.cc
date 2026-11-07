@@ -53,7 +53,7 @@ void HttpHeader::put(int hdKey, const std::string& value)
 
 void HttpHeader::remove(int hdKey) { table_.erase(hdKey); }
 
-bool HttpHeader::defined(int hdKey) const { return table_.count(hdKey); }
+bool HttpHeader::defined(int hdKey) const { return table_.contains(hdKey); }
 
 const std::string& HttpHeader::find(int hdKey) const
 {

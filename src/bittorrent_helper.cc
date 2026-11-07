@@ -915,7 +915,7 @@ std::unique_ptr<TorrentAttribute> parseMagnet(const std::string& magnet)
   for (auto xtiter = xts->begin(), eoi = xts->end();
        xtiter != eoi && infoHash.empty(); ++xtiter) {
     const String* xt = downcast<String>(*xtiter);
-    if (util::startsWith(xt->s(), "urn:btih:")) {
+    if (xt->s().starts_with("urn:btih:")) {
       size_t size = xt->s().end() - xt->s().begin() - 9;
       if (size == 32) {
         std::string rawhash =

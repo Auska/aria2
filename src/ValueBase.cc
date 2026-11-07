@@ -189,7 +189,7 @@ ValueBase* Dict::operator[](const std::string& key) const { return get(key); }
 
 bool Dict::containsKey(const std::string& key) const
 {
-  return dict_.count(key);
+  return dict_.contains(key);
 }
 
 void Dict::removeKey(const std::string& key) { dict_.erase(key); }

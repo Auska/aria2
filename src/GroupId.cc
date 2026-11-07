@@ -47,7 +47,7 @@ std::shared_ptr<GroupId> GroupId::create()
   a2_gid_t n;
   for (;;) {
     util::generateRandomData(reinterpret_cast<unsigned char*>(&n), sizeof(n));
-    if (n != 0 && set_.count(n) == 0) {
+    if (n != 0 && !set_.contains(n)) {
       break;
     }
   }
@@ -58,7 +58,7 @@ std::shared_ptr<GroupId> GroupId::create()
 std::shared_ptr<GroupId> GroupId::import(a2_gid_t n)
 {
   std::shared_ptr<GroupId> res;
-  if (n == 0 || set_.count(n) != 0) {
+  if (n == 0 || set_.contains(n)) {
     return res;
   }
   res.reset(new GroupId(n));
