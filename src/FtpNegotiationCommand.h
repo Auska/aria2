@@ -47,7 +47,7 @@ class HttpConnection;
 
 class FtpNegotiationCommand : public AbstractCommand {
 public:
-  enum Seq {
+  enum class Seq {
     SEQ_RECV_GREETING,
     SEQ_SEND_USER,
     SEQ_RECV_USER,
@@ -163,7 +163,7 @@ public:
                         const std::shared_ptr<FileEntry>& fileEntry,
                         RequestGroup* requestGroup, DownloadEngine* e,
                         const std::shared_ptr<SocketCore>& s,
-                        Seq seq = SEQ_RECV_GREETING,
+                        Seq seq = Seq::SEQ_RECV_GREETING,
                         const std::string& baseWorkingDir = "/");
   virtual ~FtpNegotiationCommand();
 };

@@ -217,7 +217,7 @@ std::shared_ptr<UDPTrackerRequest> DefaultBtAnnounce::createUDPTrackerRequest(
   auto req = std::make_shared<UDPTrackerRequest>();
   req->remoteAddr = remoteAddr;
   req->remotePort = remotePort;
-  req->action = UDPT_ACT_ANNOUNCE;
+  req->action = UDPTrackerAction::Announce;
   req->infohash = bittorrent::getTorrentAttrs(downloadContext_)->infoHash;
   const unsigned char* peerId = bittorrent::getStaticPeerId();
   req->peerId.assign(peerId, peerId + PEER_ID_LENGTH);
@@ -227,16 +227,16 @@ std::shared_ptr<UDPTrackerRequest> DefaultBtAnnounce::createUDPTrackerRequest(
   switch (announceList_.getEvent()) {
   case AnnounceTier::STARTED:
   case AnnounceTier::STARTED_AFTER_COMPLETION:
-    req->event = UDPT_EVT_STARTED;
+    req->event = UDPTrackerEvent::Started;
     break;
   case AnnounceTier::STOPPED:
-    req->event = UDPT_EVT_STOPPED;
+    req->event = UDPTrackerEvent::Stopped;
     break;
   case AnnounceTier::COMPLETED:
-    req->event = UDPT_EVT_COMPLETED;
+    req->event = UDPTrackerEvent::Completed;
     break;
   default:
-    req->event = 0;
+    req->event = UDPTrackerEvent::None;
   }
   if (!option_->blank(PREF_BT_EXTERNAL_IP)) {
     unsigned char dest[16];

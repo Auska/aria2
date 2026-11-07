@@ -37,6 +37,9 @@
 
 #include "common.h"
 
+#include <cstddef>
+#include <span>
+
 #include <cstdlib>
 
 #include <openssl/opensslv.h>
@@ -63,9 +66,9 @@ public:
 
   void init(const unsigned char* key, size_t keyLength);
 
-  // Encrypts data in in buffer to out buffer. in and out can be the
-  // same buffer.
-  void encrypt(size_t len, unsigned char* out, const unsigned char* in);
+  // Encrypts in.size() bytes from |in| to |out|. |in| and |out| can
+  // refer to the same buffer.
+  void encrypt(std::span<std::byte> out, std::span<const std::byte> in);
 };
 
 } // namespace aria2

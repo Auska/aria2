@@ -143,13 +143,13 @@ UDPAnnRequest::~UDPAnnRequest() = default;
 
 bool UDPAnnRequest::stopped() const
 {
-  return !req_ || req_->state == UDPT_STA_COMPLETE;
+  return !req_ || req_->state == UDPTrackerState::Complete;
 }
 
 bool UDPAnnRequest::success() const
 {
-  return req_ && req_->state == UDPT_STA_COMPLETE &&
-         req_->error == UDPT_ERR_SUCCESS;
+  return req_ && req_->state == UDPTrackerState::Complete &&
+         req_->error == UDPTrackerError::Success;
 }
 
 void UDPAnnRequest::stop(DownloadEngine* e)

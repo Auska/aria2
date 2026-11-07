@@ -134,16 +134,16 @@ void Netrc::parse(const std::string& path)
   if (!fp) {
     throw DL_ABORT_EX(fmt("Cannot open file: {}", path.c_str()));
   }
-  enum STATE {
-    GET_TOKEN,
-    SET_MACHINE,
-    SET_LOGIN,
-    SET_PASSWORD,
-    SET_ACCOUNT,
-    SET_MACDEF
+  enum class State {
+    GetToken,
+    SetMachine,
+    SetLogin,
+    SetPassword,
+    SetAccount,
+    SetMacdef
   };
   std::unique_ptr<Authenticator> authenticator;
-  STATE state = GET_TOKEN;
+  State state = State::GetToken;
   while (1) {
     std::string line = fp.getLine();
     if (line.empty()) {
@@ -166,11 +166,11 @@ void Netrc::parse(const std::string& path)
     for (std::vector<Scip>::const_iterator iter = tokens.begin(),
                                            eoi = tokens.end();
          iter != eoi; ++iter) {
-      if (state == GET_TOKEN) {
+      if (state == State::GetToken) {
         if (util::streq((*iter).first, (*iter).second, "machine")) {
           storeAuthenticator(std::move(authenticator));
           authenticator = make_unique<Authenticator>();
-          state = SET_MACHINE;
+          state = State::SetMachine;
         }
         else if (util::streq((*iter).first, (*iter).second, "default")) {
           storeAuthenticator(std::move(authenticator));
@@ -184,40 +184,40 @@ void Netrc::parse(const std::string& path)
                     std::string((*iter).first, (*iter).second).c_str()));
           }
           if (util::streq((*iter).first, (*iter).second, "login")) {
-            state = SET_LOGIN;
+            state = State::SetLogin;
           }
           else if (util::streq((*iter).first, (*iter).second, "password")) {
-            state = SET_PASSWORD;
+            state = State::SetPassword;
           }
           else if (util::streq((*iter).first, (*iter).second, "account")) {
-            state = SET_ACCOUNT;
+            state = State::SetAccount;
           }
           else if (util::streq((*iter).first, (*iter).second, "macdef")) {
-            state = SET_MACDEF;
+            state = State::SetMacdef;
           }
         }
       }
       else {
-        if (state == SET_MACHINE) {
+        if (state == State::SetMachine) {
           authenticator->setMachine({(*iter).first, (*iter).second});
         }
-        else if (state == SET_LOGIN) {
+        else if (state == State::SetLogin) {
           authenticator->setLogin({(*iter).first, (*iter).second});
         }
-        else if (state == SET_PASSWORD) {
+        else if (state == State::SetPassword) {
           authenticator->setPassword({(*iter).first, (*iter).second});
         }
-        else if (state == SET_ACCOUNT) {
+        else if (state == State::SetAccount) {
           authenticator->setAccount({(*iter).first, (*iter).second});
         }
-        else if (state == SET_MACDEF) {
+        else if (state == State::SetMacdef) {
           skipMacdef(fp);
         }
-        state = GET_TOKEN;
+        state = State::GetToken;
       }
     }
   }
-  if (state != GET_TOKEN) {
+  if (state != State::GetToken) {
     throw DL_ABORT_EX("Netrc:parse error. EOF reached where a token expected.");
   }
   storeAuthenticator(std::move(authenticator));
@@ -247,9 +247,9 @@ public:
 
 const Authenticator* Netrc::findAuthenticator(const std::string& hostname) const
 {
-  std::unique_ptr<Authenticator> res;
-  auto itr = std::find_if(std::begin(authenticators_),
-                          std::end(authenticators_), AuthHostMatch(hostname));
+  auto itr = std::find_if(std::ranges::begin(authenticators_),
+                          std::ranges::end(authenticators_),
+                          AuthHostMatch(hostname));
   if (itr == std::end(authenticators_)) {
     return nullptr;
   }

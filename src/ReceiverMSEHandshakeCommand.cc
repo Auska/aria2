@@ -84,17 +84,16 @@ bool ReceiverMSEHandshakeCommand::executeInternal()
   while (!done) {
     switch (sequence_) {
     case RECEIVER_IDENTIFY_HANDSHAKE: {
-      MSEHandshake::HANDSHAKE_TYPE type =
-          mseHandshake_->identifyHandshakeType();
+      auto type = mseHandshake_->identifyHandshakeType();
       switch (type) {
-      case MSEHandshake::HANDSHAKE_NOT_YET:
+      case MSEHandshake::HandshakeType::NotYet:
         done = true;
         break;
-      case MSEHandshake::HANDSHAKE_ENCRYPTED:
+      case MSEHandshake::HandshakeType::Encrypted:
         mseHandshake_->initEncryptionFacility(false);
         sequence_ = RECEIVER_WAIT_KEY;
         break;
-      case MSEHandshake::HANDSHAKE_LEGACY: {
+      case MSEHandshake::HandshakeType::Legacy: {
         const auto option = getDownloadEngine()->getOption();
         if (option->getAsBool(PREF_BT_FORCE_ENCRYPTION) ||
             option->getAsBool(PREF_BT_REQUIRE_CRYPTO)) {
@@ -215,7 +214,7 @@ void ReceiverMSEHandshakeCommand::createCommand()
 {
   auto peerConnection =
       make_unique<PeerConnection>(getCuid(), getPeer(), getSocket());
-  if (mseHandshake_->getNegotiatedCryptoType() == MSEHandshake::CRYPTO_ARC4) {
+  if (mseHandshake_->getNegotiatedCryptoType() == MSEHandshake::CryptoType::Arc4) {
     peerConnection->enableEncryption(mseHandshake_->popEncryptor(),
                                      mseHandshake_->popDecryptor());
   }

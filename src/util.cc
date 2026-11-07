@@ -1865,8 +1865,7 @@ std::vector<std::pair<size_t, std::string>> createIndexPaths(std::istream& i)
 void generateRandomData(std::span<std::byte> data)
 {
   const auto& rd = SimpleRandomizer::getInstance();
-  return rd->getRandomBytes(
-      reinterpret_cast<unsigned char*>(data.data()), data.size());
+  rd->getRandomBytes(data);
 }
 
 bool saveAs(const std::string& filename, const std::string& data,

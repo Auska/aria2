@@ -127,10 +127,11 @@ bool DHTInteractionCommand::execute()
       else {
         // this may be udp tracker response. nothrow.
         std::shared_ptr<UDPTrackerRequest> req;
-        if (udpTrackerClient_->receiveReply(req, data.data(), length,
-                                            remoteAddr, remotePort,
-                                            global::wallclock()) == 0) {
-          if (req->action == UDPT_ACT_ANNOUNCE) {
+        if (udpTrackerClient_->receiveReply(
+                req, std::span{reinterpret_cast<const std::byte*>(data.data()),
+                               static_cast<size_t>(length)},
+                remoteAddr, remotePort, global::wallclock()) == 0) {
+          if (req->action == UDPTrackerAction::Announce) {
             auto c = static_cast<TrackerWatcherCommand*>(req->user_data);
             if (c) {
               c->setStatus(Command::STATUS_ONESHOT_REALTIME);
@@ -150,7 +151,8 @@ bool DHTInteractionCommand::execute()
   while (!udpTrackerClient_->getPendingRequests().empty()) {
     // no throw
     ssize_t length = udpTrackerClient_->createRequest(
-        data.data(), data.size(), remoteAddr, remotePort, global::wallclock());
+        std::span{reinterpret_cast<std::byte*>(data.data()), data.size()},
+        remoteAddr, remotePort, global::wallclock());
     if (length == -1) {
       break;
     }
@@ -161,7 +163,7 @@ bool DHTInteractionCommand::execute()
     }
     catch (RecoverableException& e) {
       A2_LOG_INFO_EX("Exception thrown while sending UDP tracker request.", e);
-      udpTrackerClient_->requestFail(UDPT_ERR_NETWORK);
+      udpTrackerClient_->requestFail(UDPTrackerError::Network);
     }
   }
   e_->addRoutineCommand(std::unique_ptr<Command>(this));

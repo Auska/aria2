@@ -129,7 +129,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandProxied(
     return make_unique<FtpNegotiationCommand>(
         getCuid(), getRequest(), getFileEntry(), getRequestGroup(),
         getDownloadEngine(), pooledSocket,
-        FtpNegotiationCommand::SEQ_SEND_CWD_PREP, options);
+        FtpNegotiationCommand::Seq::SEQ_SEND_CWD_PREP, options);
   }
 
   assert(getRequest()->getProtocol() == "ftp");
@@ -185,7 +185,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandPlain(
   return make_unique<FtpNegotiationCommand>(
       getCuid(), getRequest(), getFileEntry(), getRequestGroup(),
       getDownloadEngine(), pooledSocket,
-      FtpNegotiationCommand::SEQ_SEND_CWD_PREP, options);
+      FtpNegotiationCommand::Seq::SEQ_SEND_CWD_PREP, options);
 }
 
 std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommand(

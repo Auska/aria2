@@ -45,32 +45,34 @@
 
 namespace aria2 {
 
-enum UDPTrackerAction {
-  UDPT_ACT_CONNECT = 0,
-  UDPT_ACT_ANNOUNCE = 1,
-  UDPT_ACT_SCRAPE = 2,
-  UDPT_ACT_ERROR = 3
+// Values of the Action and Event enums are the on-wire protocol
+// numbers.
+enum class UDPTrackerAction : int32_t {
+  Connect = 0,
+  Announce = 1,
+  Scrape = 2,
+  Error = 3
 };
 
-enum UDPTrackerError {
-  UDPT_ERR_SUCCESS,
-  UDPT_ERR_TRACKER,
-  UDPT_ERR_TIMEOUT,
-  UDPT_ERR_NETWORK,
-  UDPT_ERR_SHUTDOWN
+enum class UDPTrackerError {
+  Success,
+  Tracker,
+  Timeout,
+  Network,
+  Shutdown
 };
 
-enum UDPTrackerState { UDPT_STA_PENDING, UDPT_STA_COMPLETE };
+enum class UDPTrackerState { Pending, Complete };
 
-enum UDPTrackerEvent {
-  UDPT_EVT_NONE = 0,
-  UDPT_EVT_COMPLETED = 1,
-  UDPT_EVT_STARTED = 2,
-  UDPT_EVT_STOPPED = 3
+enum class UDPTrackerEvent : int32_t {
+  None = 0,
+  Completed = 1,
+  Started = 2,
+  Stopped = 3
 };
 
 struct UDPTrackerReply {
-  int32_t action;
+  UDPTrackerAction action;
   uint32_t transactionId;
   int32_t interval;
   int32_t leechers;
@@ -83,21 +85,21 @@ struct UDPTrackerRequest {
   std::string remoteAddr;
   uint16_t remotePort;
   uint64_t connectionId;
-  int32_t action;
+  UDPTrackerAction action;
   uint32_t transactionId;
   std::string infohash;
   std::string peerId;
   int64_t downloaded;
   int64_t left;
   int64_t uploaded;
-  int32_t event;
+  UDPTrackerEvent event;
   uint32_t ip;
   uint32_t key;
   int32_t numWant;
   uint16_t port;
   uint16_t extensions;
-  int state;
-  int error;
+  UDPTrackerState state;
+  UDPTrackerError error;
   Timer dispatched;
   int failCount;
   std::shared_ptr<UDPTrackerReply> reply;

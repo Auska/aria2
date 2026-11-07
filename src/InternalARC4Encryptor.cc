@@ -53,16 +53,19 @@ void ARC4Encryptor::init(const unsigned char* key, size_t keyLength)
   i = j = 0;
 }
 
-void ARC4Encryptor::encrypt(size_t len, unsigned char* out,
-                            const unsigned char* in)
+void ARC4Encryptor::encrypt(std::span<std::byte> out,
+                            std::span<const std::byte> in)
 {
-  for (auto c = 0u; c < len; ++c) {
+  assert(out.size() >= in.size());
+  auto outPtr = reinterpret_cast<unsigned char*>(out.data());
+  auto inPtr = reinterpret_cast<const unsigned char*>(in.data());
+  for (size_t c = 0; c < in.size(); ++c) {
     i = (i + 1) & 0xff;
     j = (j + state_[i]) & 0xff;
     auto sj = state_[i];
     auto si = state_[i] = state_[j];
     state_[j] = sj;
-    out[c] = in[c] ^ state_[(si + sj) & 0xff];
+    outPtr[c] = inPtr[c] ^ state_[(si + sj) & 0xff];
   }
 }
 

@@ -47,10 +47,11 @@ UDPTrackerClient::UDPTrackerClient() : numWatchers_(0) {}
 
 namespace {
 template <typename InputIterator>
-void failRequest(InputIterator first, InputIterator last, int error)
+void failRequest(InputIterator first, InputIterator last,
+                 UDPTrackerError error)
 {
   for (; first != last; ++first) {
-    (*first)->state = UDPT_STA_COMPLETE;
+    (*first)->state = UDPTrackerState::Complete;
     (*first)->error = error;
   }
 }
@@ -61,14 +62,15 @@ uint32_t generateTransactionId()
 {
   uint32_t res;
   SimpleRandomizer::getInstance()->getRandomBytes(
-      reinterpret_cast<unsigned char*>(&res), sizeof(res));
+      std::span{reinterpret_cast<std::byte*>(&res), sizeof(res)});
   return res;
 }
 } // namespace
 
 namespace {
 void logInvalidLength(const std::string& remoteAddr, uint16_t remotePort,
-                      int action, unsigned long expected, unsigned long actual)
+                      UDPTrackerAction action, unsigned long expected,
+                      unsigned long actual)
 {
   A2_LOG_INFO(fmt("UDPT received {} reply from {}:{} invalid length "
                   "expected:{}, actual:{}",
@@ -79,7 +81,7 @@ void logInvalidLength(const std::string& remoteAddr, uint16_t remotePort,
 
 namespace {
 void logInvalidTransaction(const std::string& remoteAddr, uint16_t remotePort,
-                           int action, uint32_t transactionId)
+                           UDPTrackerAction action, uint32_t transactionId)
 {
   A2_LOG_INFO(
       fmt("UDPT received {} reply from {}:{} invalid transaction_id={:08x}",
@@ -90,7 +92,7 @@ void logInvalidTransaction(const std::string& remoteAddr, uint16_t remotePort,
 
 namespace {
 void logTooShortLength(const std::string& remoteAddr, uint16_t remotePort,
-                       int action, unsigned long minLength,
+                       UDPTrackerAction action, unsigned long minLength,
                        unsigned long actual)
 {
   A2_LOG_INFO(fmt("UDPT received {} reply from {}:{} length too short "
@@ -103,7 +105,7 @@ void logTooShortLength(const std::string& remoteAddr, uint16_t remotePort,
 UDPTrackerClient::~UDPTrackerClient()
 {
   // Make all contained requests fail
-  int error = UDPT_ERR_SHUTDOWN;
+  auto error = UDPTrackerError::Shutdown;
   failRequest(inflightRequests_.begin(), inflightRequests_.end(), error);
   failRequest(pendingRequests_.begin(), pendingRequests_.end(), error);
   failRequest(connectRequests_.begin(), connectRequests_.end(), error);
@@ -133,18 +135,21 @@ struct CollectAddrPortMatch {
 } // namespace
 
 int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
-                                   const unsigned char* data, size_t length,
+                                   std::span<const std::byte> data,
                                    const std::string& remoteAddr,
                                    uint16_t remotePort, const Timer& now)
 {
-  int32_t action = bittorrent::getIntParam(data, 0);
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto length = data.size();
+  auto action =
+      static_cast<UDPTrackerAction>(bittorrent::getIntParam(dataPtr, 0));
   switch (action) {
-  case UDPT_ACT_CONNECT: {
+  case UDPTrackerAction::Connect: {
     if (length != 16) {
       logInvalidLength(remoteAddr, remotePort, action, 16, length);
       return -1;
     }
-    auto transactionId = bittorrent::getIntParam(data, 4);
+    auto transactionId = bittorrent::getIntParam(dataPtr, 4);
     std::shared_ptr<UDPTrackerRequest> req =
         findInflightRequest(remoteAddr, remotePort, transactionId, true);
     if (!req) {
@@ -152,12 +157,13 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
       return -1;
     }
 
-    auto connectionId = bittorrent::getLLIntParam(data, 8);
+    auto connectionId = bittorrent::getLLIntParam(dataPtr, 8);
     A2_LOG_INFO(
         fmt("UDPT received CONNECT reply from {}:{} transaction_id={:08x},"
             "connection_id={:016x}",
             remoteAddr.c_str(), remotePort, transactionId, connectionId));
-    UDPTrackerConnection c(UDPT_CST_CONNECTED, connectionId, now);
+    UDPTrackerConnection c(UDPTrackerConnectionState::Connected, connectionId,
+                           now);
     connectionIdCache_[std::make_pair(remoteAddr, remotePort)] = c;
     // Now we have connection ID, push requests which are waiting for
     // it.
@@ -170,31 +176,31 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
 
     break;
   }
-  case UDPT_ACT_ANNOUNCE: {
+  case UDPTrackerAction::Announce: {
     if (length < 20) {
       logTooShortLength(remoteAddr, remotePort, action, 20, length);
       return -1;
     }
-    auto transactionId = bittorrent::getIntParam(data, 4);
+    auto transactionId = bittorrent::getIntParam(dataPtr, 4);
     std::shared_ptr<UDPTrackerRequest> req =
         findInflightRequest(remoteAddr, remotePort, transactionId, true);
     if (!req) {
       logInvalidTransaction(remoteAddr, remotePort, action, transactionId);
       return -1;
     }
-    req->state = UDPT_STA_COMPLETE;
+    req->state = UDPTrackerState::Complete;
 
     req->reply = std::make_shared<UDPTrackerReply>();
     req->reply->action = action;
     req->reply->transactionId = transactionId;
-    req->reply->interval = bittorrent::getIntParam(data, 8);
-    req->reply->leechers = bittorrent::getIntParam(data, 12);
-    req->reply->seeders = bittorrent::getIntParam(data, 16);
+    req->reply->interval = bittorrent::getIntParam(dataPtr, 8);
+    req->reply->leechers = bittorrent::getIntParam(dataPtr, 12);
+    req->reply->seeders = bittorrent::getIntParam(dataPtr, 16);
 
     int numPeers = 0;
     for (size_t i = 20; i < length; i += 6) {
       std::pair<std::string, uint16_t> hostport =
-          bittorrent::unpackcompact(data + i, AF_INET);
+          bittorrent::unpackcompact(dataPtr + i, AF_INET);
       if (!hostport.first.empty()) {
         req->reply->peers.push_back(hostport);
         ++numPeers;
@@ -215,37 +221,38 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
 
     break;
   }
-  case UDPT_ACT_ERROR: {
+  case UDPTrackerAction::Error: {
     if (length < 8) {
       logTooShortLength(remoteAddr, remotePort, action, 8, length);
       return -1;
     }
-    auto transactionId = bittorrent::getIntParam(data, 4);
+    auto transactionId = bittorrent::getIntParam(dataPtr, 4);
     std::shared_ptr<UDPTrackerRequest> req =
         findInflightRequest(remoteAddr, remotePort, transactionId, true);
     if (!req) {
       logInvalidTransaction(remoteAddr, remotePort, action, transactionId);
       return -1;
     }
-    std::string errorString(data + 8, data + length);
+    std::string errorString(dataPtr + 8, dataPtr + length);
     errorString = util::encodeNonUtf8(errorString);
 
-    req->state = UDPT_STA_COMPLETE;
-    req->error = UDPT_ERR_TRACKER;
+    req->state = UDPTrackerState::Complete;
+    req->error = UDPTrackerError::Tracker;
 
     A2_LOG_INFO(fmt("UDPT received ERROR reply from {}:{} transaction_id={:08x},"
                     "connection_id=%016{}, action={}, error_string={}",
                     remoteAddr.c_str(), remotePort, transactionId,
-                    req->connectionId, action, errorString.c_str()));
-    if (req->action == UDPT_ACT_CONNECT) {
-      failConnect(req->remoteAddr, req->remotePort, UDPT_ERR_TRACKER);
+                    req->connectionId, getUDPTrackerActionStr(action),
+                    errorString.c_str()));
+    if (req->action == UDPTrackerAction::Connect) {
+      failConnect(req->remoteAddr, req->remotePort, UDPTrackerError::Tracker);
     }
 
     recvReq = std::move(req);
 
     break;
   }
-  case UDPT_ACT_SCRAPE:
+  case UDPTrackerAction::Scrape:
     A2_LOG_INFO(fmt("unexpected scrape action reply from {}:{}",
                     remoteAddr.c_str(), remotePort));
     return -1;
@@ -257,7 +264,7 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
   return 0;
 }
 
-ssize_t UDPTrackerClient::createRequest(unsigned char* data, size_t length,
+ssize_t UDPTrackerClient::createRequest(std::span<std::byte> data,
                                         std::string& remoteAddr,
                                         uint16_t& remotePort, const Timer& now)
 {
@@ -266,25 +273,25 @@ ssize_t UDPTrackerClient::createRequest(unsigned char* data, size_t length,
   }
   while (!pendingRequests_.empty()) {
     const std::shared_ptr<UDPTrackerRequest>& req = pendingRequests_.front();
-    if (req->action == UDPT_ACT_CONNECT) {
+    if (req->action == UDPTrackerAction::Connect) {
       ssize_t rv;
-      rv = createUDPTrackerConnect(data, length, remoteAddr, remotePort, req);
+      rv = createUDPTrackerConnect(data, remoteAddr, remotePort, req);
       return rv;
     }
     UDPTrackerConnection* c =
         getConnectionId(req->remoteAddr, req->remotePort, now);
     if (!c) {
       auto creq = std::make_shared<UDPTrackerRequest>();
-      creq->action = UDPT_ACT_CONNECT;
+      creq->action = UDPTrackerAction::Connect;
       creq->remoteAddr = req->remoteAddr;
       creq->remotePort = req->remotePort;
       creq->transactionId = generateTransactionId();
       pendingRequests_.push_front(creq);
       ssize_t rv;
-      rv = createUDPTrackerConnect(data, length, remoteAddr, remotePort, creq);
+      rv = createUDPTrackerConnect(data, remoteAddr, remotePort, creq);
       return rv;
     }
-    if (c->state == UDPT_CST_CONNECTING) {
+    if (c->state == UDPTrackerConnectionState::Connecting) {
       connectRequests_.push_back(req);
       pendingRequests_.pop_front();
       continue;
@@ -292,7 +299,7 @@ ssize_t UDPTrackerClient::createRequest(unsigned char* data, size_t length,
     req->connectionId = c->connectionId;
     req->transactionId = generateTransactionId();
     ssize_t rv;
-    rv = createUDPTrackerAnnounce(data, length, remoteAddr, remotePort, req);
+    rv = createUDPTrackerAnnounce(data, remoteAddr, remotePort, req);
     return rv;
   }
   return -1;
@@ -306,12 +313,12 @@ void UDPTrackerClient::requestSent(const Timer& now)
   }
   const std::shared_ptr<UDPTrackerRequest>& req = pendingRequests_.front();
   switch (req->action) {
-  case UDPT_ACT_CONNECT:
+  case UDPTrackerAction::Connect:
     A2_LOG_INFO(fmt("UDPT sent CONNECT to {}:{} transaction_id={:08x}",
                     req->remoteAddr.c_str(), req->remotePort,
                     req->transactionId));
     break;
-  case UDPT_ACT_ANNOUNCE:
+  case UDPTrackerAction::Announce:
     A2_LOG_INFO(fmt("UDPT sent ANNOUNCE to {}:{} transaction_id={:08x}, "
                     "connection_id=%016{}, event={}, infohash={}",
                     req->remoteAddr.c_str(), req->remotePort,
@@ -324,18 +331,15 @@ void UDPTrackerClient::requestSent(const Timer& now)
     assert(0);
   }
   req->dispatched = now;
-  switch (req->action) {
-  case UDPT_ACT_CONNECT: {
+  if (req->action == UDPTrackerAction::Connect) {
     connectionIdCache_[std::make_pair(req->remoteAddr, req->remotePort)] =
         UDPTrackerConnection();
-    break;
-  }
   }
   inflightRequests_.push_back(req);
   pendingRequests_.pop_front();
 }
 
-void UDPTrackerClient::requestFail(int error)
+void UDPTrackerClient::requestFail(UDPTrackerError error)
 {
   if (pendingRequests_.empty()) {
     A2_LOG_WARN("pendingRequests_ is empty");
@@ -343,13 +347,13 @@ void UDPTrackerClient::requestFail(int error)
   }
   const std::shared_ptr<UDPTrackerRequest>& req = pendingRequests_.front();
   switch (req->action) {
-  case UDPT_ACT_CONNECT:
+  case UDPTrackerAction::Connect:
     A2_LOG_INFO(fmt("UDPT fail CONNECT to {}:{} transaction_id={:08x}",
                     req->remoteAddr.c_str(), req->remotePort,
                     req->transactionId));
     failConnect(req->remoteAddr, req->remotePort, error);
     break;
-  case UDPT_ACT_ANNOUNCE:
+  case UDPTrackerAction::Announce:
     A2_LOG_INFO(fmt("UDPT fail ANNOUNCE to {}:{} transaction_id={:08x}, "
                     "connection_id=%016{}, event={}, infohash={}",
                     req->remoteAddr.c_str(), req->remotePort,
@@ -361,15 +365,15 @@ void UDPTrackerClient::requestFail(int error)
     // unreachable
     assert(0);
   }
-  req->state = UDPT_STA_COMPLETE;
+  req->state = UDPTrackerState::Complete;
   req->error = error;
   pendingRequests_.pop_front();
 }
 
 void UDPTrackerClient::addRequest(const std::shared_ptr<UDPTrackerRequest>& req)
 {
-  req->state = UDPT_STA_PENDING;
-  req->error = UDPT_ERR_SUCCESS;
+  req->state = UDPTrackerState::Pending;
+  req->error = UDPTrackerError::Success;
   pendingRequests_.push_back(req);
 }
 
@@ -381,12 +385,12 @@ struct TimeoutCheck {
     if (req->failCount == 0) {
       if (t >= 5_s) {
         switch (req->action) {
-        case UDPT_ACT_CONNECT:
+        case UDPTrackerAction::Connect:
           A2_LOG_INFO(fmt("UDPT resend CONNECT to {}:{} transaction_id={:08x}",
                           req->remoteAddr.c_str(), req->remotePort,
                           req->transactionId));
           break;
-        case UDPT_ACT_ANNOUNCE:
+        case UDPTrackerAction::Announce:
           A2_LOG_INFO(fmt("UDPT resend ANNOUNCE to {}:{} transaction_id={:08x}, "
                           "connection_id=%016{}, event={}, infohash={}",
                           req->remoteAddr.c_str(), req->remotePort,
@@ -409,14 +413,14 @@ struct TimeoutCheck {
     else {
       if (t >= 10_s) {
         switch (req->action) {
-        case UDPT_ACT_CONNECT:
+        case UDPTrackerAction::Connect:
           A2_LOG_INFO(fmt("UDPT timeout CONNECT to {}:{} transaction_id={:08x}",
                           req->remoteAddr.c_str(), req->remotePort,
                           req->transactionId));
           client->failConnect(req->remoteAddr, req->remotePort,
-                              UDPT_ERR_TIMEOUT);
+                              UDPTrackerError::Timeout);
           break;
-        case UDPT_ACT_ANNOUNCE:
+        case UDPTrackerAction::Announce:
           A2_LOG_INFO(fmt("UDPT timeout ANNOUNCE to {}:{} transaction_id={:08x}, "
                           "connection_id=%016{}, event={}, infohash={}",
                           req->remoteAddr.c_str(), req->remotePort,
@@ -429,8 +433,8 @@ struct TimeoutCheck {
           assert(0);
         }
         ++req->failCount;
-        req->state = UDPT_STA_COMPLETE;
-        req->error = UDPT_ERR_TIMEOUT;
+        req->state = UDPTrackerState::Complete;
+        req->error = UDPTrackerError::Timeout;
         return true;
       }
       else {
@@ -484,7 +488,7 @@ UDPTrackerClient::getConnectionId(const std::string& remoteAddr,
   if (i == connectionIdCache_.end()) {
     return nullptr;
   }
-  if ((*i).second.state == UDPT_CST_CONNECTED &&
+  if ((*i).second.state == UDPTrackerConnectionState::Connected &&
       (*i).second.lastUpdated.difference(now) > 1_min) {
     connectionIdCache_.erase(i);
     return nullptr;
@@ -498,11 +502,11 @@ namespace {
 struct FailConnectDelete {
   bool operator()(const std::shared_ptr<UDPTrackerRequest>& req) const
   {
-    if (req->action == UDPT_ACT_ANNOUNCE && req->remoteAddr == remoteAddr &&
-        req->remotePort == remotePort) {
+    if (req->action == UDPTrackerAction::Announce &&
+        req->remoteAddr == remoteAddr && req->remotePort == remotePort) {
       A2_LOG_INFO(
           fmt("Force fail infohash={}", util::toHex(req->infohash).c_str()));
-      req->state = UDPT_STA_COMPLETE;
+      req->state = UDPTrackerState::Complete;
       req->error = error;
       return true;
     }
@@ -512,8 +516,9 @@ struct FailConnectDelete {
   }
   std::string remoteAddr;
   uint16_t remotePort;
-  int error;
-  FailConnectDelete(std::string remoteAddr, uint16_t remotePort, int error)
+  UDPTrackerError error;
+  FailConnectDelete(std::string remoteAddr, uint16_t remotePort,
+                    UDPTrackerError error)
       : remoteAddr(std::move(remoteAddr)), remotePort(remotePort), error(error)
   {
   }
@@ -521,7 +526,7 @@ struct FailConnectDelete {
 } // namespace
 
 void UDPTrackerClient::failConnect(const std::string& remoteAddr,
-                                   uint16_t remotePort, int error)
+                                   uint16_t remotePort, UDPTrackerError error)
 {
   connectionIdCache_.erase(std::make_pair(remoteAddr, remotePort));
   // Fail all requests which are waiting for connection ID of the host.
@@ -533,7 +538,7 @@ void UDPTrackerClient::failConnect(const std::string& remoteAddr,
 
 void UDPTrackerClient::failAll()
 {
-  int error = UDPT_ERR_SHUTDOWN;
+  auto error = UDPTrackerError::Shutdown;
   failRequest(inflightRequests_.begin(), inflightRequests_.end(), error);
   failRequest(pendingRequests_.begin(), pendingRequests_.end(), error);
   failRequest(connectRequests_.begin(), connectRequests_.end(), error);
@@ -543,69 +548,71 @@ void UDPTrackerClient::increaseWatchers() { ++numWatchers_; }
 
 void UDPTrackerClient::decreaseWatchers() { --numWatchers_; }
 
-ssize_t createUDPTrackerConnect(unsigned char* data, size_t length,
+ssize_t createUDPTrackerConnect(std::span<std::byte> data,
                                 std::string& remoteAddr, uint16_t& remotePort,
                                 const std::shared_ptr<UDPTrackerRequest>& req)
 {
-  assert(length >= 16);
+  assert(data.size() >= 16);
+  auto dataPtr = reinterpret_cast<unsigned char*>(data.data());
   remoteAddr = req->remoteAddr;
   remotePort = req->remotePort;
-  bittorrent::setLLIntParam(data, UDPT_INITIAL_CONNECTION_ID);
-  bittorrent::setIntParam(data + 8, req->action);
-  bittorrent::setIntParam(data + 12, req->transactionId);
+  bittorrent::setLLIntParam(dataPtr, UDPT_INITIAL_CONNECTION_ID);
+  bittorrent::setIntParam(dataPtr + 8, to_underlying(req->action));
+  bittorrent::setIntParam(dataPtr + 12, req->transactionId);
   return 16;
 }
 
-ssize_t createUDPTrackerAnnounce(unsigned char* data, size_t length,
+ssize_t createUDPTrackerAnnounce(std::span<std::byte> data,
                                  std::string& remoteAddr, uint16_t& remotePort,
                                  const std::shared_ptr<UDPTrackerRequest>& req)
 {
-  assert(length >= 100);
+  assert(data.size() >= 100);
+  auto dataPtr = reinterpret_cast<unsigned char*>(data.data());
   remoteAddr = req->remoteAddr;
   remotePort = req->remotePort;
-  bittorrent::setLLIntParam(data, req->connectionId);
-  bittorrent::setIntParam(data + 8, req->action);
-  bittorrent::setIntParam(data + 12, req->transactionId);
-  memcpy(data + 16, req->infohash.c_str(), req->infohash.size());
-  memcpy(data + 36, req->peerId.c_str(), req->peerId.size());
-  bittorrent::setLLIntParam(data + 56, req->downloaded);
-  bittorrent::setLLIntParam(data + 64, req->left);
-  bittorrent::setLLIntParam(data + 72, req->uploaded);
-  bittorrent::setIntParam(data + 80, req->event);
+  bittorrent::setLLIntParam(dataPtr, req->connectionId);
+  bittorrent::setIntParam(dataPtr + 8, to_underlying(req->action));
+  bittorrent::setIntParam(dataPtr + 12, req->transactionId);
+  memcpy(dataPtr + 16, req->infohash.c_str(), req->infohash.size());
+  memcpy(dataPtr + 36, req->peerId.c_str(), req->peerId.size());
+  bittorrent::setLLIntParam(dataPtr + 56, req->downloaded);
+  bittorrent::setLLIntParam(dataPtr + 64, req->left);
+  bittorrent::setLLIntParam(dataPtr + 72, req->uploaded);
+  bittorrent::setIntParam(dataPtr + 80, to_underlying(req->event));
   // ip is already network-byte order
-  memcpy(data + 84, &req->ip, sizeof(req->ip));
-  bittorrent::setIntParam(data + 88, req->key);
-  bittorrent::setIntParam(data + 92, req->numWant);
-  bittorrent::setShortIntParam(data + 96, req->port);
+  memcpy(dataPtr + 84, &req->ip, sizeof(req->ip));
+  bittorrent::setIntParam(dataPtr + 88, req->key);
+  bittorrent::setIntParam(dataPtr + 92, req->numWant);
+  bittorrent::setShortIntParam(dataPtr + 96, req->port);
   // extensions is always 0
-  bittorrent::setShortIntParam(data + 98, 0);
+  bittorrent::setShortIntParam(dataPtr + 98, 0);
   return 100;
 }
 
-const char* getUDPTrackerActionStr(int action)
+const char* getUDPTrackerActionStr(UDPTrackerAction action)
 {
   switch (action) {
-  case UDPT_ACT_CONNECT:
+  case UDPTrackerAction::Connect:
     return "CONNECT";
-  case UDPT_ACT_ANNOUNCE:
+  case UDPTrackerAction::Announce:
     return "ANNOUNCE";
-  case UDPT_ACT_ERROR:
+  case UDPTrackerAction::Error:
     return "ERROR";
   default:
     return "(unknown)";
   }
 }
 
-const char* getUDPTrackerEventStr(int event)
+const char* getUDPTrackerEventStr(UDPTrackerEvent event)
 {
   switch (event) {
-  case UDPT_EVT_NONE:
+  case UDPTrackerEvent::None:
     return "NONE";
-  case UDPT_EVT_COMPLETED:
+  case UDPTrackerEvent::Completed:
     return "COMPLETED";
-  case UDPT_EVT_STARTED:
+  case UDPTrackerEvent::Started:
     return "STARTED";
-  case UDPT_EVT_STOPPED:
+  case UDPTrackerEvent::Stopped:
     return "STOPPED";
   default:
     return "(unknown)";

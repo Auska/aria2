@@ -155,10 +155,12 @@ bool InitiatorMSEHandshakeCommand::executeInternal()
         auto peerConnection =
             make_unique<PeerConnection>(getCuid(), getPeer(), getSocket());
         if (mseHandshake_->getNegotiatedCryptoType() ==
-            MSEHandshake::CRYPTO_ARC4) {
+            MSEHandshake::CryptoType::Arc4) {
           size_t buflen = mseHandshake_->getBufferLength();
           mseHandshake_->getDecryptor()->encrypt(
-              buflen, mseHandshake_->getBuffer(), mseHandshake_->getBuffer());
+              std::as_writable_bytes(
+                  std::span{mseHandshake_->getBuffer(), buflen}),
+              std::as_bytes(std::span{mseHandshake_->getBuffer(), buflen}));
           peerConnection->presetBuffer(mseHandshake_->getBuffer(), buflen);
           peerConnection->enableEncryption(mseHandshake_->popEncryptor(),
                                            mseHandshake_->popDecryptor());

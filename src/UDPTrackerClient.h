@@ -41,28 +41,28 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <span>
 
 #include "TimerA2.h"
+#include "UDPTrackerRequest.h"
 
 namespace aria2 {
 
 #define UDPT_INITIAL_CONNECTION_ID 0x41727101980LL
 
-struct UDPTrackerRequest;
-
-enum UDPTrackerConnectionState { UDPT_CST_CONNECTING, UDPT_CST_CONNECTED };
+enum class UDPTrackerConnectionState { Connecting, Connected };
 
 struct UDPTrackerConnection {
-  int state;
+  UDPTrackerConnectionState state;
   int64_t connectionId;
   Timer lastUpdated;
   UDPTrackerConnection()
-      : state(UDPT_CST_CONNECTING),
+      : state(UDPTrackerConnectionState::Connecting),
         connectionId(UDPT_INITIAL_CONNECTION_ID),
         lastUpdated(Timer::zero())
   {
   }
-  UDPTrackerConnection(int state, int64_t connectionId,
+  UDPTrackerConnection(UDPTrackerConnectionState state, int64_t connectionId,
                        const Timer& lastUpdated)
       : state(state), connectionId(connectionId), lastUpdated(lastUpdated)
   {
@@ -75,7 +75,7 @@ public:
   ~UDPTrackerClient();
 
   int receiveReply(std::shared_ptr<UDPTrackerRequest>& req,
-                   const unsigned char* data, size_t length,
+                   std::span<const std::byte> data,
                    const std::string& remoteAddr, uint16_t remotePort,
                    const Timer& now);
 
@@ -83,16 +83,15 @@ public:
   // always processes first entry of pendingRequests_.  If the data is
   // sent successfully, call requestSent(). Otherwise call
   // requestFail().
-  ssize_t createRequest(unsigned char* data, size_t length,
-                        std::string& remoteAddr, uint16_t& remotePort,
-                        const Timer& now);
+  ssize_t createRequest(std::span<std::byte> data, std::string& remoteAddr,
+                        uint16_t& remotePort, const Timer& now);
 
   // Tells this object that first entry of pendingRequests_ is
   // successfully sent.
   void requestSent(const Timer& now);
   // Tells this object that first entry of pendingRequests_ is not
   // successfully sent. The |error| should indicate error situation.
-  void requestFail(int error);
+  void requestFail(UDPTrackerError error);
 
   void addRequest(const std::shared_ptr<UDPTrackerRequest>& req);
 
@@ -132,7 +131,7 @@ public:
   // Actually private function, but made public, to be used by unnamed
   // function.
   void failConnect(const std::string& remoteAddr, uint16_t remotePort,
-                   int error);
+                   UDPTrackerError error);
 
 private:
   std::shared_ptr<UDPTrackerRequest>
@@ -150,17 +149,17 @@ private:
   int numWatchers_;
 };
 
-ssize_t createUDPTrackerConnect(unsigned char* data, size_t length,
+ssize_t createUDPTrackerConnect(std::span<std::byte> data,
                                 std::string& remoteAddr, uint16_t& remotePort,
                                 const std::shared_ptr<UDPTrackerRequest>& req);
 
-ssize_t createUDPTrackerAnnounce(unsigned char* data, size_t length,
+ssize_t createUDPTrackerAnnounce(std::span<std::byte> data,
                                  std::string& remoteAddr, uint16_t& remotePort,
                                  const std::shared_ptr<UDPTrackerRequest>& req);
 
-const char* getUDPTrackerActionStr(int action);
+const char* getUDPTrackerActionStr(UDPTrackerAction action);
 
-const char* getUDPTrackerEventStr(int event);
+const char* getUDPTrackerEventStr(UDPTrackerEvent event);
 
 } // namespace aria2
 

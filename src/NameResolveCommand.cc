@@ -127,14 +127,14 @@ bool NameResolveCommand::execute()
 
 void NameResolveCommand::onShutdown()
 {
-  req_->state = UDPT_STA_COMPLETE;
-  req_->error = UDPT_ERR_SHUTDOWN;
+  req_->state = UDPTrackerState::Complete;
+  req_->error = UDPTrackerError::Shutdown;
 }
 
 void NameResolveCommand::onFailure()
 {
-  req_->state = UDPT_STA_COMPLETE;
-  req_->error = UDPT_ERR_NETWORK;
+  req_->state = UDPTrackerState::Complete;
+  req_->error = UDPTrackerError::Network;
 }
 
 void NameResolveCommand::onSuccess(const std::vector<std::string>& addrs,

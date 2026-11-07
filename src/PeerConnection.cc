@@ -87,7 +87,8 @@ void PeerConnection::pushBytes(std::vector<unsigned char> data,
                                std::unique_ptr<ProgressUpdate> progressUpdate)
 {
   if (encryptionEnabled_) {
-    encryptor_->encrypt(data.size(), data.data(), data.data());
+    encryptor_->encrypt(std::as_writable_bytes(std::span{data}),
+                        std::as_bytes(std::span{data}));
   }
   socketBuffer_.pushBytes(std::move(data), std::move(progressUpdate));
 }
@@ -238,7 +239,8 @@ size_t PeerConnection::readData(std::span<unsigned char> data,
   auto length =
       static_cast<size_t>(socket_->readData(std::as_writable_bytes(data)));
   if (encryption) {
-    decryptor_->encrypt(length, data.data(), data.data());
+    decryptor_->encrypt(std::as_writable_bytes(data.first(length)),
+                        std::as_bytes(data.first(length)));
   }
   return length;
 }

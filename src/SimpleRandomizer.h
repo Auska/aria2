@@ -39,6 +39,7 @@
 
 #include <memory>
 #include <random>
+#include <span>
 
 namespace aria2 {
 
@@ -51,7 +52,7 @@ private:
   std::mt19937 gen_;
 
 public:
-  typedef std::mt19937::result_type result_type;
+  using result_type = std::mt19937::result_type;
 
   static const std::unique_ptr<SimpleRandomizer>& getInstance();
 
@@ -62,14 +63,14 @@ public:
    */
   virtual long int getRandomNumber(long int to) override;
 
-  void getRandomBytes(unsigned char* buf, size_t len);
+  void getRandomBytes(std::span<std::byte> buf);
 
   long int operator()(long int to) { return getRandomNumber(to); }
 
   result_type operator()()
   {
     result_type rv;
-    getRandomBytes(reinterpret_cast<unsigned char*>(&rv), sizeof(rv));
+    getRandomBytes(std::span{reinterpret_cast<std::byte*>(&rv), sizeof(rv)});
     return rv;
   }
 

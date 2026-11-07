@@ -263,14 +263,14 @@ void DefaultBtAnnounceTest::testGetAnnounceUrl()
   req = btAnnounce.createUDPTrackerRequest("localhost", 80, 6989);
   CPPUNIT_ASSERT_EQUAL(std::string("localhost"), req->remoteAddr);
   CPPUNIT_ASSERT_EQUAL((uint16_t)80, req->remotePort);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_ACT_ANNOUNCE, req->action);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerAction::Announce, (int)req->action);
   CPPUNIT_ASSERT_EQUAL(bittorrent::getInfoHashString(dctx_),
                        util::toHex(req->infohash));
   CPPUNIT_ASSERT_EQUAL(std::string("-aria2-ultrafastdltl"), req->peerId);
   CPPUNIT_ASSERT_EQUAL((int64_t)1310720, req->downloaded);
   CPPUNIT_ASSERT_EQUAL((int64_t)1572864, req->left);
   CPPUNIT_ASSERT_EQUAL((int64_t)1572864, req->uploaded);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_EVT_STARTED, req->event);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerEvent::Started, (int)req->event);
   CPPUNIT_ASSERT_EQUAL((uint32_t)0, req->ip);
   CPPUNIT_ASSERT_EQUAL((int32_t)50, req->numWant);
   CPPUNIT_ASSERT_EQUAL((uint16_t)6989, req->port);
@@ -286,8 +286,8 @@ void DefaultBtAnnounceTest::testGetAnnounceUrl()
                   "numwant=50&no_peer_id=1&port=6989&supportcrypto=1"),
       btAnnounce.getAnnounceUrl());
   req = btAnnounce.createUDPTrackerRequest("localhost", 80, 6989);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_ACT_ANNOUNCE, req->action);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_EVT_NONE, req->event);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerAction::Announce, (int)req->action);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerEvent::None, (int)req->event);
 
   btAnnounce.announceSuccess();
 
@@ -302,8 +302,8 @@ void DefaultBtAnnounceTest::testGetAnnounceUrl()
                   "supportcrypto=1"),
       btAnnounce.getAnnounceUrl());
   req = btAnnounce.createUDPTrackerRequest("localhost", 80, 6989);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_ACT_ANNOUNCE, req->action);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_EVT_COMPLETED, req->event);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerAction::Announce, (int)req->action);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerEvent::Completed, (int)req->event);
 
   btAnnounce.announceSuccess();
 
@@ -318,8 +318,8 @@ void DefaultBtAnnounceTest::testGetAnnounceUrl()
                   "supportcrypto=1"),
       btAnnounce.getAnnounceUrl());
   req = btAnnounce.createUDPTrackerRequest("localhost", 80, 6989);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_ACT_ANNOUNCE, req->action);
-  CPPUNIT_ASSERT_EQUAL((int)UDPT_EVT_STOPPED, req->event);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerAction::Announce, (int)req->action);
+  CPPUNIT_ASSERT_EQUAL((int)UDPTrackerEvent::Stopped, (int)req->event);
 }
 
 void DefaultBtAnnounceTest::testGetAnnounceUrl_withQuery()
@@ -591,7 +591,7 @@ void DefaultBtAnnounceTest::testProcessAnnounceResponse()
 void DefaultBtAnnounceTest::testProcessUDPTrackerResponse()
 {
   std::shared_ptr<UDPTrackerRequest> req(new UDPTrackerRequest());
-  req->action = UDPT_ACT_ANNOUNCE;
+  req->action = UDPTrackerAction::Announce;
   std::shared_ptr<UDPTrackerReply> reply(new UDPTrackerReply());
   reply->interval = 1800;
   reply->leechers = 200;

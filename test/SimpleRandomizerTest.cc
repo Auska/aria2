@@ -60,7 +60,8 @@ void SimpleRandomizerTest::testGetRandomBytes()
 
   for (size_t i = 0; i < 5000; ++i) {
     std::array<unsigned char, 257> buf;
-    SimpleRandomizer::getInstance()->getRandomBytes(buf.data(), buf.size());
+    SimpleRandomizer::getInstance()->getRandomBytes(
+        std::span{reinterpret_cast<std::byte*>(buf.data()), buf.size()});
     set.emplace(std::begin(buf), std::end(buf));
   }
 

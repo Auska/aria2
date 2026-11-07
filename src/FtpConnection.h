@@ -40,6 +40,7 @@
 #include <utility>
 #include <string>
 #include <memory>
+#include <optional>
 
 #include "TimeA2.h"
 #include "SocketBuffer.h"
@@ -73,7 +74,7 @@ private:
   int getStatus(const std::string& response) const;
   std::string::size_type findEndOfResponse(int status,
                                            const std::string& buf) const;
-  bool bulkReceiveResponse(std::pair<int, std::string>& response);
+  std::optional<std::pair<int, std::string>> bulkReceiveResponse();
 
   // prepare for large banners
   static const size_t MAX_RECV_BUFFER = 64_k;

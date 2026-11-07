@@ -57,6 +57,7 @@ std::unique_ptr<SimpleRandomizer> SimpleRandomizer::randomizer_;
 const std::unique_ptr<SimpleRandomizer>& SimpleRandomizer::getInstance()
 {
   if (!randomizer_) {
+    // shortcut: the ctor is private, so std::make_unique() is unavailable.
     randomizer_.reset(new SimpleRandomizer());
   }
   return randomizer_;
@@ -76,10 +77,12 @@ long int SimpleRandomizer::getRandomNumber(long int to)
   return std::uniform_int_distribution<long int>(0, to - 1)(*this);
 }
 
-void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
+void SimpleRandomizer::getRandomBytes(std::span<std::byte> buf)
 {
+  auto bufPtr = reinterpret_cast<unsigned char*>(buf.data());
+  auto len = buf.size();
 #ifdef HAVE_OPENSSL
-  auto rv = RAND_bytes(buf, len);
+  auto rv = RAND_bytes(bufPtr, len);
   if (rv != 1) {
     assert(1 == rv);
     abort();
@@ -87,12 +90,12 @@ void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
 #else
   constexpr static size_t blocklen = 256;
   auto iter = len / blocklen;
-  auto p = buf;
+  auto p = bufPtr;
 
   for (size_t i = 0; i < iter; ++i) {
     auto rv = getentropy(p, blocklen);
     if (rv != 0) {
-      std::cerr << "getentropy: " << strerror(errno) << std::endl;
+      std::cerr << "getentropy: " << strerror(errno) << '\n';
       assert(0);
       abort();
     }
@@ -107,7 +110,7 @@ void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
 
   auto rv = getentropy(p, rem);
   if (rv != 0) {
-    std::cerr << "getentropy: " << strerror(errno) << std::endl;
+    std::cerr << "getentropy: " << strerror(errno) << '\n';
     assert(0);
     abort();
   }

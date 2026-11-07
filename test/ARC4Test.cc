@@ -38,15 +38,19 @@ void ARC4Test::testEncrypt()
   unsigned char encrypted[LEN];
   unsigned char decrypted[LEN];
 
-  enc.encrypt(LEN, encrypted, key);
+  enc.encrypt(std::as_writable_bytes(std::span{encrypted}),
+              std::as_bytes(std::span{key}));
   CPPUNIT_ASSERT(memcmp(key, encrypted, LEN) != 0);
-  dec.encrypt(LEN, decrypted, encrypted);
+  dec.encrypt(std::as_writable_bytes(std::span{decrypted}),
+              std::as_bytes(std::span{encrypted}));
   CPPUNIT_ASSERT(memcmp(key, decrypted, LEN) == 0);
 
   // once more
-  enc.encrypt(LEN, encrypted, key);
+  enc.encrypt(std::as_writable_bytes(std::span{encrypted}),
+              std::as_bytes(std::span{key}));
   CPPUNIT_ASSERT(memcmp(key, encrypted, LEN) != 0);
-  dec.encrypt(LEN, decrypted, encrypted);
+  dec.encrypt(std::as_writable_bytes(std::span{decrypted}),
+              std::as_bytes(std::span{encrypted}));
   CPPUNIT_ASSERT(memcmp(key, decrypted, LEN) == 0);
 }
 

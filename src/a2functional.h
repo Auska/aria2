@@ -42,10 +42,17 @@
 #include <algorithm>
 #include <memory>
 #include <chrono>
+#include <type_traits>
 
 #include "A2STR.h"
 
 namespace aria2 {
+
+// std::to_underlying is C++23; keep this until the toolchain baseline moves.
+template <typename E> constexpr auto to_underlying(E e) noexcept
+{
+  return static_cast<std::underlying_type_t<E>>(e);
+}
 
 class Deleter {
 public:

@@ -65,6 +65,9 @@ namespace aria2 {
 namespace {
 
 const size_t MAX_PAD_LENGTH = 512;
+// wire-level bits of crypto_provide/crypto_select
+constexpr unsigned char CRYPTO_PLAIN_TEXT = 0x01u;
+constexpr unsigned char CRYPTO_ARC4 = 0x02u;
 const size_t CRYPTO_BITFIELD_LENGTH = 4;
 constexpr auto VC = std::array<unsigned char, MSEHandshake::VC_LENGTH>{};
 
@@ -85,7 +88,7 @@ MSEHandshake::MSEHandshake(cuid_t cuid,
       option_(op),
       rbufLength_(0),
       socketBuffer_(socket),
-      negotiatedCryptoType_(CRYPTO_NONE),
+      negotiatedCryptoType_(CryptoType::None),
       initiator_(true),
       markerIndex_(0),
       padLength_(0),
@@ -96,21 +99,21 @@ MSEHandshake::MSEHandshake(cuid_t cuid,
 
 MSEHandshake::~MSEHandshake() = default;
 
-MSEHandshake::HANDSHAKE_TYPE MSEHandshake::identifyHandshakeType()
+MSEHandshake::HandshakeType MSEHandshake::identifyHandshakeType()
 {
   if (rbufLength_ < 20) {
     wantRead_ = true;
-    return HANDSHAKE_NOT_YET;
+    return HandshakeType::NotYet;
   }
   if (rbuf_[0] == BtHandshakeMessage::PSTR_LENGTH &&
       memcmp(BtHandshakeMessage::BT_PSTR, rbuf_ + 1, 19) == 0) {
     A2_LOG_DEBUG(
         fmt("CUID#{} - This is legacy BitTorrent handshake.", cuid_));
-    return HANDSHAKE_LEGACY;
+    return HandshakeType::Legacy;
   }
   A2_LOG_DEBUG(fmt(
       "CUID#{} - This may be encrypted BitTorrent handshake.", cuid_));
-  return HANDSHAKE_ENCRYPTED;
+  return HandshakeType::Encrypted;
 }
 
 void MSEHandshake::initEncryptionFacility(bool initiator)
@@ -205,15 +208,19 @@ void MSEHandshake::initCipher(const unsigned char* infoHash)
 
   // discard first 1024 bytes ARC4 output.
   std::array<unsigned char, 1_k> garbage;
-  encryptor_->encrypt(garbage.size(), garbage.data(), garbage.data());
-  decryptor_->encrypt(garbage.size(), garbage.data(), garbage.data());
+  encryptor_->encrypt(std::as_writable_bytes(std::span{garbage}),
+                      std::as_bytes(std::span{garbage}));
+  decryptor_->encrypt(std::as_writable_bytes(std::span{garbage}),
+                      std::as_bytes(std::span{garbage}));
 
   if (initiator_) {
     ARC4Encryptor enc;
     enc.init(peerCipherKey, sizeof(peerCipherKey));
     // discard first 1024 bytes ARC4 output.
-    enc.encrypt(garbage.size(), garbage.data(), garbage.data());
-    enc.encrypt(VC_LENGTH, initiatorVCMarker_, VC.data());
+    enc.encrypt(std::as_writable_bytes(std::span{garbage}),
+                std::as_bytes(std::span{garbage}));
+    enc.encrypt(std::as_writable_bytes(std::span{initiatorVCMarker_}),
+                std::as_bytes(std::span{VC}));
   }
 }
 
@@ -221,7 +228,8 @@ void MSEHandshake::initCipher(const unsigned char* infoHash)
 // socketBuffer_.
 void MSEHandshake::encryptAndSendData(std::vector<unsigned char> data)
 {
-  encryptor_->encrypt(data.size(), data.data(), data.data());
+  encryptor_->encrypt(std::as_writable_bytes(std::span{data}),
+                      std::as_bytes(std::span{data}));
   socketBuffer_.pushBytes(std::move(data));
 }
 
@@ -262,8 +270,8 @@ void MSEHandshake::createReq23Hash(unsigned char* md,
 uint16_t MSEHandshake::decodeLength16(const unsigned char* buffer)
 {
   uint16_t be;
-  decryptor_->encrypt(sizeof(be), reinterpret_cast<unsigned char*>(&be),
-                      buffer);
+  decryptor_->encrypt(std::as_writable_bytes(std::span{&be, 1}),
+                      std::as_bytes(std::span{buffer, sizeof(be)}));
   return ntohs(be);
 }
 
@@ -350,18 +358,20 @@ bool MSEHandshake::receiveInitiatorCryptoSelectAndPadDLength()
   }
   // verifyCryptoSelect
   unsigned char* rbufptr = rbuf_;
-  decryptor_->encrypt(CRYPTO_BITFIELD_LENGTH, rbufptr, rbufptr);
+  decryptor_->encrypt(
+      std::as_writable_bytes(std::span{rbufptr, CRYPTO_BITFIELD_LENGTH}),
+      std::as_bytes(std::span{rbufptr, CRYPTO_BITFIELD_LENGTH}));
   if ((rbufptr[3] & CRYPTO_PLAIN_TEXT) &&
       !option_->getAsBool(PREF_BT_FORCE_ENCRYPTION) &&
       option_->get(PREF_BT_MIN_CRYPTO_LEVEL) == V_PLAIN) {
     A2_LOG_DEBUG(fmt("CUID#{} - peer prefers plaintext.", cuid_));
-    negotiatedCryptoType_ = CRYPTO_PLAIN_TEXT;
+    negotiatedCryptoType_ = CryptoType::PlainText;
   }
   if (rbufptr[3] & CRYPTO_ARC4) {
     A2_LOG_DEBUG(fmt("CUID#{} - peer prefers ARC4", cuid_));
-    negotiatedCryptoType_ = CRYPTO_ARC4;
+    negotiatedCryptoType_ = CryptoType::Arc4;
   }
-  if (negotiatedCryptoType_ == CRYPTO_NONE) {
+  if (negotiatedCryptoType_ == CryptoType::None) {
     throw DL_ABORT_EX(
         fmt("CUID#{} - No supported crypto type selected.", cuid_));
   }
@@ -382,7 +392,8 @@ bool MSEHandshake::receivePad()
   if (padLength_ == 0) {
     return true;
   }
-  decryptor_->encrypt(padLength_, rbuf_, rbuf_);
+  decryptor_->encrypt(std::as_writable_bytes(std::span{rbuf_, padLength_}),
+                      std::as_bytes(std::span{rbuf_, padLength_}));
   // shift rbuf_
   shiftBuffer(padLength_);
   return true;
@@ -446,20 +457,22 @@ bool MSEHandshake::receiveReceiverHashAndPadCLength(
   verifyVC(rbufptr);
   // decrypt crypto_provide
   rbufptr += VC_LENGTH;
-  decryptor_->encrypt(CRYPTO_BITFIELD_LENGTH, rbufptr, rbufptr);
+  decryptor_->encrypt(
+      std::as_writable_bytes(std::span{rbufptr, CRYPTO_BITFIELD_LENGTH}),
+      std::as_bytes(std::span{rbufptr, CRYPTO_BITFIELD_LENGTH}));
   // TODO choose the crypto type based on the preference.
   // For now, choose ARC4.
   if ((rbufptr[3] & CRYPTO_PLAIN_TEXT) &&
       !option_->getAsBool(PREF_BT_FORCE_ENCRYPTION) &&
       option_->get(PREF_BT_MIN_CRYPTO_LEVEL) == V_PLAIN) {
     A2_LOG_DEBUG(fmt("CUID#{} - peer provides plaintext.", cuid_));
-    negotiatedCryptoType_ = CRYPTO_PLAIN_TEXT;
+    negotiatedCryptoType_ = CryptoType::PlainText;
   }
   else if (rbufptr[3] & CRYPTO_ARC4) {
     A2_LOG_DEBUG(fmt("CUID#{} - peer provides ARC4.", cuid_));
-    negotiatedCryptoType_ = CRYPTO_ARC4;
+    negotiatedCryptoType_ = CryptoType::Arc4;
   }
-  if (negotiatedCryptoType_ == CRYPTO_NONE) {
+  if (negotiatedCryptoType_ == CryptoType::None) {
     throw DL_ABORT_EX(
         fmt("CUID#{} - No supported crypto type provided.", cuid_));
   }
@@ -497,7 +510,8 @@ bool MSEHandshake::receiveReceiverIA()
     return false;
   }
   ia_ = std::vector<unsigned char>(iaLength_);
-  decryptor_->encrypt(iaLength_, ia_.data(), rbuf_);
+  decryptor_->encrypt(std::as_writable_bytes(std::span{ia_}),
+                      std::as_bytes(std::span{rbuf_, iaLength_}));
   A2_LOG_DEBUG(fmt("CUID#{} - IA received.", cuid_));
   // shift rbuf_
   shiftBuffer(iaLength_);
@@ -517,7 +531,7 @@ void MSEHandshake::sendReceiverStep2()
   // VC
   ptr += VC_LENGTH;
   // crypto_select
-  ptr[3] = negotiatedCryptoType_;
+  ptr[3] = to_underlying(negotiatedCryptoType_);
   ptr += CRYPTO_BITFIELD_LENGTH;
   // len(padD)
   uint16_t padDLength =
@@ -547,7 +561,8 @@ uint16_t MSEHandshake::verifyPadLength(const unsigned char* padlenbuf,
 void MSEHandshake::verifyVC(unsigned char* vcbuf)
 {
   A2_LOG_DEBUG(fmt("CUID#{} - Verifying VC.", cuid_));
-  decryptor_->encrypt(VC_LENGTH, vcbuf, vcbuf);
+  decryptor_->encrypt(std::as_writable_bytes(std::span{vcbuf, VC_LENGTH}),
+                      std::as_bytes(std::span{vcbuf, VC_LENGTH}));
   if (!std::equal(std::begin(VC), std::end(VC), vcbuf)) {
     throw DL_ABORT_EX(
         fmt("Invalid VC: {}", util::toHex(std::as_bytes(std::span{vcbuf, VC_LENGTH})).c_str()));

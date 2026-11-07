@@ -85,19 +85,23 @@ void ARC4Encryptor::init(const unsigned char* key, size_t keyLength)
 #endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
 }
 
-void ARC4Encryptor::encrypt(size_t len, unsigned char* out,
-                            const unsigned char* in)
+void ARC4Encryptor::encrypt(std::span<std::byte> out,
+                            std::span<const std::byte> in)
 {
+  assert(out.size() >= in.size());
+  auto len = in.size();
+  auto outPtr = reinterpret_cast<unsigned char*>(out.data());
+  auto inPtr = reinterpret_cast<const unsigned char*>(in.data());
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
   int outlen;
 
-  if (EVP_EncryptUpdate(ctx_, out, &outlen, in, len) != 1) {
+  if (EVP_EncryptUpdate(ctx_, outPtr, &outlen, inPtr, len) != 1) {
     throw DL_ABORT_EX("Failed to encrypt data with RC4 cipher");
   }
 
   assert(static_cast<size_t>(outlen) == len);
 #else  // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
-  RC4(&key_, len, in, out);
+  RC4(&key_, len, inPtr, outPtr);
 #endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
 }
 

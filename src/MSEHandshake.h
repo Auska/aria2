@@ -55,17 +55,10 @@ class MessageDigest;
 
 class MSEHandshake {
 public:
-  enum HANDSHAKE_TYPE {
-    HANDSHAKE_NOT_YET = 0,
-    HANDSHAKE_LEGACY,
-    HANDSHAKE_ENCRYPTED
-  };
+  enum class HandshakeType { NotYet = 0, Legacy, Encrypted };
 
-  enum CRYPTO_TYPE {
-    CRYPTO_NONE = 0,
-    CRYPTO_PLAIN_TEXT = 0x01u,
-    CRYPTO_ARC4 = 0x02u
-  };
+  // Values match the bits of the wire crypto_provide/crypto_select field.
+  enum class CryptoType { None = 0, PlainText = 0x01, Arc4 = 0x02 };
 
   static constexpr size_t VC_LENGTH = 8U;
 
@@ -87,7 +80,7 @@ private:
 
   SocketBuffer socketBuffer_;
 
-  CRYPTO_TYPE negotiatedCryptoType_;
+  CryptoType negotiatedCryptoType_;
   std::unique_ptr<DHKeyExchange> dh_;
   std::unique_ptr<ARC4Encryptor> encryptor_;
   std::unique_ptr<ARC4Encryptor> decryptor_;
@@ -128,7 +121,7 @@ public:
 
   ~MSEHandshake();
 
-  HANDSHAKE_TYPE identifyHandshakeType();
+  HandshakeType identifyHandshakeType();
 
   void initEncryptionFacility(bool initiator);
 
@@ -178,7 +171,7 @@ public:
 
   const unsigned char* getInfoHash() const { return infoHash_; }
 
-  CRYPTO_TYPE getNegotiatedCryptoType() const { return negotiatedCryptoType_; }
+  CryptoType getNegotiatedCryptoType() const { return negotiatedCryptoType_; }
 
   const std::unique_ptr<ARC4Encryptor>& getEncryptor() const
   {

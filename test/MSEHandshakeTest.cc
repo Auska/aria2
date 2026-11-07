@@ -154,9 +154,9 @@ void MSEHandshakeTest::testHandshake()
 
     doHandshake(initiator, receiver);
 
-    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CRYPTO_PLAIN_TEXT,
+    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CryptoType::PlainText,
                          initiator->getNegotiatedCryptoType());
-    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CRYPTO_PLAIN_TEXT,
+    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CryptoType::PlainText,
                          receiver->getNegotiatedCryptoType());
   }
   {
@@ -172,9 +172,9 @@ void MSEHandshakeTest::testHandshake()
 
     doHandshake(initiator, receiver);
 
-    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CRYPTO_ARC4,
+    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CryptoType::Arc4,
                          initiator->getNegotiatedCryptoType());
-    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CRYPTO_ARC4,
+    CPPUNIT_ASSERT_EQUAL(MSEHandshake::CryptoType::Arc4,
                          receiver->getNegotiatedCryptoType());
   }
 }

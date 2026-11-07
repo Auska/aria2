@@ -313,7 +313,7 @@ FtpConnection::findEndOfResponse(int status, const std::string& buf) const
   }
 }
 
-bool FtpConnection::bulkReceiveResponse(std::pair<int, std::string>& response)
+std::optional<std::pair<int, std::string>> FtpConnection::bulkReceiveResponse()
 {
   std::array<std::byte, 1_k> buf;
   while (1) {
@@ -340,27 +340,26 @@ bool FtpConnection::bulkReceiveResponse(std::pair<int, std::string>& response)
     }
   }
   else {
-    return false;
+    return std::nullopt;
   }
   std::string::size_type length;
   if ((length = findEndOfResponse(status, strbuf_)) != std::string::npos) {
-    response.first = status;
-    response.second.assign(strbuf_.begin(), strbuf_.begin() + length);
-    A2_LOG_INFO(fmt(MSG_RECEIVE_RESPONSE, cuid_, response.second.c_str()));
+    std::string response{strbuf_.begin(), strbuf_.begin() + length};
+    A2_LOG_INFO(fmt(MSG_RECEIVE_RESPONSE, cuid_, response.c_str()));
     strbuf_.erase(0, length);
-    return true;
+    return std::make_pair(status, std::move(response));
   }
   else {
     // didn't receive response fully.
-    return false;
+    return std::nullopt;
   }
 }
 
 int FtpConnection::receiveResponse()
 {
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    return response.first;
+  auto response = bulkReceiveResponse();
+  if (response) {
+    return response->first;
   }
   else {
     return 0;
@@ -369,18 +368,18 @@ int FtpConnection::receiveResponse()
 
 int FtpConnection::receiveSizeResponse(int64_t& size)
 {
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    if (response.first == 213) {
-      auto rp = util::divide(std::begin(response.second),
-                             std::end(response.second), ' ');
+  auto response = bulkReceiveResponse();
+  if (response) {
+    if (response->first == 213) {
+      auto rp = util::divide(std::begin(response->second),
+                             std::end(response->second), ' ');
       if (!util::parseLLIntNoThrow(
               size, std::string(rp.second.first, rp.second.second)) ||
           size < 0) {
         throw DL_ABORT_EX("Size must be positive integer");
       }
     }
-    return response.first;
+    return response->first;
   }
   else {
     return 0;
@@ -410,11 +409,11 @@ bool getInteger(T* dest, const char* first, const char* last)
 int FtpConnection::receiveMdtmResponse(Time& time)
 {
   // MDTM command, specified in RFC3659.
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    if (response.first == 213) {
+  auto response = bulkReceiveResponse();
+  if (response) {
+    if (response->first == 213) {
       char buf[15]; // YYYYMMDDhhmmss+\0, milli second part is dropped.
-      sscanf(response.second.c_str(), "%*u %14s", buf);
+      sscanf(response->second.c_str(), "%*u %14s", buf);
       if (strlen(buf) == 14) {
         // We don't use Time::parse(buf,"%Y%m%d%H%M%S") here because Mac OS X
         // and included strptime doesn't parse data for this format.
@@ -438,7 +437,7 @@ int FtpConnection::receiveMdtmResponse(Time& time)
         time = Time::null();
       }
     }
-    return response.first;
+    return response->first;
   }
   else {
     return 0;
@@ -447,19 +446,19 @@ int FtpConnection::receiveMdtmResponse(Time& time)
 
 int FtpConnection::receiveEpsvResponse(uint16_t& port)
 {
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    if (response.first == 229) {
+  auto response = bulkReceiveResponse();
+  if (response) {
+    if (response->first == 229) {
       port = 0;
-      std::string::size_type leftParen = response.second.find("(");
-      std::string::size_type rightParen = response.second.find(")");
+      std::string::size_type leftParen = response->second.find("(");
+      std::string::size_type rightParen = response->second.find(")");
       if (leftParen == std::string::npos || rightParen == std::string::npos ||
           leftParen > rightParen) {
-        return response.first;
+        return response->first;
       }
       std::vector<Scip> rd;
-      util::splitIter(response.second.begin() + leftParen + 1,
-                      response.second.begin() + rightParen,
+      util::splitIter(response->second.begin() + leftParen + 1,
+                      response->second.begin() + rightParen,
                       std::back_inserter(rd), '|', true, true);
       uint32_t portTemp = 0;
       if (rd.size() == 5 &&
@@ -470,7 +469,7 @@ int FtpConnection::receiveEpsvResponse(uint16_t& port)
         }
       }
     }
-    return response.first;
+    return response->first;
   }
   else {
     return 0;
@@ -479,15 +478,15 @@ int FtpConnection::receiveEpsvResponse(uint16_t& port)
 
 int FtpConnection::receivePasvResponse(std::pair<std::string, uint16_t>& dest)
 {
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    if (response.first == 227) {
+  auto response = bulkReceiveResponse();
+  if (response) {
+    if (response->first == 227) {
       // we assume the format of response is "227 Entering Passive
       // Mode (h1,h2,h3,h4,p1,p2)."
       int h1, h2, h3, h4, p1, p2;
-      std::string::size_type p = response.second.find("(");
+      std::string::size_type p = response->second.find("(");
       if (p >= 4) {
-        sscanf(response.second.c_str() + p, "(%d,%d,%d,%d,%d,%d).", &h1, &h2,
+        sscanf(response->second.c_str() + p, "(%d,%d,%d,%d,%d,%d).", &h1, &h2,
                &h3, &h4, &p1, &p2);
         // ip address
         dest.first = fmt("{}.{}.{}.{}", h1, h2, h3, h4);
@@ -498,7 +497,7 @@ int FtpConnection::receivePasvResponse(std::pair<std::string, uint16_t>& dest)
         throw DL_RETRY_EX(EX_INVALID_RESPONSE);
       }
     }
-    return response.first;
+    return response->first;
   }
   else {
     return 0;
@@ -507,22 +506,22 @@ int FtpConnection::receivePasvResponse(std::pair<std::string, uint16_t>& dest)
 
 int FtpConnection::receivePwdResponse(std::string& pwd)
 {
-  std::pair<int, std::string> response;
-  if (bulkReceiveResponse(response)) {
-    if (response.first == 257) {
+  auto response = bulkReceiveResponse();
+  if (response) {
+    if (response->first == 257) {
       std::string::size_type first;
       std::string::size_type last;
 
-      if ((first = response.second.find("\"")) != std::string::npos &&
-          (last = response.second.find("\"", ++first)) != std::string::npos) {
-        pwd.assign(response.second.begin() + first,
-                   response.second.begin() + last);
+      if ((first = response->second.find("\"")) != std::string::npos &&
+          (last = response->second.find("\"", ++first)) != std::string::npos) {
+        pwd.assign(response->second.begin() + first,
+                   response->second.begin() + last);
       }
       else {
         throw DL_ABORT_EX2(EX_INVALID_RESPONSE, error_code::FTP_PROTOCOL_ERROR);
       }
     }
-    return response.first;
+    return response->first;
   }
   else {
     return 0;
