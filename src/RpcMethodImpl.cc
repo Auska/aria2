@@ -127,8 +127,6 @@ const char KEY_URI[] = "uri";
 const char KEY_CURRENT_URI[] = "currentUri";
 const char KEY_VERSION[] = "version";
 const char KEY_ENABLED_FEATURES[] = "enabledFeatures";
-const char KEY_METHOD_NAME[] = "methodName";
-const char KEY_PARAMS[] = "params";
 const char KEY_SESSION_ID[] = "sessionId";
 const char KEY_FILES[] = "files";
 const char KEY_DIR[] = "dir";
@@ -1345,73 +1343,6 @@ std::unique_ptr<ValueBase> SaveSessionRpcMethod::process(const RpcRequest& req,
   }
   throw DL_ABORT_EX(
       fmt("Failed to serialize session to '%s'.", filename.c_str()));
-}
-
-std::unique_ptr<ValueBase>
-SystemMulticallRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
-{
-  // Should never get here, since SystemMulticallRpcMethod overrides execute().
-  assert(false);
-  return nullptr;
-}
-
-RpcResponse SystemMulticallRpcMethod::execute(RpcRequest req, DownloadEngine* e)
-{
-  auto authorized = RpcResponse::AUTHORIZED;
-  try {
-    const List* methodSpecs = checkRequiredParam<List>(req, 0);
-    auto list = List::g();
-    for (auto& methodSpec : *methodSpecs) {
-      Dict* methodDict = downcast<Dict>(methodSpec);
-      if (!methodDict) {
-        list->append(createErrorResponse(
-            DL_ABORT_EX("system.multicall expected struct."), req));
-        continue;
-      }
-      const String* methodName =
-          downcast<String>(methodDict->get(KEY_METHOD_NAME));
-      if (!methodName) {
-        list->append(
-            createErrorResponse(DL_ABORT_EX("Missing methodName."), req));
-        continue;
-      }
-      if (methodName->s() == getMethodName()) {
-        list->append(createErrorResponse(
-            DL_ABORT_EX("Recursive system.multicall forbidden."), req));
-        continue;
-      }
-      // TODO what if params missing?
-      auto tempParamsList = methodDict->get(KEY_PARAMS);
-      std::unique_ptr<List> paramsList;
-      if (downcast<List>(tempParamsList)) {
-        paramsList.reset(
-            static_cast<List*>(methodDict->popValue(KEY_PARAMS).release()));
-      }
-      else {
-        paramsList = List::g();
-      }
-      RpcRequest r = {methodName->s(), std::move(paramsList), nullptr,
-                      req.jsonRpc};
-      RpcResponse res = getMethod(methodName->s())->execute(std::move(r), e);
-      if (rpc::not_authorized(res)) {
-        authorized = RpcResponse::NOTAUTHORIZED;
-      }
-      if (res.code == 0) {
-        auto l = List::g();
-        l->append(std::move(res.param));
-        list->append(std::move(l));
-      }
-      else {
-        list->append(std::move(res.param));
-      }
-    }
-    return RpcResponse(0, authorized, std::move(list), std::move(req.id));
-  }
-  catch (RecoverableException& ex) {
-    A2_LOG_DEBUG_EX(EX_EXCEPTION_CAUGHT, ex);
-    return RpcResponse(1, authorized, createErrorResponse(ex, req),
-                       std::move(req.id));
-  }
 }
 
 std::unique_ptr<ValueBase>

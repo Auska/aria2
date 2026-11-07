@@ -74,8 +74,6 @@ class RpcMethodTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testChangeUri);
   CPPUNIT_TEST(testChangeUri_fail);
   CPPUNIT_TEST(testPause);
-  CPPUNIT_TEST(testSystemMulticall);
-  CPPUNIT_TEST(testSystemMulticall_fail);
   CPPUNIT_TEST(testSystemListMethods);
   CPPUNIT_TEST(testSystemListNotifications);
   CPPUNIT_TEST_SUITE_END();
@@ -138,8 +136,6 @@ public:
   void testChangeUri();
   void testChangeUri_fail();
   void testPause();
-  void testSystemMulticall();
-  void testSystemMulticall_fail();
   void testSystemListMethods();
   void testSystemListNotifications();
 };
@@ -1200,83 +1196,6 @@ void RpcMethodTest::testPause()
   for (size_t i = 0; i < groups.size(); ++i) {
     CPPUNIT_ASSERT(groups[i]->isPauseRequested());
   }
-}
-
-void RpcMethodTest::testSystemMulticall()
-{
-  SystemMulticallRpcMethod m;
-  auto req = createReq("system.multicall");
-  auto reqparams = List::g();
-  for (int i = 0; i < 2; ++i) {
-    auto dict = Dict::g();
-    dict->put("methodName", AddUriRpcMethod::getMethodName());
-    auto params = List::g();
-    auto urisParam = List::g();
-    urisParam->append("http://localhost/" + util::itos(i));
-    params->append(std::move(urisParam));
-    dict->put("params", std::move(params));
-    reqparams->append(std::move(dict));
-  }
-  {
-    auto dict = Dict::g();
-    dict->put("methodName", "not exists");
-    dict->put("params", List::g());
-    reqparams->append(std::move(dict));
-  }
-  {
-    reqparams->append("not struct");
-  }
-  {
-    auto dict = Dict::g();
-    dict->put("methodName", "system.multicall");
-    dict->put("params", List::g());
-    reqparams->append(std::move(dict));
-  }
-  {
-    // missing params
-    auto dict = Dict::g();
-    dict->put("methodName", GetVersionRpcMethod::getMethodName());
-    reqparams->append(std::move(dict));
-  }
-  {
-    auto dict = Dict::g();
-    dict->put("methodName", GetVersionRpcMethod::getMethodName());
-    dict->put("params", List::g());
-    reqparams->append(std::move(dict));
-  }
-  req.params->append(std::move(reqparams));
-  auto res = m.execute(std::move(req), e_.get());
-  CPPUNIT_ASSERT_EQUAL(0, res.code);
-  const List* resParams = downcast<List>(res.param);
-  CPPUNIT_ASSERT_EQUAL((size_t)7, resParams->size());
-  auto& rgman = e_->getRequestGroupMan();
-  CPPUNIT_ASSERT_EQUAL(
-      GroupId::toHex(getReservedGroup(rgman.get(), 0)->getGID()),
-      downcast<String>(downcast<List>(resParams->get(0))->get(0))->s());
-  CPPUNIT_ASSERT_EQUAL(
-      GroupId::toHex(getReservedGroup(rgman.get(), 1)->getGID()),
-      downcast<String>(downcast<List>(resParams->get(1))->get(0))->s());
-  CPPUNIT_ASSERT_EQUAL(
-      (int64_t)1,
-      downcast<Integer>(downcast<Dict>(resParams->get(2))->get("faultCode"))
-          ->i());
-  CPPUNIT_ASSERT_EQUAL(
-      (int64_t)1,
-      downcast<Integer>(downcast<Dict>(resParams->get(3))->get("faultCode"))
-          ->i());
-  CPPUNIT_ASSERT_EQUAL(
-      (int64_t)1,
-      downcast<Integer>(downcast<Dict>(resParams->get(4))->get("faultCode"))
-          ->i());
-  CPPUNIT_ASSERT(downcast<List>(resParams->get(5)));
-  CPPUNIT_ASSERT(downcast<List>(resParams->get(6)));
-}
-
-void RpcMethodTest::testSystemMulticall_fail()
-{
-  SystemMulticallRpcMethod m;
-  auto res = m.execute(createReq("system.multicall"), e_.get());
-  CPPUNIT_ASSERT_EQUAL(1, res.code);
 }
 
 void RpcMethodTest::testSystemListMethods()
