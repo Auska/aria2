@@ -76,7 +76,7 @@ DHTMessageFactoryImpl::DHTMessageFactoryImpl(int family)
 }
 
 std::shared_ptr<DHTNode> DHTMessageFactoryImpl::getRemoteNode(
-    const unsigned char* id, const std::string& ipaddr, uint16_t port) const
+    const DHTID& id, const std::string& ipaddr, uint16_t port) const
 {
   auto node = routingTable_->getNode(id, ipaddr, port);
   if (!node) {
@@ -95,7 +95,7 @@ const Dict* getDictionary(const Dict* dict, const std::string& key)
     return d;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key));
   }
 }
 } // namespace
@@ -108,7 +108,7 @@ const String* getString(const Dict* dict, const std::string& key)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key));
   }
 }
 } // namespace
@@ -121,7 +121,7 @@ const Integer* getInteger(const Dict* dict, const std::string& key)
     return c;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key));
   }
 }
 } // namespace
@@ -162,7 +162,7 @@ const List* getList(const Dict* dict, const std::string& key)
     return l;
   }
   else {
-    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key.c_str()));
+    throw DL_ABORT_EX(fmt("Malformed DHT message. Missing {}", key));
   }
 }
 } // namespace
@@ -210,7 +210,7 @@ std::unique_ptr<DHTQueryMessage> DHTMessageFactoryImpl::createQueryMessage(
   }
   const String* id = getString(aDict, DHTMessage::ID);
   validateID(id);
-  auto remoteNode = getRemoteNode(id->uc(), ipaddr, port);
+  auto remoteNode = getRemoteNode(toDHTID(id->uc()), ipaddr, port);
   auto msg = std::unique_ptr<DHTQueryMessage>{};
   if (messageType->s() == DHTPingMessage::PING) {
     msg = createPingMessage(remoteNode, transactionID->s());
@@ -219,13 +219,14 @@ std::unique_ptr<DHTQueryMessage> DHTMessageFactoryImpl::createQueryMessage(
     const String* targetNodeID =
         getString(aDict, DHTFindNodeMessage::TARGET_NODE);
     validateID(targetNodeID);
-    msg = createFindNodeMessage(remoteNode, targetNodeID->uc(),
+    msg = createFindNodeMessage(remoteNode, toDHTID(targetNodeID->uc()),
                                 transactionID->s());
   }
   else if (messageType->s() == DHTGetPeersMessage::GET_PEERS) {
     const String* infoHash = getString(aDict, DHTGetPeersMessage::INFO_HASH);
     validateID(infoHash);
-    msg = createGetPeersMessage(remoteNode, infoHash->uc(), transactionID->s());
+    msg = createGetPeersMessage(remoteNode, toDHTID(infoHash->uc()),
+                                transactionID->s());
   }
   else if (messageType->s() == DHTAnnouncePeerMessage::ANNOUNCE_PEER) {
     const String* infoHash =
@@ -234,13 +235,13 @@ std::unique_ptr<DHTQueryMessage> DHTMessageFactoryImpl::createQueryMessage(
     const Integer* port = getInteger(aDict, DHTAnnouncePeerMessage::PORT);
     validatePort(port);
     const String* token = getString(aDict, DHTAnnouncePeerMessage::TOKEN);
-    msg = createAnnouncePeerMessage(remoteNode, infoHash->uc(),
+    msg = createAnnouncePeerMessage(remoteNode, toDHTID(infoHash->uc()),
                                     static_cast<uint16_t>(port->i()),
                                     token->s(), transactionID->s());
   }
   else {
     throw DL_ABORT_EX(
-        fmt("Unsupported message type: {}", messageType->s().c_str()));
+        fmt("Unsupported message type: {}", messageType->s()));
   }
   setVersion(msg.get(), dict);
   return msg;
@@ -260,7 +261,7 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
     if (e->size() == 2) {
       A2_LOG_INFO(fmt("Received Error DHT message. code={}, msg={}",
                       getInteger(e, 0)->i(),
-                      util::percentEncode(getString(e, 1)->s()).c_str()));
+                      util::percentEncode(getString(e, 1)->s())));
     }
     else {
       A2_LOG_DEBUG("e doesn't have 2 elements.");
@@ -269,15 +270,16 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
   }
   else if (y->s() != DHTResponseMessage::R) {
     throw DL_ABORT_EX(fmt("Malformed DHT message. y != r: y={}",
-                          util::percentEncode(y->s()).c_str()));
+                          util::percentEncode(y->s())));
   }
   const Dict* rDict = getDictionary(dict, DHTResponseMessage::R);
   const String* id = getString(rDict, DHTMessage::ID);
   validateID(id);
-  auto remoteNode = getRemoteNode(id->uc(), ipaddr, port);
+  auto remoteNode = getRemoteNode(toDHTID(id->uc()), ipaddr, port);
   auto msg = std::unique_ptr<DHTResponseMessage>{};
   if (messageType == DHTPingReplyMessage::PING) {
-    msg = createPingReplyMessage(remoteNode, id->uc(), transactionID->s());
+    msg = createPingReplyMessage(remoteNode, toDHTID(id->uc()),
+                                 transactionID->s());
   }
   else if (messageType == DHTFindNodeReplyMessage::FIND_NODE) {
     msg = createFindNodeReplyMessage(remoteNode, dict, transactionID->s());
@@ -289,7 +291,7 @@ DHTMessageFactoryImpl::createResponseMessage(const std::string& messageType,
     msg = createAnnouncePeerReplyMessage(remoteNode, transactionID->s());
   }
   else {
-    throw DL_ABORT_EX(fmt("Unsupported message type: {}", messageType.c_str()));
+    throw DL_ABORT_EX(fmt("Unsupported message type: {}", messageType));
   }
   setVersion(msg.get(), dict);
   return msg;
@@ -330,7 +332,7 @@ std::unique_ptr<DHTPingMessage> DHTMessageFactoryImpl::createPingMessage(
 
 std::unique_ptr<DHTPingReplyMessage>
 DHTMessageFactoryImpl::createPingReplyMessage(
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* id,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& id,
     const std::string& transactionID)
 {
   auto m = make_unique<DHTPingReplyMessage>(localNode_, remoteNode, id,
@@ -342,7 +344,7 @@ DHTMessageFactoryImpl::createPingReplyMessage(
 std::unique_ptr<DHTFindNodeMessage>
 DHTMessageFactoryImpl::createFindNodeMessage(
     const std::shared_ptr<DHTNode>& remoteNode,
-    const unsigned char* targetNodeID, const std::string& transactionID)
+    const DHTID& targetNodeID, const std::string& transactionID)
 {
   auto m = make_unique<DHTFindNodeMessage>(localNode_, remoteNode, targetNodeID,
                                            transactionID);
@@ -372,7 +374,7 @@ void DHTMessageFactoryImpl::extractNodes(
     throw DL_ABORT_EX(fmt("Nodes length is not multiple of {}", unit));
   }
   for (size_t offset = 0; offset < length; offset += unit) {
-    auto node = std::make_shared<DHTNode>(src + offset);
+    auto node = std::make_shared<DHTNode>(toDHTID(src + offset));
     auto addr =
         bittorrent::unpackcompact(src + offset + DHT_ID_LENGTH, family_);
     if (addr.first.empty()) {
@@ -403,7 +405,7 @@ DHTMessageFactoryImpl::createFindNodeReplyMessage(
 
 std::unique_ptr<DHTGetPeersMessage>
 DHTMessageFactoryImpl::createGetPeersMessage(
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
     const std::string& transactionID)
 {
   auto m = make_unique<DHTGetPeersMessage>(localNode_, remoteNode, infoHash,
@@ -468,7 +470,7 @@ DHTMessageFactoryImpl::createGetPeersReplyMessage(
 
 std::unique_ptr<DHTAnnouncePeerMessage>
 DHTMessageFactoryImpl::createAnnouncePeerMessage(
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
     uint16_t tcpPort, const std::string& token,
     const std::string& transactionID)
 {
@@ -492,11 +494,10 @@ DHTMessageFactoryImpl::createAnnouncePeerReplyMessage(
 }
 
 std::unique_ptr<DHTUnknownMessage> DHTMessageFactoryImpl::createUnknownMessage(
-    const unsigned char* data, size_t length, const std::string& ipaddr,
+    std::span<const unsigned char> data, const std::string& ipaddr,
     uint16_t port)
-
 {
-  return make_unique<DHTUnknownMessage>(localNode_, data, length, ipaddr, port);
+  return make_unique<DHTUnknownMessage>(localNode_, data, ipaddr, port);
 }
 
 void DHTMessageFactoryImpl::setRoutingTable(DHTRoutingTable* routingTable)

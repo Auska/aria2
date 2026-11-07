@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include "DHTConstants.h"
+
 #include <memory>
 
 namespace aria2 {
@@ -56,7 +58,7 @@ public:
                  int numRetry = 0) = 0;
 
   virtual std::shared_ptr<DHTTask>
-  createNodeLookupTask(const unsigned char* targetID) = 0;
+  createNodeLookupTask(const DHTID& targetID) = 0;
 
   virtual std::shared_ptr<DHTTask> createBucketRefreshTask() = 0;
 
@@ -66,7 +68,7 @@ public:
                        const std::shared_ptr<PeerStorage>& peerStorage) = 0;
 
   virtual std::shared_ptr<DHTTask>
-  createPeerAnnounceTask(const unsigned char* infoHash) = 0;
+  createPeerAnnounceTask(const DHTID& infoHash) = 0;
 
   virtual std::shared_ptr<DHTTask>
   createReplaceNodeTask(const std::shared_ptr<DHTBucket>& bucket,

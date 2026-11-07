@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include "DHTConstants.h"
+
 #include <set>
 #include <vector>
 #include <string>
@@ -56,12 +58,12 @@ private:
     bool operator()(const std::shared_ptr<DHTPeerAnnounceEntry>& lhs,
                     const std::shared_ptr<DHTPeerAnnounceEntry>& rhs) const;
   };
-  typedef std::set<std::shared_ptr<DHTPeerAnnounceEntry>, InfoHashLess>
-      DHTPeerAnnounceEntrySet;
+  using DHTPeerAnnounceEntrySet =
+      std::set<std::shared_ptr<DHTPeerAnnounceEntry>, InfoHashLess>;
   DHTPeerAnnounceEntrySet entries_;
 
   std::shared_ptr<DHTPeerAnnounceEntry>
-  getPeerAnnounceEntry(const unsigned char* infoHash);
+  getPeerAnnounceEntry(const DHTID& infoHash);
 
   DHTTaskQueue* taskQueue_;
 
@@ -70,13 +72,13 @@ private:
 public:
   DHTPeerAnnounceStorage();
 
-  void addPeerAnnounce(const unsigned char* infoHash, const std::string& ipaddr,
+  void addPeerAnnounce(const DHTID& infoHash, const std::string& ipaddr,
                        uint16_t port);
 
-  bool contains(const unsigned char* infoHash) const;
+  bool contains(const DHTID& infoHash) const;
 
   void getPeers(std::vector<std::shared_ptr<Peer>>& peers,
-                const unsigned char* infoHash);
+                const DHTID& infoHash);
 
   // drop peer announce entry which is not updated in the past
   // DHT_PEER_ANNOUNCE_PURGE_INTERVAL seconds.

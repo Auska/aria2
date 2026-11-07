@@ -72,8 +72,8 @@ DHKeyExchange::~DHKeyExchange()
   BN_free(publicKey_);
 }
 
-void DHKeyExchange::init(const unsigned char* prime, size_t primeBits,
-                         const unsigned char* generator, size_t privateKeyBits)
+void DHKeyExchange::init(std::string_view prime, size_t primeBits,
+                         std::string_view generator, size_t privateKeyBits)
 {
   BN_CTX_free(bnCtx_);
   bnCtx_ = BN_CTX_new();
@@ -88,10 +88,10 @@ void DHKeyExchange::init(const unsigned char* prime, size_t primeBits,
   BN_free(privateKey_);
   privateKey_ = nullptr;
 
-  if (BN_hex2bn(&prime_, reinterpret_cast<const char*>(prime)) == 0) {
+  if (BN_hex2bn(&prime_, std::string(prime).c_str()) == 0) {
     handleError("BN_hex2bn in init");
   }
-  if (BN_hex2bn(&generator_, reinterpret_cast<const char*>(generator)) == 0) {
+  if (BN_hex2bn(&generator_, std::string(generator).c_str()) == 0) {
     handleError("BN_hex2bn in init");
   }
   privateKey_ = BN_new();
@@ -108,18 +108,19 @@ void DHKeyExchange::generatePublicKey()
   BN_mod_exp(publicKey_, generator_, privateKey_, prime_, bnCtx_);
 }
 
-size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
+size_t DHKeyExchange::getPublicKey(std::span<unsigned char> out) const
 {
-  if (outLength < keyLength_) {
+  if (out.size() < keyLength_) {
     throw DL_ABORT_EX(
         fmt("Insufficient buffer for public key. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
-            static_cast<unsigned long>(outLength)));
+            static_cast<unsigned long>(out.size())));
   }
-  memset(out, 0, outLength);
+  std::fill(std::begin(out), std::end(out), 0);
+  auto outPtr = out.data();
   size_t publicKeyBytes = BN_num_bytes(publicKey_);
   size_t offset = keyLength_ - publicKeyBytes;
-  size_t nwritten = BN_bn2bin(publicKey_, out + offset);
+  size_t nwritten = BN_bn2bin(publicKey_, outPtr + offset);
   if (nwritten != publicKeyBytes) {
     throw DL_ABORT_EX(
         fmt("BN_bn2bin in DHKeyExchange::getPublicKey, {} bytes written,"
@@ -130,26 +131,26 @@ size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
   return nwritten;
 }
 
-void DHKeyExchange::generateNonce(unsigned char* out, size_t outLength) const
+void DHKeyExchange::generateNonce(std::span<unsigned char> out) const
 {
-  if (RAND_bytes(out, outLength) != 1) {
+  if (RAND_bytes(out.data(), out.size()) != 1) {
     handleError("RAND_bytes in generateNonce");
   }
 }
 
-size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
-                                    const unsigned char* peerPublicKeyData,
-                                    size_t peerPublicKeyLength) const
+size_t DHKeyExchange::computeSecret(
+    std::span<unsigned char> out,
+    std::span<const unsigned char> peerPublicKeyData) const
 {
-  if (outLength < keyLength_) {
+  if (out.size() < keyLength_) {
     throw DL_ABORT_EX(
         fmt("Insufficient buffer for secret. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
-            static_cast<unsigned long>(outLength)));
+            static_cast<unsigned long>(out.size())));
   }
 
   BIGNUM* peerPublicKey =
-      BN_bin2bn(peerPublicKeyData, peerPublicKeyLength, nullptr);
+      BN_bin2bn(peerPublicKeyData.data(), peerPublicKeyData.size(), nullptr);
   if (!peerPublicKey) {
     handleError("BN_bin2bn in computeSecret");
   }
@@ -158,10 +159,11 @@ size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
   BN_mod_exp(secret, peerPublicKey, privateKey_, prime_, bnCtx_);
   BN_free(peerPublicKey);
 
-  memset(out, 0, outLength);
+  std::fill(std::begin(out), std::end(out), 0);
+  auto outPtr = out.data();
   size_t secretBytes = BN_num_bytes(secret);
   size_t offset = keyLength_ - secretBytes;
-  size_t nwritten = BN_bn2bin(secret, out + offset);
+  size_t nwritten = BN_bn2bin(secret, outPtr + offset);
   BN_free(secret);
   if (nwritten != secretBytes) {
     throw DL_ABORT_EX(

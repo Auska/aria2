@@ -37,19 +37,21 @@
 
 #include "DHTMessage.h"
 
+#include <span>
+#include <vector>
+
 namespace aria2 {
 
 class DHTUnknownMessage : public DHTMessage {
 private:
-  unsigned char* data_;
-  size_t length_;
+  std::vector<unsigned char> data_;
   std::string ipaddr_;
   uint16_t port_;
 
 public:
   // _remoteNode is always null
   DHTUnknownMessage(const std::shared_ptr<DHTNode>& localNode,
-                    const unsigned char* data, size_t length,
+                    std::span<const unsigned char> data,
                     const std::string& ipaddr, uint16_t port);
 
   virtual ~DHTUnknownMessage();

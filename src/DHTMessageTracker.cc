@@ -73,10 +73,10 @@ DHTMessageTracker::messageArrived(const Dict* dict, const std::string& ipaddr,
   const String* tid = downcast<String>(dict->get(DHTMessage::T));
   if (!tid) {
     throw DL_ABORT_EX(
-        fmt("Malformed DHT message. From:{}:{}", ipaddr.c_str(), port));
+        fmt("Malformed DHT message. From:{}:{}", ipaddr, port));
   }
   A2_LOG_DEBUG(fmt("Searching tracker entry for TransactionID={}, Remote={}:{}",
-                   util::toHex(tid->s()).c_str(), ipaddr.c_str(), port));
+                   util::toHex(tid->s()), ipaddr, port));
   for (auto i = std::begin(entries_), eoi = std::end(entries_); i != eoi; ++i) {
     if ((*i)->match(tid->s(), ipaddr, port)) {
       auto entry = std::move(*i);
@@ -98,9 +98,9 @@ DHTMessageTracker::messageArrived(const Dict* dict, const std::string& ipaddr,
           // DHTRoutingTable
           A2_LOG_DEBUG(
               fmt("Node ID has changed: old:{}, new:{}",
-                  util::toHex(std::as_bytes(std::span{targetNode->getID(), DHT_ID_LENGTH})).c_str(),
-                  util::toHex(std::as_bytes(std::span{message->getRemoteNode()->getID(), DHT_ID_LENGTH}))
-                      .c_str()));
+                  util::toHex(std::as_bytes(std::span{targetNode->getID()})),
+                  util::toHex(std::as_bytes(std::span{message->getRemoteNode()->getID()}))
+                      ));
           routingTable_->dropNode(targetNode);
         }
         return std::make_pair(std::move(message), entry->popCallback());
@@ -120,13 +120,13 @@ void DHTMessageTracker::handleTimeoutEntry(DHTMessageTrackerEntry* entry)
 {
   try {
     auto& node = entry->getTargetNode();
-    A2_LOG_DEBUG(fmt("Message timeout: To:{}:{}", node->getIPAddress().c_str(),
+    A2_LOG_DEBUG(fmt("Message timeout: To:{}:{}", node->getIPAddress(),
                      node->getPort()));
     node->updateRTT(std::chrono::duration_cast<std::chrono::milliseconds>(
         entry->getElapsed()));
     node->timeout();
     if (node->isBad()) {
-      A2_LOG_DEBUG(fmt("Marked bad: {}:{}", node->getIPAddress().c_str(),
+      A2_LOG_DEBUG(fmt("Marked bad: {}:{}", node->getIPAddress(),
                        node->getPort()));
       routingTable_->dropNode(node);
     }

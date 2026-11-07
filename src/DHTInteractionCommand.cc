@@ -122,7 +122,8 @@ bool DHTInteractionCommand::execute()
       if (data[0] == 'd') {
         // udp tracker response does not start with 'd', so assume
         // this message belongs to DHT. nothrow.
-        receiver_->receiveMessage(remoteAddr, remotePort, data.data(), length);
+        receiver_->receiveMessage(remoteAddr, remotePort,
+                                 std::span{data}.first(length));
       }
       else {
         // this may be udp tracker response. nothrow.

@@ -76,7 +76,7 @@ bool DHTMessageDispatcherImpl::sendMessage(DHTMessageEntry* entry)
         tracker_->addMessage(entry->message.get(), entry->timeout,
                              std::move(entry->callback));
       }
-      A2_LOG_INFO(fmt("Message sent: {}", entry->message->toString().c_str()));
+      A2_LOG_INFO(fmt("Message sent: {}", entry->message->toString()));
     }
     else {
       return false;
@@ -84,7 +84,7 @@ bool DHTMessageDispatcherImpl::sendMessage(DHTMessageEntry* entry)
   }
   catch (RecoverableException& e) {
     A2_LOG_INFO_EX(
-        fmt("Failed to send message: {}", entry->message->toString().c_str()),
+        fmt("Failed to send message: {}", entry->message->toString()),
         e);
     // Add message to DHTMessageTracker with timeout 0 to treat it as
     // time out. Without this, we have untracked message and some of

@@ -36,6 +36,10 @@
 #define D_DHT_CONSTANTS_H
 
 #include "common.h"
+
+#include <algorithm>
+#include <array>
+
 #include "TimerA2.h"
 #include "a2functional.h"
 
@@ -46,6 +50,18 @@ namespace aria2 {
 constexpr uint16_t DHT_VERSION = 3U;
 
 constexpr size_t DHT_ID_LENGTH = 20;
+
+// A 20-byte DHT node ID / info hash / token target.
+using DHTID = std::array<unsigned char, DHT_ID_LENGTH>;
+
+// Copies DHT_ID_LENGTH bytes from data into a DHTID. The caller must
+// guarantee that at least DHT_ID_LENGTH bytes are readable.
+inline DHTID toDHTID(const unsigned char* data)
+{
+  DHTID id;
+  std::copy_n(data, DHT_ID_LENGTH, id.begin());
+  return id;
+}
 
 constexpr size_t DHT_TRANSACTION_ID_LENGTH = 4;
 

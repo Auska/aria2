@@ -61,18 +61,18 @@ bool DHTPeerAnnounceStorage::InfoHashLess::operator()(
     const std::shared_ptr<DHTPeerAnnounceEntry>& lhs,
     const std::shared_ptr<DHTPeerAnnounceEntry>& rhs) const
 {
-  return memcmp(lhs->getInfoHash(), rhs->getInfoHash(), DHT_ID_LENGTH) < 0;
+  // DHTID is std::array, so this is a lexicographical comparison.
+  return lhs->getInfoHash() < rhs->getInfoHash();
 }
 
 std::shared_ptr<DHTPeerAnnounceEntry>
-DHTPeerAnnounceStorage::getPeerAnnounceEntry(const unsigned char* infoHash)
+DHTPeerAnnounceStorage::getPeerAnnounceEntry(const DHTID& infoHash)
 {
   auto entry = std::make_shared<DHTPeerAnnounceEntry>(infoHash);
 
   auto i = entries_.lower_bound(entry);
 
-  if (i != entries_.end() &&
-      memcmp(infoHash, (*i)->getInfoHash(), DHT_ID_LENGTH) == 0) {
+  if (i != entries_.end() && infoHash == (*i)->getInfoHash()) {
     entry = *i;
   }
   else {
@@ -81,17 +81,17 @@ DHTPeerAnnounceStorage::getPeerAnnounceEntry(const unsigned char* infoHash)
   return entry;
 }
 
-void DHTPeerAnnounceStorage::addPeerAnnounce(const unsigned char* infoHash,
+void DHTPeerAnnounceStorage::addPeerAnnounce(const DHTID& infoHash,
                                              const std::string& ipaddr,
                                              uint16_t port)
 {
   A2_LOG_DEBUG(fmt("Adding {}:{} to peer announce list: infoHash={}",
-                   ipaddr.c_str(), port,
-                   util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})).c_str()));
+                   ipaddr, port,
+                   util::toHex(std::as_bytes(std::span{infoHash}))));
   getPeerAnnounceEntry(infoHash)->addPeerAddrEntry(PeerAddrEntry(ipaddr, port));
 }
 
-bool DHTPeerAnnounceStorage::contains(const unsigned char* infoHash) const
+bool DHTPeerAnnounceStorage::contains(const DHTID& infoHash) const
 {
   auto entry = std::make_shared<DHTPeerAnnounceEntry>(infoHash);
   return std::binary_search(entries_.begin(), entries_.end(), entry,
@@ -99,7 +99,7 @@ bool DHTPeerAnnounceStorage::contains(const unsigned char* infoHash) const
 }
 
 void DHTPeerAnnounceStorage::getPeers(std::vector<std::shared_ptr<Peer>>& peers,
-                                      const unsigned char* infoHash)
+                                      const DHTID& infoHash)
 {
   auto entry = std::make_shared<DHTPeerAnnounceEntry>(infoHash);
 
@@ -142,7 +142,7 @@ void DHTPeerAnnounceStorage::announcePeer()
     auto task = taskFactory_->createPeerAnnounceTask(e->getInfoHash());
     taskQueue_->addPeriodicTask2(task);
     A2_LOG_DEBUG(fmt("Added 1 peer announce: infoHash={}",
-                     util::toHex(std::as_bytes(std::span{e->getInfoHash(), DHT_ID_LENGTH})).c_str()));
+                     util::toHex(std::as_bytes(std::span{e->getInfoHash()}))));
   }
 }
 

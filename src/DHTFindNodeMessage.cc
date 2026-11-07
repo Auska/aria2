@@ -53,10 +53,10 @@ const std::string DHTFindNodeMessage::TARGET_NODE("target");
 DHTFindNodeMessage::DHTFindNodeMessage(
     const std::shared_ptr<DHTNode>& localNode,
     const std::shared_ptr<DHTNode>& remoteNode,
-    const unsigned char* targetNodeID, const std::string& transactionID)
+    const DHTID& targetNodeID, const std::string& transactionID)
     : DHTQueryMessage{localNode, remoteNode, transactionID}
 {
-  memcpy(targetNodeID_, targetNodeID, DHT_ID_LENGTH);
+  targetNodeID_ = targetNodeID;
 }
 
 void DHTFindNodeMessage::doReceivedAction()
@@ -71,8 +71,8 @@ void DHTFindNodeMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTFindNodeMessage::getArgument()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
-  aDict->put(TARGET_NODE, String::g(targetNodeID_, DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  aDict->put(TARGET_NODE, String::g(targetNodeID_.data(), targetNodeID_.size()));
   return aDict;
 }
 
@@ -83,7 +83,7 @@ const std::string& DHTFindNodeMessage::getMessageType() const
 
 std::string DHTFindNodeMessage::toStringOptional() const
 {
-  return "targetNodeID=" + util::toHex(std::as_bytes(std::span{targetNodeID_, DHT_ID_LENGTH}));
+  return "targetNodeID=" + util::toHex(std::as_bytes(std::span{targetNodeID_}));
 }
 
 } // namespace aria2

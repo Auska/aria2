@@ -52,7 +52,7 @@ public:
 
   unsigned char transactionID[DHT_TRANSACTION_ID_LENGTH];
 
-  unsigned char remoteNodeID[DHT_ID_LENGTH];
+  DHTID remoteNodeID;
 
   void setUp()
   {
@@ -60,7 +60,7 @@ public:
     factory = make_unique<DHTMessageFactoryImpl>(AF_INET);
     factory->setLocalNode(localNode);
     memset(transactionID, 0xff, DHT_TRANSACTION_ID_LENGTH);
-    memset(remoteNodeID, 0x0f, DHT_ID_LENGTH);
+    remoteNodeID.fill(0x0f);
     routingTable = make_unique<DHTRoutingTable>(localNode);
     factory->setRoutingTable(routingTable.get());
 
@@ -97,7 +97,7 @@ void DHTMessageFactoryImplTest::testCreatePingMessage()
   dict.put("y", "q");
   dict.put("q", "ping");
   auto aDict = Dict::g();
-  aDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+  aDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
   dict.put("a", std::move(aDict));
 
   auto r = factory->createQueryMessage(&dict, "192.168.0.1", 6881);
@@ -115,7 +115,7 @@ void DHTMessageFactoryImplTest::testCreatePingReplyMessage()
   dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+  rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
   dict.put("r", std::move(rDict));
 
   auto r = factory->createResponseMessage(
@@ -135,10 +135,10 @@ void DHTMessageFactoryImplTest::testCreateFindNodeMessage()
   dict.put("y", "q");
   dict.put("q", "find_node");
   auto aDict = Dict::g();
-  aDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
-  unsigned char targetNodeID[DHT_ID_LENGTH];
-  memset(targetNodeID, 0x11, DHT_ID_LENGTH);
-  aDict->put("target", String::g(targetNodeID, DHT_ID_LENGTH));
+  aDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
+  DHTID targetNodeID;
+  targetNodeID.fill(0x11);
+  aDict->put("target", String::g(targetNodeID.data(), DHT_ID_LENGTH));
   dict.put("a", std::move(aDict));
 
   auto r = factory->createQueryMessage(&dict, "192.168.0.1", 6881);
@@ -148,8 +148,8 @@ void DHTMessageFactoryImplTest::testCreateFindNodeMessage()
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
   CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
-  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{targetNodeID, DHT_ID_LENGTH})),
-                       util::toHex(std::as_bytes(std::span{m->getTargetNodeID(), DHT_ID_LENGTH})));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{targetNodeID})),
+                       util::toHex(std::as_bytes(std::span{m->getTargetNodeID()})));
 }
 
 void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage()
@@ -159,7 +159,7 @@ void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage()
     dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
     dict.put("y", "r");
     auto rDict = Dict::g();
-    rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+    rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
     std::string compactNodeInfo;
     std::shared_ptr<DHTNode> nodes[8];
     for (size_t i = 0; i < DHTBucket::K; ++i) {
@@ -206,7 +206,7 @@ void DHTMessageFactoryImplTest::testCreateFindNodeReplyMessage6()
     dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
     dict.put("y", "r");
     auto rDict = Dict::g();
-    rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+    rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
     std::string compactNodeInfo;
     std::shared_ptr<DHTNode> nodes[8];
     for (size_t i = 0; i < DHTBucket::K; ++i) {
@@ -250,10 +250,10 @@ void DHTMessageFactoryImplTest::testCreateGetPeersMessage()
   dict.put("y", "q");
   dict.put("q", "get_peers");
   auto aDict = Dict::g();
-  aDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
-  unsigned char infoHash[DHT_ID_LENGTH];
-  memset(infoHash, 0x11, DHT_ID_LENGTH);
-  aDict->put("info_hash", String::g(infoHash, DHT_ID_LENGTH));
+  aDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
+  DHTID infoHash;
+  infoHash.fill(0x11);
+  aDict->put("info_hash", String::g(infoHash.data(), DHT_ID_LENGTH));
   dict.put("a", std::move(aDict));
 
   auto r = factory->createQueryMessage(&dict, "192.168.0.1", 6881);
@@ -263,8 +263,8 @@ void DHTMessageFactoryImplTest::testCreateGetPeersMessage()
   CPPUNIT_ASSERT(*remoteNode_ == *m->getRemoteNode());
   CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                        util::toHex(m->getTransactionID()));
-  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})),
-                       util::toHex(std::as_bytes(std::span{m->getInfoHash(), DHT_ID_LENGTH})));
+  CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash})),
+                       util::toHex(std::as_bytes(std::span{m->getInfoHash()})));
 }
 
 void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage()
@@ -274,7 +274,7 @@ void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage()
     dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
     dict.put("y", "r");
     auto rDict = Dict::g();
-    rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+    rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
     std::string compactNodeInfo;
     std::shared_ptr<DHTNode> nodes[8];
     for (size_t i = 0; i < DHTBucket::K; ++i) {
@@ -343,7 +343,7 @@ void DHTMessageFactoryImplTest::testCreateGetPeersReplyMessage6()
     dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
     dict.put("y", "r");
     auto rDict = Dict::g();
-    rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+    rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
     std::string compactNodeInfo;
     std::shared_ptr<DHTNode> nodes[8];
     for (size_t i = 0; i < DHTBucket::K; ++i) {
@@ -410,10 +410,10 @@ void DHTMessageFactoryImplTest::testCreateAnnouncePeerMessage()
     dict.put("y", "q");
     dict.put("q", "announce_peer");
     auto aDict = Dict::g();
-    aDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
-    unsigned char infoHash[DHT_ID_LENGTH];
-    memset(infoHash, 0x11, DHT_ID_LENGTH);
-    aDict->put("info_hash", String::g(infoHash, DHT_ID_LENGTH));
+    aDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
+    DHTID infoHash;
+    infoHash.fill(0x11);
+    aDict->put("info_hash", String::g(infoHash.data(), DHT_ID_LENGTH));
     std::string token = "ffff";
     uint16_t port = 6881;
     aDict->put("port", Integer::g(port));
@@ -430,8 +430,8 @@ void DHTMessageFactoryImplTest::testCreateAnnouncePeerMessage()
     CPPUNIT_ASSERT_EQUAL(token, m->getToken());
     CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{transactionID, DHT_TRANSACTION_ID_LENGTH})),
                          util::toHex(m->getTransactionID()));
-    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash, DHT_ID_LENGTH})),
-                         util::toHex(std::as_bytes(std::span{m->getInfoHash(), DHT_ID_LENGTH})));
+    CPPUNIT_ASSERT_EQUAL(util::toHex(std::as_bytes(std::span{infoHash})),
+                         util::toHex(std::as_bytes(std::span{m->getInfoHash()})));
     CPPUNIT_ASSERT_EQUAL(port, m->getTCPPort());
   }
   catch (Exception& e) {
@@ -445,7 +445,7 @@ void DHTMessageFactoryImplTest::testCreateAnnouncePeerReplyMessage()
   dict.put("t", String::g(transactionID, DHT_TRANSACTION_ID_LENGTH));
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(remoteNodeID, DHT_ID_LENGTH));
+  rDict->put("id", String::g(remoteNodeID.data(), DHT_ID_LENGTH));
   dict.put("r", std::move(rDict));
 
   auto r = factory->createResponseMessage("announce_peer", &dict,

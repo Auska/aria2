@@ -48,23 +48,16 @@ const std::string DHTUnknownMessage::E("e");
 const std::string DHTUnknownMessage::UNKNOWN("unknown");
 
 DHTUnknownMessage::DHTUnknownMessage(const std::shared_ptr<DHTNode>& localNode,
-                                     const unsigned char* data, size_t length,
+                                     std::span<const unsigned char> data,
                                      const std::string& ipaddr, uint16_t port)
     : DHTMessage(localNode, std::shared_ptr<DHTNode>()),
-      length_(length),
+      data_(data.begin(), data.end()),
       ipaddr_(ipaddr),
       port_(port)
 {
-  if (length_ == 0) {
-    data_ = nullptr;
-  }
-  else {
-    data_ = new unsigned char[length];
-    memcpy(data_, data, length);
-  }
 }
 
-DHTUnknownMessage::~DHTUnknownMessage() { delete[] data_; }
+DHTUnknownMessage::~DHTUnknownMessage() = default;
 
 void DHTUnknownMessage::doReceivedAction() {}
 
@@ -76,13 +69,10 @@ const std::string& DHTUnknownMessage::getMessageType() const { return UNKNOWN; }
 
 std::string DHTUnknownMessage::toString() const
 {
-  size_t sampleLength = 8;
-  if (length_ < sampleLength) {
-    sampleLength = length_;
-  }
+  auto sample = std::span{data_}.first(std::min<size_t>(8, data_.size()));
   return fmt("dht unknown Remote:{}({}) length={}, first 8 bytes(hex)={}",
-             ipaddr_.c_str(), port_, static_cast<unsigned long>(length_),
-             util::toHex(std::as_bytes(std::span{data_, sampleLength})).c_str());
+             ipaddr_, port_, static_cast<unsigned long>(data_.size()),
+             util::toHex(std::as_bytes(sample)));
 }
 
 } // namespace aria2

@@ -53,8 +53,8 @@ DHTBucketTreeNode::DHTBucketTreeNode(std::unique_ptr<DHTBucketTreeNode> left,
 DHTBucketTreeNode::DHTBucketTreeNode(std::shared_ptr<DHTBucket> bucket)
     : parent_(nullptr), bucket_(std::move(bucket))
 {
-  memcpy(minId_, bucket_->getMinID(), DHT_ID_LENGTH);
-  memcpy(maxId_, bucket_->getMaxID(), DHT_ID_LENGTH);
+  minId_ = bucket_->getMinID();
+  maxId_ = bucket_->getMaxID();
 }
 
 DHTBucketTreeNode::~DHTBucketTreeNode() = default;
@@ -63,11 +63,11 @@ void DHTBucketTreeNode::resetRelation()
 {
   left_->setParent(this);
   right_->setParent(this);
-  memcpy(minId_, left_->getMinId(), DHT_ID_LENGTH);
-  memcpy(maxId_, right_->getMaxId(), DHT_ID_LENGTH);
+  minId_ = left_->getMinId();
+  maxId_ = right_->getMaxId();
 }
 
-DHTBucketTreeNode* DHTBucketTreeNode::dig(const unsigned char* key)
+DHTBucketTreeNode* DHTBucketTreeNode::dig(const DHTID& key)
 {
   if (leaf()) {
     return nullptr;
@@ -80,12 +80,12 @@ DHTBucketTreeNode* DHTBucketTreeNode::dig(const unsigned char* key)
   }
 }
 
-bool DHTBucketTreeNode::isInRange(const unsigned char* key) const
+bool DHTBucketTreeNode::isInRange(const DHTID& key) const
 {
-  return !std::lexicographical_compare(&key[0], &key[DHT_ID_LENGTH], &minId_[0],
-                                       &minId_[DHT_ID_LENGTH]) &&
-         !std::lexicographical_compare(&maxId_[0], &maxId_[DHT_ID_LENGTH],
-                                       &key[0], &key[DHT_ID_LENGTH]);
+  return !std::lexicographical_compare(std::begin(key), std::end(key),
+                                       std::begin(minId_), std::end(minId_)) &&
+         !std::lexicographical_compare(std::begin(maxId_), std::end(maxId_),
+                                       std::begin(key), std::end(key));
 }
 
 void DHTBucketTreeNode::split()
@@ -98,8 +98,7 @@ void DHTBucketTreeNode::split()
 
 namespace dht {
 
-DHTBucketTreeNode* findTreeNodeFor(DHTBucketTreeNode* root,
-                                   const unsigned char* key)
+DHTBucketTreeNode* findTreeNodeFor(DHTBucketTreeNode* root, const DHTID& key)
 {
   if (root->leaf()) {
     return root;
@@ -110,7 +109,7 @@ DHTBucketTreeNode* findTreeNodeFor(DHTBucketTreeNode* root,
 }
 
 std::shared_ptr<DHTBucket> findBucketFor(DHTBucketTreeNode* root,
-                                         const unsigned char* key)
+                                         const DHTID& key)
 {
   DHTBucketTreeNode* leaf = findTreeNodeFor(root, key);
   return leaf->getBucket();
@@ -182,7 +181,7 @@ void collectUpward(std::vector<std::shared_ptr<DHTNode>>& nodes,
 } // namespace
 
 void findClosestKNodes(std::vector<std::shared_ptr<DHTNode>>& nodes,
-                       DHTBucketTreeNode* root, const unsigned char* key)
+                       DHTBucketTreeNode* root, const DHTID& key)
 {
   size_t nodesSize = nodes.size();
   if (DHTBucket::K <= nodesSize) {

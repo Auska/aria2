@@ -49,19 +49,18 @@ DHTNode::DHTNode()
   generateID();
 }
 
-DHTNode::DHTNode(const unsigned char* id)
-    : port_(0), rtt_(0), condition_(1), lastContact_(Timer::zero())
+DHTNode::DHTNode(const DHTID& id)
+    : id_(id), port_(0), rtt_(0), condition_(1), lastContact_(Timer::zero())
 {
-  memcpy(id_, id, DHT_ID_LENGTH);
 }
 
 DHTNode::~DHTNode() = default;
 
-void DHTNode::generateID() { util::generateRandomKey(id_); }
+void DHTNode::generateID() { util::generateRandomKey(id_.data()); }
 
 bool DHTNode::operator==(const DHTNode& node) const
 {
-  return memcmp(id_, node.id_, DHT_ID_LENGTH) == 0;
+  return id_ == node.id_;
 }
 
 bool DHTNode::operator!=(const DHTNode& node) const { return !(*this == node); }
@@ -102,11 +101,12 @@ void DHTNode::timeout() { ++condition_; }
 std::string DHTNode::toString() const
 {
   return fmt("DHTNode ID={}, Host={}({}), Condition={}, RTT={}",
-             util::toHex(std::as_bytes(std::span{id_, DHT_ID_LENGTH})).c_str(), ipaddr_.c_str(), port_,
-             condition_, static_cast<long int>(rtt_.count()));
+             util::toHex(std::as_bytes(std::span{id_})),
+             ipaddr_, port_, condition_,
+             static_cast<long int>(rtt_.count()));
 }
 
-void DHTNode::setID(const unsigned char* id) { memcpy(id_, id, DHT_ID_LENGTH); }
+void DHTNode::setID(const DHTID& id) { id_ = id; }
 
 void DHTNode::setIPAddress(const std::string& ipaddr) { ipaddr_ = ipaddr; }
 

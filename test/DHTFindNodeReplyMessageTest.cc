@@ -66,7 +66,7 @@ void DHTFindNodeReplyMessageTest::testGetBencodedMessage()
   dict.put("v", "A200");
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(localNode->getID(), DHT_ID_LENGTH));
+  rDict->put("id", String::g(localNode->getID().data(), DHT_ID_LENGTH));
   rDict->put("nodes", compactNodeInfo);
   dict.put("r", std::move(rDict));
 
@@ -109,7 +109,7 @@ void DHTFindNodeReplyMessageTest::testGetBencodedMessage6()
   dict.put("v", "A200");
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(localNode->getID(), DHT_ID_LENGTH));
+  rDict->put("id", String::g(localNode->getID().data(), DHT_ID_LENGTH));
   rDict->put("nodes6", compactNodeInfo);
   dict.put("r", std::move(rDict));
 

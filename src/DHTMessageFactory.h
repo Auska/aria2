@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include "DHTConstants.h"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -79,12 +81,12 @@ public:
 
   virtual std::unique_ptr<DHTPingReplyMessage>
   createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                         const unsigned char* id,
+                         const DHTID& id,
                          const std::string& transactionID) = 0;
 
   virtual std::unique_ptr<DHTFindNodeMessage>
   createFindNodeMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const unsigned char* targetNodeID,
+                        const DHTID& targetNodeID,
                         const std::string& transactionID = A2STR::NIL) = 0;
 
   virtual std::unique_ptr<DHTFindNodeReplyMessage> createFindNodeReplyMessage(
@@ -94,7 +96,7 @@ public:
 
   virtual std::unique_ptr<DHTGetPeersMessage>
   createGetPeersMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const unsigned char* infoHash,
+                        const DHTID& infoHash,
                         const std::string& transactionID = A2STR::NIL) = 0;
 
   virtual std::unique_ptr<DHTGetPeersReplyMessage> createGetPeersReplyMessage(
@@ -105,7 +107,7 @@ public:
 
   virtual std::unique_ptr<DHTAnnouncePeerMessage>
   createAnnouncePeerMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                            const unsigned char* infoHash, uint16_t tcpPort,
+                            const DHTID& infoHash, uint16_t tcpPort,
                             const std::string& token,
                             const std::string& transactionID = A2STR::NIL) = 0;
 
@@ -114,7 +116,7 @@ public:
                                  const std::string& transactionID) = 0;
 
   virtual std::unique_ptr<DHTUnknownMessage>
-  createUnknownMessage(const unsigned char* data, size_t length,
+  createUnknownMessage(std::span<const unsigned char> data,
                        const std::string& ipaddr, uint16_t port) = 0;
 };
 

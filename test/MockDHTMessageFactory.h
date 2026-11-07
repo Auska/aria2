@@ -51,7 +51,7 @@ public:
 
   virtual std::unique_ptr<DHTPingReplyMessage>
   createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                         const unsigned char* remoteNodeID,
+                         const DHTID& remoteNodeID,
                          const std::string& transactionID) override
   {
     return nullptr;
@@ -59,7 +59,7 @@ public:
 
   virtual std::unique_ptr<DHTFindNodeMessage>
   createFindNodeMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const unsigned char* targetNodeID,
+                        const DHTID& targetNodeID,
                         const std::string& transactionID = "") override
   {
     return nullptr;
@@ -75,7 +75,7 @@ public:
 
   virtual std::unique_ptr<DHTGetPeersMessage>
   createGetPeersMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const unsigned char* infoHash,
+                        const DHTID& infoHash,
                         const std::string& transactionID) override
   {
     return nullptr;
@@ -91,7 +91,7 @@ public:
   }
 
   virtual std::unique_ptr<DHTAnnouncePeerMessage> createAnnouncePeerMessage(
-      const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+      const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
       uint16_t tcpPort, const std::string& token,
       const std::string& transactionID = "") override
   {
@@ -107,7 +107,7 @@ public:
   }
 
   virtual std::unique_ptr<DHTUnknownMessage>
-  createUnknownMessage(const unsigned char* data, size_t length,
+  createUnknownMessage(std::span<const unsigned char> data,
                        const std::string& ipaddr, uint16_t port) override
   {
     return nullptr;

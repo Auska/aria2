@@ -46,7 +46,7 @@ public:
     }
 
     virtual std::shared_ptr<DHTTask>
-    createNodeLookupTask(const unsigned char* targetID) override
+    createNodeLookupTask(const DHTID& targetID) override
     {
       std::shared_ptr<MockDHTTask> task(
           new MockDHTTask(std::shared_ptr<DHTNode>()));
@@ -106,14 +106,14 @@ void BtPortMessageTest::testCreateMessage()
 
 void BtPortMessageTest::testDoReceivedAction()
 {
-  unsigned char nodeID[DHT_ID_LENGTH];
-  memset(nodeID, 0, DHT_ID_LENGTH);
+  DHTID nodeID;
+  nodeID.fill(0);
   std::shared_ptr<DHTNode> localNode(new DHTNode(nodeID));
 
   // 9 nodes to create at least 2 buckets.
   std::shared_ptr<DHTNode> nodes[9];
   for (size_t i = 0; i < arraySize(nodes); ++i) {
-    memset(nodeID, 0, DHT_ID_LENGTH);
+    nodeID.fill(0);
     nodeID[DHT_ID_LENGTH - 1] = i + 1;
     nodes[i].reset(new DHTNode(nodeID));
   }
@@ -146,8 +146,8 @@ void BtPortMessageTest::testDoReceivedAction()
 
 void BtPortMessageTest::testDoReceivedAction_bootstrap()
 {
-  unsigned char nodeID[DHT_ID_LENGTH];
-  memset(nodeID, 0, DHT_ID_LENGTH);
+  DHTID nodeID;
+  nodeID.fill(0);
   nodeID[0] = 0xff;
   std::shared_ptr<DHTNode> localNode(new DHTNode(nodeID));
   DHTRoutingTable routingTable(localNode); // no nodes , 1 bucket.
@@ -173,7 +173,7 @@ void BtPortMessageTest::testDoReceivedAction_bootstrap()
 
   auto task2 =
       std::dynamic_pointer_cast<MockDHTTask>(taskQueue.immediateTaskQueue_[1]);
-  CPPUNIT_ASSERT(memcmp(nodeID, task2->targetID_, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodeID.data(), task2->targetID_.data(), DHT_ID_LENGTH) == 0);
 }
 
 } // namespace aria2

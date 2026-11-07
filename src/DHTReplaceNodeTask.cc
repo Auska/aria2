@@ -76,7 +76,7 @@ void DHTReplaceNodeTask::sendMessage()
 void DHTReplaceNodeTask::onReceived(const DHTPingReplyMessage* message)
 {
   A2_LOG_INFO(fmt("ReplaceNode: Ping reply received from {}.",
-                  message->getRemoteNode()->toString().c_str()));
+                  message->getRemoteNode()->toString()));
   setFinished(true);
 }
 
@@ -89,15 +89,15 @@ void DHTReplaceNodeTask::onTimeout(const std::shared_ptr<DHTNode>& node)
   ++numRetry_;
   if (numRetry_ >= MAX_RETRY) {
     A2_LOG_INFO(fmt("ReplaceNode: Ping failed {} times. Replace {} with {}.",
-                    numRetry_, node->toString().c_str(),
-                    newNode_->toString().c_str()));
+                    numRetry_, node->toString(),
+                    newNode_->toString()));
     node->markBad();
     bucket_->addNode(newNode_);
     setFinished(true);
   }
   else {
     A2_LOG_INFO(fmt("ReplaceNode: Ping reply timeout from {}. Try once more.",
-                    node->toString().c_str()));
+                    node->toString()));
     sendMessage();
   }
 }

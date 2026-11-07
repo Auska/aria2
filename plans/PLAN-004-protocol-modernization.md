@@ -269,7 +269,7 @@ API **一并换成枚举类型**（引擎层调用点做单行适配）。
      `src/util.cc:1868` 无需改：`util::generateRandomData` 在 PLAN-003 已收 `std::span<std::byte>`。
    - 门禁：见「测试与验证」阶段 1 专项。
 
-2. [ ] **阶段 2：DHT 簇（116 文件 / 12 230 行）**
+2. [x] **阶段 2：DHT 簇（116 文件 / 12 230 行）**
    - 惯用法：`typedef`→`using` 1 处（`src/DHTPeerAnnounceStorage.h:59`）；
      `src/DHTUnknownMessage.cc:62,67` 的 `new[]`/`delete[]` → `std::vector<unsigned char>`；
      `std::find` 9 处 → ranges。
@@ -544,6 +544,19 @@ BT 36（`AnnounceListTest`、`Bt*MessageTest`、`DefaultBt*Test`、
    改用已有的 `getUDPTrackerActionStr(action)`。
    `test/ARC4Test.cc`、`test/DefaultBtAnnounceTest.cc`、`test/UDPTrackerClientTest.cc`
    的断言语义随之加 `(int)` 转型（CppUnit 的比较需要 `operator<<`，枚举没有）。
+7. **执行期修正（审查 #2）**：阶段 2 实际改动与计划有两处偏差，
+   均已记入文档：①`src/DHTConnection.h` 的 `receiveMessage/sendMessage`
+   是 UDP socket 层裸缓冲区接口，本期未 span 化（属 NET 组，留给后续统一），
+   真正的 DHT 侧收包口 `DHTMessageReceiver::receiveMessage` 与
+   `DHTUnknownMessage` 构造、`DHTMessageFactory::createUnknownMessage` 已改
+   `std::span`；②`DHKeyExchange::init` 的 `prime/generator` 形参语义是
+   **十六进制文本**（内部按 C 字符串解析），故改为 `std::string_view` 而非
+   `std::span`，`getPublicKey/generateNonce/computeSecret` 改 `std::span`，
+   两版实现（`Internal`/`Libssl`）签名已人工逐行对齐；本机只编译 Libssl 版，
+   `InternalDHKeyExchange` 未被编译器验证。
+   另：`DHTID` 边界转换统一用 `src/DHTConstants.h` 新增的
+   `inline DHTID toDHTID(const unsigned char*)`。
+
 5. **反向修正**：初稿曾写「阶段 1 零跨组适配」「阶段 2 有 1 处适配」「`bittorrent_helper.h:301`
    的 `assertID`」，核对后分别改为 2 处、0 处、`:242`；初稿曾把
    `src/DHTBucket.cc`、`src/DHTGetPeersCommand.cc`（只用未变的 `getInfoHashString`）

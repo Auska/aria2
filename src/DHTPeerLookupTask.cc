@@ -58,7 +58,7 @@ namespace aria2 {
 DHTPeerLookupTask::DHTPeerLookupTask(
     const std::shared_ptr<DownloadContext>& downloadContext, uint16_t tcpPort)
     : DHTAbstractNodeLookupTask<DHTGetPeersReplyMessage>(
-          bittorrent::getInfoHash(downloadContext)),
+          toDHTID(bittorrent::getInfoHash(downloadContext))),
       tcpPort_(tcpPort)
 {
 }
@@ -75,7 +75,7 @@ void DHTPeerLookupTask::onReceivedInternal(
     const DHTGetPeersReplyMessage* message)
 {
   std::shared_ptr<DHTNode> remoteNode = message->getRemoteNode();
-  tokenStorage_[util::toHex(std::as_bytes(std::span{remoteNode->getID(), DHT_ID_LENGTH}))] =
+  tokenStorage_[util::toHex(std::as_bytes(std::span{remoteNode->getID()}))] =
       message->getToken();
   peerStorage_->addPeer(message->getValues());
   A2_LOG_INFO(fmt("Received {} peers.",
@@ -96,7 +96,7 @@ std::unique_ptr<DHTMessageCallback> DHTPeerLookupTask::createCallback()
 void DHTPeerLookupTask::onFinish()
 {
   A2_LOG_DEBUG(fmt("Peer lookup for {} finished",
-                   util::toHex(std::as_bytes(std::span{getTargetID(), DHT_ID_LENGTH})).c_str()));
+                   util::toHex(std::as_bytes(std::span{getTargetID()}))));
   // send announce_peer message to K closest nodes
   size_t num = DHTBucket::K;
   for (auto i = std::begin(getEntries()), eoi = std::end(getEntries());
@@ -105,10 +105,10 @@ void DHTPeerLookupTask::onFinish()
       continue;
     }
     auto& node = (*i)->node;
-    std::string idHex = util::toHex(std::as_bytes(std::span{node->getID(), DHT_ID_LENGTH}));
+    std::string idHex = util::toHex(std::as_bytes(std::span{node->getID()}));
     std::string token = tokenStorage_[idHex];
     if (token.empty()) {
-      A2_LOG_DEBUG(fmt("Token is empty for ID:{}", idHex.c_str()));
+      A2_LOG_DEBUG(fmt("Token is empty for ID:{}", idHex));
       continue;
     }
     getMessageDispatcher()->addMessageToQueue(

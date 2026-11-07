@@ -51,7 +51,7 @@ class Peer;
 
 class DHTGetPeersMessage : public DHTQueryMessage {
 private:
-  unsigned char infoHash_[DHT_ID_LENGTH];
+  DHTID infoHash_;
 
   DHTPeerAnnounceStorage* peerAnnounceStorage_;
 
@@ -69,7 +69,7 @@ protected:
 public:
   DHTGetPeersMessage(const std::shared_ptr<DHTNode>& localNode,
                      const std::shared_ptr<DHTNode>& remoteNode,
-                     const unsigned char* infoHash,
+                     const DHTID& infoHash,
                      const std::string& transactionID = A2STR::NIL);
 
   virtual void doReceivedAction() override;
@@ -78,7 +78,7 @@ public:
 
   virtual const std::string& getMessageType() const override;
 
-  const unsigned char* getInfoHash() const { return infoHash_; }
+  const DHTID& getInfoHash() const { return infoHash_; }
 
   void setPeerAnnounceStorage(DHTPeerAnnounceStorage* storage);
 

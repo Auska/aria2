@@ -28,10 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTPeerAnnounceStorageTest);
 
 void DHTPeerAnnounceStorageTest::testAddAnnounce()
 {
-  unsigned char infohash1[DHT_ID_LENGTH];
-  memset(infohash1, 0xff, DHT_ID_LENGTH);
-  unsigned char infohash2[DHT_ID_LENGTH];
-  memset(infohash2, 0xf0, DHT_ID_LENGTH);
+  DHTID infohash1;
+  infohash1.fill(0xff);
+  DHTID infohash2;
+  infohash2.fill(0xf0);
   DHTPeerAnnounceStorage storage;
 
   storage.addPeerAnnounce(infohash1, "192.168.0.1", 6881);

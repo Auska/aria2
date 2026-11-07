@@ -37,24 +37,27 @@
 
 #include "common.h"
 
+#include <cassert>
 #include <cstdlib>
+#include <span>
 
 namespace aria2 {
 
+// XOR metric comparator: |key ^ key1| < |key ^ key2|. Like the original
+// pointer version it returns true when both keys are equal.
 class XORCloser {
 private:
-  const unsigned char* key_;
-  size_t length_;
+  std::span<const unsigned char> key_;
 
 public:
-  XORCloser(const unsigned char* key, size_t length)
-      : key_(key), length_(length)
-  {
-  }
+  explicit XORCloser(std::span<const unsigned char> key) : key_(key) {}
 
-  bool operator()(const unsigned char* key1, const unsigned char* key2) const
+  bool operator()(std::span<const unsigned char> key1,
+                  std::span<const unsigned char> key2) const
   {
-    for (size_t i = 0; i < length_; ++i) {
+    assert(key_.size() == key1.size());
+    assert(key_.size() == key2.size());
+    for (size_t i = 0; i < key_.size(); ++i) {
       unsigned char c1 = key_[i] ^ key1[i];
       unsigned char c2 = key_[i] ^ key2[i];
 

@@ -38,10 +38,10 @@ public:
   public:
     virtual std::unique_ptr<DHTPingReplyMessage>
     createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                           const unsigned char* remoteNodeID,
+                           const DHTID& remoteNodeID,
                            const std::string& transactionID) override
     {
-      unsigned char id[DHT_ID_LENGTH];
+      DHTID id;
       std::fill(std::begin(id), std::end(id), '0');
       return make_unique<DHTPingReplyMessage>(localNode_, remoteNode, id,
                                               transactionID);
@@ -68,7 +68,7 @@ void DHTPingMessageTest::testGetBencodedMessage()
   dict.put("y", "q");
   dict.put("q", "ping");
   auto aDict = Dict::g();
-  aDict->put("id", String::g(localNode_->getID(), DHT_ID_LENGTH));
+  aDict->put("id", String::g(localNode_->getID().data(), DHT_ID_LENGTH));
   dict.put("a", std::move(aDict));
 
   CPPUNIT_ASSERT_EQUAL(bencode2::encode(&dict), msgbody);

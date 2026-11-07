@@ -46,7 +46,7 @@ namespace aria2 {
 
 class DHTNode {
 private:
-  unsigned char id_[DHT_ID_LENGTH];
+  DHTID id_;
 
   std::string ipaddr_;
 
@@ -61,16 +61,13 @@ private:
 public:
   DHTNode();
 
-  /**
-   * id must be 20 bytes length
-   */
-  DHTNode(const unsigned char* id);
+  explicit DHTNode(const DHTID& id);
 
   ~DHTNode();
 
   void generateID();
 
-  const unsigned char* getID() const { return id_; }
+  const DHTID& getID() const { return id_; }
 
   void updateRTT(std::chrono::milliseconds t) { rtt_ = std::move(t); }
 
@@ -78,7 +75,7 @@ public:
 
   void setIPAddress(const std::string& ipaddr);
 
-  void setID(const unsigned char* id);
+  void setID(const DHTID& id);
 
   uint16_t getPort() const { return port_; }
 

@@ -100,7 +100,7 @@ bool DHTGetPeersCommand::execute()
     A2_LOG_DEBUG(
         fmt("Issuing PeerLookup for infoHash={}",
             bittorrent::getInfoHashString(requestGroup_->getDownloadContext())
-                .c_str()));
+                ));
     task_ = taskFactory_->createPeerLookupTask(
         requestGroup_->getDownloadContext(), e_->getBtRegistry()->getTcpPort(),
         peerStorage_);

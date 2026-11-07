@@ -17,7 +17,7 @@ public:
   }
 
   virtual std::shared_ptr<DHTTask>
-  createNodeLookupTask(const unsigned char* targetID) override
+  createNodeLookupTask(const DHTID& targetID) override
   {
     return nullptr;
   }
@@ -35,7 +35,7 @@ public:
   }
 
   virtual std::shared_ptr<DHTTask>
-  createPeerAnnounceTask(const unsigned char* infoHash) override
+  createPeerAnnounceTask(const DHTID& infoHash) override
   {
     return nullptr;
   }

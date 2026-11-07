@@ -64,7 +64,7 @@ DHTFindNodeReplyMessage::DHTFindNodeReplyMessage(
 void DHTFindNodeReplyMessage::doReceivedAction()
 {
   for (auto& node : closestKNodes_) {
-    if (memcmp(node->getID(), getLocalNode()->getID(), DHT_ID_LENGTH) != 0) {
+    if (node->getID() != getLocalNode()->getID()) {
       getRoutingTable()->addNode(node);
     }
   }
@@ -73,7 +73,7 @@ void DHTFindNodeReplyMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTFindNodeReplyMessage::getResponse()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   unsigned char buffer[DHTBucket::K * 38];
   const int clen = bittorrent::getCompactLength(family_);
   const int unit = clen + 20;
@@ -82,7 +82,7 @@ std::unique_ptr<Dict> DHTFindNodeReplyMessage::getResponse()
   size_t k = 0;
   for (auto i = std::begin(closestKNodes_), eoi = std::end(closestKNodes_);
        i != eoi && k < DHTBucket::K; ++i) {
-    memcpy(buffer + offset, (*i)->getID(), DHT_ID_LENGTH);
+    memcpy(buffer + offset, (*i)->getID().data(), DHT_ID_LENGTH);
     unsigned char compact[COMPACT_LEN_IPV6];
     int compactlen =
         bittorrent::packcompact(compact, (*i)->getIPAddress(), (*i)->getPort());

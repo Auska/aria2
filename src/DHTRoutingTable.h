@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include "DHTConstants.h"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -73,7 +75,7 @@ public:
   bool addGoodNode(const std::shared_ptr<DHTNode>& node);
 
   void getClosestKNodes(std::vector<std::shared_ptr<DHTNode>>& nodes,
-                        const unsigned char* key) const;
+                        const DHTID& key) const;
 
   int getNumBucket() const;
 
@@ -85,12 +87,12 @@ public:
 
   void moveBucketTail(const std::shared_ptr<DHTNode>& node);
 
-  std::shared_ptr<DHTBucket> getBucketFor(const unsigned char* nodeID) const;
+  std::shared_ptr<DHTBucket> getBucketFor(const DHTID& nodeID) const;
 
   std::shared_ptr<DHTBucket>
   getBucketFor(const std::shared_ptr<DHTNode>& node) const;
 
-  std::shared_ptr<DHTNode> getNode(const unsigned char* id,
+  std::shared_ptr<DHTNode> getNode(const DHTID& id,
                                    const std::string& ipaddr,
                                    uint16_t port) const;
 

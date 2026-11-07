@@ -43,7 +43,7 @@ void DHTAnnouncePeerReplyMessageTest::testGetBencodedMessage()
   dict.put("v", "A200");
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(localNode->getID(), DHT_ID_LENGTH));
+  rDict->put("id", String::g(localNode->getID().data(), DHT_ID_LENGTH));
   dict.put("r", std::move(rDict));
 
   CPPUNIT_ASSERT_EQUAL(bencode2::encode(&dict), msgbody);

@@ -30,8 +30,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTBucketTreeTest);
 
 void DHTBucketTreeTest::testDig()
 {
-  unsigned char localNodeID[DHT_ID_LENGTH];
-  memset(localNodeID, 0xff, DHT_ID_LENGTH);
+  DHTID localNodeID;
+  localNodeID.fill(0xff);
 
   auto localNode = std::make_shared<DHTNode>(localNodeID);
 
@@ -61,8 +61,8 @@ void DHTBucketTreeTest::testDig()
 
 void DHTBucketTreeTest::testFindBucketFor()
 {
-  unsigned char localNodeID[DHT_ID_LENGTH];
-  memset(localNodeID, 0xaa, DHT_ID_LENGTH);
+  DHTID localNodeID;
+  localNodeID.fill(0xaa);
 
   auto localNode = std::make_shared<DHTNode>(localNodeID);
 
@@ -108,8 +108,8 @@ void DHTBucketTreeTest::testFindBucketFor()
 
 void DHTBucketTreeTest::testFindClosestKNodes()
 {
-  unsigned char localNodeID[DHT_ID_LENGTH];
-  memset(localNodeID, 0xaa, DHT_ID_LENGTH);
+  DHTID localNodeID;
+  localNodeID.fill(0xaa);
 
   auto localNode = std::make_shared<DHTNode>(localNodeID);
 
@@ -119,7 +119,7 @@ void DHTBucketTreeTest::testFindClosestKNodes()
   auto bucket4 = std::shared_ptr<DHTBucket>(bucket3->split());
   auto bucket5 = std::shared_ptr<DHTBucket>(bucket3->split());
 
-  unsigned char id[DHT_ID_LENGTH];
+  DHTID id;
   {
     auto b1 = make_unique<DHTBucketTreeNode>(bucket1);
     auto b2 = make_unique<DHTBucketTreeNode>(bucket2);
@@ -145,8 +145,8 @@ void DHTBucketTreeTest::testFindClosestKNodes()
       bucket5->addNode(std::make_shared<DHTNode>(id));
     }
     {
-      unsigned char targetID[DHT_ID_LENGTH];
-      memset(targetID, 0x80, DHT_ID_LENGTH);
+      DHTID targetID;
+      targetID.fill(0x80);
       std::vector<std::shared_ptr<DHTNode>> nodes;
       dht::findClosestKNodes(nodes, &bp4, targetID);
       CPPUNIT_ASSERT_EQUAL((size_t)8, nodes.size());
@@ -160,8 +160,8 @@ void DHTBucketTreeTest::testFindClosestKNodes()
       CPPUNIT_ASSERT(bucket1->isInRange(nodes[7]));
     }
     {
-      unsigned char targetID[DHT_ID_LENGTH];
-      memset(targetID, 0xf0, DHT_ID_LENGTH);
+      DHTID targetID;
+      targetID.fill(0xf0);
       std::vector<std::shared_ptr<DHTNode>> nodes;
       dht::findClosestKNodes(nodes, &bp4, targetID);
       CPPUNIT_ASSERT_EQUAL((size_t)8, nodes.size());
@@ -179,8 +179,8 @@ void DHTBucketTreeTest::testFindClosestKNodes()
         bucket4->getRandomNodeID(id);
         bucket4->addNode(std::make_shared<DHTNode>(id));
       }
-      unsigned char targetID[DHT_ID_LENGTH];
-      memset(targetID, 0x80, DHT_ID_LENGTH);
+      DHTID targetID;
+      targetID.fill(0x80);
       std::vector<std::shared_ptr<DHTNode>> nodes;
       dht::findClosestKNodes(nodes, &bp4, targetID);
       CPPUNIT_ASSERT_EQUAL((size_t)8, nodes.size());
@@ -193,8 +193,8 @@ void DHTBucketTreeTest::testFindClosestKNodes()
 
 void DHTBucketTreeTest::testEnumerateBucket()
 {
-  unsigned char localNodeID[DHT_ID_LENGTH];
-  memset(localNodeID, 0xaa, DHT_ID_LENGTH);
+  DHTID localNodeID;
+  localNodeID.fill(0xaa);
 
   auto localNode = std::make_shared<DHTNode>(localNodeID);
 

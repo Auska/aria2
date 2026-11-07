@@ -42,16 +42,16 @@
 
 namespace aria2 {
 
-DHTPeerAnnounceEntry::DHTPeerAnnounceEntry(const unsigned char* infoHash)
+DHTPeerAnnounceEntry::DHTPeerAnnounceEntry(const DHTID& infoHash)
 {
-  memcpy(infoHash_, infoHash, DHT_ID_LENGTH);
+  infoHash_ = infoHash;
 }
 
 DHTPeerAnnounceEntry::~DHTPeerAnnounceEntry() = default;
 
 void DHTPeerAnnounceEntry::addPeerAddrEntry(const PeerAddrEntry& entry)
 {
-  auto i = std::find(peerAddrEntries_.begin(), peerAddrEntries_.end(), entry);
+  auto i = std::ranges::find(peerAddrEntries_, entry);
   if (i == peerAddrEntries_.end()) {
     peerAddrEntries_.push_back(entry);
   }

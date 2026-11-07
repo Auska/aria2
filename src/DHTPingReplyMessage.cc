@@ -45,11 +45,11 @@ const std::string DHTPingReplyMessage::PING("ping");
 
 DHTPingReplyMessage::DHTPingReplyMessage(
     const std::shared_ptr<DHTNode>& localNode,
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* id,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& id,
     const std::string& transactionID)
     : DHTResponseMessage(localNode, remoteNode, transactionID)
 {
-  memcpy(id_, id, DHT_ID_LENGTH);
+  id_ = id;
 }
 
 void DHTPingReplyMessage::doReceivedAction() {}
@@ -57,7 +57,7 @@ void DHTPingReplyMessage::doReceivedAction() {}
 std::unique_ptr<Dict> DHTPingReplyMessage::getResponse()
 {
   auto rDict = Dict::g();
-  rDict->put(DHTMessage::ID, String::g(id_, DHT_ID_LENGTH));
+  rDict->put(DHTMessage::ID, String::g(id_.data(), id_.size()));
   return rDict;
 }
 

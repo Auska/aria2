@@ -54,9 +54,9 @@ private:
   size_t prefixLength_;
 
   // this bucket contains nodes of distance between [min_, max_](inclusive).
-  unsigned char min_[DHT_ID_LENGTH];
+  DHTID min_;
 
-  unsigned char max_[DHT_ID_LENGTH];
+  DHTID max_;
 
   std::shared_ptr<DHTNode> localNode_;
 
@@ -69,14 +69,13 @@ private:
 
   Timer lastUpdated_;
 
-  bool isInRange(const unsigned char* nodeID, const unsigned char* max,
-                 const unsigned char* min) const;
+  bool isInRange(const DHTID& nodeID, const DHTID& max,
+                 const DHTID& min) const;
 
 public:
   DHTBucket(const std::shared_ptr<DHTNode>& localNode);
 
-  DHTBucket(size_t prefixLength, const unsigned char* max,
-            const unsigned char* min,
+  DHTBucket(size_t prefixLength, const DHTID& max, const DHTID& min,
             const std::shared_ptr<DHTNode>& localNode);
 
   ~DHTBucket();
@@ -85,13 +84,13 @@ public:
 
   static const size_t CACHE_SIZE = 2;
 
-  void getRandomNodeID(unsigned char* nodeID) const;
+  void getRandomNodeID(DHTID& nodeID) const;
 
   std::unique_ptr<DHTBucket> split();
 
   bool isInRange(const std::shared_ptr<DHTNode>& node) const;
 
-  bool isInRange(const unsigned char* nodeID) const;
+  bool isInRange(const DHTID& nodeID) const;
 
   bool addNode(const std::shared_ptr<DHTNode>& node);
 
@@ -101,9 +100,9 @@ public:
 
   size_t getPrefixLength() const { return prefixLength_; }
 
-  const unsigned char* getMaxID() const { return max_; }
+  const DHTID& getMaxID() const { return max_; }
 
-  const unsigned char* getMinID() const { return min_; }
+  const DHTID& getMinID() const { return min_; }
 
   size_t countNode() const { return nodes_.size(); }
 
@@ -122,7 +121,7 @@ public:
 
   bool contains(const std::shared_ptr<DHTNode>& node) const;
 
-  std::shared_ptr<DHTNode> getNode(const unsigned char* nodeID,
+  std::shared_ptr<DHTNode> getNode(const DHTID& nodeID,
                                    const std::string& ipaddr,
                                    uint16_t port) const;
 

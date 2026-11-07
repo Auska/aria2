@@ -60,7 +60,7 @@ void DHTBucketRefreshTask::startup()
       continue;
     }
     b->notifyUpdate();
-    unsigned char targetID[DHT_ID_LENGTH];
+    DHTID targetID;
     b->getRandomNodeID(targetID);
     auto task = std::make_shared<DHTNodeLookupTask>(targetID);
     task->setRoutingTable(getRoutingTable());
@@ -70,7 +70,7 @@ void DHTBucketRefreshTask::startup()
     task->setLocalNode(getLocalNode());
 
     A2_LOG_INFO(fmt("Dispating bucket refresh. targetID={}",
-                    util::toHex(std::as_bytes(std::span{targetID, DHT_ID_LENGTH})).c_str()));
+                    util::toHex(std::as_bytes(std::span{targetID}))));
     getTaskQueue()->addPeriodicTask1(task);
   }
   setFinished(true);

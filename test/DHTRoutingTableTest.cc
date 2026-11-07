@@ -64,10 +64,9 @@ void DHTRoutingTableTest::testAddNode_localNode()
 }
 
 namespace {
-void createID(unsigned char* id, unsigned char firstChar,
-              unsigned char lastChar)
+void createID(DHTID& id, unsigned char firstChar, unsigned char lastChar)
 {
-  memset(id, 0, DHT_ID_LENGTH);
+  id.fill(0);
   id[0] = firstChar;
   id[DHT_ID_LENGTH - 1] = lastChar;
 }
@@ -75,7 +74,7 @@ void createID(unsigned char* id, unsigned char firstChar,
 
 void DHTRoutingTableTest::testGetClosestKNodes()
 {
-  unsigned char id[DHT_ID_LENGTH];
+  DHTID id;
   createID(id, 0x81, 0);
   auto localNode = std::make_shared<DHTNode>(id);
 
@@ -106,7 +105,7 @@ void DHTRoutingTableTest::testGetClosestKNodes()
     CPPUNIT_ASSERT_EQUAL((size_t)8, nodes.size());
     for (size_t i = 0; i < nodes.size(); ++i) {
       CPPUNIT_ASSERT(
-          memcmp(nodes2[0]->getID(), nodes[0]->getID(), DHT_ID_LENGTH) == 0);
+          memcmp(nodes2[0]->getID().data(), nodes[0]->getID().data(), DHT_ID_LENGTH) == 0);
     }
   }
 }

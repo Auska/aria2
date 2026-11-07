@@ -39,16 +39,19 @@ void XORCloserTest::testOperator()
   keys[4][DHT_ID_LENGTH - 1] = 0x01;
   keys[5][0] = 0x00;
 
-  std::deque<unsigned char*> l(&keys[0], &keys[NUM_KEY]);
+  std::deque<std::span<unsigned char>> l;
+  for (auto& key : keys) {
+    l.push_back(key);
+  }
 
-  std::sort(l.begin(), l.end(), XORCloser(keys[2], DHT_ID_LENGTH));
+  std::sort(l.begin(), l.end(), XORCloser(std::span<const unsigned char>{keys[2]}));
 
-  CPPUNIT_ASSERT(memcmp(keys[2], l[0], DHT_ID_LENGTH) == 0);
-  CPPUNIT_ASSERT(memcmp(keys[1], l[1], DHT_ID_LENGTH) == 0);
-  CPPUNIT_ASSERT(memcmp(keys[3], l[2], DHT_ID_LENGTH) == 0);
-  CPPUNIT_ASSERT(memcmp(keys[0], l[3], DHT_ID_LENGTH) == 0);
-  CPPUNIT_ASSERT(memcmp(keys[5], l[4], DHT_ID_LENGTH) == 0);
-  CPPUNIT_ASSERT(memcmp(keys[4], l[5], DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[2]}, l[0]));
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[1]}, l[1]));
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[3]}, l[2]));
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[0]}, l[3]));
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[5]}, l[4]));
+  CPPUNIT_ASSERT(std::ranges::equal(std::span{keys[4]}, l[5]));
 }
 
 } // namespace aria2

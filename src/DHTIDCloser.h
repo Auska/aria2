@@ -48,9 +48,7 @@ private:
   XORCloser closer_;
 
 public:
-  DHTIDCloser(const unsigned char* targetID) : closer_{targetID, DHT_ID_LENGTH}
-  {
-  }
+  explicit DHTIDCloser(const DHTID& targetID) : closer_{targetID} {}
 
   bool operator()(const std::unique_ptr<DHTNodeLookupEntry>& m1,
                   const std::unique_ptr<DHTNodeLookupEntry>& m2) const

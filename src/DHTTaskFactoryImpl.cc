@@ -72,7 +72,7 @@ DHTTaskFactoryImpl::createPingTask(const std::shared_ptr<DHTNode>& remoteNode,
 }
 
 std::shared_ptr<DHTTask>
-DHTTaskFactoryImpl::createNodeLookupTask(const unsigned char* targetID)
+DHTTaskFactoryImpl::createNodeLookupTask(const DHTID& targetID)
 {
   auto task = std::make_shared<DHTNodeLookupTask>(targetID);
   setCommonProperty(task);
@@ -98,7 +98,7 @@ std::shared_ptr<DHTTask> DHTTaskFactoryImpl::createPeerLookupTask(
 }
 
 std::shared_ptr<DHTTask>
-DHTTaskFactoryImpl::createPeerAnnounceTask(const unsigned char* infoHash)
+DHTTaskFactoryImpl::createPeerAnnounceTask(const DHTID& infoHash)
 {
   // TODO
   return nullptr;

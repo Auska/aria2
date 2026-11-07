@@ -37,6 +37,9 @@
 #define D_INTERNAL_DH_KEY_EXCHANGE_H
 
 #include "common.h"
+
+#include <span>
+#include <string_view>
 #include "bignum.h"
 
 namespace aria2 {
@@ -53,18 +56,21 @@ private:
 public:
   DHKeyExchange() : keyLength_(0) {}
 
-  void init(const unsigned char* prime, size_t primeBits,
-            const unsigned char* generator, size_t privateKeyBits);
+  void init(std::string_view prime, size_t primeBits,
+            std::string_view generator, size_t privateKeyBits);
 
   void generatePublicKey();
 
-  size_t getPublicKey(unsigned char* out, size_t outLength) const;
+  // Writes at most out.size() bytes into out and returns the number of
+  // bytes written.
+  size_t getPublicKey(std::span<unsigned char> out) const;
 
-  void generateNonce(unsigned char* out, size_t outLength) const;
+  void generateNonce(std::span<unsigned char> out) const;
 
-  size_t computeSecret(unsigned char* out, size_t outLength,
-                       const unsigned char* peerPublicKeyData,
-                       size_t peerPublicKeyLength) const;
+  // Writes at most out.size() bytes into out and returns the number of
+  // bytes written.
+  size_t computeSecret(std::span<unsigned char> out,
+                       std::span<const unsigned char> peerPublicKey) const;
 };
 
 } // namespace aria2

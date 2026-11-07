@@ -44,10 +44,10 @@
 
 namespace aria2 {
 
-void DHKeyExchange::init(const unsigned char* prime, size_t primeBits,
-                         const unsigned char* generator, size_t privateKeyBits)
+void DHKeyExchange::init(std::string_view prime, size_t primeBits,
+                         std::string_view generator, size_t privateKeyBits)
 {
-  std::string pr = reinterpret_cast<const char*>(prime);
+  std::string pr(prime);
   if (pr.length() % 2) {
     pr = "0" + pr;
   }
@@ -57,7 +57,7 @@ void DHKeyExchange::init(const unsigned char* prime, size_t primeBits,
   }
   prime_ = n(reinterpret_cast<const unsigned char*>(pr.c_str()), pr.length());
 
-  std::string gen = reinterpret_cast<const char*>(generator);
+  std::string gen(generator);
   if (gen.length() % 2) {
     gen = "0" + gen;
   }
@@ -81,45 +81,45 @@ void DHKeyExchange::generatePublicKey()
   publicKey_ = generator_.mul_mod(privateKey_, prime_);
 }
 
-size_t DHKeyExchange::getPublicKey(unsigned char* out, size_t outLength) const
+size_t DHKeyExchange::getPublicKey(std::span<unsigned char> out) const
 {
-  if (outLength < keyLength_) {
+  if (out.size() < keyLength_) {
     throw DL_ABORT_EX(
         fmt("Insufficient buffer for public key. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
-            static_cast<unsigned long>(outLength)));
+            static_cast<unsigned long>(out.size())));
   }
-  publicKey_.binary(out, outLength);
+  publicKey_.binary(out.data(), out.size());
   return keyLength_;
 }
 
-void DHKeyExchange::generateNonce(unsigned char* out, size_t outLength) const
+void DHKeyExchange::generateNonce(std::span<unsigned char> out) const
 {
-  util::generateRandomData(std::as_writable_bytes(std::span{out, outLength}));
+  util::generateRandomData(std::as_writable_bytes(out));
 }
 
-size_t DHKeyExchange::computeSecret(unsigned char* out, size_t outLength,
-                                    const unsigned char* peerPublicKeyData,
-                                    size_t peerPublicKeyLength) const
+size_t DHKeyExchange::computeSecret(
+    std::span<unsigned char> out,
+    std::span<const unsigned char> peerPublicKeyData) const
 {
-  if (outLength < keyLength_) {
+  if (out.size() < keyLength_) {
     throw DL_ABORT_EX(
         fmt("Insufficient buffer for secret. expect:{}, actual:{}",
             static_cast<unsigned long>(keyLength_),
-            static_cast<unsigned long>(outLength)));
+            static_cast<unsigned long>(out.size())));
   }
-  if (prime_.length() < peerPublicKeyLength) {
+  if (prime_.length() < peerPublicKeyData.size()) {
     throw DL_ABORT_EX(
         fmt("peer public key overflows bignum. max:{}, actual:{}",
             static_cast<unsigned long>(prime_.length()),
-            static_cast<unsigned long>(peerPublicKeyLength)));
+            static_cast<unsigned long>(peerPublicKeyData.size())));
   }
 
-  n peerKey(peerPublicKeyData, peerPublicKeyLength);
+  n peerKey(peerPublicKeyData.data(), peerPublicKeyData.size());
   n secret = peerKey.mul_mod(privateKey_, prime_);
-  secret.binary(out, outLength);
+  secret.binary(out.data(), out.size());
 
-  return outLength;
+  return out.size();
 }
 
 } // namespace aria2

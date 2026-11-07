@@ -10,6 +10,7 @@ class DHTNodeTest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST_SUITE(DHTNodeTest);
   CPPUNIT_TEST(testGenerateID);
+  CPPUNIT_TEST(testLessThan);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -18,6 +19,8 @@ public:
   void tearDown() {}
 
   void testGenerateID();
+
+  void testLessThan();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(DHTNodeTest);
@@ -25,7 +28,24 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTNodeTest);
 void DHTNodeTest::testGenerateID()
 {
   DHTNode node;
-  std::cerr << util::toHex(std::as_bytes(std::span{node.getID(), DHT_ID_LENGTH})) << std::endl;
+  std::cerr << util::toHex(std::as_bytes(std::span{node.getID()})) << std::endl;
+}
+
+void DHTNodeTest::testLessThan()
+{
+  DHTID a;
+  a.fill(0);
+  DHTID b;
+  b.fill(0);
+  b[0] = 1;
+  DHTNode nodeA(a);
+  DHTNode nodeB(b);
+
+  CPPUNIT_ASSERT(nodeA < nodeB);
+  CPPUNIT_ASSERT(!(nodeB < nodeA));
+  // DHTNode::operator< returns true for identical IDs; this is the
+  // historical (non-strict-weak-ordering) behaviour and is kept as is.
+  CPPUNIT_ASSERT(nodeA < nodeA);
 }
 
 } // namespace aria2

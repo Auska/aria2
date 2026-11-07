@@ -76,7 +76,7 @@ void DHTRoutingTableSerializerTest::checkToLocalnode(
   CPPUNIT_ASSERT(memcmp(zero, buf, 8) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(localNode->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(localNode->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);
@@ -150,7 +150,7 @@ void DHTRoutingTableSerializerTest::testSerialize()
   CPPUNIT_ASSERT(memcmp(zero, buf, 16) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(nodes[0]->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodes[0]->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);
@@ -178,7 +178,7 @@ void DHTRoutingTableSerializerTest::testSerialize()
   CPPUNIT_ASSERT(memcmp(zero, buf, 16) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(nodes[1]->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodes[1]->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);
@@ -209,7 +209,7 @@ void DHTRoutingTableSerializerTest::testSerialize()
   CPPUNIT_ASSERT(memcmp(zero, buf, 16) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(nodes[2]->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodes[2]->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);
@@ -273,7 +273,7 @@ void DHTRoutingTableSerializerTest::testSerialize6()
   CPPUNIT_ASSERT(memcmp(zero, buf, 6) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(nodes[0]->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodes[0]->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);
@@ -298,7 +298,7 @@ void DHTRoutingTableSerializerTest::testSerialize6()
   CPPUNIT_ASSERT(memcmp(zero, buf, 6) == 0);
   // localnode ID
   ss.read(buf, DHT_ID_LENGTH);
-  CPPUNIT_ASSERT(memcmp(nodes[1]->getID(), buf, DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(memcmp(nodes[1]->getID().data(), buf, DHT_ID_LENGTH) == 0);
   // 4bytes reserved
   ss.read(buf, 4);
   CPPUNIT_ASSERT(memcmp(zero, buf, 4) == 0);

@@ -60,7 +60,7 @@ const std::string DHTGetPeersMessage::INFO_HASH("info_hash");
 
 DHTGetPeersMessage::DHTGetPeersMessage(
     const std::shared_ptr<DHTNode>& localNode,
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
     const std::string& transactionID)
     : DHTQueryMessage{localNode, remoteNode, transactionID},
       peerAnnounceStorage_{nullptr},
@@ -68,7 +68,7 @@ DHTGetPeersMessage::DHTGetPeersMessage(
       btRegistry_{nullptr},
       family_{AF_INET}
 {
-  memcpy(infoHash_, infoHash, DHT_ID_LENGTH);
+  infoHash_ = infoHash;
 }
 
 void DHTGetPeersMessage::addLocalPeer(std::vector<std::shared_ptr<Peer>>& peers)
@@ -78,7 +78,7 @@ void DHTGetPeersMessage::addLocalPeer(std::vector<std::shared_ptr<Peer>>& peers)
   }
 
   auto& dctx = btRegistry_->getDownloadContext(
-      std::string(infoHash_, infoHash_ + DHT_ID_LENGTH));
+      std::string(infoHash_.begin(), infoHash_.end()));
 
   if (!dctx) {
     return;
@@ -130,8 +130,8 @@ void DHTGetPeersMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTGetPeersMessage::getArgument()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
-  aDict->put(INFO_HASH, String::g(infoHash_, DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  aDict->put(INFO_HASH, String::g(infoHash_.data(), infoHash_.size()));
   return aDict;
 }
 
@@ -159,7 +159,7 @@ void DHTGetPeersMessage::setFamily(int family) { family_ = family; }
 
 std::string DHTGetPeersMessage::toStringOptional() const
 {
-  return "info_hash=" + util::toHex(std::as_bytes(std::span{infoHash_, INFO_HASH_LENGTH}));
+  return "info_hash=" + util::toHex(std::as_bytes(std::span{infoHash_}));
 }
 
 } // namespace aria2

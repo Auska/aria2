@@ -48,7 +48,7 @@ class DHTAnnouncePeerMessage : public DHTQueryMessage {
 private:
   std::string token_;
 
-  unsigned char infoHash_[DHT_ID_LENGTH];
+  DHTID infoHash_;
 
   uint16_t tcpPort_;
 
@@ -62,7 +62,7 @@ protected:
 public:
   DHTAnnouncePeerMessage(const std::shared_ptr<DHTNode>& localNode,
                          const std::shared_ptr<DHTNode>& remoteNode,
-                         const unsigned char* infoHash, uint16_t tcpPort,
+                         const DHTID& infoHash, uint16_t tcpPort,
                          const std::string& token,
                          const std::string& transactionID = A2STR::NIL);
 
@@ -74,7 +74,7 @@ public:
 
   virtual void validate() const override;
 
-  const unsigned char* getInfoHash() const { return infoHash_; }
+  const DHTID& getInfoHash() const { return infoHash_; }
 
   const std::string& getToken() const { return token_; }
 

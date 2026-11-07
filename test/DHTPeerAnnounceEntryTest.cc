@@ -31,8 +31,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTPeerAnnounceEntryTest);
 
 void DHTPeerAnnounceEntryTest::testRemoveStalePeerAddrEntry()
 {
-  unsigned char infohash[DHT_ID_LENGTH];
-  memset(infohash, 0xff, DHT_ID_LENGTH);
+  DHTID infohash;
+  infohash.fill(0xff);
   DHTPeerAnnounceEntry entry(infohash);
 
   entry.addPeerAddrEntry(PeerAddrEntry("192.168.0.1", 6881));
@@ -54,8 +54,8 @@ void DHTPeerAnnounceEntryTest::testRemoveStalePeerAddrEntry()
 
 void DHTPeerAnnounceEntryTest::testEmpty()
 {
-  unsigned char infohash[DHT_ID_LENGTH];
-  memset(infohash, 0xff, DHT_ID_LENGTH);
+  DHTID infohash;
+  infohash.fill(0xff);
   {
     DHTPeerAnnounceEntry entry(infohash);
     entry.addPeerAddrEntry(PeerAddrEntry("192.168.0.1", 6881));
@@ -69,8 +69,8 @@ void DHTPeerAnnounceEntryTest::testEmpty()
 
 void DHTPeerAnnounceEntryTest::testAddPeerAddrEntry()
 {
-  unsigned char infohash[DHT_ID_LENGTH];
-  memset(infohash, 0xff, DHT_ID_LENGTH);
+  DHTID infohash;
+  infohash.fill(0xff);
 
   DHTPeerAnnounceEntry entry(infohash);
   entry.addPeerAddrEntry(PeerAddrEntry("192.168.0.1", 6881, Timer::zero()));
@@ -86,8 +86,8 @@ void DHTPeerAnnounceEntryTest::testAddPeerAddrEntry()
 
 void DHTPeerAnnounceEntryTest::testGetPeers()
 {
-  unsigned char infohash[DHT_ID_LENGTH];
-  memset(infohash, 0xff, DHT_ID_LENGTH);
+  DHTID infohash;
+  infohash.fill(0xff);
 
   DHTPeerAnnounceEntry entry(infohash);
   {

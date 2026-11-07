@@ -62,7 +62,7 @@ DHTTokenTracker::DHTTokenTracker(const unsigned char* initialSecret)
 
 DHTTokenTracker::~DHTTokenTracker() = default;
 
-std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
+std::string DHTTokenTracker::generateToken(const DHTID& infoHash,
                                            const std::string& ipaddr,
                                            uint16_t port,
                                            const unsigned char* secret) const
@@ -72,9 +72,9 @@ std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
   int compactlen = bittorrent::packcompact(src + DHT_ID_LENGTH, ipaddr, port);
   if (compactlen == 0) {
     throw DL_ABORT_EX(fmt("Token generation failed: ipaddr={}, port={}",
-                          ipaddr.c_str(), port));
+                          ipaddr, port));
   }
-  memcpy(src, infoHash, DHT_ID_LENGTH);
+  std::copy(std::begin(infoHash), std::end(infoHash), src);
   memcpy(src + DHT_ID_LENGTH + COMPACT_LEN_IPV6, secret, SECRET_SIZE);
   unsigned char md[20];
   message_digest::digest(md, sizeof(md), MessageDigest::sha1().get(),
@@ -82,7 +82,7 @@ std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
   return std::string(&md[0], &md[sizeof(md)]);
 }
 
-std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
+std::string DHTTokenTracker::generateToken(const DHTID& infoHash,
                                            const std::string& ipaddr,
                                            uint16_t port) const
 {
@@ -90,7 +90,7 @@ std::string DHTTokenTracker::generateToken(const unsigned char* infoHash,
 }
 
 bool DHTTokenTracker::validateToken(const std::string& token,
-                                    const unsigned char* infoHash,
+                                    const DHTID& infoHash,
                                     const std::string& ipaddr,
                                     uint16_t port) const
 {

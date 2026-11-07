@@ -60,12 +60,12 @@ public:
   ~DHTBucketTreeNode();
   // Returns child node, left or right, which contains key.  If dig is
   // called against leaf node, then returns 0.
-  DHTBucketTreeNode* dig(const unsigned char* key);
-  bool isInRange(const unsigned char* key) const;
+  DHTBucketTreeNode* dig(const DHTID& key);
+  bool isInRange(const DHTID& key) const;
   // Returns true iff this is a leaf node.
   bool leaf() const { return bucket_.get(); }
-  const unsigned char* getMaxId() const { return maxId_; }
-  const unsigned char* getMinId() const { return minId_; }
+  const DHTID& getMaxId() const { return maxId_; }
+  const DHTID& getMinId() const { return minId_; }
   DHTBucketTreeNode* getParent() const { return parent_; }
   DHTBucketTreeNode* getLeft() const { return left_.get(); }
   DHTBucketTreeNode* getRight() const { return right_.get(); }
@@ -88,29 +88,28 @@ private:
   std::unique_ptr<DHTBucketTreeNode> left_;
   std::unique_ptr<DHTBucketTreeNode> right_;
   std::shared_ptr<DHTBucket> bucket_;
-  unsigned char minId_[DHT_ID_LENGTH];
-  unsigned char maxId_[DHT_ID_LENGTH];
+  DHTID minId_;
+  DHTID maxId_;
 };
 
 namespace dht {
 
 // Returns leaf node where key fits between node's min and max ID
 // range.
-DHTBucketTreeNode* findTreeNodeFor(DHTBucketTreeNode* root,
-                                   const unsigned char* key);
+DHTBucketTreeNode* findTreeNodeFor(DHTBucketTreeNode* root, const DHTID& key);
 
 // Returns bucket where key fits between bucket's min and max ID
 // range. This function first use findTreeNodeFor and returns its
 // bucket_.
 std::shared_ptr<DHTBucket> findBucketFor(DHTBucketTreeNode* root,
-                                         const unsigned char* key);
+                                         const DHTID& key);
 
 // Stores most closest K nodes against key in nodes. K is
 // DHTBucket::K. This function may returns less than K nodes because
 // the routing tree contains less than K nodes. The order of nodes is
 // arbitrary.  Caller must pass empty nodes.
 void findClosestKNodes(std::vector<std::shared_ptr<DHTNode>>& nodes,
-                       DHTBucketTreeNode* root, const unsigned char* key);
+                       DHTBucketTreeNode* root, const DHTID& key);
 
 // Stores all buckets in buckets.
 void enumerateBucket(std::vector<std::shared_ptr<DHTBucket>>& buckets,

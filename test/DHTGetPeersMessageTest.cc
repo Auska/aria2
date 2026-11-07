@@ -68,8 +68,8 @@ void DHTGetPeersMessageTest::testGetBencodedMessage()
   util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
-  unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
+  DHTID infoHash;
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash}));
 
   DHTGetPeersMessage msg(localNode_, remoteNode_, infoHash, transactionID);
   msg.setVersion("A200");
@@ -82,8 +82,8 @@ void DHTGetPeersMessageTest::testGetBencodedMessage()
   dict.put("y", "q");
   dict.put("q", "get_peers");
   auto aDict = Dict::g();
-  aDict->put("id", String::g(localNode_->getID(), DHT_ID_LENGTH));
-  aDict->put("info_hash", String::g(infoHash, DHT_ID_LENGTH));
+  aDict->put("id", String::g(localNode_->getID().data(), DHT_ID_LENGTH));
+  aDict->put("info_hash", String::g(infoHash.data(), DHT_ID_LENGTH));
   dict.put("a", std::move(aDict));
 
   CPPUNIT_ASSERT_EQUAL(util::percentEncode(bencode2::encode(&dict)),
@@ -99,8 +99,8 @@ void DHTGetPeersMessageTest::testDoReceivedAction()
   util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
-  unsigned char infoHash[DHT_ID_LENGTH];
-  util::generateRandomData(std::as_writable_bytes(std::span{infoHash, DHT_ID_LENGTH}));
+  DHTID infoHash;
+  util::generateRandomData(std::as_writable_bytes(std::span{infoHash}));
 
   DHTTokenTracker tokenTracker;
   MockDHTMessageDispatcher dispatcher;
@@ -109,7 +109,8 @@ void DHTGetPeersMessageTest::testDoReceivedAction()
   DHTRoutingTable routingTable(localNode_);
 
   auto torrentAttrs = std::make_shared<TorrentAttribute>();
-  torrentAttrs->infoHash = std::string(infoHash, infoHash + DHT_ID_LENGTH);
+  torrentAttrs->infoHash =
+      std::string(infoHash.begin(), infoHash.end());
 
   auto dctx = std::make_shared<DownloadContext>();
   dctx->setAttribute(CTX_ATTR_BT, torrentAttrs);

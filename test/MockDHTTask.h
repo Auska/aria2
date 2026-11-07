@@ -14,7 +14,7 @@ class MockDHTTask : public DHTTask {
 public:
   std::shared_ptr<DHTNode> remoteNode_;
 
-  unsigned char targetID_[DHT_ID_LENGTH];
+  DHTID targetID_;
 
   bool finished_;
 
@@ -29,10 +29,7 @@ public:
 
   virtual bool finished() override { return finished_; }
 
-  void setTargetID(const unsigned char* targetID)
-  {
-    memcpy(targetID_, targetID, DHT_ID_LENGTH);
-  }
+  void setTargetID(const DHTID& targetID) { targetID_ = targetID; }
 };
 
 } // namespace aria2

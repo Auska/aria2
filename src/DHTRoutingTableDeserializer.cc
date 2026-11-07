@@ -77,11 +77,11 @@ void readBytes(BufferedFile& fp, unsigned char* buf, size_t buflen,
 
 void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
 {
-  A2_LOG_INFO(fmt("Loading DHT routing table from {}.", filename.c_str()));
+  A2_LOG_INFO(fmt("Loading DHT routing table from {}.", filename));
   BufferedFile fp(filename.c_str(), BufferedFile::READ);
   if (!fp) {
     throw DL_ABORT_EX(
-        fmt("Failed to load DHT routing table from {}", filename.c_str()));
+        fmt("Failed to load DHT routing table from {}", filename));
   }
   char header[8];
   memset(header, 0, sizeof(header));
@@ -124,7 +124,7 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
   }
   else {
     throw DL_ABORT_EX(fmt("Failed to load DHT routing table from {}. cause:{}",
-                          filename.c_str(), "bad header"));
+                          filename, "bad header"));
   }
 
   uint32_t temp32;
@@ -146,7 +146,7 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
   readBytes(fp, buf, buf.size(), 8);
   // localnode ID
   readBytes(fp, buf, buf.size(), DHT_ID_LENGTH);
-  auto localNode = std::make_shared<DHTNode>(buf);
+  auto localNode = std::make_shared<DHTNode>(toDHTID(buf));
   // 4bytes reserved
   readBytes(fp, buf, buf.size(), 4);
 
@@ -189,7 +189,7 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
     // node ID
     readBytes(fp, buf, buf.size(), DHT_ID_LENGTH);
 
-    auto node = std::make_shared<DHTNode>(buf);
+    auto node = std::make_shared<DHTNode>(toDHTID(buf));
     node->setIPAddress(peer.first);
     node->setPort(peer.second);
     // 4bytes reserved

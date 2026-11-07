@@ -45,7 +45,7 @@
 
 namespace aria2 {
 
-DHTNodeLookupTask::DHTNodeLookupTask(const unsigned char* targetNodeID)
+DHTNodeLookupTask::DHTNodeLookupTask(const DHTID& targetNodeID)
     : DHTAbstractNodeLookupTask<DHTFindNodeReplyMessage>(targetNodeID)
 {
 }

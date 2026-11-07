@@ -73,7 +73,7 @@ public:
                  int numRetry = 0) override;
 
   virtual std::shared_ptr<DHTTask>
-  createNodeLookupTask(const unsigned char* targetID) override;
+  createNodeLookupTask(const DHTID& targetID) override;
 
   virtual std::shared_ptr<DHTTask> createBucketRefreshTask() override;
 
@@ -82,7 +82,7 @@ public:
       const std::shared_ptr<PeerStorage>& peerStorage) override;
 
   virtual std::shared_ptr<DHTTask>
-  createPeerAnnounceTask(const unsigned char* infoHash) override;
+  createPeerAnnounceTask(const DHTID& infoHash) override;
 
   virtual std::shared_ptr<DHTTask>
   createReplaceNodeTask(const std::shared_ptr<DHTBucket>& bucket,

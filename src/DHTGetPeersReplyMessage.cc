@@ -78,7 +78,7 @@ void DHTGetPeersReplyMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTGetPeersReplyMessage::getResponse()
 {
   auto rDict = Dict::g();
-  rDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
+  rDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   rDict->put(TOKEN, token_);
   // TODO want parameter
   if (!closestKNodes_.empty()) {
@@ -94,7 +94,8 @@ std::unique_ptr<Dict> DHTGetPeersReplyMessage::getResponse()
       auto cclen =
           static_cast<std::make_unsigned<decltype(clen)>::type>((clen));
       if (clen >= 0 && compactlen == cclen) {
-        last = std::copy_n((*i)->getID(), DHT_ID_LENGTH, last);
+        last = std::copy(std::begin((*i)->getID()), std::end((*i)->getID()),
+                         last);
         last = std::copy_n(std::begin(compact), compactlen, last);
         ++k;
       }
@@ -156,7 +157,7 @@ void DHTGetPeersReplyMessage::accept(DHTMessageCallback* callback)
 
 std::string DHTGetPeersReplyMessage::toStringOptional() const
 {
-  return fmt("token={}, values={}, nodes={}", util::toHex(token_).c_str(),
+  return fmt("token={}, values={}, nodes={}", util::toHex(token_),
              static_cast<unsigned long>(values_.size()),
              static_cast<unsigned long>(closestKNodes_.size()));
 }

@@ -68,7 +68,7 @@ private:
   BtRegistry* btRegistry_;
 
   // search node in routingTable. If it is not found, create new one.
-  std::shared_ptr<DHTNode> getRemoteNode(const unsigned char* id,
+  std::shared_ptr<DHTNode> getRemoteNode(const DHTID& id,
                                          const std::string& ipaddr,
                                          uint16_t port) const;
 
@@ -99,12 +99,12 @@ public:
 
   virtual std::unique_ptr<DHTPingReplyMessage>
   createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                         const unsigned char* id,
+                         const DHTID& id,
                          const std::string& transactionID) override;
 
   virtual std::unique_ptr<DHTFindNodeMessage> createFindNodeMessage(
       const std::shared_ptr<DHTNode>& remoteNode,
-      const unsigned char* targetNodeID,
+      const DHTID& targetNodeID,
       const std::string& transactionID = A2STR::NIL) override;
 
   std::unique_ptr<DHTFindNodeReplyMessage>
@@ -118,7 +118,7 @@ public:
       const std::string& transactionID) override;
 
   virtual std::unique_ptr<DHTGetPeersMessage> createGetPeersMessage(
-      const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+      const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
       const std::string& transactionID = A2STR::NIL) override;
 
   virtual std::unique_ptr<DHTGetPeersReplyMessage> createGetPeersReplyMessage(
@@ -133,7 +133,7 @@ public:
                              const std::string& transactionID);
 
   virtual std::unique_ptr<DHTAnnouncePeerMessage> createAnnouncePeerMessage(
-      const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+      const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
       uint16_t tcpPort, const std::string& token,
       const std::string& transactionID = A2STR::NIL) override;
 
@@ -143,7 +143,7 @@ public:
       override;
 
   virtual std::unique_ptr<DHTUnknownMessage>
-  createUnknownMessage(const unsigned char* data, size_t length,
+  createUnknownMessage(std::span<const unsigned char> data,
                        const std::string& ipaddr, uint16_t port) override;
 
   void setRoutingTable(DHTRoutingTable* routingTable);

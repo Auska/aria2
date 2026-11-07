@@ -34,8 +34,8 @@ void DHTPingReplyMessageTest::testGetBencodedMessage()
   util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
-  unsigned char id[DHT_ID_LENGTH];
-  util::generateRandomData(std::as_writable_bytes(std::span{id, DHT_ID_LENGTH}));
+  DHTID id;
+  util::generateRandomData(std::as_writable_bytes(std::span{id}));
 
   DHTPingReplyMessage msg(localNode, remoteNode, id, transactionID);
   msg.setVersion("A200");
@@ -46,7 +46,7 @@ void DHTPingReplyMessageTest::testGetBencodedMessage()
   dict.put("v", "A200");
   dict.put("y", "r");
   auto rDict = Dict::g();
-  rDict->put("id", String::g(id, DHT_ID_LENGTH));
+  rDict->put("id", String::g(id.data(), DHT_ID_LENGTH));
   dict.put("r", std::move(rDict));
 
   CPPUNIT_ASSERT_EQUAL(bencode2::encode(&dict), msgbody);

@@ -62,7 +62,7 @@ void DHTPingMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTPingMessage::getArgument()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   return aDict;
 }
 

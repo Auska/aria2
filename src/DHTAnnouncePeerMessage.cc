@@ -62,7 +62,7 @@ const std::string DHTAnnouncePeerMessage::TOKEN("token");
 
 DHTAnnouncePeerMessage::DHTAnnouncePeerMessage(
     const std::shared_ptr<DHTNode>& localNode,
-    const std::shared_ptr<DHTNode>& remoteNode, const unsigned char* infoHash,
+    const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
     uint16_t tcpPort, const std::string& token,
     const std::string& transactionID)
     : DHTQueryMessage{localNode, remoteNode, transactionID},
@@ -71,7 +71,7 @@ DHTAnnouncePeerMessage::DHTAnnouncePeerMessage(
       peerAnnounceStorage_{nullptr},
       tokenTracker_{nullptr}
 {
-  memcpy(infoHash_, infoHash, DHT_ID_LENGTH);
+  infoHash_ = infoHash;
 }
 
 void DHTAnnouncePeerMessage::doReceivedAction()
@@ -87,8 +87,8 @@ void DHTAnnouncePeerMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTAnnouncePeerMessage::getArgument()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID(), DHT_ID_LENGTH));
-  aDict->put(INFO_HASH, String::g(infoHash_, DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  aDict->put(INFO_HASH, String::g(infoHash_.data(), infoHash_.size()));
   aDict->put(PORT, Integer::g(tcpPort_));
   aDict->put(TOKEN, token_);
   return aDict;
@@ -105,8 +105,8 @@ void DHTAnnouncePeerMessage::validate() const
                                     getRemoteNode()->getIPAddress(),
                                     getRemoteNode()->getPort())) {
     throw DL_ABORT_EX(fmt(
-        "Invalid token={} from {}:{}", util::toHex(token_).c_str(),
-        getRemoteNode()->getIPAddress().c_str(), getRemoteNode()->getPort()));
+        "Invalid token={} from {}:{}", util::toHex(token_),
+        getRemoteNode()->getIPAddress(), getRemoteNode()->getPort()));
   }
 }
 
@@ -123,8 +123,8 @@ void DHTAnnouncePeerMessage::setTokenTracker(DHTTokenTracker* tokenTracker)
 
 std::string DHTAnnouncePeerMessage::toStringOptional() const
 {
-  return fmt("token={}, info_hash={}, tcpPort={}", util::toHex(token_).c_str(),
-             util::toHex(std::as_bytes(std::span{infoHash_, INFO_HASH_LENGTH})).c_str(), tcpPort_);
+  return fmt("token={}, info_hash={}, tcpPort={}", util::toHex(token_),
+             util::toHex(std::as_bytes(std::span{infoHash_})), tcpPort_);
 }
 
 } // namespace aria2

@@ -44,7 +44,7 @@ class DHTFindNodeReplyMessage;
 class DHTNodeLookupTask
     : public DHTAbstractNodeLookupTask<DHTFindNodeReplyMessage> {
 public:
-  DHTNodeLookupTask(const unsigned char* targetNodeID);
+  explicit DHTNodeLookupTask(const DHTID& targetNodeID);
 
   virtual void
   getNodesFromMessage(std::vector<std::shared_ptr<DHTNode>>& nodes,

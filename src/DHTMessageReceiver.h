@@ -37,8 +37,9 @@
 
 #include "common.h"
 
-#include <string>
 #include <memory>
+#include <span>
+#include <string>
 
 namespace aria2 {
 
@@ -57,7 +58,7 @@ private:
   DHTRoutingTable* routingTable_;
 
   std::unique_ptr<DHTUnknownMessage>
-  handleUnknownMessage(const unsigned char* data, size_t length,
+  handleUnknownMessage(std::span<const unsigned char> data,
                        const std::string& remoteAddr, uint16_t remotePort);
 
   void onMessageReceived(DHTMessage* message);
@@ -65,10 +66,9 @@ private:
 public:
   DHTMessageReceiver(const std::shared_ptr<DHTMessageTracker>& tracker);
 
-  std::unique_ptr<DHTMessage> receiveMessage(const std::string& remoteAddr,
-                                             uint16_t remotePort,
-                                             unsigned char* data,
-                                             size_t length);
+  std::unique_ptr<DHTMessage>
+  receiveMessage(const std::string& remoteAddr, uint16_t remotePort,
+                 std::span<const unsigned char> data);
 
   void handleTimeout();
 

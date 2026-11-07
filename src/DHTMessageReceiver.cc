@@ -63,12 +63,12 @@ DHTMessageReceiver::DHTMessageReceiver(
 
 std::unique_ptr<DHTMessage>
 DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
-                                   uint16_t remotePort, unsigned char* data,
-                                   size_t length)
+                                   uint16_t remotePort,
+                                   std::span<const unsigned char> data)
 {
   try {
     bool isReply = false;
-    auto decoded = bencode2::decode(std::as_bytes(std::span{data, length}));
+    auto decoded = bencode2::decode(std::as_bytes(data));
     const Dict* dict = downcast<Dict>(decoded);
     if (dict) {
       const String* y = downcast<String>(dict->get(DHTMessage::Y));
@@ -79,21 +79,21 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
       }
       else {
         A2_LOG_INFO(fmt("Malformed DHT message. Missing 'y' key. From:{}:{}",
-                        remoteAddr.c_str(), remotePort));
-        return handleUnknownMessage(data, length, remoteAddr, remotePort);
+                        remoteAddr, remotePort));
+        return handleUnknownMessage(data, remoteAddr, remotePort);
       }
     }
     else {
       A2_LOG_INFO(fmt("Malformed DHT message. This is not a bencoded directory."
                       " From:{}:{}",
-                      remoteAddr.c_str(), remotePort));
-      return handleUnknownMessage(data, length, remoteAddr, remotePort);
+                      remoteAddr, remotePort));
+      return handleUnknownMessage(data, remoteAddr, remotePort);
     }
     if (isReply) {
       auto p = tracker_->messageArrived(dict, remoteAddr, remotePort);
       if (!p.first) {
         // timeout or malicious? message
-        return handleUnknownMessage(data, length, remoteAddr, remotePort);
+        return handleUnknownMessage(data, remoteAddr, remotePort);
       }
       onMessageReceived(p.first.get());
       if (p.second) {
@@ -106,7 +106,7 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
       if (*message->getLocalNode() == *message->getRemoteNode()) {
         // drop message from localnode
         A2_LOG_INFO("Received DHT message from localnode.");
-        return handleUnknownMessage(data, length, remoteAddr, remotePort);
+        return handleUnknownMessage(data, remoteAddr, remotePort);
       }
       onMessageReceived(message.get());
       return std::move(message);
@@ -114,13 +114,13 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
   }
   catch (RecoverableException& e) {
     A2_LOG_INFO_EX("Exception thrown while receiving DHT message.", e);
-    return handleUnknownMessage(data, length, remoteAddr, remotePort);
+    return handleUnknownMessage(data, remoteAddr, remotePort);
   }
 }
 
 void DHTMessageReceiver::onMessageReceived(DHTMessage* message)
 {
-  A2_LOG_INFO(fmt("Message received: {}", message->toString().c_str()));
+  A2_LOG_INFO(fmt("Message received: {}", message->toString()));
   message->validate();
   message->doReceivedAction();
   message->getRemoteNode()->markGood();
@@ -131,11 +131,11 @@ void DHTMessageReceiver::onMessageReceived(DHTMessage* message)
 void DHTMessageReceiver::handleTimeout() { tracker_->handleTimeout(); }
 
 std::unique_ptr<DHTUnknownMessage> DHTMessageReceiver::handleUnknownMessage(
-    const unsigned char* data, size_t length, const std::string& remoteAddr,
+    std::span<const unsigned char> data, const std::string& remoteAddr,
     uint16_t remotePort)
 {
-  auto m = factory_->createUnknownMessage(data, length, remoteAddr, remotePort);
-  A2_LOG_INFO(fmt("Message received: {}", m->toString().c_str()));
+  auto m = factory_->createUnknownMessage(data, remoteAddr, remotePort);
+  A2_LOG_INFO(fmt("Message received: {}", m->toString()));
   return m;
 }
 

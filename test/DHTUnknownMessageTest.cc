@@ -30,9 +30,11 @@ void DHTUnknownMessageTest::testToString()
   {
     // data.size() > 8
     std::string data = "chocolate";
-    DHTUnknownMessage msg(localNode,
-                          reinterpret_cast<const unsigned char*>(data.c_str()),
-                          data.size(), ipaddr, port);
+    DHTUnknownMessage msg(
+        localNode,
+        std::span{reinterpret_cast<const unsigned char*>(data.data()),
+                  data.size()},
+        ipaddr, port);
 
     CPPUNIT_ASSERT_EQUAL(
         std::string("dht unknown Remote:192.168.0.1(6881) length=9, first 8 "
@@ -42,9 +44,11 @@ void DHTUnknownMessageTest::testToString()
   {
     // data.size() == 3
     std::string data = "foo";
-    DHTUnknownMessage msg(localNode,
-                          reinterpret_cast<const unsigned char*>(data.c_str()),
-                          data.size(), ipaddr, port);
+    DHTUnknownMessage msg(
+        localNode,
+        std::span{reinterpret_cast<const unsigned char*>(data.data()),
+                  data.size()},
+        ipaddr, port);
 
     CPPUNIT_ASSERT_EQUAL(std::string("dht unknown Remote:192.168.0.1(6881) "
                                      "length=3, first 8 bytes(hex)=666f6f"),

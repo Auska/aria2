@@ -73,7 +73,7 @@ bool DHTRoutingTable::addGoodNode(const std::shared_ptr<DHTNode>& node)
 
 bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
 {
-  A2_LOG_DEBUG(fmt("Trying to add node:{}", node->toString().c_str()));
+  A2_LOG_DEBUG(fmt("Trying to add node:{}", node->toString()));
   if (*localNode_ == *node) {
     A2_LOG_DEBUG("Adding node with the same ID with localnode is not allowed.");
     return false;
@@ -87,8 +87,8 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
     }
     else if (bucket->splitAllowed()) {
       A2_LOG_DEBUG(fmt("Splitting bucket. Range:{}-{}",
-                       util::toHex(std::as_bytes(std::span{bucket->getMinID(), DHT_ID_LENGTH})).c_str(),
-                       util::toHex(std::as_bytes(std::span{bucket->getMaxID(), DHT_ID_LENGTH})).c_str()));
+                       util::toHex(std::as_bytes(std::span{bucket->getMinID()})),
+                       util::toHex(std::as_bytes(std::span{bucket->getMaxID()}))));
       treeNode->split();
       ++numBucket_;
       if (treeNode->getLeft()->isInRange(node->getID())) {
@@ -101,7 +101,7 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
     else {
       if (good) {
         bucket->cacheNode(node);
-        A2_LOG_DEBUG(fmt("Cached node={}", node->toString().c_str()));
+        A2_LOG_DEBUG(fmt("Cached node={}", node->toString()));
       }
       return false;
     }
@@ -110,8 +110,7 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
 }
 
 void DHTRoutingTable::getClosestKNodes(
-    std::vector<std::shared_ptr<DHTNode>>& nodes,
-    const unsigned char* key) const
+    std::vector<std::shared_ptr<DHTNode>>& nodes, const DHTID& key) const
 {
   dht::findClosestKNodes(nodes, root_.get(), key);
 }
@@ -130,7 +129,7 @@ void DHTRoutingTable::showBuckets() const
 }
 
 std::shared_ptr<DHTBucket>
-DHTRoutingTable::getBucketFor(const unsigned char* nodeID) const
+DHTRoutingTable::getBucketFor(const DHTID& nodeID) const
 {
   return dht::findBucketFor(root_.get(), nodeID);
 }
@@ -141,7 +140,7 @@ DHTRoutingTable::getBucketFor(const std::shared_ptr<DHTNode>& node) const
   return getBucketFor(node->getID());
 }
 
-std::shared_ptr<DHTNode> DHTRoutingTable::getNode(const unsigned char* nodeID,
+std::shared_ptr<DHTNode> DHTRoutingTable::getNode(const DHTID& nodeID,
                                                   const std::string& ipaddr,
                                                   uint16_t port) const
 {

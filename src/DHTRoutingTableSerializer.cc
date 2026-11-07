@@ -75,18 +75,18 @@ void DHTRoutingTableSerializer::setNodes(
   if (fp.write(std::span{reinterpret_cast<const std::byte*>(ptr),              \
                          static_cast<size_t>(count)}) != (count)) {            \
     throw DL_ABORT_EX(                                                         \
-        fmt("Failed to save DHT routing table to {}.", filename.c_str()));     \
+        fmt("Failed to save DHT routing table to {}.", filename));     \
   }
 
 void DHTRoutingTableSerializer::serialize(const std::string& filename)
 {
-  A2_LOG_INFO(fmt("Saving DHT routing table to {}.", filename.c_str()));
+  A2_LOG_INFO(fmt("Saving DHT routing table to {}.", filename));
   std::string filenameTemp = filename;
   filenameTemp += "__temp";
   BufferedFile fp(filenameTemp.c_str(), BufferedFile::WRITE);
   if (!fp) {
     throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename.c_str()));
+        fmt("Failed to save DHT routing table to {}.", filename));
   }
   char header[8];
   memset(header, 0, sizeof(header));
@@ -111,7 +111,7 @@ void DHTRoutingTableSerializer::serialize(const std::string& filename)
   // 8bytes reserved
   WRITE_CHECK(fp, zero, 8);
   // 20bytes localnode ID
-  WRITE_CHECK(fp, localNode_->getID(), DHT_ID_LENGTH);
+  WRITE_CHECK(fp, localNode_->getID().data(), DHT_ID_LENGTH);
   // 4bytes reserved
   WRITE_CHECK(fp, zero, 4);
 
@@ -144,17 +144,17 @@ void DHTRoutingTableSerializer::serialize(const std::string& filename)
     // 24-clen bytes reserved
     WRITE_CHECK(fp, zero, static_cast<size_t>(24 - clen));
     // 20bytes: node ID
-    WRITE_CHECK(fp, node->getID(), DHT_ID_LENGTH);
+    WRITE_CHECK(fp, node->getID().data(), DHT_ID_LENGTH);
     // 4bytes reserved
     WRITE_CHECK(fp, zero, 4);
   }
   if (fp.close() == EOF) {
     throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename.c_str()));
+        fmt("Failed to save DHT routing table to {}.", filename));
   }
   if (!File(filenameTemp).renameTo(filename)) {
     throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename.c_str()));
+        fmt("Failed to save DHT routing table to {}.", filename));
   }
   A2_LOG_INFO("DHT routing table was saved successfully");
 }

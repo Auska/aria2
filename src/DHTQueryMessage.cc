@@ -65,12 +65,12 @@ bool DHTQueryMessage::isReply() const { return false; }
 std::string DHTQueryMessage::toString() const
 {
   return fmt("dht query {} TransactionID={} Remote:{}({}), id={}, v={}, {}",
-             getMessageType().c_str(), util::toHex(getTransactionID()).c_str(),
-             getRemoteNode()->getIPAddress().c_str(),
+             getMessageType(), util::toHex(getTransactionID()),
+             getRemoteNode()->getIPAddress(),
              getRemoteNode()->getPort(),
-             util::toHex(std::as_bytes(std::span{getRemoteNode()->getID(), DHT_ID_LENGTH})).c_str(),
-             util::torrentPercentEncode(getVersion()).c_str(),
-             toStringOptional().c_str());
+             util::toHex(std::as_bytes(std::span{getRemoteNode()->getID()})),
+             util::torrentPercentEncode(getVersion()),
+             toStringOptional());
 }
 
 } // namespace aria2

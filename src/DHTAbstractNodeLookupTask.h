@@ -65,7 +65,7 @@ class DHTMessage;
 template <class ResponseMessage>
 class DHTAbstractNodeLookupTask : public DHTAbstractTask {
 private:
-  unsigned char targetID_[DHT_ID_LENGTH];
+  DHTID targetID_;
 
   std::deque<std::unique_ptr<DHTNodeLookupEntry>> entries_;
 
@@ -100,7 +100,7 @@ private:
     }
     if (inFlightMessage_ == 0) {
       A2_LOG_DEBUG(fmt("Finished node_lookup for node ID {}",
-                       util::toHex(std::as_bytes(std::span{targetID_, DHT_ID_LENGTH})).c_str()));
+                       util::toHex(std::as_bytes(std::span{targetID_})).c_str()));
       onFinish();
       updateBucket();
       setFinished(true);
@@ -108,14 +108,14 @@ private:
     else {
       A2_LOG_DEBUG(fmt("{} in flight message for node ID {}",
                        static_cast<unsigned long>(inFlightMessage_),
-                       util::toHex(std::as_bytes(std::span{targetID_, DHT_ID_LENGTH})).c_str()));
+                       util::toHex(std::as_bytes(std::span{targetID_})).c_str()));
     }
   }
 
   void updateBucket() {}
 
 protected:
-  const unsigned char* getTargetID() const { return targetID_; }
+  const DHTID& getTargetID() const { return targetID_; }
 
   const std::deque<std::unique_ptr<DHTNodeLookupEntry>>& getEntries() const
   {
@@ -137,9 +137,9 @@ protected:
   virtual std::unique_ptr<DHTMessageCallback> createCallback() = 0;
 
 public:
-  DHTAbstractNodeLookupTask(const unsigned char* targetID) : inFlightMessage_(0)
+  explicit DHTAbstractNodeLookupTask(const DHTID& targetID)
+      : targetID_(targetID), inFlightMessage_(0)
   {
-    memcpy(targetID_, targetID, DHT_ID_LENGTH);
   }
 
   static const size_t ALPHA = 3;
@@ -183,10 +183,9 @@ public:
 
     size_t count = 0;
     for (auto& ne : newEntries) {
-      if (memcmp(getLocalNode()->getID(), ne->node->getID(), DHT_ID_LENGTH) !=
-          0) {
+      if (getLocalNode()->getID() != ne->node->getID()) {
         A2_LOG_DEBUG(fmt("Received nodes: id={}, ip={}",
-                         util::toHex(std::as_bytes(std::span{ne->node->getID(), DHT_ID_LENGTH})).c_str(),
+                         util::toHex(std::as_bytes(std::span{ne->node->getID()})).c_str(),
                          ne->node->getIPAddress().c_str()));
         entries_.push_front(std::move(ne));
         ++count;
@@ -211,7 +210,7 @@ public:
   void onTimeout(const std::shared_ptr<DHTNode>& node)
   {
     A2_LOG_DEBUG(fmt("node lookup message timeout for node ID={}",
-                     util::toHex(std::as_bytes(std::span{node->getID(), DHT_ID_LENGTH})).c_str()));
+                     util::toHex(std::as_bytes(std::span{node->getID()})).c_str()));
     --inFlightMessage_;
     for (auto i = std::begin(entries_), eoi = std::end(entries_); i != eoi;
          ++i) {

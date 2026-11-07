@@ -50,14 +50,14 @@ class Peer;
 
 class DHTPeerAnnounceEntry {
 private:
-  unsigned char infoHash_[DHT_ID_LENGTH];
+  DHTID infoHash_;
 
   std::vector<PeerAddrEntry> peerAddrEntries_;
 
   Timer lastUpdated_;
 
 public:
-  DHTPeerAnnounceEntry(const unsigned char* infoHash);
+  explicit DHTPeerAnnounceEntry(const DHTID& infoHash);
 
   ~DHTPeerAnnounceEntry();
 
@@ -80,7 +80,7 @@ public:
 
   void notifyUpdate();
 
-  const unsigned char* getInfoHash() const { return infoHash_; }
+  const DHTID& getInfoHash() const { return infoHash_; }
 
   void getPeers(std::vector<std::shared_ptr<Peer>>& peers) const;
 };

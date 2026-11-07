@@ -35,6 +35,7 @@
 #include "MSEHandshake.h"
 
 #include <span>
+#include <string_view>
 
 #include <array>
 #include <cstring>
@@ -71,11 +72,11 @@ constexpr unsigned char CRYPTO_ARC4 = 0x02u;
 const size_t CRYPTO_BITFIELD_LENGTH = 4;
 constexpr auto VC = std::array<unsigned char, MSEHandshake::VC_LENGTH>{};
 
-const unsigned char* PRIME = reinterpret_cast<const unsigned char*>(
+constexpr std::string_view PRIME =
     "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B"
     "139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485"
-    "B576625E7EC6F44C42E9A63A36210000000000090563");
-const unsigned char* GENERATOR = reinterpret_cast<const unsigned char*>("2");
+    "B576625E7EC6F44C42E9A63A36210000000000090563";
+constexpr std::string_view GENERATOR = "2";
 
 } // namespace
 
@@ -129,11 +130,11 @@ void MSEHandshake::sendPublicKey()
 {
   A2_LOG_DEBUG(fmt("CUID#{} - Sending public key.", cuid_));
   auto buf = std::vector<unsigned char>(KEY_LENGTH + MAX_PAD_LENGTH);
-  dh_->getPublicKey(buf.data(), KEY_LENGTH);
+  dh_->getPublicKey(std::span{buf.data(), KEY_LENGTH});
 
   size_t padLength =
       SimpleRandomizer::getInstance()->getRandomNumber(MAX_PAD_LENGTH + 1);
-  dh_->generateNonce(buf.data() + KEY_LENGTH, padLength);
+  dh_->generateNonce(std::span{buf.data() + KEY_LENGTH, padLength});
   buf.resize(KEY_LENGTH + padLength);
 
   socketBuffer_.pushBytes(std::move(buf));
@@ -176,7 +177,7 @@ bool MSEHandshake::receivePublicKey()
   }
   A2_LOG_DEBUG(fmt("CUID#{} - public key received.", cuid_));
   // TODO handle exception. in catch, resbufLength = 0;
-  dh_->computeSecret(secret_, sizeof(secret_), rbuf_, KEY_LENGTH);
+  dh_->computeSecret(std::span{secret_}, std::span{rbuf_, KEY_LENGTH});
   // shift buffer
   shiftBuffer(KEY_LENGTH);
   return true;

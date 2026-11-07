@@ -30,8 +30,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTIDCloserTest);
 
 void DHTIDCloserTest::testOperator()
 {
-  unsigned char id[DHT_ID_LENGTH];
-  memset(id, 0xf0, DHT_ID_LENGTH);
+  DHTID id;
+  id.fill(0xf0);
 
   auto e1 = make_unique<DHTNodeLookupEntry>(std::make_shared<DHTNode>(id));
   auto ep1 = e1.get();

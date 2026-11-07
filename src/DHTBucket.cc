@@ -51,35 +51,34 @@
 
 namespace aria2 {
 
-DHTBucket::DHTBucket(size_t prefixLength, const unsigned char* max,
-                     const unsigned char* min,
+DHTBucket::DHTBucket(size_t prefixLength, const DHTID& max, const DHTID& min,
                      const std::shared_ptr<DHTNode>& localNode)
     : prefixLength_(prefixLength),
+      min_(min),
+      max_(max),
       localNode_(localNode),
       lastUpdated_(global::wallclock())
 {
-  memcpy(max_, max, DHT_ID_LENGTH);
-  memcpy(min_, min, DHT_ID_LENGTH);
 }
 
 DHTBucket::DHTBucket(const std::shared_ptr<DHTNode>& localNode)
     : prefixLength_(0), localNode_(localNode), lastUpdated_(global::wallclock())
 {
-  memset(max_, 0xffu, DHT_ID_LENGTH);
-  memset(min_, 0, DHT_ID_LENGTH);
+  max_.fill(0xffu);
+  min_.fill(0);
 }
 
 DHTBucket::~DHTBucket() = default;
 
-void DHTBucket::getRandomNodeID(unsigned char* nodeID) const
+void DHTBucket::getRandomNodeID(DHTID& nodeID) const
 {
   if (prefixLength_ == 0) {
-    util::generateRandomKey(nodeID);
+    util::generateRandomKey(nodeID.data());
   }
   else {
     size_t lastByteIndex = (prefixLength_ - 1) / 8;
-    util::generateRandomKey(nodeID);
-    memcpy(nodeID, min_, lastByteIndex + 1);
+    util::generateRandomKey(nodeID.data());
+    std::copy_n(std::begin(min_), lastByteIndex + 1, std::begin(nodeID));
   }
 }
 
@@ -88,19 +87,19 @@ bool DHTBucket::isInRange(const std::shared_ptr<DHTNode>& node) const
   return isInRange(node->getID(), max_, min_);
 }
 
-bool DHTBucket::isInRange(const unsigned char* nodeID) const
+bool DHTBucket::isInRange(const DHTID& nodeID) const
 {
   return isInRange(nodeID, max_, min_);
 }
 
 // Returns true if nodeID is in [min, max] (inclusive).
-bool DHTBucket::isInRange(const unsigned char* nodeID, const unsigned char* max,
-                          const unsigned char* min) const
+bool DHTBucket::isInRange(const DHTID& nodeID, const DHTID& max,
+                          const DHTID& min) const
 {
-  return !std::lexicographical_compare(&nodeID[0], &nodeID[DHT_ID_LENGTH],
-                                       &min[0], &min[DHT_ID_LENGTH]) &&
-         !std::lexicographical_compare(&max[0], &max[DHT_ID_LENGTH], &nodeID[0],
-                                       &nodeID[DHT_ID_LENGTH]);
+  return !std::lexicographical_compare(std::begin(nodeID), std::end(nodeID),
+                                       std::begin(min), std::end(min)) &&
+         !std::lexicographical_compare(std::begin(max), std::end(max),
+                                       std::begin(nodeID), std::end(nodeID));
 }
 
 bool DHTBucket::addNode(const std::shared_ptr<DHTNode>& node)
@@ -178,13 +177,11 @@ std::unique_ptr<DHTBucket> DHTBucket::split()
 {
   assert(splitAllowed());
 
-  unsigned char rMax[DHT_ID_LENGTH];
-  memcpy(rMax, max_, DHT_ID_LENGTH);
-  bitfield::flipBit(rMax, DHT_ID_LENGTH, prefixLength_);
-  unsigned char rMin[DHT_ID_LENGTH];
-  memcpy(rMin, min_, DHT_ID_LENGTH);
+  DHTID rMax = max_;
+  bitfield::flipBit(rMax.data(), rMax.size(), prefixLength_);
+  DHTID rMin = min_;
 
-  bitfield::flipBit(min_, DHT_ID_LENGTH, prefixLength_);
+  bitfield::flipBit(min_.data(), min_.size(), prefixLength_);
 
   ++prefixLength_;
   auto rBucket = make_unique<DHTBucket>(prefixLength_, rMax, rMin, localNode_);
@@ -202,12 +199,14 @@ std::unique_ptr<DHTBucket> DHTBucket::split()
   // TODO create toString() and use it.
   A2_LOG_DEBUG(fmt("New bucket. prefixLength={}, Range:{}-{}",
                    static_cast<unsigned int>(rBucket->getPrefixLength()),
-                   util::toHex(std::as_bytes(std::span{rBucket->getMinID(), DHT_ID_LENGTH})).c_str(),
-                   util::toHex(std::as_bytes(std::span{rBucket->getMaxID(), DHT_ID_LENGTH})).c_str()));
+                   util::toHex(std::as_bytes(std::span{rBucket->getMinID()}))
+                       ,
+                   util::toHex(std::as_bytes(std::span{rBucket->getMaxID()}))
+                       ));
   A2_LOG_DEBUG(fmt("Existing bucket. prefixLength={}, Range:{}-{}",
                    static_cast<unsigned int>(prefixLength_),
-                   util::toHex(std::as_bytes(std::span{getMinID(), DHT_ID_LENGTH})).c_str(),
-                   util::toHex(std::as_bytes(std::span{getMaxID(), DHT_ID_LENGTH})).c_str()));
+                   util::toHex(std::as_bytes(std::span{getMinID()})),
+                   util::toHex(std::as_bytes(std::span{getMaxID()}))));
   return rBucket;
 }
 
@@ -218,7 +217,7 @@ void DHTBucket::getGoodNodes(
   std::erase_if(goodNodes, std::mem_fn(&DHTNode::isBad));
 }
 
-std::shared_ptr<DHTNode> DHTBucket::getNode(const unsigned char* nodeID,
+std::shared_ptr<DHTNode> DHTBucket::getNode(const DHTID& nodeID,
                                             const std::string& ipaddr,
                                             uint16_t port) const
 {
@@ -237,8 +236,7 @@ std::shared_ptr<DHTNode> DHTBucket::getNode(const unsigned char* nodeID,
 
 bool DHTBucket::operator==(const DHTBucket& bucket) const
 {
-  return memcmp(max_, bucket.max_, DHT_ID_LENGTH) == 0 &&
-         memcmp(min_, bucket.min_, DHT_ID_LENGTH) == 0;
+  return max_ == bucket.max_ && min_ == bucket.min_;
 }
 
 bool DHTBucket::needsRefresh() const
