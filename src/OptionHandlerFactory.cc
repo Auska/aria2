@@ -1223,15 +1223,6 @@ std::vector<OptionHandler*> OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(op);
   }
   {
-    OptionHandler* op(new ChecksumOptionHandler(
-        PREF_SSH_HOST_KEY_MD, TEXT_SSH_HOST_KEY_MD, {"sha-1", "md5"}));
-    op->addTag(TAG_FTP);
-    op->setInitialOption(true);
-    op->setChangeGlobalOption(true);
-    op->setChangeOptionForReserved(true);
-    handlers.push_back(op);
-  }
-  {
     OptionHandler* op(new LocalFilePathOptionHandler(
         PREF_NETRC_PATH, TEXT_NETRC_PATH, util::getHomeDir() + "/.netrc",
         /* acceptStdin = */ false, 0, /* mustExist = */ false));

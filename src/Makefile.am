@@ -312,41 +312,13 @@ SRCS += \
 	crypto_hash.cc crypto_hash.h
 endif # USE_INTERNAL_MD
 
-if HAVE_LIBGNUTLS
-SRCS += \
-	LibgnutlsTLSContext.cc LibgnutlsTLSContext.h \
-        LibgnutlsTLSSession.cc LibgnutlsTLSSession.h
-endif # HAVE_LIBGNUTLS
-
-if HAVE_LIBGCRYPT
-SRCS += \
-	LibgcryptARC4Encryptor.cc LibgcryptARC4Encryptor.h \
-        LibgcryptDHKeyExchange.cc LibgcryptDHKeyExchange.h
-if USE_LIBGCRYPT_MD
-SRCS += LibgcryptMessageDigestImpl.cc
-endif # USE_LIBGCRYPT_MD
-endif # HAVE_LIBGCRYPT
-
-if HAVE_LIBNETTLE
-SRCS += LibnettleARC4Encryptor.cc LibnettleARC4Encryptor.h
-if USE_LIBNETTLE_MD
-SRCS += LibnettleMessageDigestImpl.cc
-endif # USE_LIBNETTLE_MD
-endif # HAVE_LIBNETTLE
-
-if HAVE_LIBGMP
-SRCS += \
-	a2gmp.cc a2gmp.h \
-        LibgmpDHKeyExchange.cc LibgmpDHKeyExchange.h
-endif # HAVE_LIBGMP
-
 if HAVE_OPENSSL
 SRCS += \
 	LibsslARC4Encryptor.cc LibsslARC4Encryptor.h \
-        LibsslDHKeyExchange.cc LibsslDHKeyExchange.h
+	LibsslDHKeyExchange.cc LibsslDHKeyExchange.h
 SRCS += \
 	LibsslTLSContext.cc LibsslTLSContext.h \
-        LibsslTLSSession.cc LibsslTLSSession.h
+	LibsslTLSSession.cc LibsslTLSSession.h
 if USE_OPENSSL_MD
 SRCS += LibsslMessageDigestImpl.cc
 endif
@@ -365,14 +337,6 @@ SRCS += \
 	Sqlite3CookieParser.cc Sqlite3CookieParser.h\
 	Sqlite3CookieParserImpl.cc Sqlite3CookieParserImpl.h
 endif # HAVE_SQLITE3
-
-if HAVE_LIBSSH2
-SRCS += SSHSession.cc SSHSession.h \
-	SftpNegotiationCommand.cc SftpNegotiationCommand.h \
-	SftpNegotiationConnectChain.h \
-	SftpDownloadCommand.cc SftpDownloadCommand.h \
-	SftpFinishDownloadCommand.cc SftpFinishDownloadCommand.h
-endif # HAVE_LIBSSH2
 
 if ENABLE_ASYNC_DNS
 SRCS += \
@@ -618,12 +582,7 @@ AM_CPPFLAGS = \
 	@ZLIB_CFLAGS@ \
 	@LIBUV_CFLAGS@ \
 	@SQLITE3_CFLAGS@ \
-	@LIBGNUTLS_CFLAGS@ \
 	@OPENSSL_CFLAGS@ \
-	@LIBNETTLE_CFLAGS@ \
-	@LIBGMP_CFLAGS@ \
-	@LIBGCRYPT_CFLAGS@ \
-	@LIBSSH2_CFLAGS@ \
 	@LIBCARES_CFLAGS@ \
 	@WSLAY_CFLAGS@ \
 	@TCMALLOC_CFLAGS@ \
@@ -637,12 +596,7 @@ EXTLDADD = @ALLOCA@ \
 	@ZLIB_LIBS@ \
 	@LIBUV_LIBS@ \
 	@SQLITE3_LIBS@ \
-	@LIBGNUTLS_LIBS@ \
 	@OPENSSL_LIBS@ \
-	@LIBNETTLE_LIBS@ \
-	@LIBGMP_LIBS@ \
-	@LIBGCRYPT_LIBS@ \
-	@LIBSSH2_LIBS@ \
 	@LIBCARES_LIBS@ \
 	@WSLAY_LIBS@ \
 	@TCMALLOC_LIBS@ \

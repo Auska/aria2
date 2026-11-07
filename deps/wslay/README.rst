@@ -42,12 +42,6 @@ needed:
 
 * cunit >= 2.1
 
-To build and run the example programs, the following packages are
-needed:
-
-* nettle >= 2.4
-
-
 Build from git
 --------------
 

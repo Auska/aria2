@@ -41,10 +41,6 @@
 #include <cstring>
 #include <iostream>
 
-#ifdef HAVE_LIBGNUTLS
-#  include <gnutls/crypto.h>
-#endif // HAVE_LIBGNUTLS
-
 #ifdef HAVE_OPENSSL
 #  include <openssl/rand.h>
 #endif // HAVE_OPENSSL
@@ -82,13 +78,7 @@ long int SimpleRandomizer::getRandomNumber(long int to)
 
 void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
 {
-#if defined(HAVE_LIBGNUTLS)
-  auto rv = gnutls_rnd(GNUTLS_RND_RANDOM, buf, len);
-  if (rv != 0) {
-    assert(0 == rv);
-    abort();
-  }
-#elif defined(HAVE_OPENSSL)
+#ifdef HAVE_OPENSSL
   auto rv = RAND_bytes(buf, len);
   if (rv != 1) {
     assert(1 == rv);
@@ -121,7 +111,7 @@ void SimpleRandomizer::getRandomBytes(unsigned char* buf, size_t len)
     assert(0);
     abort();
   }
-#endif // !HAVE_OPENSSL && !HAVE_LIBGNUTLS
+#endif // !HAVE_OPENSSL
 }
 
 } // namespace aria2

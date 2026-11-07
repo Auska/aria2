@@ -37,17 +37,12 @@ AC_DEFINE_UNQUOTED([TARGET], ["$target"], [Define target-type])
 
 # Checks for arguments.
 ARIA2_ARG_WITH([libuv])
-ARIA2_ARG_WITHOUT([gnutls])
-ARIA2_ARG_WITHOUT([libnettle])
-ARIA2_ARG_WITHOUT([libgmp])
-ARIA2_ARG_WITHOUT([libgcrypt])
 ARIA2_ARG_WITHOUT([openssl])
 ARIA2_ARG_WITHOUT([sqlite3])
 ARIA2_ARG_WITHOUT([libcares])
 ARIA2_ARG_WITHOUT([libz])
 ARIA2_ARG_WITH([tcmalloc])
 ARIA2_ARG_WITH([jemalloc])
-ARIA2_ARG_WITHOUT([libssh2])
 
 ARIA2_ARG_DISABLE([ssl])
 ARIA2_ARG_DISABLE([bittorrent])
@@ -73,13 +68,6 @@ AC_ARG_WITH([bashcompletiondir],
   [bashcompletiondir=$withval], [bashcompletiondir=$docdir/bash_completion])
 
 AC_ARG_VAR([ARIA2_STATIC], [Set 'yes' to build a statically linked aria2])
-
-AC_ARG_ENABLE([gnutls-system-crypto-policy],
-    AS_HELP_STRING([--enable-gnutls-system-crypto-policy], [Enable gnutls system wide crypto policy]))
-
-AS_IF([test "x$enable_gnutls_system_crypto_policy" = "xyes"], [
-  AC_DEFINE([USE_GNUTLS_SYSTEM_CRYPTO_POLICY], [1], [Define to 1 if using gnutls system wide crypto policy .])
-])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -236,129 +224,24 @@ if test "x$with_sqlite3" = "xyes"; then
   fi
 fi
 
-if test "x$enable_ssl" != "xyes"; then
-  with_libnettle=no
-  with_libgcrypt=no
-  with_gnutls=no
-  with_openssl=no
-fi
-
-have_libgnutls=no
-if test "x$with_gnutls" = "xyes" && test "x$have_ssl" != "xyes"; then
-  # gnutls >= 2.8 doesn't have libgnutls-config anymore. We require
-  # 2.2.0 because we use gnutls_priority_set_direct()
-  PKG_CHECK_MODULES([LIBGNUTLS], [gnutls >= 2.2.0],
-                    [have_libgnutls=yes], [have_libgnutls=no])
-  if test "x$have_libgnutls" = "xyes"; then
-    have_ssl=yes
-    AC_DEFINE([HAVE_LIBGNUTLS], [1], [Define to 1 if you have libgnutls.])
-    save_LIBS=$LIBS
-    LIBS="$LIBGNUTLS_LIBS $LIBS"
-    AC_CHECK_FUNCS([gnutls_certificate_set_x509_system_trust])
-    LIBS=$save_LIBS
-  else
-    AC_MSG_WARN([$LIBGNUTLS_PKG_ERRORS])
-    if test "x$with_gnutls_requested" = "xyes"; then
-      ARIA2_DEP_NOT_MET([gnutls])
-    fi
-  fi
-fi
-
+# OpenSSL is the only optional TLS/crypto backend. Without it the
+# internal implementations are used and HTTPS is disabled.
 have_openssl=no
-if test "x$with_openssl" = "xyes" && test "x$have_ssl" != "xyes"; then
+have_ssl=no
+if test "x$enable_ssl" = "xyes" && test "x$with_openssl" = "xyes"; then
   PKG_CHECK_MODULES([OPENSSL], [openssl >= 0.9.8],
                     [have_openssl=yes], [have_openssl=no])
   if test "x$have_openssl" = "xyes"; then
     have_ssl=yes
     AC_DEFINE([HAVE_OPENSSL], [1], [Define to 1 if you have openssl.])
-
     save_LIBS=$LIBS
     LIBS="$OPENSSL_LIBS $LIBS"
-    AC_CHECK_FUNCS([EVP_DigestInit_ex], [have_digestinit_ex=yes])
-    if test "x$have_digestinit_ex" = "x"; then
-      AC_DEFINE([HAVE_OLD_OPENSSL], [1], [Define to 1 if you have old openssl.])
-    fi
     AC_CHECK_FUNCS([EVP_sha224])
-    AC_CHECK_FUNCS([EVP_sha256])
-    AC_CHECK_FUNCS([EVP_sha384])
-    AC_CHECK_FUNCS([EVP_sha512])
     LIBS=$save_LIBS
   else
     AC_MSG_WARN([$OPENSSL_PKG_ERRORS])
     if test "x$with_openssl_requested" = "xyes"; then
       ARIA2_DEP_NOT_MET([openssl])
-    fi
-  fi
-fi
-
-have_libnettle=no
-have_libgmp=no
-have_libgcrypt=no
-if test "x$have_openssl" != "xyes"; then
-  if test "x$with_libnettle" = "xyes" &&
-     test "x$have_nativetls" != "xyes"; then
-    PKG_CHECK_MODULES([LIBNETTLE], [nettle],
-                      [have_libnettle=yes], [have_libnettle=no])
-    if test "x$have_libnettle" = "xyes"; then
-      AC_DEFINE([HAVE_LIBNETTLE], [1], [Define to 1 if you have libnettle.])
-    elif test "x$with_libnettle_requested" = "xyes"; then
-      ARIA2_DEP_NOT_MET([nettle])
-    fi
-  fi
-  if test "x$with_libgmp" = "xyes" &&
-     (test "x$have_libnettle" = "xyes" ||
-      test "x$have_nativetls" = "xyes") &&
-     test "x$enable_bittorrent" = "xyes"; then
-    AC_CHECK_LIB([gmp], [__gmpz_init], [have_libgmp=yes], [have_libgmp=no])
-    if test "x$have_libgmp" = "xyes"; then
-      LIBGMP_CFLAGS=
-      LIBGMP_LIBS=-lgmp
-      AC_SUBST([LIBGMP_CFLAGS])
-      AC_SUBST([LIBGMP_LIBS])
-      AC_DEFINE([HAVE_LIBGMP], [1], [Define to 1 if you have libgmp.])
-      save_LIBS=$LIBS
-      LIBS="$LIBGMP_LIBS $LIBS"
-      AC_CHECK_FUNCS([__gmpz_powm_sec], [have_mpz_powm_sec=yes])
-      LIBS=$save_LIBS
-      if test "x$have_mpz_powm_sec" = "xyes"; then
-        AC_DEFINE([HAVE_GMP_SEC], [1], [Define to 1 if you have a GMP with sec functions.])
-      fi
-    else
-      AC_MSG_WARN([libgmp not found])
-      if test "x$with_libgmp_requested" = "xyes"; then
-        ARIA2_DEP_NOT_MET([libgmp])
-      fi
-    fi
-  fi
-  if test "x$with_libgcrypt" = "xyes" &&
-     test "x$have_nativetls" != "xyes" &&
-     test "x$have_libnettle" != "xyes"; then
-    m4_ifdef([AM_PATH_LIBGCRYPT], [AM_PATH_LIBGCRYPT([1.2.4], [have_libgcrypt=yes])], [
-    AC_MSG_WARN([configure was generated without libgcrypt detection.  libgcrypt detection is disabled])
-      LIBGCRYPT_CFLAGS=
-      LIBGCRYPT_LIBS=
-      AC_SUBST([LIBGCRYPT_CFLAGS])
-      AC_SUBST([LIBGCRYPT_LIBS])
-    ])
-    if test "x$have_libgcrypt" = "xyes"; then
-      AC_DEFINE([HAVE_LIBGCRYPT], [1], [Define to 1 if you have libgcrypt.])
-    fi
-  fi
-fi
-
-have_libssh2=no
-if test "x$with_libssh2" = "xyes"; then
-  PKG_CHECK_MODULES([LIBSSH2], [libssh2], [have_libssh2=yes], [have_libssh2=no])
-  if test "x$have_libssh2" = "xyes"; then
-    AC_DEFINE([HAVE_LIBSSH2], [1], [Define to 1 if you have libssh2.])
-
-    if test "x$ARIA2_STATIC" = "xyes"; then
-      LIBSSH2_CFLAGS="-DLIBSSH2_API= $LIBSSH2_CFLAGS"
-    fi
-  else
-    AC_MSG_WARN([$LIBSSH2_PKG_ERRORS])
-    if test "x$with_libssh2_requested" = "xyes"; then
-      ARIA2_DEP_NOT_MET([libssh2])
     fi
   fi
 fi
@@ -379,57 +262,33 @@ if test "x$with_libcares" = "xyes"; then
   fi
 fi
 
-use_md=""
-if test "x$have_libnettle" = "xyes"; then
-  AC_DEFINE([USE_LIBNETTLE_MD], [1], [What message digest implementation to use])
-  use_md="libnettle"
+if test "x$have_openssl" = "xyes"; then
+  AC_DEFINE([USE_OPENSSL_MD], [1], [What message digest implementation to use])
+  use_md="openssl"
 else
-  if test "x$have_libgcrypt" = "xyes"; then
-    AC_DEFINE([USE_LIBGCRYPT_MD], [1], [What message digest implementation to use])
-    use_md="libgcrypt"
-  else
-    if test "x$have_openssl" = "xyes"; then
-      AC_DEFINE([USE_OPENSSL_MD], [1], [What message digest implementation to use])
-      use_md="openssl"
-    else
-      AC_DEFINE([USE_INTERNAL_MD], [1], [What message digest implementation to use])
-      use_md="internal"
-    fi
-  fi
+  AC_DEFINE([USE_INTERNAL_MD], [1], [What message digest implementation to use])
+  use_md="internal"
 fi
 
-# Define variables based on the result of the checks for libraries.
 if test "x$have_ssl" = "xyes"; then
   AC_DEFINE([ENABLE_SSL], [1], [Define to 1 if ssl support is enabled.])
   AM_CONDITIONAL([ENABLE_SSL], true)
 else
-  have_ssl="no"
   AM_CONDITIONAL([ENABLE_SSL], false)
 fi
 
+AM_CONDITIONAL([HAVE_OPENSSL], [test "x$have_openssl" = "xyes"])
+AM_CONDITIONAL([USE_OPENSSL_MD], [test "x$use_md" = "xopenssl"])
+AM_CONDITIONAL([USE_INTERNAL_MD], [test "x$use_md" = "xinternal"])
 
-AM_CONDITIONAL([HAVE_LIBGNUTLS], [ test "x$have_libgnutls" = "xyes" ])
-AM_CONDITIONAL([HAVE_LIBNETTLE], [ test "x$have_libnettle" = "xyes" ])
-AM_CONDITIONAL([USE_LIBNETTLE_MD], [ test "x$use_md" = "xlibnettle"])
-AM_CONDITIONAL([HAVE_LIBGMP], [ test "x$have_libgmp" = "xyes" ])
-AM_CONDITIONAL([HAVE_LIBGCRYPT], [ test "x$have_libgcrypt" = "xyes" ])
-AM_CONDITIONAL([USE_LIBGCRYPT_MD], [ test "x$use_md" = "xlibgcrypt"])
-AM_CONDITIONAL([HAVE_OPENSSL], [ test "x$have_openssl" = "xyes" ])
-AM_CONDITIONAL([USE_OPENSSL_MD], [ test "x$use_md" = "xopenssl"])
-AM_CONDITIONAL([USE_INTERNAL_MD], [ test "x$use_md" = "xinternal"])
-
-if test "x$have_libgmp" = "xyes" ||
-   test "x$have_libgcrypt" = "xyes" ||
-   test "x$have_openssl" = "xyes"; then
+if test "x$have_openssl" = "xyes"; then
   AM_CONDITIONAL([USE_INTERNAL_BIGNUM], false)
 else
   AC_DEFINE([USE_INTERNAL_BIGNUM], [1], [Define to 1 if internal BIGNUM support is enabled.])
   AM_CONDITIONAL([USE_INTERNAL_BIGNUM], true)
 fi
 
-if test "x$have_libnettle" = "xyes" ||
-   test "x$have_libgcrypt" = "xyes" ||
-   test "x$have_openssl" = "xyes"; then
+if test "x$have_openssl" = "xyes"; then
   AM_CONDITIONAL([USE_INTERNAL_ARC4], false)
 else
   AC_DEFINE([USE_INTERNAL_ARC4], [1], [Define to 1 if internal ARC4 support is enabled.])
@@ -461,9 +320,6 @@ AM_CONDITIONAL([HAVE_ZLIB], [test "x$have_zlib" = "xyes"])
 
 # Set conditional for sqlite3
 AM_CONDITIONAL([HAVE_SQLITE3], [test "x$have_sqlite3" = "xyes"])
-
-# Set conditional for libssh2
-AM_CONDITIONAL([HAVE_LIBSSH2], [test "x$have_libssh2" = "xyes"])
 
 # Checks for header files.
 AC_FUNC_ALLOCA
@@ -807,15 +663,10 @@ WARNCXXFLAGS:   $WARNCXXFLAGS
 LibUV:          $have_libuv (CFLAGS='$LIBUV_CFLAGS' LIBS='$LIBUV_LIBS')
 SQLite3:        $have_sqlite3 (CFLAGS='$SQLITE3_CFLAGS' LIBS='$SQLITE3_LIBS')
 SSL Support:    $have_ssl
-GnuTLS:         $have_libgnutls (CFLAGS='$LIBGNUTLS_CFLAGS' LIBS='$LIBGNUTLS_LIBS')
 OpenSSL:        $have_openssl (CFLAGS='$OPENSSL_CFLAGS' LIBS='$OPENSSL_LIBS')
 CA Bundle:      $ca_bundle
-LibNettle:      $have_libnettle (CFLAGS='$LIBNETTLE_CFLAGS' LIBS='$LIBNETTLE_LIBS')
-LibGmp:         $have_libgmp (CFLAGS='$LIBGMP_CFLAGS' LIBS='$LIBGMP_LIBS')
-LibGcrypt:      $have_libgcrypt (CFLAGS='$LIBGCRYPT_CFLAGS' LIBS='$LIBGCRYPT_LIBS')
 LibCares:       $have_libcares (CFLAGS='$LIBCARES_CFLAGS' LIBS='$LIBCARES_LIBS')
 Zlib:           $have_zlib (CFLAGS='$ZLIB_CFLAGS' LIBS='$ZLIB_LIBS')
-Libssh2:        $have_libssh2 (CFLAGS='$LIBSSH2_CFLAGS' LIBS='$LIBSSH2_LIBS')
 Tcmalloc:       $have_tcmalloc (CFLAGS='$TCMALLOC_CFLAGS' LIBS='$TCMALLOC_LIBS')
 Jemalloc:       $have_jemalloc (CFLAGS='$JEMALLOC_CFLAGS' LIBS='$JEMALLOC_LIBS')
 Epoll:          $have_epoll

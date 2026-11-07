@@ -47,21 +47,13 @@ case "$1" in
 	;;
     *)
 	# Library combinations
-	build "--without-libnettle --without-libgcrypt --without-openssl" \
-	    "nodigest"
-	build "--without-libnettle --with-libgcrypt" "libgcrypt"
-	build "--without-gnutls" "openssl"
-	build "--without-gnutls --without-openssl" "nossl"
+	build "--without-openssl" "internal"
+	build "--disable-ssl" "nossl"
 	build "--without-libcares" "nocares"
-	build "--without-libxml2" "expat"
-	build "--without-libxml2 --without-libexpat" "noxml"
 	build "--without-libz" "nozlib"
 	build "--without-sqlite3" "nosqlite3"
-	build "--without-libssh2" "nolibssh2"
 	# Feature combinations
 	build "--disable-bittorrent" "nobt"
-	build "--disable-metalink" "noml"
-	build "--disable-bittorrent --disable-metalink" "nobt_noml"
 	build "--disable-epoll" "noepoll"
 	build "--disable-epoll --without-libcares" "noepoll_nocares"
 	build "--enable-libaria2" "libaria2"

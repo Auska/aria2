@@ -43,27 +43,15 @@
 #ifdef HAVE_SQLITE3
 #  include <sqlite3.h>
 #endif // HAVE_SQLITE3
-#ifdef HAVE_LIBGNUTLS
-#  include <gnutls/gnutls.h>
-#endif // HAVE_LIBGNUTLS
 #ifdef HAVE_OPENSSL
 #  include <openssl/opensslv.h>
 #endif // HAVE_OPENSSL
-#ifdef HAVE_LIBGMP
-#  include <gmp.h>
-#endif // HAVE_LIBGMP
-#ifdef HAVE_LIBGCRYPT
-#  include <gcrypt.h>
-#endif // HAVE_LIBGCRYPT
 #ifdef HAVE_LIBCARES
 #  include <ares.h>
 #endif // HAVE_LIBCARES
 #ifdef HAVE_SYS_UTSNAME_H
 #  include <sys/utsname.h>
 #endif // HAVE_SYS_UTSNAME_H
-#ifdef HAVE_LIBSSH2
-#  include <libssh2.h>
-#endif // HAVE_LIBSSH2
 #include "util.h"
 
 namespace aria2 {
@@ -78,9 +66,6 @@ uint16_t getDefaultPort(const std::string& protocol)
   }
   else if (protocol == "ftp") {
     return 21;
-  }
-  else if (protocol == "sftp") {
-    return 22;
   }
   else {
     return 0;
@@ -153,14 +138,6 @@ const char* strSupportedFeature(int feature)
     return "Message Digest";
     break;
 
-  case (FEATURE_SFTP):
-#ifdef HAVE_LIBSSH2
-    return "SFTP";
-#else  // !HAVE_LIBSSH2
-    return nullptr;
-#endif // !HAVE_LIBSSH2
-    break;
-
   default:
     return nullptr;
   }
@@ -175,9 +152,6 @@ std::string usedLibs()
 #ifdef HAVE_SQLITE3
   res += "sqlite3/" SQLITE_VERSION " ";
 #endif // HAVE_SQLITE3
-#ifdef HAVE_LIBGNUTLS
-  res += "GnuTLS/" GNUTLS_VERSION " ";
-#endif // HAVE_LIBGNUTLS
 #ifdef HAVE_OPENSSL
   res += fmt("OpenSSL/%ld.%ld.%ld", OPENSSL_VERSION_NUMBER >> 28,
              (OPENSSL_VERSION_NUMBER >> 20) & 0xff,
@@ -187,24 +161,9 @@ std::string usedLibs()
   }
   res += " ";
 #endif // HAVE_OPENSSL
-#ifdef HAVE_LIBNETTLE
-  // No library version in header files.
-  res += "nettle ";
-#endif // HAVE_LIBNETTLE
-#ifdef HAVE_LIBGMP
-  res += fmt("GMP/%d.%d.%d ", __GNU_MP_VERSION, __GNU_MP_VERSION_MINOR,
-             __GNU_MP_VERSION_PATCHLEVEL);
-#endif // HAVE_LIBGMP
-#ifdef HAVE_LIBGCRYPT
-  res += "libgcrypt/" GCRYPT_VERSION " ";
-#endif // HAVE_LIBGCRYPT
 #ifdef HAVE_LIBCARES
   res += "c-ares/" ARES_VERSION_STR " ";
 #endif // HAVE_LIBCARES
-
-#ifdef HAVE_LIBSSH2
-  res += "libssh2/" LIBSSH2_VERSION " ";
-#endif // HAVE_LIBSSH2
 
   if (!res.empty()) {
     res.erase(res.length() - 1);

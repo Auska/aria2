@@ -8,11 +8,8 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         compiler: [gcc, clang]
-        crypto: [openssl, gnutls]
+        crypto: [openssl, internal]
         bittorrent: [with-bt, without-bt]
-        exclude:
-        - crypto: openssl
-          bittorrent: without-bt
 
     runs-on: ${{ matrix.os }}
 
@@ -30,11 +27,9 @@ jobs:
           libtool \
           pkg-config \
           libssl-dev \
-          libgnutls28-dev \
           libc-ares-dev \
           zlib1g-dev \
           libsqlite3-dev \
-          libssh2-1-dev \
           libcppunit-dev
     - name: Setup clang
       if: matrix.compiler == 'clang'
@@ -64,14 +59,14 @@ jobs:
         FEATURE_FLAGS="$FEATURE_FLAGS --disable-bittorrent"
 
         echo 'FEATURE_FLAGS='"$FEATURE_FLAGS" >> $GITHUB_ENV
-    - name: Configure autotools (gnutls)
-      if: matrix.crypto == 'gnutls'
-      run: |
-        ./configure --with-gnutls --without-openssl $FEATURE_FLAGS
-    - name: Configure autotools (openssl)
+    - name: Configure autotools (OpenSSL)
       if: matrix.crypto == 'openssl'
       run: |
-        ./configure --without-gnutls --with-openssl $FEATURE_FLAGS
+        ./configure --with-openssl $FEATURE_FLAGS
+    - name: Configure autotools (internal fallback)
+      if: matrix.crypto == 'internal'
+      run: |
+        ./configure --without-openssl $FEATURE_FLAGS
     - name: Build aria2
       run: |
         make -j"$(nproc 2> /dev/null || sysctl -n hw.ncpu)" check

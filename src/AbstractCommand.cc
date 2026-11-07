@@ -672,7 +672,7 @@ std::string getProxyUri(const std::string& protocol, const Option* option)
                              PREF_HTTPS_PROXY_PASSWD, option);
   }
 
-  if (protocol == "ftp" || protocol == "sftp") {
+  if (protocol == "ftp") {
     return getProxyOptionFor(PREF_FTP_PROXY, PREF_FTP_PROXY_USER,
                              PREF_FTP_PROXY_PASSWD, option);
   }
@@ -868,8 +868,7 @@ bool AbstractCommand::checkIfConnectionEstablished(
 const std::string&
 AbstractCommand::resolveProxyMethod(const std::string& protocol) const
 {
-  if (getOption()->get(PREF_PROXY_METHOD) == V_TUNNEL || protocol == "https" ||
-      protocol == "sftp") {
+  if (getOption()->get(PREF_PROXY_METHOD) == V_TUNNEL || protocol == "https") {
     return V_TUNNEL;
   }
   return V_GET;

@@ -10,11 +10,11 @@ Introduction
 ------------
 
 aria2 is a utility for downloading files. The supported protocols are
-HTTP(S), FTP, SFTP and BitTorrent. aria2 can download a
+HTTP(S), FTP and BitTorrent. aria2 can download a
 file from multiple sources/protocols and tries to utilize your maximum
 download bandwidth. It supports downloading a file from
-HTTP(S)/FTP/SFTP and BitTorrent at the same time, while the data
-downloaded from HTTP(S)/FTP/SFTP is uploaded to the BitTorrent
+HTTP(S)/FTP and BitTorrent at the same time, while the data
+downloaded from HTTP(S)/FTP is uploaded to the BitTorrent
 swarm.
 
 The project page is located at https://aria2.github.io/.
@@ -28,7 +28,7 @@ Features
 Here is a list of features:
 
 * Command-line interface
-* Download files through HTTP(S)/FTP/SFTP/BitTorrent
+* Download files through HTTP(S)/FTP/BitTorrent
 * Segmented downloading
 * HTTP/1.1 implementation
 * HTTP Proxy support
@@ -46,7 +46,7 @@ Here is a list of features:
 * Save Cookies in the Mozilla/Firefox (1.x/2.x)/Netscape format.
 * Custom HTTP Header support
 * Persistent Connections support
-* FTP/SFTP through HTTP Proxy
+* FTP through HTTP Proxy
 * Download/Upload speed throttling
 * BitTorrent extensions: Fast extension, DHT, PEX, MSE/PSE,
   Multi-Tracker, UDP tracker
@@ -102,41 +102,20 @@ Dependency
 ======================== ========================================
 features                  dependency
 ======================== ========================================
-HTTPS                    GnuTLS or OpenSSL
-SFTP                     libssh2
-BitTorrent               None. Optional: libnettle+libgmp or libgcrypt
-                         or OpenSSL (see note)
-Checksum                 None. Optional: libnettle or libgcrypt
-                         or OpenSSL (see note)
+HTTPS                    OpenSSL
+BitTorrent               None. Optional: OpenSSL
+Checksum                 None. Optional: OpenSSL
 gzip, deflate in HTTP    zlib
 Async DNS                C-Ares
 Firefox3/Chromium cookie libsqlite3
-JSON-RPC over WebSocket  libnettle or libgcrypt or OpenSSL
+JSON-RPC over WebSocket  None. Optional: OpenSSL
 ======================== ========================================
 
-
-.. note::
-
-  GnuTLS has precedence over OpenSSL if both libraries are installed.
-  If you prefer OpenSSL, run configure with ``--without-gnutls``
-  ``--with-openssl``.
-
-.. note::
-
-  libnettle has precedence over libgcrypt if both libraries are
-  installed.  If you prefer libgcrypt, run configure with
-  ``--without-libnettle --with-libgcrypt``. If OpenSSL is selected over
-  GnuTLS, neither libnettle nor libgcrypt will be used.
-
-  If none of the optional dependencies are installed, an internal
-  implementation that only supports md5 and sha1 will be used.
-
-A user can have one of the following configurations for SSL and crypto
-libraries:
-
-* OpenSSL
-* GnuTLS + libgcrypt
-* GnuTLS + libnettle
+OpenSSL is optional. It enables HTTPS and accelerates BitTorrent,
+checksum and WebSocket. Without it, internal implementations are used
+for BitTorrent encryption and message digests, and HTTPS is disabled.
+Use ``--without-openssl`` or ``--disable-ssl`` to force the internal
+build.
 
 You can disable BitTorrent support by providing
 ``--disable-bittorrent`` to the configure script.
@@ -158,27 +137,14 @@ To build aria2 from the source package, you need the following
 development packages (package name may vary depending on the
 distribution you use):
 
-* libgnutls-dev    (Required for HTTPS, BitTorrent, Checksum support)
-* nettle-dev       (Required for BitTorrent, Checksum support)
-* libgmp-dev       (Required for BitTorrent)
-* libssh2-1-dev    (Required for SFTP support)
+* libssl-dev       (Optional: HTTPS, BitTorrent, Checksum support)
 * libc-ares-dev    (Required for async DNS support)
 * zlib1g-dev       (Required for gzip, deflate decoding support in HTTP)
 * libsqlite3-dev   (Required for Firefox3/Chromium cookie support)
 * pkg-config       (Required to detect installed libraries)
 
-You can use libgcrypt-dev instead of nettle-dev and libgmp-dev:
-
-* libgpg-error-dev (Required for BitTorrent, Checksum support)
-* libgcrypt-dev    (Required for BitTorrent, Checksum support)
-
-You can use libssl-dev instead of
-libgnutls-dev, nettle-dev, libgmp-dev, libgpg-error-dev and libgcrypt-dev:
-
-* libssl-dev       (Required for HTTPS, BitTorrent, Checksum support)
-
 On Fedora you need the following packages: gcc, gcc-c++, kernel-devel,
-libgcrypt-devel, openssl-devel, cppunit
+cppunit, and optionally openssl-devel
 
 If you downloaded source code from a git repository, you have to install
 the following packages to get autoconf macros:
@@ -214,10 +180,8 @@ features as possible except for experimental features not enabled by
 default.
 
 Since 1.1.0, aria2 checks the certificate of HTTPS servers by default.
-If you build with OpenSSL or the recent version of GnuTLS which has
-``gnutls_certificate_set_x509_system_trust()`` function and the
-library is properly configured to locate the system-wide CA
-certificates store, aria2 will automatically load those certificates
+If built with OpenSSL and it is properly configured to locate the
+system-wide CA certificates store, aria2 will automatically load those certificates
 at the startup. If it is not the case, I recommend supplying the path
 to the CA bundle file. For example, in Debian the path to CA bundle
 file is '/etc/ssl/certs/ca-certificates.crt' (in ca-certificates
@@ -316,7 +280,7 @@ Other things should be noted
 netrc
 -----
 
-netrc support is enabled by default for HTTP(S)/FTP/SFTP.  To disable
+netrc support is enabled by default for HTTP(S)/FTP.  To disable
 netrc support, specify -n command-line option.  Your .netrc file
 should have correct permissions(600).
 

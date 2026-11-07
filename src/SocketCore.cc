@@ -61,9 +61,6 @@
 #  include "TLSContext.h"
 #  include "TLSSession.h"
 #endif // ENABLE_SSL
-#ifdef HAVE_LIBSSH2
-#  include "SSHSession.h"
-#endif // HAVE_LIBSSH2
 
 namespace aria2 {
 
@@ -598,13 +595,6 @@ void SocketCore::closeConnection()
   }
 #endif // ENABLE_SSL
 
-#ifdef HAVE_LIBSSH2
-  if (sshSession_) {
-    sshSession_->closeConnection();
-    sshSession_.reset();
-  }
-#endif // HAVE_LIBSSH2
-
   if (sockfd_ != (sock_t)-1) {
     shutdown(sockfd_, SHUT_WR);
     CLOSE(sockfd_);
@@ -785,26 +775,7 @@ void SocketCore::readData(void* data, size_t& len)
   wantRead_ = false;
   wantWrite_ = false;
 
-#ifdef HAVE_LIBSSH2
-  if (sshSession_) {
-    ret = sshSession_->readData(data, len);
-    if (ret < 0) {
-      if (ret != SSH_ERR_WOULDBLOCK) {
-        throw DL_RETRY_EX(
-            fmt(EX_SOCKET_RECV, sshSession_->getLastErrorString().c_str()));
-      }
-      if (sshSession_->checkDirection() == SSH_WANT_READ) {
-        wantRead_ = true;
-      }
-      else {
-        wantWrite_ = true;
-      }
-      ret = 0;
-    }
-  }
-  else
-#endif // HAVE_LIBSSH2
-    if (!secure_) {
+  if (!secure_) {
       // Cast for Windows recv()
       while ((ret = recv(sockfd_, reinterpret_cast<char*>(data), len, 0)) ==
                  -1 &&
@@ -873,8 +844,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
       tlsSession_.reset();
       throw DL_ABORT_EX(fmt(EX_SSL_INIT_FAILURE, error.c_str()));
     }
-    // Check hostname is not numeric and it includes ".". Setting
-    // "localhost" will produce TLS alert with GNUTLS.
+    // Check hostname is not numeric and it includes ".".
     if (tlsctx->getSide() == TLS_CLIENT && !util::isNumericHost(hostname) &&
         hostname.find(".") != std::string::npos) {
       rv = tlsSession_->setSNIHostname(hostname);
@@ -975,157 +945,6 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 }
 
 #endif // ENABLE_SSL
-
-#ifdef HAVE_LIBSSH2
-
-bool SocketCore::sshHandshake(const std::string& hashType,
-                              const std::string& digest)
-{
-  wantRead_ = false;
-  wantWrite_ = false;
-
-  if (!sshSession_) {
-    sshSession_ = make_unique<SSHSession>();
-    if (sshSession_->init(sockfd_) == SSH_ERR_ERROR) {
-      throw DL_ABORT_EX("Could not create SSH session");
-    }
-  }
-  auto rv = sshSession_->handshake();
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH handshake failure: %s",
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  if (!hashType.empty()) {
-    auto actualDigest = sshSession_->hostkeyMessageDigest(hashType);
-    if (actualDigest.empty()) {
-      throw DL_ABORT_EX(fmt("Empty host key fingerprint from SSH layer: "
-                            "perhaps hash type %s is not supported?",
-                            hashType.c_str()));
-    }
-    if (digest != actualDigest) {
-      throw DL_ABORT_EX(fmt("Unexpected SSH host key: expected %s, actual %s",
-                            util::toHex(digest).c_str(),
-                            util::toHex(actualDigest).c_str()));
-    }
-  }
-  return true;
-}
-
-bool SocketCore::sshAuthPassword(const std::string& user,
-                                 const std::string& password)
-{
-  assert(sshSession_);
-
-  wantRead_ = false;
-  wantWrite_ = false;
-
-  auto rv = sshSession_->authPassword(user, password);
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH authentication failure: %s",
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  return true;
-}
-
-bool SocketCore::sshSFTPOpen(const std::string& path)
-{
-  assert(sshSession_);
-
-  wantRead_ = false;
-  wantWrite_ = false;
-
-  auto rv = sshSession_->sftpOpen(path);
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH opening SFTP path %s failed: %s", path.c_str(),
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  return true;
-}
-
-bool SocketCore::sshSFTPClose()
-{
-  assert(sshSession_);
-
-  wantRead_ = false;
-  wantWrite_ = false;
-
-  auto rv = sshSession_->sftpClose();
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH closing SFTP failed: %s",
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  return true;
-}
-
-bool SocketCore::sshSFTPStat(int64_t& totalLength, time_t& mtime,
-                             const std::string& path)
-{
-  assert(sshSession_);
-
-  wantRead_ = false;
-  wantWrite_ = false;
-
-  auto rv = sshSession_->sftpStat(totalLength, mtime);
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH stat SFTP path %s filed: %s", path.c_str(),
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  return true;
-}
-
-void SocketCore::sshSFTPSeek(int64_t pos)
-{
-  assert(sshSession_);
-
-  sshSession_->sftpSeek(pos);
-}
-
-bool SocketCore::sshGracefulShutdown()
-{
-  assert(sshSession_);
-  auto rv = sshSession_->gracefulShutdown();
-  if (rv == SSH_ERR_WOULDBLOCK) {
-    sshCheckDirection();
-    return false;
-  }
-  if (rv == SSH_ERR_ERROR) {
-    throw DL_ABORT_EX(fmt("SSH graceful shutdown failed: %s",
-                          sshSession_->getLastErrorString().c_str()));
-  }
-  return true;
-}
-
-void SocketCore::sshCheckDirection()
-{
-  if (sshSession_->checkDirection() == SSH_WANT_READ) {
-    wantRead_ = true;
-  }
-  else {
-    wantWrite_ = true;
-  }
-}
-
-#endif // HAVE_LIBSSH2
 
 ssize_t SocketCore::writeData(const void* data, size_t len,
                               const std::string& host, uint16_t port)

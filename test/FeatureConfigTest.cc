@@ -31,7 +31,7 @@ void FeatureConfigTest::testGetDefaultPort()
   CPPUNIT_ASSERT_EQUAL((uint16_t)80, getDefaultPort("http"));
   CPPUNIT_ASSERT_EQUAL((uint16_t)443, getDefaultPort("https"));
   CPPUNIT_ASSERT_EQUAL((uint16_t)21, getDefaultPort("ftp"));
-  CPPUNIT_ASSERT_EQUAL((uint16_t)22, getDefaultPort("sftp"));
+  CPPUNIT_ASSERT_EQUAL((uint16_t)0, getDefaultPort("unsupported"));
 }
 
 void FeatureConfigTest::testStrSupportedFeature()
@@ -43,13 +43,6 @@ void FeatureConfigTest::testStrSupportedFeature()
   CPPUNIT_ASSERT(!https);
 #endif // ENABLE_SSL
   CPPUNIT_ASSERT(!strSupportedFeature(MAX_FEATURE));
-
-  auto sftp = strSupportedFeature(FEATURE_SFTP);
-#ifdef HAVE_LIBSSH2
-  CPPUNIT_ASSERT(sftp);
-#else  // !HAVE_LIBSSH2
-  CPPUNIT_ASSERT(!sftp);
-#endif // !HAVE_LIBSSH2
 }
 
 void FeatureConfigTest::testFeatureSummary()
@@ -77,10 +70,6 @@ void FeatureConfigTest::testFeatureSummary()
 #endif // ENABLE_SSL
 
       "Message Digest",
-
-#ifdef HAVE_LIBSSH2
-      "SFTP",
-#endif // HAVE_LIBSSH2
   };
 
   std::string featuresString =

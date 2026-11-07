@@ -70,13 +70,9 @@ InitiateConnectionCommandFactory::createInitiateConnectionCommand(
     return make_unique<HttpInitiateConnectionCommand>(cuid, req, fileEntry,
                                                       requestGroup, e);
   }
-  else if (req->getProtocol() == "ftp"
-#ifdef HAVE_LIBSSH2
-           || req->getProtocol() == "sftp"
-#endif // HAVE_LIBSSH2
-  ) {
+  else if (req->getProtocol() == "ftp") {
     if (req->getFile().empty()) {
-      throw DL_ABORT_EX(fmt("FTP/SFTP URI %s doesn't contain file path.",
+      throw DL_ABORT_EX(fmt("FTP URI %s doesn't contain file path.",
                             req->getUri().c_str()));
     }
     return make_unique<FtpInitiateConnectionCommand>(cuid, req, fileEntry,

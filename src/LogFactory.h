@@ -55,7 +55,6 @@ private:
 
   static void openLogger(const std::shared_ptr<Logger>& logger);
 
-  static void adjustDependentLevels();
 
   LogFactory();
 

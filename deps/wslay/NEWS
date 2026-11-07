@@ -23,21 +23,10 @@ Release Note
 ------------
 
 This release adds CMake build support and the ability to set and
-verify reserved bits.  Build issue with nettle >= 3.4 was fixed.
+verify reserved bits.
 
 Changes
 -------
-
-* Fix compilation of examples
-
-  Since 3.4 nettle defines base64_encode_raw like this:
-
-      void base64_encode_raw(char *dst, size_t length, const uint8_t *src);
-
-  So examples have to be adjusted. More read at
-  https://git.lysator.liu.se/nettle/nettle/blob/nettle_3.4_release_20171119/NEWS#L49-53
-
-  Patch from Sergey Avseyev
 
 * check for 0 length before memcpy:
 
