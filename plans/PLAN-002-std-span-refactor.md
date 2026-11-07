@@ -196,7 +196,7 @@
    - 门禁：干净副本 `autoreconf -i && ./configure && make -j check`，
      `test/aria2c.log` 为 `OK (N)` 且无 `Failures !!!`；
      `git grep` 确认 `util.h` 里不再有 ptr+len 声明。
-2. [ ] **阶段 2：util_security 簇改 std::span**
+2. [x] **阶段 2：util_security 簇改 std::span**
    - `src/util_security.h` / `.cc`：**8 个** ptr+len 函数签名
      （`compare` 的 2 个重载合并为 1 个 span 重载）与 3 个 `.cc` 定义
      （`compare` ×2 合并、`HMACResult`、`HMAC`、`create` ×2、`update`、

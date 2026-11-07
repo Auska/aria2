@@ -87,16 +87,19 @@ bool compare(const unsigned char a, const unsigned char b)
   return rv;
 }
 
-bool compare(const uint8_t* a, const uint8_t* b, size_t length)
+bool compare(std::span<const std::byte> a, std::span<const std::byte> b)
 {
+  if (a.size() != b.size()) {
+    return false;
+  }
   unsigned char rv = 0;
-  for (size_t i = 0; i < length; ++i) {
-    rv |= a[i] ^ b[i];
+  for (size_t i = 0; i < a.size(); ++i) {
+    rv |= static_cast<unsigned char>(a[i]) ^ static_cast<unsigned char>(b[i]);
   }
   return compare(rv, 0);
 }
 
-HMAC::HMAC(const std::string& algorithm, const char* secret, size_t length)
+HMAC::HMAC(const std::string& algorithm, std::span<const std::byte> secret)
     : blockSize_(getBlockSize(algorithm)),
       md_(MessageDigest::create(algorithm)),
       clean_(false)
@@ -104,9 +107,9 @@ HMAC::HMAC(const std::string& algorithm, const char* secret, size_t length)
   ipad_.assign(blockSize_, 0x36);
   opad_.assign(blockSize_, 0x5c);
 
-  if (length > blockSize_) {
+  if (secret.size() > blockSize_) {
     md_->reset();
-    md_->update(secret, length);
+    md_->update(secret.data(), secret.size());
     auto hash = md_->digest();
     for (size_t i = 0uL, e = hash.length(); i < e; ++i) {
       ipad_.replace(i, 1, 1, hash[i] ^ 0x36);
@@ -114,9 +117,10 @@ HMAC::HMAC(const std::string& algorithm, const char* secret, size_t length)
     }
   }
   else {
-    for (size_t i = 0uL, e = length; i < e; ++i) {
-      ipad_.replace(i, 1, 1, secret[i] ^ 0x36);
-      opad_.replace(i, 1, 1, secret[i] ^ 0x5c);
+    for (size_t i = 0uL, e = secret.size(); i < e; ++i) {
+      auto c = static_cast<char>(secret[i]);
+      ipad_.replace(i, 1, 1, c ^ 0x36);
+      opad_.replace(i, 1, 1, c ^ 0x5c);
     }
   }
   reset();
@@ -129,8 +133,8 @@ std::unique_ptr<HMAC> HMAC::createRandom(const std::string& algorithm)
     return nullptr;
   }
   auto buf = make_unique<char[]>(len);
-  generateRandomData(std::as_writable_bytes(std::span{(unsigned char*)buf.get(), len}));
-  return create(algorithm, buf.get(), len);
+  generateRandomData(std::as_writable_bytes(std::span{buf.get(), len}));
+  return create(algorithm, std::as_bytes(std::span{buf.get(), len}));
 }
 
 bool HMAC::supports(const std::string& algorithm)
@@ -143,7 +147,7 @@ bool HMAC::supports(const std::string& algorithm)
          canon == "sha-384" || canon == "sha-512";
 }
 
-HMACResult PBKDF2(HMAC* hmac, const char* salt, size_t salt_length,
+HMACResult PBKDF2(HMAC* hmac, std::span<const std::byte> salt,
                   size_t iterations, size_t key_length)
 {
   if (!hmac) {
@@ -161,15 +165,15 @@ HMACResult PBKDF2(HMAC* hmac, const char* salt, size_t salt_length,
   hmac->reset();
 
   for (uint32_t counter = 1; key_length; ++counter) {
-    hmac->update(salt, salt_length);
+    hmac->update(salt);
     const uint32_t c = htonl(counter);
-    hmac->update((char*)&c, sizeof(c));
+    hmac->update(std::as_bytes(std::span{&c, 1}));
 
     auto bytes = hmac->getResult().getBytes();
     memcpy(p, bytes.data(), bytes.length());
 
     for (size_t i = 1uL; i < iterations; ++i) {
-      hmac->update(bytes);
+      hmac->update(std::as_bytes(std::span{bytes.data(), bytes.size()}));
       bytes = hmac->getResult().getBytes();
       for (size_t j = 0uL; j < hmac_length; ++j) {
         p[j] ^= bytes[j];

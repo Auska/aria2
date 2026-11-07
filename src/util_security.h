@@ -40,6 +40,8 @@
 
 #include <string>
 #include <stdexcept>
+#include <cstddef>
+#include <span>
 
 #include "a2functional.h"
 #include "MessageDigest.h"
@@ -65,12 +67,7 @@ bool compare(const uint8_t a, const uint8_t b);
  * @param b Second byte array.
  * @return True, if both match, false otherwise.
  */
-bool compare(const uint8_t* a, const uint8_t* b, size_t length);
-inline bool compare(const char* a, const char* b, size_t length)
-{
-  return compare(reinterpret_cast<const uint8_t*>(a),
-                 reinterpret_cast<const uint8_t*>(b), length * sizeof(char));
-}
+bool compare(std::span<const std::byte> a, std::span<const std::byte> b);
 
 /**
  * HMAC Result wrapper. While it is still possible to get the raw result bytes,
@@ -85,8 +82,9 @@ public:
   {
   }
 
-  HMACResult(const char* result, size_t length)
-      : result_(result, length), len_(length)
+  HMACResult(std::span<const std::byte> result)
+      : result_(reinterpret_cast<const char*>(result.data()), result.size()),
+        len_(result.size())
   {
   }
 
@@ -99,7 +97,8 @@ public:
     if (len_ != other.len_) {
       throw std::domain_error("comparing different hmac is undefined");
     }
-    return compare(result_.data(), other.result_.data(), len_);
+    return compare(std::as_bytes(std::span{result_.data(), len_}),
+                   std::as_bytes(std::span{other.result_.data(), len_}));
   }
 
   bool operator!=(const HMACResult& other) const { return !(*this == other); }
@@ -127,7 +126,7 @@ public:
    * @see create
    * @see createRandom
    */
-  HMAC(const std::string& algorithm, const char* secret, size_t length);
+  HMAC(const std::string& algorithm, std::span<const std::byte> secret);
 
   /**
    * Creates a new instance using the specified algorithm and secret.
@@ -135,19 +134,20 @@ public:
   static std::unique_ptr<HMAC> create(const std::string& algorithm,
                                       const std::string& secret)
   {
-    return create(algorithm, secret.data(), secret.length());
+    return create(algorithm,
+                  std::as_bytes(std::span{secret.data(), secret.size()}));
   }
 
   /**
    * Creates a new instance using the specified algorithm and secret.
    */
   static std::unique_ptr<HMAC> create(const std::string& algorithm,
-                                      const char* secret, size_t length)
+                                      std::span<const std::byte> secret)
   {
     if (!supports(algorithm)) {
       return nullptr;
     }
-    return make_unique<HMAC>(algorithm, secret, length);
+    return make_unique<HMAC>(algorithm, secret);
   }
 
   /**
@@ -155,15 +155,15 @@ public:
    */
   static std::unique_ptr<HMAC> create(const std::string& secret)
   {
-    return create("sha-1", secret.data(), secret.length());
+    return create("sha-1", std::as_bytes(std::span{secret.data(), secret.size()}));
   }
 
   /**
    * Creates a new instance using sha-1 and the specified secret.
    */
-  static std::unique_ptr<HMAC> create(const char* secret, size_t length)
+  static std::unique_ptr<HMAC> create(std::span<const std::byte> secret)
   {
-    return create("sha-1", secret, length);
+    return create("sha-1", secret);
   }
 
   /**
@@ -212,9 +212,9 @@ public:
   /**
    * Updates the HMAC with new message data.
    */
-  void update(const char* data, size_t length)
+  void update(std::span<const std::byte> data)
   {
-    md_->update(data, length);
+    md_->update(data.data(), data.size());
     clean_ = false;
   }
 
@@ -250,10 +250,10 @@ public:
    * Returns the resulting HMAC of string in one go. You cannot mix call to this
    * method with calls to update.
    */
-  HMACResult getResult(const char* data, size_t len)
+  HMACResult getResult(std::span<const std::byte> data)
   {
     reset();
-    update(data, len);
+    update(data);
     return getResult();
   }
 
@@ -270,7 +270,7 @@ private:
  * Example:
  *   result = PBKDF2(HMAC::create("password"), random_salt, salt_len, 1000);
  */
-HMACResult PBKDF2(HMAC* hmac, const char* salt, size_t salt_length,
+HMACResult PBKDF2(HMAC* hmac, std::span<const std::byte> salt,
                   size_t iterations, size_t key_length = 0);
 
 /**
@@ -282,7 +282,8 @@ HMACResult PBKDF2(HMAC* hmac, const char* salt, size_t salt_length,
 inline HMACResult PBKDF2(HMAC* hmac, const std::string& salt, size_t iterations,
                          size_t key_length = 0)
 {
-  return PBKDF2(hmac, salt.data(), salt.length(), iterations, key_length);
+  return PBKDF2(hmac, std::as_bytes(std::span{salt.data(), salt.size()}),
+                iterations, key_length);
 }
 
 } // namespace security

@@ -246,22 +246,46 @@ void SecurityTest::testCompareByte()
 
 void SecurityTest::testCompareArray()
 {
-  CPPUNIT_ASSERT(util::security::compare("", "", 0));
-  CPPUNIT_ASSERT(util::security::compare("a", "a", 1));
-  CPPUNIT_ASSERT(util::security::compare("a", "ab", 1));
-  CPPUNIT_ASSERT(util::security::compare("a\0b", "a\0b", 3));
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"", 0}),
+                                         std::as_bytes(std::span{"", 0})));
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"a", 1}),
+                                         std::as_bytes(std::span{"a", 1})));
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"a", 1}),
+                                         std::as_bytes(std::span{"ab", 1})));
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"a\0b", 3}),
+                                         std::as_bytes(std::span{"a\0b", 3})));
   CPPUNIT_ASSERT(
-      util::security::compare("a\0b", "a\0b", 4)); // implicit null-termination
-  CPPUNIT_ASSERT(util::security::compare("a\0", "a\0b", 2));
-  CPPUNIT_ASSERT(util::security::compare("a\xff", "a\xff", 2));
+      util::security::compare(std::as_bytes(std::span{"a\0b", 4}),
+                                         std::as_bytes(std::span{"a\0b", 4}))); // implicit null-termination
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"a\0", 2}),
+                                         std::as_bytes(std::span{"a\0b", 2})));
+  CPPUNIT_ASSERT(util::security::compare(std::as_bytes(std::span{"a\xff", 2}),
+                                         std::as_bytes(std::span{"a\xff", 2})));
 
-  CPPUNIT_ASSERT(!util::security::compare("a", "b", 1));
-  CPPUNIT_ASSERT(!util::security::compare("a", "bb", 1));
-  CPPUNIT_ASSERT(!util::security::compare("a\1b", "a\0b", 3));
+  CPPUNIT_ASSERT(!util::security::compare(std::as_bytes(std::span{"a", 1}),
+                                         std::as_bytes(std::span{"b", 1})));
+  CPPUNIT_ASSERT(!util::security::compare(std::as_bytes(std::span{"a", 1}),
+                                         std::as_bytes(std::span{"bb", 1})));
+  CPPUNIT_ASSERT(!util::security::compare(std::as_bytes(std::span{"a\1b", 3}),
+                                         std::as_bytes(std::span{"a\0b", 3})));
+
+  // Spans of different length must not be considered equal (the old
+  // ptr+len API required the caller to pass the same length explicitly).
   CPPUNIT_ASSERT(
-      !util::security::compare("a\1b", "a\0b", 4)); // implicit null-termination
-  CPPUNIT_ASSERT(!util::security::compare("a\4", "a\0b", 2));
-  CPPUNIT_ASSERT(!util::security::compare("a\0", "a\xff", 2));
+      !util::security::compare(std::as_bytes(std::span{"a", 1}),
+                               std::as_bytes(std::span{"a", 2})));
+  CPPUNIT_ASSERT(
+      !util::security::compare(std::span<const std::byte>{},
+                               std::as_bytes(std::span{"a", 1})));
+  CPPUNIT_ASSERT(util::security::compare(std::span<const std::byte>{},
+                                         std::span<const std::byte>{}));
+  CPPUNIT_ASSERT(
+      !util::security::compare(std::as_bytes(std::span{"a\1b", 4}),
+                                         std::as_bytes(std::span{"a\0b", 4}))); // implicit null-termination
+  CPPUNIT_ASSERT(!util::security::compare(std::as_bytes(std::span{"a\4", 2}),
+                                         std::as_bytes(std::span{"a\0b", 2})));
+  CPPUNIT_ASSERT(!util::security::compare(std::as_bytes(std::span{"a\0", 2}),
+                                         std::as_bytes(std::span{"a\xff", 2})));
 }
 
 static struct {
@@ -290,15 +314,19 @@ void SecurityTest::testHMAC()
       auto resultlen = SELECT(resultlength);
 #undef SELECT
 
-      auto h = util::security::HMAC::create(hmac.hash, key, keylen);
-      auto h2 = util::security::HMAC::create(hmac.hash, key, keylen - 1);
-      auto r = h->getResult(data, datalen);
+      auto h = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, keylen}));
+      auto h2 = util::security::HMAC::create(hmac.hash, std::as_bytes(std::span{key, keylen - 1}));
+      auto r = h->getResult(std::as_bytes(std::span{data, datalen}));
       auto hr = util::toUpper(util::toHex(r.getBytes()));
-      CPPUNIT_ASSERT(util::security::compare(hr.data(), result, resultlen));
+      // Compare only the first |resultlen| bytes, as the original
+      // compare(hr.data(), result, resultlen) did.
+      CPPUNIT_ASSERT(util::security::compare(
+          std::as_bytes(std::span{hr.data(), static_cast<size_t>(resultlen)}),
+          std::as_bytes(std::span{result, static_cast<size_t>(resultlen)})));
       CPPUNIT_ASSERT(r == r);
       auto r2 = r;
       CPPUNIT_ASSERT(r == r2);
-      CPPUNIT_ASSERT(r != h2->getResult(data, datalen));
+      CPPUNIT_ASSERT(r != h2->getResult(std::as_bytes(std::span{data, datalen})));
     }
   }
 }
@@ -400,11 +428,13 @@ static struct pbkdf2 {
 void SecurityTest::testPBKDF2()
 {
   for (const auto& test : pbkdf2s) {
-    auto h = util::security::HMAC::create(test.pass, test.pass_len);
-    auto r = util::security::PBKDF2(h.get(), test.salt, test.salt_len,
-                                    test.iterations, test.key_len);
+    auto h = util::security::HMAC::create(
+        std::as_bytes(std::span{test.pass, test.pass_len}));
+    auto r = util::security::PBKDF2(
+        h.get(), std::as_bytes(std::span{test.salt, test.salt_len}),
+        test.iterations, test.key_len);
     const auto kl = test.key_len ? test.key_len : r.length();
-    auto e = util::security::HMACResult((char*)test.key, kl);
+    auto e = util::security::HMACResult(std::as_bytes(std::span{test.key, kl}));
 #if 0
     printf("actual [%s]  expected [%s]\n",
         util::toHex(r.getBytes()).c_str(),
