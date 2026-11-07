@@ -41,7 +41,6 @@ ARIA2_ARG_WITHOUT([openssl])
 ARIA2_ARG_WITHOUT([sqlite3])
 ARIA2_ARG_WITHOUT([libcares])
 ARIA2_ARG_WITHOUT([libz])
-ARIA2_ARG_WITH([tcmalloc])
 ARIA2_ARG_WITH([jemalloc])
 
 ARIA2_ARG_DISABLE([ssl])
@@ -394,7 +393,6 @@ fi
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
-AC_PROG_GCC_TRADITIONAL
 
 AC_FUNC_MEMCMP
 AC_FUNC_MKTIME
@@ -453,35 +451,10 @@ AC_CHECK_FUNCS([__argz_count \
                 utime \
                 utimes])
 
-dnl Put tcmalloc/jemalloc checks after the posix_memalign check.
-dnl These libraries may implement posix_memalign while the usual CRT may not.
-dnl Since we aren't including the corresponding library headers this will lead
-dnl to undefined posix_memalign() errors when compiling.
-if test "x$with_tcmalloc_requested" = "xyes" &&
-   test "x$with_jemalloc_requested" = "xyes"; then
-  AC_MSG_FAILURE([Cannot use both, tcmalloc and jemalloc!])
-fi
-
-have_tcmalloc=no
-if test "x$with_tcmalloc" = "xyes"; then
-  dnl Important: put malloc libs at the very end.
-  dnl Only newish versions have a .pc, thus try CHECK_LIB as well.
-  PKG_CHECK_MODULES([TCMALLOC], [libtcmalloc_minimal], [have_tcmalloc=yes], [have_tcmalloc=no])
-  if test "x$have_tcmalloc" != "xyes"; then
-    AC_CHECK_LIB([tcmalloc_minimal], [malloc], [have_tcmalloc=yes], [have_tcmalloc=no])
-    if test "x$have_tcmalloc" = "xyes"; then
-      TCMALLOC_CFLAGS=
-      TCMALLOC_LIBS="-ltcmalloc_minimal"
-      AC_SUBST([TCMALLOC_CFLAGS])
-      AC_SUBST([TCMALLOC_LIBS])
-    else
-      if test "x$with_tcmalloc_requested" = "xyes"; then
-        ARIA2_DEP_NOT_MET([tcmalloc_minimal])
-      fi
-    fi
-  fi
-fi
-
+dnl Put jemalloc check after the posix_memalign check.
+dnl jemalloc may implement posix_memalign while the usual CRT may not.
+dnl Since we aren't including its headers this will lead to undefined
+dnl posix_memalign() errors when compiling.
 have_jemalloc=no
 if test "x$with_jemalloc" = "xyes"; then
   dnl Important: put malloc libs at the very end.
@@ -667,7 +640,6 @@ OpenSSL:        $have_openssl (CFLAGS='$OPENSSL_CFLAGS' LIBS='$OPENSSL_LIBS')
 CA Bundle:      $ca_bundle
 LibCares:       $have_libcares (CFLAGS='$LIBCARES_CFLAGS' LIBS='$LIBCARES_LIBS')
 Zlib:           $have_zlib (CFLAGS='$ZLIB_CFLAGS' LIBS='$ZLIB_LIBS')
-Tcmalloc:       $have_tcmalloc (CFLAGS='$TCMALLOC_CFLAGS' LIBS='$TCMALLOC_LIBS')
 Jemalloc:       $have_jemalloc (CFLAGS='$JEMALLOC_CFLAGS' LIBS='$JEMALLOC_LIBS')
 Epoll:          $have_epoll
 Bittorrent:     $enable_bittorrent
