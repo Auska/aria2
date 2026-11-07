@@ -71,7 +71,7 @@ void GZipDecodingStreamFilterTest::testTransform()
   CPPUNIT_ASSERT(filter_->finished());
   std::string data = writer_->getString();
   std::shared_ptr<MessageDigest> sha1(MessageDigest::sha1());
-  sha1->update(data.data(), data.size());
+  sha1->update(std::as_bytes(std::span{data}));
   CPPUNIT_ASSERT_EQUAL(std::string("8b577b33c0411b2be9d4fa74c7402d54a8d21f96"),
                        util::toHex(sha1->digest()));
 }

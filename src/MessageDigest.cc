@@ -39,6 +39,8 @@
 
 #include "MessageDigestImpl.h"
 #include "util.h"
+#include <ranges>
+
 #include "array_fun.h"
 
 namespace aria2 {
@@ -99,13 +101,12 @@ std::vector<std::string> MessageDigest::getSupportedHashTypes()
 
 std::string MessageDigest::getSupportedHashTypeString()
 {
-  auto ht = getSupportedHashTypes();
-  std::stringstream ss;
-  std::copy(std::begin(ht), std::end(ht),
-            std::ostream_iterator<std::string>(ss, ", "));
-  auto res = ss.str();
-  if (!res.empty()) {
-    res.erase(ss.str().length() - 2);
+  std::string res;
+  for (const auto& hashType : getSupportedHashTypes()) {
+    if (!res.empty()) {
+      res += ", ";
+    }
+    res += hashType;
   }
   return res;
 }
@@ -117,12 +118,10 @@ size_t MessageDigest::getDigestLength(const std::string& hashType)
 
 bool MessageDigest::isStronger(const std::string& lhs, const std::string& rhs)
 {
-  auto lEntry = std::find_if(
-      std::begin(hashTypes), std::end(hashTypes),
-      [&lhs](const HashTypeEntry& entry) { return lhs == entry.hashType; });
-  auto rEntry = std::find_if(
-      std::begin(hashTypes), std::end(hashTypes),
-      [&rhs](const HashTypeEntry& entry) { return rhs == entry.hashType; });
+  auto lEntry = std::ranges::find_if(
+      hashTypes, [&lhs](const HashTypeEntry& entry) { return lhs == entry.hashType; });
+  auto rEntry = std::ranges::find_if(
+      hashTypes, [&rhs](const HashTypeEntry& entry) { return rhs == entry.hashType; });
   if (lEntry == std::end(hashTypes)) {
     return false;
   }
@@ -160,9 +159,9 @@ size_t MessageDigest::getDigestLength() const
 
 void MessageDigest::reset() { pImpl_->reset(); }
 
-MessageDigest& MessageDigest::update(const void* data, size_t length)
+MessageDigest& MessageDigest::update(std::span<const std::byte> data)
 {
-  pImpl_->update(data, length);
+  pImpl_->update(data);
   return *this;
 }
 

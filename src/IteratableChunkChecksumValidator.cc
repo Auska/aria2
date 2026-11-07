@@ -138,7 +138,7 @@ std::string IteratableChunkChecksumValidator::digest(int64_t offset,
       throw DL_ABORT_EX(
           fmt(EX_FILE_READ, dctx_->getBasePath().c_str(), "data is too short"));
     }
-    ctx_->update(buf.data(), r);
+    ctx_->update(std::as_bytes(std::span{buf.data(), static_cast<size_t>(r)}));
     offset += r;
   }
   return ctx_->digest();

@@ -95,19 +95,21 @@ protected:
 
   virtual std::string digest()
   {
-    return std::string((const char*)state_.bytes, sizeof(state_.bytes));
+    return std::string(reinterpret_cast<const char*>(state_.bytes),
+                       sizeof(state_.bytes));
   }
 
 public:
   AlgorithmImpl() = default;
 
-  virtual void update(const void* data, uint64_t len)
+  virtual void update(std::span<const std::byte> data)
   {
+    uint64_t len = data.size();
     if (unlikely(!len)) {
       return;
     }
 
-    auto bytes = reinterpret_cast<const uint8_t*>(data);
+    auto bytes = reinterpret_cast<const uint8_t*>(data.data());
     count_ += len;
 
     // We have data buffered...
@@ -348,7 +350,8 @@ public:
     state_.words[3] = __crypto_bswap(state_.words[3]);
 #endif // LITTLE_ENDIAN == BYTE_ORDER
 
-    auto rv = std::string((const char*)state_.bytes, sizeof(state_.bytes));
+    auto rv = std::string(reinterpret_cast<const char*>(state_.bytes),
+                          sizeof(state_.bytes));
     reset();
     return rv;
   }
@@ -735,7 +738,7 @@ private:
 protected:
   virtual std::string digest()
   {
-    return std::string((const char*)state_.bytes,
+    return std::string(reinterpret_cast<const char*>(state_.bytes),
                        sizeof(state_.bytes) - sizeof(word_t));
   }
 
@@ -1000,7 +1003,7 @@ private:
 protected:
   virtual std::string digest()
   {
-    return std::string((const char*)state_.bytes,
+    return std::string(reinterpret_cast<const char*>(state_.bytes),
                        sizeof(state_.bytes) - sizeof(word_t) * 2);
   }
 
@@ -1033,10 +1036,10 @@ static const std::set<std::string> names{
 
 // For fast name |lookup|
 static const std::unordered_map<std::string, Algorithms> mapped{
-    {"md5", algoMD5},        {"sha", algoSHA1},       {"sha1", algoSHA1},
-    {"sha-1", algoSHA1},     {"sha224", algoSHA224},  {"sha-224", algoSHA224},
-    {"sha256", algoSHA256},  {"sha-256", algoSHA256}, {"sha384", algoSHA384},
-    {"sha-384", algoSHA384}, {"sha512", algoSHA512},  {"sha-512", algoSHA512},
+    {"md5", Algorithms::MD5},        {"sha", Algorithms::SHA1},       {"sha1", Algorithms::SHA1},
+    {"sha-1", Algorithms::SHA1},     {"sha224", Algorithms::SHA224},  {"sha-224", Algorithms::SHA224},
+    {"sha256", Algorithms::SHA256},  {"sha-256", Algorithms::SHA256}, {"sha384", Algorithms::SHA384},
+    {"sha-384", Algorithms::SHA384}, {"sha512", Algorithms::SHA512},  {"sha-512", Algorithms::SHA512},
 };
 static const auto mapped_end = mapped.end();
 } // namespace
@@ -1047,7 +1050,7 @@ Algorithms crypto::hash::lookup(const std::string& name)
 {
   auto i = mapped.find(name);
   if (unlikely(i == mapped_end)) {
-    return algoNone;
+    return Algorithms::NONE;
   }
   return i->second;
 }
@@ -1055,22 +1058,22 @@ Algorithms crypto::hash::lookup(const std::string& name)
 std::unique_ptr<Algorithm> crypto::hash::create(Algorithms algo)
 {
   switch (algo) {
-  case algoMD5:
+  case Algorithms::MD5:
     return aria2::make_unique<MD5>();
 
-  case algoSHA1:
+  case Algorithms::SHA1:
     return aria2::make_unique<SHA1>();
 
-  case algoSHA224:
+  case Algorithms::SHA224:
     return aria2::make_unique<SHA224>();
 
-  case algoSHA256:
+  case Algorithms::SHA256:
     return aria2::make_unique<SHA256>();
 
-  case algoSHA384:
+  case Algorithms::SHA384:
     return aria2::make_unique<SHA384>();
 
-  case algoSHA512:
+  case Algorithms::SHA512:
     return aria2::make_unique<SHA512>();
 
   default:

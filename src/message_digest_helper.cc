@@ -58,24 +58,26 @@ std::string digest(MessageDigest* ctx, const std::shared_ptr<BinaryStream>& bs,
   size_t tail = res.rem;
   for (int64_t i = 0; i < iteration; ++i) {
     ssize_t readLength = bs->readData(buf.data(), buf.size(), offset);
-    if ((size_t)readLength != buf.size()) {
+    if (static_cast<size_t>(readLength) != buf.size()) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    ctx->update(buf.data(), readLength);
+    ctx->update(std::as_bytes(
+        std::span{buf.data(), static_cast<size_t>(readLength)}));
     offset += readLength;
   }
   if (tail) {
     ssize_t readLength = bs->readData(buf.data(), tail, offset);
-    if ((size_t)readLength != tail) {
+    if (static_cast<size_t>(readLength) != tail) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    ctx->update(buf.data(), readLength);
+    ctx->update(std::as_bytes(
+        std::span{buf.data(), static_cast<size_t>(readLength)}));
   }
   return ctx->digest();
 }
 
 void digest(unsigned char* md, size_t mdLength, MessageDigest* ctx,
-            const void* data, size_t length)
+            std::span<const std::byte> data)
 {
   size_t reqLength = ctx->getDigestLength();
   if (mdLength < reqLength) {
@@ -84,7 +86,7 @@ void digest(unsigned char* md, size_t mdLength, MessageDigest* ctx,
                           static_cast<unsigned long>(reqLength),
                           static_cast<unsigned long>(mdLength)));
   }
-  ctx->update(data, length);
+  ctx->update(data);
   ctx->digest(md);
 }
 

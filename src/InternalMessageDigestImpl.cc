@@ -62,9 +62,9 @@ public:
 
   virtual void reset() override { ctx_->reset(); }
 
-  virtual void update(const void* data, size_t length) override
+  virtual void update(std::span<const std::byte> data) override
   {
-    ctx_->update(data, length);
+    ctx_->update(data);
   }
 
   virtual void digest(unsigned char* md) override
@@ -77,12 +77,12 @@ private:
   std::unique_ptr<hash::Algorithm> ctx_;
 };
 
-typedef MessageDigestBase<hash::algoMD5> MessageDigestMD5;
-typedef MessageDigestBase<hash::algoSHA1> MessageDigestSHA1;
-typedef MessageDigestBase<hash::algoSHA224> MessageDigestSHA224;
-typedef MessageDigestBase<hash::algoSHA256> MessageDigestSHA256;
-typedef MessageDigestBase<hash::algoSHA384> MessageDigestSHA384;
-typedef MessageDigestBase<hash::algoSHA512> MessageDigestSHA512;
+using MessageDigestMD5 = MessageDigestBase<hash::Algorithms::MD5>;
+using MessageDigestSHA1 = MessageDigestBase<hash::Algorithms::SHA1>;
+using MessageDigestSHA224 = MessageDigestBase<hash::Algorithms::SHA224>;
+using MessageDigestSHA256 = MessageDigestBase<hash::Algorithms::SHA256>;
+using MessageDigestSHA384 = MessageDigestBase<hash::Algorithms::SHA384>;
+using MessageDigestSHA512 = MessageDigestBase<hash::Algorithms::SHA512>;
 
 } // namespace
 

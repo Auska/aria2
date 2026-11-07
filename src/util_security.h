@@ -196,7 +196,7 @@ public:
       return;
     }
     md_->reset();
-    md_->update(ipad_.data(), ipad_.length());
+    md_->update(std::as_bytes(std::span{ipad_}));
     clean_ = true;
   }
 
@@ -205,7 +205,7 @@ public:
    */
   void update(const std::string& data)
   {
-    md_->update(data.data(), data.length());
+    md_->update(std::as_bytes(std::span{data}));
     clean_ = false;
   }
 
@@ -214,7 +214,7 @@ public:
    */
   void update(std::span<const std::byte> data)
   {
-    md_->update(data.data(), data.size());
+    md_->update(std::as_bytes(std::span{data}));
     clean_ = false;
   }
 
@@ -227,8 +227,8 @@ public:
   {
     auto rv = md_->digest();
     md_->reset();
-    md_->update(opad_.data(), opad_.length());
-    md_->update(rv.data(), rv.length());
+    md_->update(std::as_bytes(std::span{opad_}));
+    md_->update(std::as_bytes(std::span{rv}));
     rv = md_->digest();
     clean_ = false;
     reset();

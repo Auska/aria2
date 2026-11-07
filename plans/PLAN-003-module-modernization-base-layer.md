@@ -362,7 +362,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
      `git grep -n 'PRId64\|PRIu64' -- src/message.h` 无命中；
      `git grep -nE '\bfmt\("[^"]*%' -- 'src/*.cc'` 无命中。
 
-2. [ ] **阶段 2：解析器簇（19 文件 / 4 344 行）**
+2. [x] **阶段 2：解析器簇（19 文件 / 4 344 行）**
    - 惯用法：10 处 `typedef`→`using`（`ValueBase.h`、`GenericParser.h:2`、
      `prefs.h` 等）；3 处非 scoped enum →
      `enum class`（`BencodeError`、`JsonError`、`StructElementType`，
@@ -385,7 +385,7 @@ isValidHash`（bool 正确）、`File::exists(std::string& err)`、`ErrorCode` �
      函数内 `static const`。
    - 门禁：同上；`git grep -nE '\*\s*\w+\s*,\s*(size_t|ssize_t)' -- 'src/BencodeParser.h' 'src/JsonParser.h' 'src/GenericParser.h'` 无命中。
 
-3. [ ] **阶段 3：摘要簇（18 文件 / 2 731 行）**
+3. [x] **阶段 3：摘要簇（18 文件 / 2 731 行）**
    - 惯用法：4 处 `typedef`→`using`（`MessageDigestImpl.h:53,54,55`、
      `InternalDHKeyExchange.h:46`）；
      1 处非 scoped enum → `enum class`（`crypto::hash::Algorithms`，

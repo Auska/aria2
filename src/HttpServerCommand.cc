@@ -33,6 +33,8 @@
  */
 /* copyright --> */
 #include "HttpServerCommand.h"
+
+#include <span>
 #include "SocketCore.h"
 #include "DownloadEngine.h"
 #include "HttpServer.h"
@@ -128,7 +130,7 @@ std::string createWebSocketServerKey(const std::string& clientKey)
   src += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
   unsigned char digest[20];
   message_digest::digest(digest, sizeof(digest), MessageDigest::sha1().get(),
-                         src.c_str(), src.size());
+                         std::as_bytes(std::span{src}));
   return base64::encode(&digest[0], &digest[sizeof(digest)]);
 }
 } // namespace

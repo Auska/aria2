@@ -50,7 +50,7 @@ size_t SHA1IOFile::onRead(void* ptr, size_t count)
 
 size_t SHA1IOFile::onWrite(const void* ptr, size_t count)
 {
-  sha1_->update(ptr, count);
+  sha1_->update(std::as_bytes(std::span{static_cast<const char*>(ptr), count}));
 
   return count;
 }

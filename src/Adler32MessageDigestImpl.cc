@@ -51,10 +51,10 @@ size_t Adler32MessageDigestImpl::getDigestLength() const { return length(); }
 
 void Adler32MessageDigestImpl::reset() { adler_ = adler32(0, Z_NULL, 0); }
 
-void Adler32MessageDigestImpl::update(const void* data, size_t length)
+void Adler32MessageDigestImpl::update(std::span<const std::byte> data)
 {
-  adler_ =
-      adler32(adler_, reinterpret_cast<const unsigned char*>(data), length);
+  adler_ = adler32(adler_, reinterpret_cast<const unsigned char*>(data.data()),
+                   data.size());
 }
 
 void Adler32MessageDigestImpl::digest(unsigned char* md)

@@ -38,6 +38,8 @@
 
 #include "common.h"
 
+#include <span>
+
 #include <string>
 #include <memory>
 #include <functional>
@@ -50,9 +52,9 @@ namespace aria2 {
 
 class MessageDigestImpl {
 public:
-  typedef std::function<std::unique_ptr<MessageDigestImpl>()> factory_t;
-  typedef std::tuple<factory_t, size_t> hash_info_t;
-  typedef std::map<std::string, hash_info_t> hashes_t;
+  using factory_t = std::function<std::unique_ptr<MessageDigestImpl>()>;
+  using hash_info_t = std::tuple<factory_t, size_t>;
+  using hashes_t = std::map<std::string, hash_info_t>;
 
   template <typename T> inline static hash_info_t make_hi()
   {
@@ -97,7 +99,7 @@ public:
 public:
   virtual size_t getDigestLength() const = 0;
   virtual void reset() = 0;
-  virtual void update(const void* data, size_t length) = 0;
+  virtual void update(std::span<const std::byte> data) = 0;
   virtual void digest(unsigned char* md) = 0;
 
 protected:

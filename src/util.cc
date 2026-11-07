@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "util.h"
 
+#include <span>
+
 #ifdef HAVE_SIGNAL_H
 #  include <signal.h>
 #endif // HAVE_SIGNAL_H
@@ -1921,8 +1923,8 @@ void generateRandomKey(unsigned char* key)
   unsigned char bytes[40];
   generateRandomData(
       std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
-  message_digest::digest(key, 20, MessageDigest::sha1().get(), bytes,
-                         sizeof(bytes));
+  message_digest::digest(key, 20, MessageDigest::sha1().get(),
+                         std::as_bytes(std::span{bytes}));
 }
 
 // Returns true is given numeric ipv4addr is in Private Address Space.

@@ -74,13 +74,15 @@ public:
   static size_t length() { return EVP_MD_size(init_fn()); }
   virtual size_t getDigestLength() const override { return len_; }
   virtual void reset() override { EVP_DigestInit_ex(ctx_, md_, nullptr); }
-  virtual void update(const void* data, size_t length) override
+  virtual void update(std::span<const std::byte> data) override
   {
-    auto bytes = reinterpret_cast<const char*>(data);
-    while (length) {
-      size_t l = std::min(length, (size_t)std::numeric_limits<uint32_t>::max());
+    const std::byte* bytes = data.data();
+    while (!data.empty()) {
+      size_t l =
+          std::min(data.size(),
+                   static_cast<size_t>(std::numeric_limits<uint32_t>::max()));
       EVP_DigestUpdate(ctx_, bytes, l);
-      length -= l;
+      data = data.subspan(l);
       bytes += l;
     }
   }
@@ -96,8 +98,8 @@ private:
   const size_t len_;
 };
 
-typedef MessageDigestBase<EVP_md5> MessageDigestMD5;
-typedef MessageDigestBase<EVP_sha1> MessageDigestSHA1;
+using MessageDigestMD5 = MessageDigestBase<EVP_md5>;
+using MessageDigestSHA1 = MessageDigestBase<EVP_sha1>;
 
 std::unique_ptr<MessageDigestImpl> MessageDigestImpl::sha1()
 {

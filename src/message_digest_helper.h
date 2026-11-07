@@ -37,6 +37,7 @@
 
 #include "common.h"
 
+#include <span>
 #include <string>
 #include <memory>
 
@@ -59,7 +60,7 @@ std::string digest(MessageDigest* ctx, const std::shared_ptr<BinaryStream>& bs,
  * Throws exception when mdLength is less than the size of message digest.
  */
 void digest(unsigned char* md, size_t mdLength, MessageDigest* ctx,
-            const void* data, size_t length);
+            std::span<const std::byte> data);
 
 } // namespace message_digest
 

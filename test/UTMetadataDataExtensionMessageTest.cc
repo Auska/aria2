@@ -5,6 +5,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "BtConstants.h"
+
+#include <span>
 #include "PieceStorage.h"
 #include "DownloadContext.h"
 #include "DirectDiskAdaptor.h"
@@ -83,8 +85,8 @@ void UTMetadataDataExtensionMessageTest::testDoReceivedAction()
 
   unsigned char infoHash[INFO_HASH_LENGTH];
   message_digest::digest(infoHash, INFO_HASH_LENGTH,
-                         MessageDigest::sha1().get(), metadata.data(),
-                         metadata.size());
+                         MessageDigest::sha1().get(),
+                         std::as_bytes(std::span{metadata}));
   {
     auto attrs = make_unique<TorrentAttribute>();
     attrs->infoHash = std::string(&infoHash[0], &infoHash[20]);

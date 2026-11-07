@@ -66,7 +66,7 @@ void IteratableChecksumValidator::validateChunk()
   std::array<unsigned char, 4_k> buf;
   size_t length = pieceStorage_->getDiskAdaptor()->readDataDropCache(
       buf.data(), buf.size(), currentOffset_);
-  ctx_->update(buf.data(), length);
+  ctx_->update(std::as_bytes(std::span{buf.data(), static_cast<size_t>(length)}));
   currentOffset_ += length;
   if (finished()) {
     std::string actualDigest = ctx_->digest();

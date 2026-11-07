@@ -33,6 +33,8 @@
  */
 /* copyright --> */
 #include "UTMetadataDataExtensionMessage.h"
+
+#include <span>
 #include "bencode2.h"
 #include "util.h"
 #include "a2functional.h"
@@ -91,8 +93,8 @@ void UTMetadataDataExtensionMessage::doReceivedAction()
       std::string metadata = util::toString(pieceStorage_->getDiskAdaptor());
       unsigned char infoHash[INFO_HASH_LENGTH];
       message_digest::digest(infoHash, INFO_HASH_LENGTH,
-                             MessageDigest::sha1().get(), metadata.data(),
-                             metadata.size());
+                             MessageDigest::sha1().get(),
+                             std::as_bytes(std::span{metadata}));
       if (memcmp(infoHash, bittorrent::getInfoHash(dctx_), INFO_HASH_LENGTH) ==
           0) {
         A2_LOG_INFO("Got ut_metadata");

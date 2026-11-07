@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "RpcMethodImpl.h"
 
+#include <span>
+
 #include <cassert>
 #include <algorithm>
 #include <sstream>
@@ -262,7 +264,7 @@ std::string getHexSha1(const std::string& s)
 {
   unsigned char hash[20];
   message_digest::digest(hash, sizeof(hash), MessageDigest::sha1().get(),
-                         s.data(), s.size());
+                         std::as_bytes(std::span{s}));
   return util::toHex(std::as_bytes(std::span{hash, sizeof(hash)}));
 }
 } // namespace

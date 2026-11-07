@@ -9,20 +9,21 @@
 #include <cstring>
 #include <memory>
 #include <set>
+#include <span>
 #include <string>
 #include <limits>
 
 namespace crypto {
 namespace hash {
 
-enum Algorithms {
-  algoNone = 0x0,
-  algoMD5 = 0x1,
-  algoSHA1 = 0x2,
-  algoSHA224 = 0x3,
-  algoSHA256 = 0x4,
-  algoSHA384 = 0x5,
-  algoSHA512 = 0x6,
+enum class Algorithms {
+  NONE = 0x0,
+  MD5 = 0x1,
+  SHA1 = 0x2,
+  SHA224 = 0x3,
+  SHA256 = 0x4,
+  SHA384 = 0x5,
+  SHA512 = 0x6,
 };
 
 class Algorithm {
@@ -31,11 +32,11 @@ public:
 
   virtual ~Algorithm() = default;
 
-  virtual void update(const void* data, uint64_t len) = 0;
+  virtual void update(std::span<const std::byte> data) = 0;
 
   inline void update(const std::string& data)
   {
-    return update(data.data(), data.length());
+    return update(std::as_bytes(std::span{data}));
   }
 
   virtual std::string finalize() = 0;
@@ -70,27 +71,27 @@ inline uint_fast16_t length(const std::string& name)
   return create(name)->length();
 }
 
-inline std::string compute(Algorithms algo, const void* data, uint_fast64_t len)
+inline std::string compute(Algorithms algo, std::span<const std::byte> data)
 {
   auto ctx = create(algo);
-  ctx->update(data, len);
+  ctx->update(data);
   return ctx->finalize();
 }
 
 inline std::string compute(Algorithms algo, const std::string& data)
 {
-  return compute(algo, data.data(), data.length());
+  return compute(algo, std::as_bytes(std::span{data}));
 }
 
-inline std::string compute(const std::string& name, const void* data,
-                           uint_fast64_t len)
+inline std::string compute(const std::string& name,
+                           std::span<const std::byte> data)
 {
-  return compute(lookup(name), data, len);
+  return compute(lookup(name), data);
 }
 
 inline std::string compute(const std::string& name, const std::string& data)
 {
-  return compute(lookup(name), data.data(), data.length());
+  return compute(lookup(name), std::as_bytes(std::span{data}));
 }
 
 } // namespace hash

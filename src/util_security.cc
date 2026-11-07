@@ -109,7 +109,7 @@ HMAC::HMAC(const std::string& algorithm, std::span<const std::byte> secret)
 
   if (secret.size() > blockSize_) {
     md_->reset();
-    md_->update(secret.data(), secret.size());
+    md_->update(std::as_bytes(std::span{secret}));
     auto hash = md_->digest();
     for (size_t i = 0uL, e = hash.length(); i < e; ++i) {
       ipad_.replace(i, 1, 1, hash[i] ^ 0x36);

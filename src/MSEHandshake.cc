@@ -34,6 +34,8 @@
 /* copyright --> */
 #include "MSEHandshake.h"
 
+#include <span>
+
 #include <array>
 #include <cstring>
 #include <cassert>
@@ -188,16 +190,16 @@ void MSEHandshake::initCipher(const unsigned char* infoHash)
 
   unsigned char localCipherKey[20];
   sha1_->reset();
-  message_digest::digest(localCipherKey, sizeof(localCipherKey), sha1_.get(), s,
-                         sizeof(s));
+  message_digest::digest(localCipherKey, sizeof(localCipherKey), sha1_.get(),
+                         std::as_bytes(std::span{s}));
   encryptor_ = make_unique<ARC4Encryptor>();
   encryptor_->init(localCipherKey, sizeof(localCipherKey));
 
   unsigned char peerCipherKey[20];
   memcpy(s, initiator_ ? "keyB" : "keyA", 4);
   sha1_->reset();
-  message_digest::digest(peerCipherKey, sizeof(peerCipherKey), sha1_.get(), s,
-                         sizeof(s));
+  message_digest::digest(peerCipherKey, sizeof(peerCipherKey), sha1_.get(),
+                         std::as_bytes(std::span{s}));
   decryptor_ = make_unique<ARC4Encryptor>();
   decryptor_->init(peerCipherKey, sizeof(peerCipherKey));
 
@@ -229,7 +231,8 @@ void MSEHandshake::createReq1Hash(unsigned char* md) const
   memcpy(buffer, "req1", 4);
   memcpy(buffer + 4, secret_, KEY_LENGTH);
   sha1_->reset();
-  message_digest::digest(md, 20, sha1_.get(), buffer, 4 + KEY_LENGTH);
+  message_digest::digest(md, 20, sha1_.get(),
+                         std::as_bytes(std::span{buffer, 4 + KEY_LENGTH}));
 }
 
 void MSEHandshake::createReq23Hash(unsigned char* md,
@@ -240,14 +243,16 @@ void MSEHandshake::createReq23Hash(unsigned char* md,
   memcpy(x + 4, infoHash, INFO_HASH_LENGTH);
   unsigned char xh[20];
   sha1_->reset();
-  message_digest::digest(xh, sizeof(xh), sha1_.get(), x, sizeof(x));
+  message_digest::digest(xh, sizeof(xh), sha1_.get(),
+                         std::as_bytes(std::span{x}));
 
   unsigned char y[4 + 96];
   memcpy(y, "req3", 4);
   memcpy(y + 4, secret_, KEY_LENGTH);
   unsigned char yh[20];
   sha1_->reset();
-  message_digest::digest(yh, sizeof(yh), sha1_.get(), y, sizeof(y));
+  message_digest::digest(yh, sizeof(yh), sha1_.get(),
+                         std::as_bytes(std::span{y}));
 
   for (size_t i = 0; i < 20; ++i) {
     md[i] = xh[i] ^ yh[i];

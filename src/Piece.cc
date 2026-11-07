@@ -207,7 +207,7 @@ bool Piece::updateHash(int64_t begin, const unsigned char* data,
     if (!mdctx_) {
       mdctx_ = MessageDigest::create(hashType_);
     }
-    mdctx_->update(data, dataLength);
+    mdctx_->update(std::as_bytes(std::span{data, dataLength}));
     nextBegin_ += dataLength;
     return true;
   }
@@ -242,7 +242,8 @@ void updateHashWithRead(MessageDigest* mdctx,
     if ((size_t)nread != buf.size()) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    mdctx->update(buf.data(), nread);
+    mdctx->update(
+        std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
     offset += nread;
   }
   if (res.rem) {
@@ -250,7 +251,8 @@ void updateHashWithRead(MessageDigest* mdctx,
     if (nread != res.rem) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
-    mdctx->update(buf.data(), nread);
+    mdctx->update(
+        std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
   }
 }
 } // namespace
@@ -268,7 +270,7 @@ Piece::getDigestWithWrCache(size_t pieceLength,
       if (goff < d->goff) {
         updateHashWithRead(mdctx.get(), adaptor, goff, d->goff - goff);
       }
-      mdctx->update(d->data + d->offset, d->len);
+      mdctx->update(std::as_bytes(std::span{d->data + d->offset, d->len}));
       goff = d->goff + d->len;
     }
     updateHashWithRead(mdctx.get(), adaptor, goff, start + length_ - goff);

@@ -35,6 +35,8 @@
 #ifndef D_ADLER32_MESSAGE_DIGEST_H
 #define D_ADLER32_MESSAGE_DIGEST_H
 
+#include <span>
+
 #include "MessageDigestImpl.h"
 
 namespace aria2 {
@@ -49,7 +51,7 @@ public:
   Adler32MessageDigestImpl();
   virtual size_t getDigestLength() const override;
   virtual void reset() override;
-  virtual void update(const void* data, size_t length) override;
+  virtual void update(std::span<const std::byte> data) override;
   virtual void digest(unsigned char* md) override;
   static size_t length();
 

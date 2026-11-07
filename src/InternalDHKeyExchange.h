@@ -43,7 +43,7 @@ namespace aria2 {
 
 class DHKeyExchange {
 private:
-  typedef bignum::ulong<1024> n; // aka max. 8096 bits
+  using n = bignum::ulong<1024>; // aka max. 8096 bits
   size_t keyLength_;
   n prime_;
   n generator_;

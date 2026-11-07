@@ -3,6 +3,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "DownloadContext.h"
+
+#include <span>
 #include "RequestGroup.h"
 #include "Option.h"
 #include "FileEntry.h"
@@ -76,9 +78,8 @@ void UTMetadataPostDownloadHandlerTest::testGetNextRequestGroups()
       "6:pieces60:"
       "AAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCe";
   unsigned char infoHash[20];
-  message_digest::digest(
-      infoHash, sizeof(infoHash), MessageDigest::sha1().get(),
-      reinterpret_cast<const unsigned char*>(metadata.data()), metadata.size());
+  message_digest::digest(infoHash, sizeof(infoHash), MessageDigest::sha1().get(),
+                         std::as_bytes(std::span{metadata}));
   dctx_->getFirstFileEntry()->setLength(metadata.size());
   std::vector<std::vector<std::string>> announceList;
   std::vector<std::string> announceTier;
