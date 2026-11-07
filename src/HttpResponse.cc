@@ -73,7 +73,7 @@ void HttpResponse::validateResponse() const
   switch (statusCode) {
   case 200: // OK
   case 206: // Partial Content
-    if (!httpHeader_->defined(HttpHeader::TRANSFER_ENCODING)) {
+    if (!httpHeader_->defined(HttpHeader::InterestingHeader::TRANSFER_ENCODING)) {
       // compare the received range against the requested range
       auto responseRange = httpHeader_->getRange();
       if (!httpRequest_->isRangeSatisfied(responseRange)) {
@@ -98,7 +98,7 @@ void HttpResponse::validateResponse() const
   case 303: // See Other
   case 307: // Temporary Redirect
   case 308: // Permanent Redirect
-    if (!httpHeader_->defined(HttpHeader::LOCATION)) {
+    if (!httpHeader_->defined(HttpHeader::InterestingHeader::LOCATION)) {
       throw DL_ABORT_EX2(fmt(EX_LOCATION_HEADER_REQUIRED, statusCode),
                          error_code::HTTP_PROTOCOL_ERROR);
     }
@@ -114,7 +114,7 @@ void HttpResponse::validateResponse() const
 std::string HttpResponse::determineFilename(bool contentDispositionUTF8) const
 {
   std::string contentDisposition = util::getContentDispositionFilename(
-      httpHeader_->find(HttpHeader::CONTENT_DISPOSITION),
+      httpHeader_->find(HttpHeader::InterestingHeader::CONTENT_DISPOSITION),
       contentDispositionUTF8);
   if (contentDisposition.empty()) {
     auto file = httpRequest_->getFile();
@@ -126,14 +126,14 @@ std::string HttpResponse::determineFilename(bool contentDispositionUTF8) const
   }
 
   A2_LOG_INFO(
-      fmt(MSG_CONTENT_DISPOSITION_DETECTED, cuid_, contentDisposition.c_str()));
+      fmt(MSG_CONTENT_DISPOSITION_DETECTED, cuid_, contentDisposition));
   return contentDisposition;
 }
 
 void HttpResponse::retrieveCookie()
 {
   Time now;
-  auto r = httpHeader_->equalRange(HttpHeader::SET_COOKIE);
+  auto r = httpHeader_->equalRange(HttpHeader::InterestingHeader::SET_COOKIE);
   for (; r.first != r.second; ++r.first) {
     httpRequest_->getCookieStorage()->parseAndStore(
         (*r.first).second, httpRequest_->getHost(), httpRequest_->getDir(),
@@ -150,7 +150,7 @@ bool HttpResponse::isRedirect() const
   case 303: // See Other
   case 307: // Temporary Redirect
   case 308: // Permanent Redirect
-    return httpHeader_->defined(HttpHeader::LOCATION);
+    return httpHeader_->defined(HttpHeader::InterestingHeader::LOCATION);
   }
   return false;
 }
@@ -161,27 +161,27 @@ void HttpResponse::processRedirect()
   if (!req->redirectUri(util::percentEncodeMini(getRedirectURI()))) {
     throw DL_RETRY_EX(fmt(
         "CUID#{} - Redirect to {} failed. It may not be a valid URI.",
-        cuid_, req->getCurrentUri().c_str()));
+        cuid_, req->getCurrentUri()));
   }
 
   A2_LOG_NOTICE(fmt(MSG_REDIRECT, cuid_,
-                    httpRequest_->getRequest()->getCurrentUri().c_str()));
+                    httpRequest_->getRequest()->getCurrentUri()));
 }
 
 const std::string& HttpResponse::getRedirectURI() const
 {
-  return httpHeader_->find(HttpHeader::LOCATION);
+  return httpHeader_->find(HttpHeader::InterestingHeader::LOCATION);
 }
 
 bool HttpResponse::isTransferEncodingSpecified() const
 {
-  return httpHeader_->defined(HttpHeader::TRANSFER_ENCODING);
+  return httpHeader_->defined(HttpHeader::InterestingHeader::TRANSFER_ENCODING);
 }
 
 const std::string& HttpResponse::getTransferEncoding() const
 {
   // TODO See TODO in getTransferEncodingStreamFilter()
-  return httpHeader_->find(HttpHeader::TRANSFER_ENCODING);
+  return httpHeader_->find(HttpHeader::InterestingHeader::TRANSFER_ENCODING);
 }
 
 std::unique_ptr<StreamFilter>
@@ -199,12 +199,12 @@ HttpResponse::getTransferEncodingStreamFilter() const
 
 bool HttpResponse::isContentEncodingSpecified() const
 {
-  return httpHeader_->defined(HttpHeader::CONTENT_ENCODING);
+  return httpHeader_->defined(HttpHeader::InterestingHeader::CONTENT_ENCODING);
 }
 
 const std::string& HttpResponse::getContentEncoding() const
 {
-  return httpHeader_->find(HttpHeader::CONTENT_ENCODING);
+  return httpHeader_->find(HttpHeader::InterestingHeader::CONTENT_ENCODING);
 }
 
 std::unique_ptr<StreamFilter>
@@ -244,8 +244,8 @@ std::string HttpResponse::getContentType() const
     return A2STR::NIL;
   }
 
-  const auto& ctype = httpHeader_->find(HttpHeader::CONTENT_TYPE);
-  auto i = std::find(ctype.begin(), ctype.end(), ';');
+  const auto& ctype = httpHeader_->find(HttpHeader::InterestingHeader::CONTENT_TYPE);
+  auto i = std::ranges::find(ctype, ';');
   Scip p = util::stripIter(ctype.begin(), i);
   return std::string(p.first, p.second);
 }
@@ -269,7 +269,7 @@ int HttpResponse::getStatusCode() const { return httpHeader_->getStatusCode(); }
 
 Time HttpResponse::getLastModifiedTime() const
 {
-  return Time::parseHTTPDate(httpHeader_->find(HttpHeader::LAST_MODIFIED));
+  return Time::parseHTTPDate(httpHeader_->find(HttpHeader::InterestingHeader::LAST_MODIFIED));
 }
 
 bool HttpResponse::supportsPersistentConnection() const
@@ -281,7 +281,7 @@ bool HttpResponse::supportsPersistentConnection() const
 // http://tools.ietf.org/html/rfc3230.
 void HttpResponse::getDigest(std::vector<Checksum>& result) const
 {
-  auto p = httpHeader_->equalRange(HttpHeader::DIGEST);
+  auto p = httpHeader_->equalRange(HttpHeader::InterestingHeader::DIGEST);
   for (; p.first != p.second; ++p.first) {
     const std::string& s = (*p.first).second;
     std::string::const_iterator itr = s.begin();

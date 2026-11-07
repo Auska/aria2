@@ -436,7 +436,7 @@ bool CookieStorage::load(const std::string& filename, time_t now)
   {
     BufferedFile fp{filename.c_str(), BufferedFile::READ};
     if (!fp) {
-      A2_LOG_ERROR(fmt("Failed to open cookie file {}", filename.c_str()));
+      A2_LOG_ERROR(fmt("Failed to open cookie file {}", filename));
       return false;
     }
     headlen = fp.read(std::as_writable_bytes(std::span{header}));
@@ -472,7 +472,7 @@ bool CookieStorage::load(const std::string& filename, time_t now)
     return true;
   }
   catch (RecoverableException& e) {
-    A2_LOG_ERROR(fmt("Failed to load cookies from {}", filename.c_str()));
+    A2_LOG_ERROR(fmt("Failed to load cookies from {}", filename));
     return false;
   }
 }
@@ -484,17 +484,17 @@ bool CookieStorage::saveNsFormat(const std::string& filename)
   {
     BufferedFile fp{tempfilename.c_str(), BufferedFile::WRITE};
     if (!fp) {
-      A2_LOG_ERROR(fmt("Cannot create cookie file {}", filename.c_str()));
+      A2_LOG_ERROR(fmt("Cannot create cookie file {}", filename));
       return false;
     }
     for (auto& p : lruTracker_) {
       if (!p.second->writeCookie(fp)) {
-        A2_LOG_ERROR(fmt("Failed to save cookies to {}", filename.c_str()));
+        A2_LOG_ERROR(fmt("Failed to save cookies to {}", filename));
         return false;
       }
     }
     if (fp.close() == EOF) {
-      A2_LOG_ERROR(fmt("Failed to save cookies to {}", filename.c_str()));
+      A2_LOG_ERROR(fmt("Failed to save cookies to {}", filename));
       return false;
     }
   }
@@ -502,8 +502,8 @@ bool CookieStorage::saveNsFormat(const std::string& filename)
     return true;
   }
   else {
-    A2_LOG_ERROR(fmt("Could not rename file {} as {}", tempfilename.c_str(),
-                     filename.c_str()));
+    A2_LOG_ERROR(fmt("Could not rename file {} as {}", tempfilename,
+                     filename));
     return false;
   }
 }

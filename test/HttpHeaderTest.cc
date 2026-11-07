@@ -32,7 +32,7 @@ void HttpHeaderTest::testGetRange()
   {
     HttpHeader httpHeader;
     httpHeader.put(
-        HttpHeader::CONTENT_RANGE,
+        HttpHeader::InterestingHeader::CONTENT_RANGE,
         "9223372036854775800-9223372036854775801/9223372036854775807");
 
     Range range = httpHeader.getRange();
@@ -44,7 +44,7 @@ void HttpHeaderTest::testGetRange()
   {
     HttpHeader httpHeader;
     httpHeader.put(
-        HttpHeader::CONTENT_RANGE,
+        HttpHeader::InterestingHeader::CONTENT_RANGE,
         "9223372036854775800-9223372036854775801/9223372036854775807");
 
     Range range = httpHeader.getRange();
@@ -55,7 +55,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes */1024");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes */1024");
 
     Range range = httpHeader.getRange();
 
@@ -65,7 +65,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes 0-9/*");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes 0-9/*");
 
     Range range = httpHeader.getRange();
 
@@ -75,7 +75,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes */*");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes */*");
 
     Range range = httpHeader.getRange();
 
@@ -85,7 +85,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes 0");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes 0");
 
     Range range = httpHeader.getRange();
 
@@ -95,7 +95,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes 0/");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes 0/");
 
     Range range = httpHeader.getRange();
 
@@ -106,7 +106,7 @@ void HttpHeaderTest::testGetRange()
   {
     // Support for non-compliant server
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes=0-1023/1024");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes=0-1023/1024");
 
     Range range = httpHeader.getRange();
 
@@ -116,7 +116,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes 0-/3");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes 0-/3");
     try {
       httpHeader.getRange();
       CPPUNIT_FAIL("Exception must be thrown");
@@ -127,7 +127,7 @@ void HttpHeaderTest::testGetRange()
   }
   {
     HttpHeader httpHeader;
-    httpHeader.put(HttpHeader::CONTENT_RANGE, "bytes -0/3");
+    httpHeader.put(HttpHeader::InterestingHeader::CONTENT_RANGE, "bytes -0/3");
     try {
       httpHeader.getRange();
       CPPUNIT_FAIL("Exception must be thrown");
@@ -141,11 +141,11 @@ void HttpHeaderTest::testGetRange()
 void HttpHeaderTest::testFindAll()
 {
   HttpHeader h;
-  h.put(HttpHeader::LINK, "100");
-  h.put(HttpHeader::LINK, "101");
-  h.put(HttpHeader::CONNECTION, "200");
+  h.put(HttpHeader::InterestingHeader::LINK, "100");
+  h.put(HttpHeader::InterestingHeader::LINK, "101");
+  h.put(HttpHeader::InterestingHeader::CONNECTION, "200");
 
-  std::vector<std::string> r(h.findAll(HttpHeader::LINK));
+  std::vector<std::string> r(h.findAll(HttpHeader::InterestingHeader::LINK));
   CPPUNIT_ASSERT_EQUAL((size_t)2, r.size());
   CPPUNIT_ASSERT_EQUAL(std::string("100"), r[0]);
   CPPUNIT_ASSERT_EQUAL(std::string("101"), r[1]);
@@ -156,13 +156,13 @@ void HttpHeaderTest::testClearField()
   HttpHeader h;
   h.setStatusCode(200);
   h.setVersion("HTTP/1.1");
-  h.put(HttpHeader::LINK, "Bar");
+  h.put(HttpHeader::InterestingHeader::LINK, "Bar");
 
-  CPPUNIT_ASSERT_EQUAL(std::string("Bar"), h.find(HttpHeader::LINK));
+  CPPUNIT_ASSERT_EQUAL(std::string("Bar"), h.find(HttpHeader::InterestingHeader::LINK));
 
   h.clearField();
 
-  CPPUNIT_ASSERT_EQUAL(std::string(""), h.find(HttpHeader::LINK));
+  CPPUNIT_ASSERT_EQUAL(std::string(""), h.find(HttpHeader::InterestingHeader::LINK));
   CPPUNIT_ASSERT_EQUAL(200, h.getStatusCode());
   CPPUNIT_ASSERT_EQUAL(std::string("HTTP/1.1"), h.getVersion());
 }
@@ -170,31 +170,31 @@ void HttpHeaderTest::testClearField()
 void HttpHeaderTest::testFieldContains()
 {
   HttpHeader h;
-  h.put(HttpHeader::CONNECTION, "Keep-Alive, Upgrade");
-  h.put(HttpHeader::UPGRADE, "WebSocket");
-  h.put(HttpHeader::SEC_WEBSOCKET_VERSION, "13");
-  h.put(HttpHeader::SEC_WEBSOCKET_VERSION, "8, 7");
-  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::CONNECTION, "upgrade"));
-  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::CONNECTION, "keep-alive"));
-  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::CONNECTION, "close"));
-  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::UPGRADE, "websocket"));
-  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::UPGRADE, "spdy"));
-  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::SEC_WEBSOCKET_VERSION, "13"));
-  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::SEC_WEBSOCKET_VERSION, "8"));
-  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::SEC_WEBSOCKET_VERSION, "6"));
+  h.put(HttpHeader::InterestingHeader::CONNECTION, "Keep-Alive, Upgrade");
+  h.put(HttpHeader::InterestingHeader::UPGRADE, "WebSocket");
+  h.put(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION, "13");
+  h.put(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION, "8, 7");
+  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::InterestingHeader::CONNECTION, "upgrade"));
+  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::InterestingHeader::CONNECTION, "keep-alive"));
+  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::InterestingHeader::CONNECTION, "close"));
+  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::InterestingHeader::UPGRADE, "websocket"));
+  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::InterestingHeader::UPGRADE, "spdy"));
+  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION, "13"));
+  CPPUNIT_ASSERT(h.fieldContains(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION, "8"));
+  CPPUNIT_ASSERT(!h.fieldContains(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION, "6"));
 }
 
 void HttpHeaderTest::testRemove()
 {
   HttpHeader h;
-  h.put(HttpHeader::CONNECTION, "close");
-  h.put(HttpHeader::TRANSFER_ENCODING, "chunked");
-  h.put(HttpHeader::TRANSFER_ENCODING, "gzip");
+  h.put(HttpHeader::InterestingHeader::CONNECTION, "close");
+  h.put(HttpHeader::InterestingHeader::TRANSFER_ENCODING, "chunked");
+  h.put(HttpHeader::InterestingHeader::TRANSFER_ENCODING, "gzip");
 
-  h.remove(HttpHeader::TRANSFER_ENCODING);
+  h.remove(HttpHeader::InterestingHeader::TRANSFER_ENCODING);
 
-  CPPUNIT_ASSERT(!h.defined(HttpHeader::TRANSFER_ENCODING));
-  CPPUNIT_ASSERT(h.defined(HttpHeader::CONNECTION));
+  CPPUNIT_ASSERT(!h.defined(HttpHeader::InterestingHeader::TRANSFER_ENCODING));
+  CPPUNIT_ASSERT(h.defined(HttpHeader::InterestingHeader::CONNECTION));
 }
 
 } // namespace aria2

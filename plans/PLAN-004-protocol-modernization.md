@@ -298,7 +298,7 @@ API **一并换成枚举类型**（引擎层调用点做单行适配）。
      `createNodeLookupTask(localNode_->getID())` 两侧同时变 `std::array`，源码不改）。
    - 门禁：见阶段 2 专项。
 
-3. [ ] **阶段 3：HTTP 簇（53 文件 / 9 107 行）**
+3. [x] **阶段 3：HTTP 簇（53 文件 / 9 107 行）**
    - 惯用法：`typedef`→`using` 2 处（`src/HttpConnection.h:79` `HttpRequestEntries`
      在全局命名空间、`src/WebSocketSessionMan.h:52-54` `WebSocketSessions`）；
      `enum class` 4 个（`InterestingHeader`、`ParserMode`、`HttpHeaderProcessor.cc:50`
@@ -556,6 +556,19 @@ BT 36（`AnnounceListTest`、`Bt*MessageTest`、`DefaultBt*Test`、
    `InternalDHKeyExchange` 未被编译器验证。
    另：`DHTID` 边界转换统一用 `src/DHTConstants.h` 新增的
    `inline DHTID toDHTID(const unsigned char*)`。
+8. **执行期修正（审查 #3）**：阶段 3 三处与计划文字的差异：
+   ①`InterestingHeader` 保留为 `HttpHeader` 的**嵌套** `enum class`，故 130 处
+   调用点写作 `HttpHeader::InterestingHeader::CONNECTION`；`MAX_INTERESTING_HEADER`
+   由枚举成员改为 `static constexpr size_t`（`= static_cast<size_t>(UPGRADE) + 1`），
+   `idInterestingHeader` 返回 `std::optional<HttpHeader::InterestingHeader>`，
+   `HttpHeaderProcessor::lastFieldHdKey_` 随之改为 `std::optional`，哨兵比较改真值判断。
+   ②`std::find` 实际只改了 **2 处容器级**调用（`src/HttpResponse.cc:248`
+   `std::ranges::find(ctype, ';')`、`src/HttpServerBodyCommand.cc:186-188`
+   `std::ranges::find(reqPath, '#')`/`'?'`）；其余 3 处是对 `[first,last)` 迭代器区间
+   的查找（`src/HttpHeader.cc:118,121,136,145`、`src/cookie_helper.cc:262-263`），
+   `std::ranges::find` 不接受迭代器区间，保留 `std::find`。
+   ③`src/LpdMessageReceiver.cc` 的跨组适配同时包含 `ParserMode::` 限定与
+   `parse(std::as_bytes(std::span{buf}.first(length)))` 两处改动。
 
 5. **反向修正**：初稿曾写「阶段 1 零跨组适配」「阶段 2 有 1 处适配」「`bittorrent_helper.h:301`
    的 `assertID`」，核对后分别改为 2 处、0 处、`:242`；初稿曾把

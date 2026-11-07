@@ -76,7 +76,8 @@ public:
   const std::unique_ptr<HttpHeaderProcessor>& getHttpHeaderProcessor() const;
 };
 
-typedef std::deque<std::unique_ptr<HttpRequestEntry>> HttpRequestEntries;
+using HttpRequestEntries =
+    std::deque<std::unique_ptr<HttpRequestEntry>>;
 
 class HttpConnection {
 private:

@@ -111,7 +111,7 @@ NsCookieParser::parse(const std::string& filename, time_t creationTime)
 {
   BufferedFile fp{filename.c_str(), BufferedFile::READ};
   if (!fp) {
-    throw DL_ABORT_EX(fmt("Failed to open file {}", filename.c_str()));
+    throw DL_ABORT_EX(fmt("Failed to open file {}", filename));
   }
   std::vector<std::unique_ptr<Cookie>> cookies;
   while (1) {

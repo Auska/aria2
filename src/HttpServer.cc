@@ -62,10 +62,10 @@ HttpServer::HttpServer(const std::shared_ptr<SocketCore>& socket)
       socketRecvBuffer_(std::make_shared<SocketRecvBuffer>(socket_)),
       socketBuffer_(socket),
       headerProcessor_(
-          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::SERVER_PARSER)),
+          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::SERVER_PARSER)),
       lastContentLength_(0),
       bodyConsumed_(0),
-      reqType_(RPC_TYPE_NONE),
+      reqType_(RequestType::RPC_TYPE_NONE),
       keepAlive_(true),
       gzip_(false),
       acceptsGZip_(false),
@@ -177,23 +177,24 @@ bool HttpServer::receiveRequest()
       throw DL_ABORT_EX(EX_EOF_FROM_PEER);
     }
   }
-  if (headerProcessor_->parse(socketRecvBuffer_->getBuffer(),
-                              socketRecvBuffer_->getBufferLength())) {
+  if (headerProcessor_->parse(std::as_bytes(
+          std::span{socketRecvBuffer_->getBuffer(),
+                    socketRecvBuffer_->getBufferLength()}))) {
     lastRequestHeader_ = headerProcessor_->getResult();
     A2_LOG_INFO(fmt("HTTP Server received request\n{}",
-                    headerProcessor_->getHeaderString().c_str()));
+                    headerProcessor_->getHeaderString()));
     socketRecvBuffer_->drain(headerProcessor_->getLastBytesProcessed());
     bodyConsumed_ = 0;
     if (setupResponseRecv() < 0) {
       A2_LOG_INFO("Request path is invalid. Ignore the request body.");
     }
     const std::string& contentLengthHdr =
-        lastRequestHeader_->find(HttpHeader::CONTENT_LENGTH);
+        lastRequestHeader_->find(HttpHeader::InterestingHeader::CONTENT_LENGTH);
     if (!contentLengthHdr.empty()) {
       if (!util::parseLLIntNoThrow(lastContentLength_, contentLengthHdr) ||
           lastContentLength_ < 0) {
         throw DL_ABORT_EX(
-            fmt("Invalid Content-Length={}", contentLengthHdr.c_str()));
+            fmt("Invalid Content-Length={}", contentLengthHdr));
       }
     }
     else {
@@ -203,7 +204,7 @@ bool HttpServer::receiveRequest()
 
     std::vector<Scip> acceptEncodings;
     const std::string& acceptEnc =
-        lastRequestHeader_->find(HttpHeader::ACCEPT_ENCODING);
+        lastRequestHeader_->find(HttpHeader::InterestingHeader::ACCEPT_ENCODING);
     util::splitIter(acceptEnc.begin(), acceptEnc.end(),
                     std::back_inserter(acceptEncodings), ',', true);
     acceptsGZip_ = false;
@@ -271,8 +272,8 @@ void HttpServer::feedResponse(int status, const std::string& headers,
           "Content-Length: {}\r\n"
           "Expires: {}\r\n"
           "Cache-Control: no-cache\r\n",
-          getStatusString(status), httpDate.c_str(),
-          static_cast<unsigned long>(text.size()), httpDate.c_str());
+          getStatusString(status), httpDate,
+          static_cast<unsigned long>(text.size()), httpDate);
   if (!contentType.empty()) {
     header += "Content-Type: ";
     header += contentType;
@@ -291,7 +292,7 @@ void HttpServer::feedResponse(int status, const std::string& headers,
   }
   header += headers;
   header += "\r\n";
-  A2_LOG_DEBUG(fmt("HTTP Server sends response:\n{}", header.c_str()));
+  A2_LOG_DEBUG(fmt("HTTP Server sends response:\n{}", header));
   socketBuffer_.pushStr(std::move(header));
   socketBuffer_.pushStr(std::move(text));
 }
@@ -304,8 +305,8 @@ void HttpServer::feedUpgradeResponse(const std::string& protocol,
                            "Connection: Upgrade\r\n"
                            "{}"
                            "\r\n",
-                           protocol.c_str(), headers.c_str());
-  A2_LOG_DEBUG(fmt("HTTP Server sends upgrade response:\n{}", header.c_str()));
+                           protocol, headers);
+  A2_LOG_DEBUG(fmt("HTTP Server sends upgrade response:\n{}", header));
   socketBuffer_.pushStr(std::move(header));
 }
 
@@ -323,7 +324,7 @@ bool HttpServer::authenticate()
   }
 
   const std::string& authHeader =
-      lastRequestHeader_->find(HttpHeader::AUTHORIZATION);
+      lastRequestHeader_->find(HttpHeader::InterestingHeader::AUTHORIZATION);
   if (authHeader.empty()) {
     return false;
   }
@@ -369,21 +370,21 @@ int HttpServer::setupResponseRecv()
   std::string path = createPath();
   if (getMethod() == "GET") {
     if (path == "/jsonrpc") {
-      reqType_ = RPC_TYPE_JSONP;
+      reqType_ = RequestType::RPC_TYPE_JSONP;
       lastBody_.reset();
       return 0;
     }
   }
   else if (getMethod() == "POST") {
     if (path == "/jsonrpc") {
-      if (reqType_ != RPC_TYPE_JSON) {
-        reqType_ = RPC_TYPE_JSON;
+      if (reqType_ != RequestType::RPC_TYPE_JSON) {
+        reqType_ = RequestType::RPC_TYPE_JSON;
         lastBody_ = make_unique<json::JsonDiskWriter>();
       }
       return 0;
     }
   }
-  reqType_ = RPC_TYPE_NONE;
+  reqType_ = RequestType::RPC_TYPE_NONE;
   lastBody_.reset();
   return -1;
 }

@@ -80,8 +80,8 @@ int getInteger(InputIterator first, InputIterator last)
 }
 } // namespace
 
-bool parseDate(time_t& time, std::string::const_iterator first,
-               std::string::const_iterator last)
+std::optional<time_t> parseDate(std::string::const_iterator first,
+                                std::string::const_iterator last)
 {
   // Following algorithm is described in
   // http://tools.ietf.org/html/rfc6265#section-5.1.1
@@ -186,20 +186,20 @@ bool parseDate(time_t& time, std::string::const_iterator first,
   if (!foundDayOfMonth || !foundMonth || !foundYear || !foundTime ||
       !in(dayOfMonth, 1, 31) || year < 1601 || hour > 23 || minute > 59 ||
       second > 59) {
-    return false;
+    return std::nullopt;
   }
   if ((month == 4 || month == 6 || month == 9 || month == 11) &&
       dayOfMonth > 30) {
-    return false;
+    return std::nullopt;
   }
   if (month == 2) {
     if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
       if (dayOfMonth > 29) {
-        return false;
+        return std::nullopt;
       }
     }
     else if (dayOfMonth > 28) {
-      return false;
+      return std::nullopt;
     }
   }
 
@@ -211,9 +211,11 @@ bool parseDate(time_t& time, std::string::const_iterator first,
   timespec.tm_mday = dayOfMonth;
   timespec.tm_mon = month - 1;
   timespec.tm_year = year - 1900;
-  time = timegm(&timespec);
-
-  return time != -1;
+  auto time = timegm(&timespec);
+  if (time == -1) {
+    return std::nullopt;
+  }
+  return time;
 }
 
 std::unique_ptr<Cookie> parse(const std::string& cookieStr,
@@ -272,12 +274,12 @@ std::unique_ptr<Cookie> parse(const std::string& cookieStr,
       ++i;
     }
     if (util::strieq(p.first, p.second, "expires")) {
-      if (parseDate(expiryTime, attrp.first, attrp.second)) {
-        foundExpires = true;
-      }
-      else {
+      auto expires = parseDate(attrp.first, attrp.second);
+      if (!expires) {
         return nullptr;
       }
+      expiryTime = *expires;
+      foundExpires = true;
     }
     else if (util::strieq(p.first, p.second, "max-age")) {
       if (attrp.first == attrp.second ||

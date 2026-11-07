@@ -46,39 +46,11 @@
 
 namespace aria2 {
 
-namespace {
-enum {
-  // Server mode
-  PREV_METHOD,
-  METHOD,
-  PREV_PATH,
-  PATH,
-  PREV_REQ_VERSION,
-  REQ_VERSION,
-  // Client mode,
-  PREV_RES_VERSION,
-  RES_VERSION,
-  PREV_STATUS_CODE,
-  STATUS_CODE,
-  PREV_REASON_PHRASE,
-  REASON_PHRASE,
-  // name/value header fields
-  PREV_EOL,
-  PREV_FIELD_NAME,
-  FIELD_NAME,
-  PREV_FIELD_VALUE,
-  FIELD_VALUE,
-  // End of header
-  PREV_EOH,
-  HEADERS_COMPLETE
-};
-} // namespace
-
 HttpHeaderProcessor::HttpHeaderProcessor(ParserMode mode)
     : mode_(mode),
-      state_(mode == CLIENT_PARSER ? PREV_RES_VERSION : PREV_METHOD),
+      state_(mode == ParserMode::CLIENT_PARSER ? ParseState::PREV_RES_VERSION
+                                               : ParseState::PREV_METHOD),
       lastBytesProcessed_(0),
-      lastFieldHdKey_(HttpHeader::MAX_INTERESTING_HEADER),
       result_(make_unique<HttpHeader>())
 {
 }
@@ -137,27 +109,29 @@ size_t ignoreText(std::string& buf, const unsigned char* data, size_t length,
 }
 } // namespace
 
-bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
+bool HttpHeaderProcessor::parse(std::span<const std::byte> data)
 {
+  auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
+  auto length = data.size();
   size_t i;
   lastBytesProcessed_ = 0;
   for (i = 0; i < length; ++i) {
-    unsigned char c = data[i];
+    unsigned char c = dataPtr[i];
     switch (state_) {
-    case PREV_METHOD:
+    case ParseState::PREV_METHOD:
       if (util::isLws(c) || util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad Request-Line: missing method");
       }
 
-      i = getToken(buf_, data, length, i);
-      state_ = METHOD;
+      i = getToken(buf_, dataPtr, length, i);
+      state_ = ParseState::METHOD;
       break;
 
-    case METHOD:
+    case ParseState::METHOD:
       if (util::isLws(c)) {
         result_->setMethod(buf_);
         buf_.clear();
-        state_ = PREV_PATH;
+        state_ = ParseState::PREV_PATH;
         break;
       }
 
@@ -165,10 +139,10 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         throw DL_ABORT_EX("Bad Request-Line: missing request-target");
       }
 
-      i = getToken(buf_, data, length, i);
+      i = getToken(buf_, dataPtr, length, i);
       break;
 
-    case PREV_PATH:
+    case ParseState::PREV_PATH:
       if (util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad Request-Line: missing request-target");
       }
@@ -177,15 +151,15 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         break;
       }
 
-      i = getToken(buf_, data, length, i);
-      state_ = PATH;
+      i = getToken(buf_, dataPtr, length, i);
+      state_ = ParseState::PATH;
       break;
 
-    case PATH:
+    case ParseState::PATH:
       if (util::isLws(c)) {
         result_->setRequestPath(buf_);
         buf_.clear();
-        state_ = PREV_REQ_VERSION;
+        state_ = ParseState::PREV_REQ_VERSION;
         break;
       }
 
@@ -193,10 +167,10 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         throw DL_ABORT_EX("Bad Request-Line: missing HTTP-version");
       }
 
-      i = getToken(buf_, data, length, i);
+      i = getToken(buf_, dataPtr, length, i);
       break;
 
-    case PREV_REQ_VERSION:
+    case ParseState::PREV_REQ_VERSION:
       if (util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad Request-Line: missing HTTP-version");
       }
@@ -205,15 +179,15 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         break;
       }
 
-      i = getToken(buf_, data, length, i);
-      state_ = REQ_VERSION;
+      i = getToken(buf_, dataPtr, length, i);
+      state_ = ParseState::REQ_VERSION;
       break;
 
-    case REQ_VERSION:
+    case ParseState::REQ_VERSION:
       if (util::isCRLF(c)) {
         result_->setVersion(buf_);
         buf_.clear();
-        state_ = c == '\n' ? PREV_FIELD_NAME : PREV_EOL;
+        state_ = c == '\n' ? ParseState::PREV_FIELD_NAME : ParseState::PREV_EOL;
         break;
       }
 
@@ -221,23 +195,23 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         throw DL_ABORT_EX("Bad Request-Line: LWS after HTTP-version");
       }
 
-      i = getToken(buf_, data, length, i);
+      i = getToken(buf_, dataPtr, length, i);
       break;
 
-    case PREV_RES_VERSION:
+    case ParseState::PREV_RES_VERSION:
       if (util::isLws(c) || util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad Status-Line: missing HTTP-version");
       }
 
-      i = getToken(buf_, data, length, i);
-      state_ = RES_VERSION;
+      i = getToken(buf_, dataPtr, length, i);
+      state_ = ParseState::RES_VERSION;
       break;
 
-    case RES_VERSION:
+    case ParseState::RES_VERSION:
       if (util::isLws(c)) {
         result_->setVersion(buf_);
         buf_.clear();
-        state_ = PREV_STATUS_CODE;
+        state_ = ParseState::PREV_STATUS_CODE;
         break;
       }
 
@@ -247,21 +221,21 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
 
       break;
 
-    case PREV_STATUS_CODE:
+    case ParseState::PREV_STATUS_CODE:
       if (util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad Status-Line: missing status-code");
       }
 
       if (!util::isLws(c)) {
-        state_ = STATUS_CODE;
-        i = getToken(buf_, data, length, i);
+        state_ = ParseState::STATUS_CODE;
+        i = getToken(buf_, dataPtr, length, i);
       }
 
       break;
 
-    case STATUS_CODE:
+    case ParseState::STATUS_CODE:
       if (!util::isLws(c) && !util::isCRLF(c)) {
-        i = getToken(buf_, data, length, i);
+        i = getToken(buf_, dataPtr, length, i);
         break;
       }
 
@@ -278,22 +252,22 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         buf_.clear();
       }
       if (c == '\r') {
-        state_ = PREV_EOL;
+        state_ = ParseState::PREV_EOL;
         break;
       }
 
       if (c == '\n') {
-        state_ = PREV_FIELD_NAME;
+        state_ = ParseState::PREV_FIELD_NAME;
         break;
       }
 
-      state_ = PREV_REASON_PHRASE;
+      state_ = ParseState::PREV_REASON_PHRASE;
       break;
 
-    case PREV_REASON_PHRASE:
+    case ParseState::PREV_REASON_PHRASE:
       if (util::isCRLF(c)) {
         // The reason-phrase is completely optional.
-        state_ = c == '\n' ? PREV_FIELD_NAME : PREV_EOL;
+        state_ = c == '\n' ? ParseState::PREV_FIELD_NAME : ParseState::PREV_EOL;
         break;
       }
 
@@ -301,54 +275,54 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         break;
       }
 
-      state_ = REASON_PHRASE;
-      i = getText(buf_, data, length, i);
+      state_ = ParseState::REASON_PHRASE;
+      i = getText(buf_, dataPtr, length, i);
       break;
 
-    case REASON_PHRASE:
+    case ParseState::REASON_PHRASE:
       if (util::isCRLF(c)) {
         result_->setReasonPhrase(buf_);
         buf_.clear();
-        state_ = c == '\n' ? PREV_FIELD_NAME : PREV_EOL;
+        state_ = c == '\n' ? ParseState::PREV_FIELD_NAME : ParseState::PREV_EOL;
         break;
       }
 
-      i = getText(buf_, data, length, i);
+      i = getText(buf_, dataPtr, length, i);
       break;
 
-    case PREV_EOL:
+    case ParseState::PREV_EOL:
       if (c != '\n') {
         throw DL_ABORT_EX("Bad HTTP header: missing LF");
       }
 
-      state_ = PREV_FIELD_NAME;
+      state_ = ParseState::PREV_FIELD_NAME;
       break;
 
-    case PREV_FIELD_NAME:
+    case ParseState::PREV_FIELD_NAME:
       if (util::isLws(c)) {
         if (lastFieldName_.empty()) {
           throw DL_ABORT_EX("Bad HTTP header: field name starts with LWS");
         }
         // Evil Multi-line header field
-        state_ = FIELD_VALUE;
+        state_ = ParseState::FIELD_VALUE;
         break;
       }
 
       if (!lastFieldName_.empty()) {
-        if (lastFieldHdKey_ != HttpHeader::MAX_INTERESTING_HEADER) {
-          result_->put(lastFieldHdKey_, util::strip(buf_));
+        if (lastFieldHdKey_) {
+          result_->put(*lastFieldHdKey_, util::strip(buf_));
         }
         lastFieldName_.clear();
-        lastFieldHdKey_ = HttpHeader::MAX_INTERESTING_HEADER;
+        lastFieldHdKey_.reset();
         buf_.clear();
       }
       if (c == '\n') {
-        state_ = HEADERS_COMPLETE;
+        state_ = ParseState::HEADERS_COMPLETE;
         break;
       }
 
       if (c == '\r') {
-        state_ = PREV_EOH;
+        state_ = ParseState::PREV_EOH;
         break;
       }
 
@@ -356,11 +330,11 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         throw DL_ABORT_EX("Bad HTTP header: field name starts with ':'");
       }
 
-      state_ = FIELD_NAME;
-      i = getFieldNameToken(lastFieldName_, data, length, i);
+      state_ = ParseState::FIELD_NAME;
+      i = getFieldNameToken(lastFieldName_, dataPtr, length, i);
       break;
 
-    case FIELD_NAME:
+    case ParseState::FIELD_NAME:
       if (util::isLws(c) || util::isCRLF(c)) {
         throw DL_ABORT_EX("Bad HTTP header: missing ':'");
       }
@@ -368,21 +342,21 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
       if (c == ':') {
         util::lowercase(lastFieldName_);
         lastFieldHdKey_ = idInterestingHeader(lastFieldName_.c_str());
-        state_ = PREV_FIELD_VALUE;
+        state_ = ParseState::PREV_FIELD_VALUE;
         break;
       }
 
-      i = getFieldNameToken(lastFieldName_, data, length, i);
+      i = getFieldNameToken(lastFieldName_, dataPtr, length, i);
       break;
 
-    case PREV_FIELD_VALUE:
+    case ParseState::PREV_FIELD_VALUE:
       if (c == '\r') {
-        state_ = PREV_EOL;
+        state_ = ParseState::PREV_EOL;
         break;
       }
 
       if (c == '\n') {
-        state_ = PREV_FIELD_NAME;
+        state_ = ParseState::PREV_FIELD_NAME;
         break;
       }
 
@@ -390,44 +364,44 @@ bool HttpHeaderProcessor::parse(const unsigned char* data, size_t length)
         break;
       }
 
-      state_ = FIELD_VALUE;
-      if (lastFieldHdKey_ == HttpHeader::MAX_INTERESTING_HEADER) {
-        i = ignoreText(buf_, data, length, i);
+      state_ = ParseState::FIELD_VALUE;
+      if (!lastFieldHdKey_) {
+        i = ignoreText(buf_, dataPtr, length, i);
         break;
       }
 
-      i = getText(buf_, data, length, i);
+      i = getText(buf_, dataPtr, length, i);
       break;
 
-    case FIELD_VALUE:
+    case ParseState::FIELD_VALUE:
       if (c == '\r') {
-        state_ = PREV_EOL;
+        state_ = ParseState::PREV_EOL;
         break;
       }
 
       if (c == '\n') {
-        state_ = PREV_FIELD_NAME;
+        state_ = ParseState::PREV_FIELD_NAME;
         break;
       }
 
-      if (lastFieldHdKey_ == HttpHeader::MAX_INTERESTING_HEADER) {
-        i = ignoreText(buf_, data, length, i);
+      if (!lastFieldHdKey_) {
+        i = ignoreText(buf_, dataPtr, length, i);
         break;
       }
 
-      i = getText(buf_, data, length, i);
+      i = getText(buf_, dataPtr, length, i);
       break;
 
-    case PREV_EOH:
+    case ParseState::PREV_EOH:
       if (c != '\n') {
         throw DL_ABORT_EX("Bad HTTP header: "
                           "missing LF at the end of the header");
       }
 
-      state_ = HEADERS_COMPLETE;
+      state_ = ParseState::HEADERS_COMPLETE;
       break;
 
-    case HEADERS_COMPLETE:
+    case ParseState::HEADERS_COMPLETE:
       goto fin;
     }
   }
@@ -442,9 +416,9 @@ fin:
   }
 
   lastBytesProcessed_ = i;
-  headers_.append(&data[0], &data[i]);
+  headers_.append(&dataPtr[0], &dataPtr[i]);
 
-  if (state_ != HEADERS_COMPLETE) {
+  if (state_ != ParseState::HEADERS_COMPLETE) {
     return false;
   }
 
@@ -455,9 +429,9 @@ fin:
   // content-length.  There is no text about transfer-encoding and
   // content-range.  But there is no reason to send transfer-encoding
   // when range is set.
-  if (result_->defined(HttpHeader::TRANSFER_ENCODING)) {
-    result_->remove(HttpHeader::CONTENT_LENGTH);
-    result_->remove(HttpHeader::CONTENT_RANGE);
+  if (result_->defined(HttpHeader::InterestingHeader::TRANSFER_ENCODING)) {
+    result_->remove(HttpHeader::InterestingHeader::CONTENT_LENGTH);
+    result_->remove(HttpHeader::InterestingHeader::CONTENT_RANGE);
   }
 
   return true;
@@ -465,8 +439,7 @@ fin:
 
 bool HttpHeaderProcessor::parse(const std::string& data)
 {
-  return parse(reinterpret_cast<const unsigned char*>(data.c_str()),
-               data.size());
+  return parse(std::as_bytes(std::span{data}));
 }
 
 size_t HttpHeaderProcessor::getLastBytesProcessed() const
@@ -476,11 +449,11 @@ size_t HttpHeaderProcessor::getLastBytesProcessed() const
 
 void HttpHeaderProcessor::clear()
 {
-  state_ = (mode_ == CLIENT_PARSER ? PREV_RES_VERSION : PREV_METHOD);
+  state_ = (mode_ == ParserMode::CLIENT_PARSER ? ParseState::PREV_RES_VERSION : ParseState::PREV_METHOD);
   lastBytesProcessed_ = 0;
   buf_.clear();
   lastFieldName_.clear();
-  lastFieldHdKey_ = HttpHeader::MAX_INTERESTING_HEADER;
+  lastFieldHdKey_.reset();
   result_ = make_unique<HttpHeader>();
   headers_.clear();
 }

@@ -113,36 +113,24 @@ bool Cookie::isExpired(time_t base) const
 
 std::string Cookie::toNsCookieFormat() const
 {
-  std::stringstream ss;
+  std::string s;
   if (!hostOnly_) {
-    ss << ".";
+    s += '.';
   }
-  ss << domain_ << "\t";
-  if (hostOnly_) {
-    ss << "FALSE";
-  }
-  else {
-    ss << "TRUE";
-  }
-  ss << "\t";
-  ss << path_ << "\t";
-  if (secure_) {
-    ss << "TRUE";
-  }
-  else {
-    ss << "FALSE";
-  }
-  ss << "\t";
-  if (persistent_) {
-    ss << expiryTime_;
-  }
-  else {
-    ss << 0;
-  }
-  ss << "\t";
-  ss << name_ << "\t";
-  ss << value_;
-  return ss.str();
+  s += domain_;
+  s += '\t';
+  s += hostOnly_ ? "FALSE" : "TRUE";
+  s += '\t';
+  s += path_;
+  s += '\t';
+  s += secure_ ? "TRUE" : "FALSE";
+  s += '\t';
+  s += persistent_ ? std::to_string(expiryTime_) : std::string("0");
+  s += '\t';
+  s += name_;
+  s += '\t';
+  s += value_;
+  return s;
 }
 
 void Cookie::setName(std::string name) { name_ = std::move(name); }

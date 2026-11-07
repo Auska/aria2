@@ -154,7 +154,8 @@ void onFrameRecvChunkCallback(
   if (!wsSession->getIgnorePayload()) {
     // The return value is ignored here. It will be evaluated in
     // onMsgRecvCallback.
-    wsSession->parseUpdate(arg->data, arg->data_length);
+    wsSession->parseUpdate(std::as_bytes(
+        std::span{arg->data, static_cast<size_t>(arg->data_length)}));
   }
 }
 } // namespace
@@ -168,7 +169,7 @@ void onMsgRecvCallback(wslay_event_context_ptr wsctx,
   if (!wslay_is_ctrl_frame(arg->opcode)) {
     // TODO Only process text frame
     ssize_t error = 0;
-    auto json = wsSession->parseFinal(nullptr, 0, error);
+    auto json = wsSession->parseFinal({}, error);
     if (error < 0) {
       A2_LOG_INFO("Failed to parse JSON-RPC request");
       RpcResponse res(
@@ -311,23 +312,23 @@ bool WebSocketSession::closeSent()
   return wslay_event_get_close_sent(wsctx_);
 }
 
-ssize_t WebSocketSession::parseUpdate(const uint8_t* data, size_t len)
+ssize_t WebSocketSession::parseUpdate(std::span<const std::byte> data)
 {
   // Cap the number of bytes to feed the parser
   size_t maxlen = e_->getOption()->getAsInt(PREF_RPC_MAX_REQUEST_SIZE);
-  if (receivedLength_ + len <= maxlen) {
-    receivedLength_ += len;
+  if (receivedLength_ + data.size() <= maxlen) {
+    receivedLength_ += data.size();
   }
   else {
-    len = 0;
+    data = data.first(0);
   }
-  return parser_.parseUpdate(std::as_bytes(std::span{data, len}));
+  return parser_.parseUpdate(data);
 }
 
 std::unique_ptr<ValueBase>
-WebSocketSession::parseFinal(const uint8_t* data, size_t len, ssize_t& error)
+WebSocketSession::parseFinal(std::span<const std::byte> data, ssize_t& error)
 {
-  auto res = parser_.parseFinal(std::as_bytes(std::span{data, len}), error);
+  auto res = parser_.parseFinal(data, error);
   receivedLength_ = 0;
   return res;
 }

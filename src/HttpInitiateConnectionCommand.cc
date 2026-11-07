@@ -80,7 +80,7 @@ std::unique_ptr<Command> HttpInitiateConnectionCommand::createNextCommand(
             proxyRequest->getHost(), proxyRequest->getPort());
     std::string proxyMethod = resolveProxyMethod(getRequest()->getProtocol());
     if (!pooledSocket) {
-      A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr.c_str(), port));
+      A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr, port));
       createSocket();
       getSocket()->establishConnection(addr, port);
 
@@ -120,7 +120,7 @@ std::unique_ptr<Command> HttpInitiateConnectionCommand::createNextCommand(
         getDownloadEngine()->popPooledSocket(resolvedAddresses,
                                              getRequest()->getPort());
     if (!pooledSocket) {
-      A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr.c_str(), port));
+      A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr, port));
       createSocket();
       getSocket()->establishConnection(addr, port);
 

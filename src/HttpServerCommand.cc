@@ -139,10 +139,10 @@ namespace {
 int websocketHandshake(const HttpHeader* header)
 {
   if (header->getMethod() != "GET" ||
-      header->find(HttpHeader::SEC_WEBSOCKET_KEY).empty()) {
+      header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_KEY).empty()) {
     return 400;
   }
-  else if (header->find(HttpHeader::SEC_WEBSOCKET_VERSION) != "13") {
+  else if (header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION) != "13") {
     return 426;
   }
   else if (header->getRequestPath() != "/jsonrpc") {
@@ -211,16 +211,16 @@ bool HttpServerCommand::execute()
         return true;
       }
       auto& header = httpServer_->getRequestHeader();
-      if (header->fieldContains(HttpHeader::UPGRADE, "websocket") &&
-          header->fieldContains(HttpHeader::CONNECTION, "upgrade")) {
+      if (header->fieldContains(HttpHeader::InterestingHeader::UPGRADE, "websocket") &&
+          header->fieldContains(HttpHeader::InterestingHeader::CONNECTION, "upgrade")) {
 #ifdef ENABLE_WEBSOCKET
         int status = websocketHandshake(header.get());
         if (status == 101) {
           std::string serverKey = createWebSocketServerKey(
-              header->find(HttpHeader::SEC_WEBSOCKET_KEY));
+              header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_KEY));
           httpServer_->feedUpgradeResponse(
               "websocket",
-              fmt("Sec-WebSocket-Accept: {}\r\n", serverKey.c_str()));
+              fmt("Sec-WebSocket-Accept: {}\r\n", serverKey));
           e_->addCommand(make_unique<rpc::WebSocketResponseCommand>(
               getCuid(), httpServer_, e_, socket_));
         }

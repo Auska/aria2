@@ -37,7 +37,9 @@
 
 #include "common.h"
 
+#include <cstddef>
 #include <memory>
+#include <span>
 
 #include <wslay/wslay.h>
 
@@ -81,12 +83,12 @@ public:
   bool closeSent();
   // Parses partial request body. This function returns the number of
   // bytes processed if it succeeds, or negative error code.
-  ssize_t parseUpdate(const uint8_t* data, size_t len);
+  ssize_t parseUpdate(std::span<const std::byte> data);
   // Parses final part of request body and returns result.  The
   // |error| will be the number of bytes processed if this function
   // succeeds, or negative error code. Whether success or failure,
   // this function resets parser state and receivedLength_.
-  std::unique_ptr<ValueBase> parseFinal(const uint8_t* data, size_t len,
+  std::unique_ptr<ValueBase> parseFinal(std::span<const std::byte> data,
                                         ssize_t& error);
 
   const std::shared_ptr<SocketCore>& getSocket() const { return socket_; }

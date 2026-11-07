@@ -75,7 +75,7 @@ bool HttpListenCommand::execute()
       auto endpoint = socket->getPeerInfo();
 
       A2_LOG_INFO(fmt("RPC: Accepted the connection from {}:{}.",
-                      endpoint.addr.c_str(), endpoint.port));
+                      endpoint.addr, endpoint.port));
 
       e_->setNoWait(true);
       e_->addCommand(

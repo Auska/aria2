@@ -48,7 +48,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(HttpHeaderProcessorTest);
 
 void HttpHeaderProcessorTest::testParse1()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   std::string hd1 = "HTTP/1.1 200 OK\r\n";
   CPPUNIT_ASSERT(!proc.parse(hd1));
   CPPUNIT_ASSERT(proc.parse("\r\n"));
@@ -56,7 +56,7 @@ void HttpHeaderProcessorTest::testParse1()
 
 void HttpHeaderProcessorTest::testParse2()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   std::string hd1 = "HTTP/1.1 200 OK\n";
   CPPUNIT_ASSERT(!proc.parse(hd1));
   CPPUNIT_ASSERT(proc.parse("\n"));
@@ -64,7 +64,7 @@ void HttpHeaderProcessorTest::testParse2()
 
 void HttpHeaderProcessorTest::testParse3()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::SERVER_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::SERVER_PARSER);
   std::string s = "GET / HTTP/1.1\r\n"
                   "Host: aria2.sourceforge.net\r\n"
                   "Connection: close \r\n"     // trailing white space (BWS)
@@ -77,20 +77,20 @@ void HttpHeaderProcessorTest::testParse3()
                   "\r\n";
   CPPUNIT_ASSERT(proc.parse(s));
   auto h = proc.getResult();
-  CPPUNIT_ASSERT_EQUAL(std::string("close"), h->find(HttpHeader::CONNECTION));
+  CPPUNIT_ASSERT_EQUAL(std::string("close"), h->find(HttpHeader::InterestingHeader::CONNECTION));
   CPPUNIT_ASSERT_EQUAL(std::string("text1 text2 text3"),
-                       h->find(HttpHeader::ACCEPT_ENCODING));
+                       h->find(HttpHeader::InterestingHeader::ACCEPT_ENCODING));
   CPPUNIT_ASSERT_EQUAL(std::string("foo"),
-                       h->findAll(HttpHeader::AUTHORIZATION)[0]);
+                       h->findAll(HttpHeader::InterestingHeader::AUTHORIZATION)[0]);
   CPPUNIT_ASSERT_EQUAL(std::string("bar"),
-                       h->findAll(HttpHeader::AUTHORIZATION)[1]);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), h->find(HttpHeader::CONTENT_TYPE));
-  CPPUNIT_ASSERT(h->defined(HttpHeader::CONTENT_TYPE));
+                       h->findAll(HttpHeader::InterestingHeader::AUTHORIZATION)[1]);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), h->find(HttpHeader::InterestingHeader::CONTENT_TYPE));
+  CPPUNIT_ASSERT(h->defined(HttpHeader::InterestingHeader::CONTENT_TYPE));
 }
 
 void HttpHeaderProcessorTest::testGetLastBytesProcessed()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   std::string hd1 = "HTTP/1.1 200 OK\r\n"
                     "\r\nputbackme";
   CPPUNIT_ASSERT(proc.parse(hd1));
@@ -106,7 +106,7 @@ void HttpHeaderProcessorTest::testGetLastBytesProcessed()
 
 void HttpHeaderProcessorTest::testGetLastBytesProcessed_nullChar()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   const char x[] = "HTTP/1.1 200 OK\r\n"
                    "foo: foo\0bar\r\n"
                    "\r\nputbackme";
@@ -117,7 +117,7 @@ void HttpHeaderProcessorTest::testGetLastBytesProcessed_nullChar()
 
 void HttpHeaderProcessorTest::testGetHttpResponseHeader()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   std::string hd = "HTTP/1.1 404 Not Found\r\n"
                    "Date: Mon, 25 Jun 2007 16:04:59 GMT\r\n"
                    "Server: Apache/2.2.3 (Debian)\r\n"
@@ -137,15 +137,15 @@ void HttpHeaderProcessorTest::testGetHttpResponseHeader()
   CPPUNIT_ASSERT_EQUAL(std::string("Not Found"), header->getReasonPhrase());
   CPPUNIT_ASSERT_EQUAL(std::string("HTTP/1.1"), header->getVersion());
   CPPUNIT_ASSERT_EQUAL(std::string("9187"),
-                       header->find(HttpHeader::CONTENT_LENGTH));
+                       header->find(HttpHeader::InterestingHeader::CONTENT_LENGTH));
   CPPUNIT_ASSERT_EQUAL(std::string("text/html; charset=UTF-8"),
-                       header->find(HttpHeader::CONTENT_TYPE));
-  CPPUNIT_ASSERT(!header->defined(HttpHeader::CONTENT_ENCODING));
+                       header->find(HttpHeader::InterestingHeader::CONTENT_TYPE));
+  CPPUNIT_ASSERT(!header->defined(HttpHeader::InterestingHeader::CONTENT_ENCODING));
 }
 
 void HttpHeaderProcessorTest::testGetHttpResponseHeader_statusOnly()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 
   std::string hd = "HTTP/1.1 200\r\n\r\n";
   CPPUNIT_ASSERT(proc.parse(hd));
@@ -156,7 +156,7 @@ void HttpHeaderProcessorTest::testGetHttpResponseHeader_statusOnly()
 void HttpHeaderProcessorTest::
     testGetHttpResponseHeader_insufficientStatusLength()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 
   std::string hd = "HTTP/1.1 20\r\n\r\n";
   try {
@@ -170,7 +170,7 @@ void HttpHeaderProcessorTest::
 
 void HttpHeaderProcessorTest::testGetHttpResponseHeader_nameStartsWs()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 
   std::string hd = "HTTP/1.1 200\r\n"
                    " foo:bar\r\n"
@@ -210,7 +210,7 @@ void HttpHeaderProcessorTest::testGetHttpResponseHeader_nameStartsWs()
 
 void HttpHeaderProcessorTest::testGetHttpResponseHeader_teAndCl()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 
   std::string hd = "HTTP/1.1 200\r\n"
                    "Content-Length: 200\r\n"
@@ -222,14 +222,14 @@ void HttpHeaderProcessorTest::testGetHttpResponseHeader_teAndCl()
 
   auto httpHeader = proc.getResult();
   CPPUNIT_ASSERT_EQUAL(std::string("chunked"),
-                       httpHeader->find(HttpHeader::TRANSFER_ENCODING));
-  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::CONTENT_LENGTH));
-  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::CONTENT_RANGE));
+                       httpHeader->find(HttpHeader::InterestingHeader::TRANSFER_ENCODING));
+  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::InterestingHeader::CONTENT_LENGTH));
+  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::InterestingHeader::CONTENT_RANGE));
 }
 
 void HttpHeaderProcessorTest::testBeyondLimit()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 
   std::string hd1 = "HTTP/1.1 200 OK\r\n";
   std::string hd2 = std::string(1025, 'A');
@@ -246,7 +246,7 @@ void HttpHeaderProcessorTest::testBeyondLimit()
 
 void HttpHeaderProcessorTest::testGetHeaderString()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::CLIENT_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
   std::string hd = "HTTP/1.1 200 OK\r\n"
                    "Date: Mon, 25 Jun 2007 16:04:59 GMT\r\n"
                    "Server: Apache/2.2.3 (Debian)\r\n"
@@ -276,7 +276,7 @@ void HttpHeaderProcessorTest::testGetHeaderString()
 
 void HttpHeaderProcessorTest::testGetHttpRequestHeader()
 {
-  HttpHeaderProcessor proc(HttpHeaderProcessor::SERVER_PARSER);
+  HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::SERVER_PARSER);
   std::string request = "GET /index.html HTTP/1.1\r\n"
                         "Host: host\r\n"
                         "Connection: close\r\n"
@@ -291,8 +291,8 @@ void HttpHeaderProcessorTest::testGetHttpRequestHeader()
                        httpHeader->getRequestPath());
   CPPUNIT_ASSERT_EQUAL(std::string("HTTP/1.1"), httpHeader->getVersion());
   CPPUNIT_ASSERT_EQUAL(std::string("close"),
-                       httpHeader->find(HttpHeader::CONNECTION));
-  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::CONTENT_ENCODING));
+                       httpHeader->find(HttpHeader::InterestingHeader::CONNECTION));
+  CPPUNIT_ASSERT(!httpHeader->defined(HttpHeader::InterestingHeader::CONTENT_ENCODING));
 }
 
 } // namespace aria2

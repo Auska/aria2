@@ -45,17 +45,19 @@ HttpHeader::HttpHeader() : statusCode_(0) {}
 
 HttpHeader::~HttpHeader() = default;
 
-void HttpHeader::put(int hdKey, const std::string& value)
+void HttpHeader::put(InterestingHeader hdKey, const std::string& value)
 {
-  std::multimap<int, std::string>::value_type vt(hdKey, value);
-  table_.insert(vt);
+  table_.emplace(hdKey, value);
 }
 
-void HttpHeader::remove(int hdKey) { table_.erase(hdKey); }
+void HttpHeader::remove(InterestingHeader hdKey) { table_.erase(hdKey); }
 
-bool HttpHeader::defined(int hdKey) const { return table_.contains(hdKey); }
+bool HttpHeader::defined(InterestingHeader hdKey) const
+{
+  return table_.contains(hdKey);
+}
 
-const std::string& HttpHeader::find(int hdKey) const
+const std::string& HttpHeader::find(InterestingHeader hdKey) const
 {
   auto itr = table_.find(hdKey);
   if (itr == table_.end()) {
@@ -66,7 +68,7 @@ const std::string& HttpHeader::find(int hdKey) const
   }
 }
 
-std::vector<std::string> HttpHeader::findAll(int hdKey) const
+std::vector<std::string> HttpHeader::findAll(InterestingHeader hdKey) const
 {
   std::vector<std::string> v;
   auto itrpair = table_.equal_range(hdKey);
@@ -77,18 +79,18 @@ std::vector<std::string> HttpHeader::findAll(int hdKey) const
   return v;
 }
 
-std::pair<std::multimap<int, std::string>::const_iterator,
-          std::multimap<int, std::string>::const_iterator>
-HttpHeader::equalRange(int hdKey) const
+std::pair<HttpHeader::HeaderTable::const_iterator,
+          HttpHeader::HeaderTable::const_iterator>
+HttpHeader::equalRange(InterestingHeader hdKey) const
 {
   return table_.equal_range(hdKey);
 }
 
 Range HttpHeader::getRange() const
 {
-  const auto& rangeStr = find(CONTENT_RANGE);
+  const auto& rangeStr = find(InterestingHeader::CONTENT_RANGE);
   if (rangeStr.empty()) {
-    const std::string& clenStr = find(CONTENT_LENGTH);
+    const std::string& clenStr = find(InterestingHeader::CONTENT_LENGTH);
     if (clenStr.empty()) {
       return Range();
     }
@@ -113,10 +115,10 @@ Range HttpHeader::getRange() const
   // server returns '100-199/200', omitting bytes-unit specifier
   // 'bytes'.  Moreover, some server may return like
   // 'bytes=100-199/200'.
-  auto byteRangeSpec = std::find(rangeStr.begin(), rangeStr.end(), ' ');
+  auto byteRangeSpec = std::ranges::find(rangeStr, ' ');
   if (byteRangeSpec == rangeStr.end()) {
     // check for 'bytes=100-199/200' case
-    byteRangeSpec = std::find(rangeStr.begin(), rangeStr.end(), '=');
+    byteRangeSpec = std::ranges::find(rangeStr, '=');
     if (byteRangeSpec == rangeStr.end()) {
       // we assume bytes-unit specifier omitted.
       byteRangeSpec = rangeStr.begin();
@@ -192,11 +194,9 @@ void HttpHeader::setReasonPhrase(const std::string& reasonPhrase)
   reasonPhrase_ = reasonPhrase;
 }
 
-bool HttpHeader::fieldContains(int hdKey, const char* value)
+bool HttpHeader::fieldContains(InterestingHeader hdKey, const char* value)
 {
-  std::pair<std::multimap<int, std::string>::const_iterator,
-            std::multimap<int, std::string>::const_iterator>
-      range = equalRange(hdKey);
+  auto range = equalRange(hdKey);
   for (auto i = range.first; i != range.second; ++i) {
     std::vector<Scip> values;
     util::splitIter((*i).second.begin(), (*i).second.end(),
@@ -214,7 +214,7 @@ bool HttpHeader::fieldContains(int hdKey, const char* value)
 
 bool HttpHeader::isKeepAlive() const
 {
-  const std::string& connection = find(CONNECTION);
+  const std::string& connection = find(InterestingHeader::CONNECTION);
   return !util::strieq(connection, "close") &&
          (version_ == "HTTP/1.1" || util::strieq(connection, "keep-alive"));
 }
@@ -247,17 +247,17 @@ constexpr const char* INTERESTING_HEADER_NAMES[] = {
 };
 } // namespace
 
-int idInterestingHeader(const char* hdName)
+std::optional<HttpHeader::InterestingHeader> idInterestingHeader(
+    const char* hdName)
 {
   auto i = std::lower_bound(std::begin(INTERESTING_HEADER_NAMES),
                             std::end(INTERESTING_HEADER_NAMES), hdName,
                             util::strless);
-  if (i != std::end(INTERESTING_HEADER_NAMES) && strcmp(*i, hdName) == 0) {
-    return i - std::begin(INTERESTING_HEADER_NAMES);
+  if (i == std::end(INTERESTING_HEADER_NAMES) || strcmp(*i, hdName) != 0) {
+    return std::nullopt;
   }
-  else {
-    return HttpHeader::MAX_INTERESTING_HEADER;
-  }
+  return static_cast<HttpHeader::InterestingHeader>(
+      i - std::begin(INTERESTING_HEADER_NAMES));
 }
 
 } // namespace aria2

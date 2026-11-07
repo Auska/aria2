@@ -92,7 +92,7 @@ std::unique_ptr<StreamFilter> getTransferEncodingStreamFilter(
     auto filter = httpResponse->getTransferEncodingStreamFilter();
     if (!filter) {
       throw DL_ABORT_EX(fmt(EX_TRANSFER_ENCODING_NOT_SUPPORTED,
-                            httpResponse->getTransferEncoding().c_str()));
+                            httpResponse->getTransferEncoding()));
     }
     filter->init();
     filter->installDelegate(std::move(delegate));
@@ -113,7 +113,7 @@ getContentEncodingStreamFilter(HttpResponse* httpResponse,
                       "implementation doesn't support it. The decoding "
                       "process is skipped and the downloaded content will be "
                       "still encoded.",
-                      httpResponse->getContentEncoding().c_str()));
+                      httpResponse->getContentEncoding()));
     }
     else {
       filter->init();
@@ -197,22 +197,22 @@ bool HttpResponseCommand::executeInternal()
     }
 
     A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED,
-                      GroupId::toHex(grp->getGID()).c_str(),
-                      grp->getFirstFilePath().c_str()));
+                      GroupId::toHex(grp->getGID()),
+                      grp->getFirstFilePath()));
     poolConnection();
     fe->poolRequest(req);
     return true;
   }
 
   if (!getPieceStorage()) {
-    if (httpHeader->defined(HttpHeader::DIGEST)) {
+    if (httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
       std::vector<Checksum> checksums;
       httpResponse->getDigest(checksums);
       for (const auto& checksum : checksums) {
         if (ctx->getHashType().empty()) {
           A2_LOG_DEBUG(fmt("Setting digest: type={}, digest={}",
-                           checksum.getHashType().c_str(),
-                           checksum.getDigest().c_str()));
+                           checksum.getHashType(),
+                           checksum.getDigest()));
           ctx->setDigest(checksum.getHashType(), checksum.getDigest());
           break;
         }
@@ -265,7 +265,7 @@ bool HttpResponseCommand::executeInternal()
       fe->setLength(0);
       if (req->getMethod() == Request::METHOD_GET &&
           (totalLength != 0 || !httpResponse->getHttpHeader()->defined(
-                                   HttpHeader::CONTENT_LENGTH))) {
+                                   HttpHeader::InterestingHeader::CONTENT_LENGTH))) {
         // DownloadContext::knowsTotalLength() == true only when
         // server says the size of file is 0 explicitly.
         getDownloadContext()->markTotalLengthIsUnknown();
@@ -276,7 +276,7 @@ bool HttpResponseCommand::executeInternal()
     return handleDefaultEncoding(std::move(httpResponse));
   }
 
-  if (!ctx->getHashType().empty() && httpHeader->defined(HttpHeader::DIGEST)) {
+  if (!ctx->getHashType().empty() && httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
     std::vector<Checksum> checksums;
     httpResponse->getDigest(checksums);
     for (const auto& checksum : checksums) {
@@ -428,8 +428,8 @@ bool HttpResponseCommand::handleOtherEncoding(
       getPieceStorage()->markAllPiecesDone();
       getDownloadContext()->setChecksumVerified(true);
       A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED,
-                        GroupId::toHex(getRequestGroup()->getGID()).c_str(),
-                        getRequestGroup()->getFirstFilePath().c_str()));
+                        GroupId::toHex(getRequestGroup()->getGID()),
+                        getRequestGroup()->getFirstFilePath()));
     }
     poolConnection();
     return true;

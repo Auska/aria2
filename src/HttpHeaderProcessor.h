@@ -36,18 +36,20 @@
 #define D_HTTP_HEADER_PROCESSOR_H
 
 #include "common.h"
+#include "HttpHeader.h"
 
-#include <utility>
-#include <string>
+#include <cstddef>
 #include <memory>
+#include <optional>
+#include <span>
+#include <string>
+#include <utility>
 
 namespace aria2 {
 
-class HttpHeader;
-
 class HttpHeaderProcessor {
 public:
-  enum ParserMode { CLIENT_PARSER, SERVER_PARSER };
+  enum class ParserMode { CLIENT_PARSER, SERVER_PARSER };
 
   HttpHeaderProcessor(ParserMode mode);
 
@@ -57,7 +59,7 @@ public:
    * This function stops processing data when end of header is
    * reached.
    */
-  bool parse(const unsigned char* data, size_t length);
+  bool parse(std::span<const std::byte> data);
   bool parse(const std::string& data);
 
   /**
@@ -81,12 +83,38 @@ public:
   void clear();
 
 private:
+  enum class ParseState {
+    // Server mode
+    PREV_METHOD,
+    METHOD,
+    PREV_PATH,
+    PATH,
+    PREV_REQ_VERSION,
+    REQ_VERSION,
+    // Client mode,
+    PREV_RES_VERSION,
+    RES_VERSION,
+    PREV_STATUS_CODE,
+    STATUS_CODE,
+    PREV_REASON_PHRASE,
+    REASON_PHRASE,
+    // name/value header fields
+    PREV_EOL,
+    PREV_FIELD_NAME,
+    FIELD_NAME,
+    PREV_FIELD_VALUE,
+    FIELD_VALUE,
+    // End of header
+    PREV_EOH,
+    HEADERS_COMPLETE
+  };
+
   ParserMode mode_;
-  int state_;
+  ParseState state_;
   size_t lastBytesProcessed_;
   std::string buf_;
   std::string lastFieldName_;
-  int lastFieldHdKey_;
+  std::optional<HttpHeader::InterestingHeader> lastFieldHdKey_;
   std::unique_ptr<HttpHeader> result_;
   std::string headers_;
 };

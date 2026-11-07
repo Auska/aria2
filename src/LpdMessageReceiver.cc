@@ -92,10 +92,9 @@ std::unique_ptr<LpdMessage> LpdMessageReceiver::receiveMessage()
       A2_LOG_INFO_EX("Failed to receive LPD message.", e);
       return nullptr;
     }
-    HttpHeaderProcessor proc(HttpHeaderProcessor::SERVER_PARSER);
+    HttpHeaderProcessor proc(HttpHeaderProcessor::ParserMode::SERVER_PARSER);
     try {
-      if (!proc.parse(reinterpret_cast<const unsigned char*>(buf.data()),
-                      length)) {
+      if (!proc.parse(std::as_bytes(std::span{buf}.first(length)))) {
         // UDP packet must contain whole HTTP header block.
         continue;
       }
@@ -105,9 +104,9 @@ std::unique_ptr<LpdMessage> LpdMessageReceiver::receiveMessage()
       continue;
     }
     auto header = proc.getResult();
-    const std::string& infoHashString = header->find(HttpHeader::INFOHASH);
+    const std::string& infoHashString = header->find(HttpHeader::InterestingHeader::INFOHASH);
     uint32_t port = 0;
-    if (!util::parseUIntNoThrow(port, header->find(HttpHeader::PORT)) ||
+    if (!util::parseUIntNoThrow(port, header->find(HttpHeader::InterestingHeader::PORT)) ||
         port > UINT16_MAX || port == 0) {
       A2_LOG_INFO(fmt("Bad LPD port={}", port));
       continue;

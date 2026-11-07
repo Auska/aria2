@@ -183,10 +183,8 @@ bool HttpServerBodyCommand::execute()
 
       if (httpServer_->receiveBody()) {
         std::string reqPath = httpServer_->getRequestPath();
-        reqPath.erase(std::find(reqPath.begin(), reqPath.end(), '#'),
-                      reqPath.end());
-        std::string query(std::find(reqPath.begin(), reqPath.end(), '?'),
-                          reqPath.end());
+        reqPath.erase(std::ranges::find(reqPath, '#'), reqPath.end());
+        std::string query(std::ranges::find(reqPath, '?'), reqPath.end());
         reqPath.erase(reqPath.size() - query.size(), query.size());
 
         if (httpServer_->getMethod() == "OPTIONS") {
@@ -194,15 +192,15 @@ bool HttpServerBodyCommand::execute()
           // See http://www.w3.org/TR/cors/
           auto& header = httpServer_->getRequestHeader();
           std::string accessControlHeaders;
-          if (!header->find(HttpHeader::ORIGIN).empty() &&
-              !header->find(HttpHeader::ACCESS_CONTROL_REQUEST_METHOD)
+          if (!header->find(HttpHeader::InterestingHeader::ORIGIN).empty() &&
+              !header->find(HttpHeader::InterestingHeader::ACCESS_CONTROL_REQUEST_METHOD)
                    .empty() &&
               !httpServer_->getAllowOrigin().empty()) {
             accessControlHeaders +=
                 "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
                 "Access-Control-Max-Age: 1728000\r\n";
             const std::string& accReqHeaders =
-                header->find(HttpHeader::ACCESS_CONTROL_REQUEST_HEADERS);
+                header->find(HttpHeader::InterestingHeader::ACCESS_CONTROL_REQUEST_HEADERS);
             if (!accReqHeaders.empty()) {
               // We allow all headers requested.
               accessControlHeaders += "Access-Control-Allow-Headers: ";
@@ -217,12 +215,12 @@ bool HttpServerBodyCommand::execute()
 
         // Do something for requestpath and body
         switch (httpServer_->getRequestType()) {
-        case RPC_TYPE_JSON:
-        case RPC_TYPE_JSONP: {
+        case RequestType::RPC_TYPE_JSON:
+        case RequestType::RPC_TYPE_JSONP: {
           std::string callback;
           std::unique_ptr<ValueBase> json;
           ssize_t error = 0;
-          if (httpServer_->getRequestType() == RPC_TYPE_JSONP) {
+          if (httpServer_->getRequestType() == RequestType::RPC_TYPE_JSONP) {
             json::JsonGetParam param = json::decodeGetParams(query);
             callback = param.callback;
             ssize_t error = 0;

@@ -33,34 +33,33 @@ CPPUNIT_TEST_SUITE_REGISTRATION(CookieHelperTest);
 void CookieHelperTest::testParseDate()
 {
   // RFC1123
-  time_t time = 0;
   std::string s = "Sat, 06 Sep 2008 15:26:33 GMT";
-  CPPUNIT_ASSERT(cookie::parseDate(time, s.begin(), s.end()));
-  CPPUNIT_ASSERT_EQUAL((time_t)1220714793, time);
+  CPPUNIT_ASSERT_EQUAL((time_t)1220714793,
+                       cookie::parseDate(s.begin(), s.end()).value());
   // RFC850
   s = "Saturday, 06-Sep-08 15:26:33 GMT";
-  CPPUNIT_ASSERT(cookie::parseDate(time, s.begin(), s.end()));
-  CPPUNIT_ASSERT_EQUAL((time_t)1220714793, time);
+  CPPUNIT_ASSERT_EQUAL((time_t)1220714793,
+                       cookie::parseDate(s.begin(), s.end()).value());
   // ANSI C's asctime()
   s = "Sun Sep  6 15:26:33 2008";
-  CPPUNIT_ASSERT(cookie::parseDate(time, s.begin(), s.end()));
-  CPPUNIT_ASSERT_EQUAL((time_t)1220714793, time);
+  CPPUNIT_ASSERT_EQUAL((time_t)1220714793,
+                       cookie::parseDate(s.begin(), s.end()).value());
   s = "Thu Jan 1 0:0:0 1970";
-  CPPUNIT_ASSERT(cookie::parseDate(time, s.begin(), s.end()));
-  CPPUNIT_ASSERT_EQUAL((time_t)0, time);
+  CPPUNIT_ASSERT_EQUAL((time_t)0,
+                       cookie::parseDate(s.begin(), s.end()).value());
 
   s = "Thu Jan 1 1970 0:";
-  CPPUNIT_ASSERT(!cookie::parseDate(time, s.begin(), s.end()));
+  CPPUNIT_ASSERT(!cookie::parseDate(s.begin(), s.end()));
   s = "Thu Jan 1 1970 0:0";
-  CPPUNIT_ASSERT(!cookie::parseDate(time, s.begin(), s.end()));
+  CPPUNIT_ASSERT(!cookie::parseDate(s.begin(), s.end()));
   s = "Thu Jan 1 1970 0:0:";
-  CPPUNIT_ASSERT(!cookie::parseDate(time, s.begin(), s.end()));
+  CPPUNIT_ASSERT(!cookie::parseDate(s.begin(), s.end()));
 
   // Leap year
   s = "Tue, 29 Feb 2000 00:00:00 GMT";
-  CPPUNIT_ASSERT(cookie::parseDate(time, s.begin(), s.end()));
+  CPPUNIT_ASSERT(cookie::parseDate(s.begin(), s.end()));
   s = "Thu, 29 Feb 2001 00:00:00 GMT";
-  CPPUNIT_ASSERT(!cookie::parseDate(time, s.begin(), s.end()));
+  CPPUNIT_ASSERT(!cookie::parseDate(s.begin(), s.end()));
 }
 
 void CookieHelperTest::testDomainMatch()

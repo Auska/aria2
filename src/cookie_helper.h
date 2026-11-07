@@ -37,8 +37,9 @@
 
 #include "common.h"
 
-#include <string>
 #include <memory>
+#include <optional>
+#include <string>
 
 #include "a2time.h"
 
@@ -48,8 +49,8 @@ class Cookie;
 
 namespace cookie {
 
-bool parseDate(time_t& time, std::string::const_iterator first,
-               std::string::const_iterator last);
+std::optional<time_t> parseDate(std::string::const_iterator first,
+                                std::string::const_iterator last);
 
 std::unique_ptr<Cookie> parse(const std::string& cookieStr,
                               const std::string& requestHost,

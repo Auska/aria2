@@ -38,40 +38,20 @@
 #include "common.h"
 
 #include <map>
-#include <vector>
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace aria2 {
 
 struct Range;
 
 class HttpHeader {
-private:
-  std::multimap<int, std::string> table_;
-
-  // HTTP status code, e.g. 200
-  int statusCode_;
-
-  // The reason-phrase for the response
-  std::string reasonPhrase_;
-
-  // HTTP version, e.g. HTTP/1.1
-  std::string version_;
-
-  // HTTP Method, e.g. GET, POST, etc
-  std::string method_;
-
-  // Request Path
-  std::string requestPath_;
-
 public:
-  HttpHeader();
-  ~HttpHeader();
-
   // The list of headers we are interested in. Only those header
   // values are stored in table_. When updating this list, also update
   // INTERESTING_HEADER_NAMES in HttpHeader.cc
-  enum InterestingHeader {
+  enum class InterestingHeader {
     ACCEPT_ENCODING,
     ACCESS_CONTROL_REQUEST_HEADERS,
     ACCESS_CONTROL_REQUEST_METHOD,
@@ -95,19 +75,44 @@ public:
     SET_COOKIE,
     TRANSFER_ENCODING,
     UPGRADE,
-    MAX_INTERESTING_HEADER
   };
 
-  // For all methods, use lowercased header field name.
-  void put(int hdKey, const std::string& value);
-  bool defined(int hdKey) const;
-  const std::string& find(int hdKey) const;
-  std::vector<std::string> findAll(int hdKey) const;
-  std::pair<std::multimap<int, std::string>::const_iterator,
-            std::multimap<int, std::string>::const_iterator>
-  equalRange(int hdKey) const;
+  static constexpr size_t MAX_INTERESTING_HEADER =
+      static_cast<size_t>(InterestingHeader::UPGRADE) + 1;
 
-  void remove(int hdKey);
+private:
+  using HeaderTable = std::multimap<InterestingHeader, std::string>;
+
+  HeaderTable table_;
+
+  // HTTP status code, e.g. 200
+  int statusCode_;
+
+  // The reason-phrase for the response
+  std::string reasonPhrase_;
+
+  // HTTP version, e.g. HTTP/1.1
+  std::string version_;
+
+  // HTTP Method, e.g. GET, POST, etc
+  std::string method_;
+
+  // Request Path
+  std::string requestPath_;
+
+public:
+  HttpHeader();
+  ~HttpHeader();
+
+  // For all methods, use lowercased header field name.
+  void put(InterestingHeader hdKey, const std::string& value);
+  bool defined(InterestingHeader hdKey) const;
+  const std::string& find(InterestingHeader hdKey) const;
+  std::vector<std::string> findAll(InterestingHeader hdKey) const;
+  std::pair<HeaderTable::const_iterator, HeaderTable::const_iterator>
+  equalRange(InterestingHeader hdKey) const;
+
+  void remove(InterestingHeader hdKey);
 
   Range getRange() const;
 
@@ -154,14 +159,15 @@ public:
 
   // Returns true if header field |name| contains |value|. This method
   // assumes the values of the header field is delimited by ','.
-  bool fieldContains(int hdKey, const char* value);
+  bool fieldContains(InterestingHeader hdKey, const char* value);
 
   // Returns true if the headers indicate that the remote endpoint
   // keeps connection open.
   bool isKeepAlive() const;
 };
 
-int idInterestingHeader(const char* hdName);
+std::optional<HttpHeader::InterestingHeader> idInterestingHeader(
+    const char* hdName);
 
 } // namespace aria2
 

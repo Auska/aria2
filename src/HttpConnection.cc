@@ -64,13 +64,13 @@ namespace aria2 {
 HttpRequestEntry::HttpRequestEntry(std::unique_ptr<HttpRequest> httpRequest)
     : httpRequest_{std::move(httpRequest)},
       proc_{
-          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::CLIENT_PARSER)}
+          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::CLIENT_PARSER)}
 {
 }
 
 void HttpRequestEntry::resetHttpHeaderProcessor()
 {
-  proc_ = make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::CLIENT_PARSER);
+  proc_ = make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 }
 
 std::unique_ptr<HttpRequest> HttpRequestEntry::popHttpRequest()
@@ -98,10 +98,15 @@ HttpConnection::~HttpConnection() = default;
 
 std::string HttpConnection::eraseConfidentialInfo(const std::string& request)
 {
-  std::istringstream istr(request);
   std::string result;
-  std::string line;
-  while (getline(istr, line)) {
+  size_t pos = 0;
+  while (pos < request.size()) {
+    auto eol = request.find('\n', pos);
+    if (eol == std::string::npos) {
+      eol = request.size();
+    }
+    std::string line = request.substr(pos, eol - pos);
+    pos = eol + 1;
     if (util::istartsWith(line, "Authorization: ")) {
       result += "Authorization: <snip>\n";
     }
@@ -126,7 +131,7 @@ void HttpConnection::sendRequest(std::unique_ptr<HttpRequest> httpRequest,
                                  std::string request)
 {
   A2_LOG_INFO(
-      fmt(MSG_SENDING_REQUEST, cuid_, eraseConfidentialInfo(request).c_str()));
+      fmt(MSG_SENDING_REQUEST, cuid_, eraseConfidentialInfo(request)));
   socketBuffer_.pushStr(std::move(request));
   socketBuffer_.send();
   outstandingHttpRequests_.push_back(
@@ -158,10 +163,11 @@ std::unique_ptr<HttpResponse> HttpConnection::receiveResponse()
   }
 
   const auto& proc = outstandingHttpRequests_.front()->getHttpHeaderProcessor();
-  if (proc->parse(socketRecvBuffer_->getBuffer(),
-                  socketRecvBuffer_->getBufferLength())) {
+  if (proc->parse(std::as_bytes(
+          std::span{socketRecvBuffer_->getBuffer(),
+                    socketRecvBuffer_->getBufferLength()}))) {
     A2_LOG_INFO(fmt(MSG_RECEIVE_RESPONSE, cuid_,
-                    eraseConfidentialInfo(proc->getHeaderString()).c_str()));
+                    eraseConfidentialInfo(proc->getHeaderString())));
     auto result = proc->getResult();
     if (result->getStatusCode() / 100 == 1) {
       socketRecvBuffer_->drain(proc->getLastBytesProcessed());
