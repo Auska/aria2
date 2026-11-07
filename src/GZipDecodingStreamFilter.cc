@@ -46,7 +46,8 @@ const std::string GZipDecodingStreamFilter::NAME("GZipDecodingStreamFilter");
 GZipDecodingStreamFilter::GZipDecodingStreamFilter(
     std::unique_ptr<StreamFilter> delegate)
     : StreamFilter{std::move(delegate)},
-      strm_{nullptr},
+      strm_{},
+      initialized_{false},
       finished_{false},
       bytesProcessed_{0}
 {
@@ -58,65 +59,67 @@ void GZipDecodingStreamFilter::init()
 {
   finished_ = false;
   release();
-  strm_ = new z_stream();
-  strm_->zalloc = Z_NULL;
-  strm_->zfree = Z_NULL;
-  strm_->opaque = Z_NULL;
-  strm_->avail_in = 0;
-  strm_->next_in = Z_NULL;
+  strm_ = z_stream{};
+  strm_.zalloc = Z_NULL;
+  strm_.zfree = Z_NULL;
+  strm_.opaque = Z_NULL;
+  strm_.avail_in = 0;
+  strm_.next_in = Z_NULL;
 
   // initialize z_stream with gzip/zlib format auto detection enabled.
-  if (Z_OK != inflateInit2(strm_, 47)) {
+  if (Z_OK != inflateInit2(&strm_, 47)) {
     throw DL_ABORT_EX("Initializing z_stream failed.");
   }
+  initialized_ = true;
 }
 
 void GZipDecodingStreamFilter::release()
 {
-  if (strm_) {
-    inflateEnd(strm_);
-    delete strm_;
-    strm_ = nullptr;
+  if (initialized_) {
+    inflateEnd(&strm_);
+    initialized_ = false;
   }
 }
 
 ssize_t
 GZipDecodingStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
                                     const std::shared_ptr<Segment>& segment,
-                                    const unsigned char* inbuf, size_t inlen)
+                                    std::span<const std::byte> inbuf)
 {
   bytesProcessed_ = 0;
   ssize_t outlen = 0;
-  if (inlen == 0) {
+  if (inbuf.empty()) {
     return outlen;
   }
 
-  strm_->avail_in = inlen;
-  strm_->next_in = const_cast<unsigned char*>(inbuf);
+  strm_.avail_in = inbuf.size();
+  strm_.next_in = const_cast<unsigned char*>(
+      reinterpret_cast<const unsigned char*>(inbuf.data()));
 
-  unsigned char outbuf[OUTBUF_LENGTH];
+  std::array<std::byte, OUTBUF_LENGTH> outbuf;
   while (1) {
-    strm_->avail_out = OUTBUF_LENGTH;
-    strm_->next_out = outbuf;
+    strm_.avail_out = OUTBUF_LENGTH;
+    strm_.next_out = reinterpret_cast<unsigned char*>(outbuf.data());
 
-    int ret = ::inflate(strm_, Z_NO_FLUSH);
+    int ret = ::inflate(&strm_, Z_NO_FLUSH);
 
     if (ret == Z_STREAM_END) {
       finished_ = true;
     }
     else if (ret != Z_OK && ret != Z_BUF_ERROR) {
-      throw DL_ABORT_EX(fmt("libz::inflate() failed. cause:{}", strm_->msg));
+      throw DL_ABORT_EX(fmt("libz::inflate() failed. cause:{}", strm_.msg));
     }
 
-    size_t produced = OUTBUF_LENGTH - strm_->avail_out;
+    size_t produced = OUTBUF_LENGTH - strm_.avail_out;
 
-    outlen += getDelegate()->transform(out, segment, outbuf, produced);
-    if (strm_->avail_out > 0) {
+    outlen += getDelegate()->transform(out, segment,
+                                       std::span{outbuf}.first(produced));
+    if (strm_.avail_out > 0) {
       break;
     }
   }
-  assert(inlen >= strm_->avail_in);
-  bytesProcessed_ = inlen - strm_->avail_in;
+  assert(inbuf.size() >= strm_.avail_in);
+  bytesProcessed_ = inbuf.size() - strm_.avail_in;
   return outlen;
 }
 

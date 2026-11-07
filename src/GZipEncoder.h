@@ -36,6 +36,8 @@
 #define D_GZIP_ENCODER_H
 #include "common.h"
 
+#include <cstddef>
+#include <span>
 #include <string>
 
 #include <zlib.h>
@@ -44,12 +46,13 @@ namespace aria2 {
 
 class GZipEncoder {
 private:
-  z_stream* strm_;
+  z_stream strm_;
+  bool initialized_;
 
   // Internal buffer for deflated data.
   std::string internalBuf_;
 
-  std::string encode(const unsigned char* in, size_t length, int flush);
+  std::string encode(std::span<const std::byte> in, int flush);
   // Not implemented
   GZipEncoder& operator<<(char c);
 
@@ -81,9 +84,9 @@ public:
   // Feeds binary data pointed by in with size length to deflater and
   // returns compressed output available so far.  Don't use this
   // method with operator<< methods.
-  std::string encode(const unsigned char* in, size_t length)
+  std::string encode(std::span<const std::byte> in)
   {
-    return encode(in, length, Z_NO_FLUSH);
+    return encode(in, Z_NO_FLUSH);
   }
 
   // Releases allocated resources.

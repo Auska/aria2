@@ -72,7 +72,8 @@ void DHTRoutingTableSerializer::setNodes(
 }
 
 #define WRITE_CHECK(fp, ptr, count)                                            \
-  if (fp.write((ptr), (count)) != (count)) {                                   \
+  if (fp.write(std::span{reinterpret_cast<const std::byte*>(ptr),              \
+                         static_cast<size_t>(count)}) != (count)) {            \
     throw DL_ABORT_EX(                                                         \
         fmt("Failed to save DHT routing table to {}.", filename.c_str()));     \
   }

@@ -1,6 +1,8 @@
 #include "ServerStatMan.h"
 
+#include <cstddef>
 #include <iostream>
+#include <span>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -120,7 +122,7 @@ void ServerStatManTest::testLoad()
       "host=mirror, protocol=http, dl_speed=0, last_updated=1210000002, "
       "status=ERROR\n";
   BufferedFile fp(filename, BufferedFile::WRITE);
-  CPPUNIT_ASSERT_EQUAL((size_t)in.size(), fp.write(in.data(), in.size()));
+  CPPUNIT_ASSERT_EQUAL((size_t)in.size(), fp.write(std::as_bytes(std::span{in})));
   CPPUNIT_ASSERT(fp.close() != EOF);
 
   ServerStatMan ssm;

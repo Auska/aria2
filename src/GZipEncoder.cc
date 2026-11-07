@@ -43,52 +43,52 @@
 
 namespace aria2 {
 
-GZipEncoder::GZipEncoder() : strm_(nullptr) {}
+GZipEncoder::GZipEncoder() : strm_{}, initialized_(false) {}
 
 GZipEncoder::~GZipEncoder() { release(); }
 
 void GZipEncoder::init()
 {
   release();
-  strm_ = new z_stream();
-  strm_->zalloc = Z_NULL;
-  strm_->zfree = Z_NULL;
-  strm_->opaque = Z_NULL;
-  strm_->avail_in = 0;
-  strm_->next_in = Z_NULL;
+  strm_ = z_stream{};
+  strm_.zalloc = Z_NULL;
+  strm_.zfree = Z_NULL;
+  strm_.opaque = Z_NULL;
+  strm_.avail_in = 0;
+  strm_.next_in = Z_NULL;
 
-  if (Z_OK != deflateInit2(strm_, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31, 9,
+  if (Z_OK != deflateInit2(&strm_, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31, 9,
                            Z_DEFAULT_STRATEGY)) {
     throw DL_ABORT_EX("Initializing z_stream failed.");
   }
+  initialized_ = true;
 }
 
 void GZipEncoder::release()
 {
-  if (strm_) {
-    deflateEnd(strm_);
-    delete strm_;
-    strm_ = nullptr;
+  if (initialized_) {
+    deflateEnd(&strm_);
+    initialized_ = false;
   }
 }
 
-std::string GZipEncoder::encode(const unsigned char* in, size_t length,
-                                int flush)
+std::string GZipEncoder::encode(std::span<const std::byte> in, int flush)
 {
-  strm_->avail_in = length;
-  strm_->next_in = const_cast<unsigned char*>(in);
+  strm_.avail_in = in.size();
+  strm_.next_in = const_cast<unsigned char*>(
+      reinterpret_cast<const unsigned char*>(in.data()));
   std::string out;
-  std::array<unsigned char, 4_k> outbuf;
+  std::array<std::byte, 4_k> outbuf;
   while (1) {
-    strm_->avail_out = outbuf.size();
-    strm_->next_out = outbuf.data();
-    int ret = ::deflate(strm_, flush);
+    strm_.avail_out = outbuf.size();
+    strm_.next_out = reinterpret_cast<unsigned char*>(outbuf.data());
+    int ret = ::deflate(&strm_, flush);
     if (ret == Z_STREAM_ERROR) {
-      throw DL_ABORT_EX(fmt("libz::deflate() failed. cause:{}", strm_->msg));
+      throw DL_ABORT_EX(fmt("libz::deflate() failed. cause:{}", strm_.msg));
     }
-    size_t produced = outbuf.size() - strm_->avail_out;
-    out.append(outbuf.data(), outbuf.data() + produced);
-    if (strm_->avail_out > 0) {
+    size_t produced = outbuf.size() - strm_.avail_out;
+    out.append(reinterpret_cast<const char*>(outbuf.data()), produced);
+    if (strm_.avail_out > 0) {
       break;
     }
   }
@@ -97,20 +97,19 @@ std::string GZipEncoder::encode(const unsigned char* in, size_t length,
 
 std::string GZipEncoder::str()
 {
-  internalBuf_ += encode(nullptr, 0, Z_FINISH);
+  internalBuf_ += encode(std::span<const std::byte>{}, Z_FINISH);
   return internalBuf_;
 }
 
 GZipEncoder& GZipEncoder::operator<<(const char* s)
 {
-  internalBuf_ += encode(reinterpret_cast<const unsigned char*>(s), strlen(s));
+  internalBuf_ += encode(std::as_bytes(std::span{s, strlen(s)}));
   return *this;
 }
 
 GZipEncoder& GZipEncoder::operator<<(const std::string& s)
 {
-  internalBuf_ +=
-      encode(reinterpret_cast<const unsigned char*>(s.data()), s.size());
+  internalBuf_ += encode(std::as_bytes(std::span{s}));
   return *this;
 }
 
@@ -123,7 +122,7 @@ GZipEncoder& GZipEncoder::operator<<(int64_t i)
 
 GZipEncoder& GZipEncoder::write(const char* s, size_t length)
 {
-  internalBuf_ += encode(reinterpret_cast<const unsigned char*>(s), length);
+  internalBuf_ += encode(std::as_bytes(std::span{s, length}));
   return *this;
 }
 

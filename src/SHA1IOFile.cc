@@ -42,17 +42,17 @@ SHA1IOFile::SHA1IOFile() : sha1_(MessageDigest::sha1()) {}
 
 std::string SHA1IOFile::digest() { return sha1_->digest(); }
 
-size_t SHA1IOFile::onRead(void* ptr, size_t count)
+size_t SHA1IOFile::onRead(std::span<std::byte> data)
 {
   assert(0);
   return 0;
 }
 
-size_t SHA1IOFile::onWrite(const void* ptr, size_t count)
+size_t SHA1IOFile::onWrite(std::span<const std::byte> data)
 {
-  sha1_->update(std::as_bytes(std::span{static_cast<const char*>(ptr), count}));
+  sha1_->update(data);
 
-  return count;
+  return data.size();
 }
 
 char* SHA1IOFile::onGets(char* s, int size)

@@ -37,6 +37,8 @@
 
 #include "OutputFile.h"
 
+#include <cstddef>
+#include <span>
 #include <string>
 #include <iosfwd>
 
@@ -46,7 +48,7 @@ namespace aria2 {
 // fopen/fclose/fread/fwrite/fgets functionality.
 class IOFile : public OutputFile {
 private:
-  typedef void (IOFile::*unspecified_bool_type)() const;
+  using unspecified_bool_type = void (IOFile::*)() const;
   void goodState() const {}
 
 public:
@@ -56,9 +58,9 @@ public:
   // returns false.
   operator unspecified_bool_type() const;
   // wrapper for fread. Using 1 for 2nd argument of fread.
-  size_t read(void* ptr, size_t count);
+  size_t read(std::span<std::byte> data);
   // wrapper for fwrite. Using 1 for 2nd argument of fwrite.
-  size_t write(const void* ptr, size_t count);
+  size_t write(std::span<const std::byte> data);
   virtual size_t write(const char* str) override;
   // wrapper for fgets
   char* gets(char* s, int size);
@@ -87,8 +89,8 @@ public:
   static const char APPEND[];
 
 protected:
-  virtual size_t onRead(void* ptr, size_t count) = 0;
-  virtual size_t onWrite(const void* ptr, size_t count) = 0;
+  virtual size_t onRead(std::span<std::byte> data) = 0;
+  virtual size_t onWrite(std::span<const std::byte> data) = 0;
   virtual char* onGets(char* s, int size) = 0;
   virtual int onVprintf(const char* format, va_list va) = 0;
   virtual int onFlush() = 0;

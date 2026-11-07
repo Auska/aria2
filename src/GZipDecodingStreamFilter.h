@@ -45,7 +45,9 @@ namespace aria2 {
 // GZipDecodingStreamFilter can decode both gzip and deflate format.
 class GZipDecodingStreamFilter : public StreamFilter {
 private:
-  z_stream* strm_;
+  z_stream strm_;
+
+  bool initialized_;
 
   bool finished_;
 
@@ -62,8 +64,7 @@ public:
 
   virtual ssize_t transform(const std::shared_ptr<BinaryStream>& out,
                             const std::shared_ptr<Segment>& segment,
-                            const unsigned char* inbuf,
-                            size_t inlen) override;
+                            std::span<const std::byte> inbuf) override;
 
   virtual bool finished() override;
 

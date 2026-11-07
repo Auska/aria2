@@ -1,6 +1,8 @@
 #include "GZipFile.h"
 
+#include <cstddef>
 #include <iostream>
+#include <span>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -30,12 +32,12 @@ void GZipFileTest::testOpen()
   GZipFile wr(f.getPath().c_str(), GZipFile::WRITE);
   CPPUNIT_ASSERT(wr);
   std::string msg = "aria2 rules\nalpha\nbravo\ncharlie";
-  wr.write(msg.data(), msg.size());
+  wr.write(std::as_bytes(std::span{msg}));
   wr.close();
 
   GZipFile rd(f.getPath().c_str(), GZipFile::READ);
   char buf[256];
-  size_t len = rd.read(buf, 11);
+  size_t len = rd.read(std::as_writable_bytes(std::span{buf}.first(11)));
   CPPUNIT_ASSERT_EQUAL((size_t)11, len);
   buf[len] = '\0';
   CPPUNIT_ASSERT_EQUAL(std::string("aria2 rules"), std::string(buf));

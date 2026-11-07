@@ -34,8 +34,11 @@
 /* copyright --> */
 #include "ProtocolDetector.h"
 
+#include <array>
+#include <cstddef>
 #include <cstring>
 #include <iomanip>
+#include <span>
 
 #include "Request.h"
 #include "File.h"
@@ -62,9 +65,9 @@ bool ProtocolDetector::guessTorrentFile(const std::string& uri) const
 {
   BufferedFile fp(uri.c_str(), BufferedFile::READ);
   if (fp) {
-    char head[1];
-    if (fp.read(head, sizeof(head)) == sizeof(head)) {
-      return head[0] == 'd';
+    std::array<std::byte, 1> head;
+    if (fp.read(std::span{head}) == head.size()) {
+      return head[0] == std::byte{'d'};
     }
     else {
       return false;

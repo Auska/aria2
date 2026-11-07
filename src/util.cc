@@ -1882,7 +1882,7 @@ bool saveAs(const std::string& filename, const std::string& data,
     if (!fp) {
       return false;
     }
-    if (fp.write(data.data(), data.size()) != data.size()) {
+    if (fp.write(std::as_bytes(std::span{data})) != data.size()) {
       return false;
     }
     if (fp.close() == EOF) {

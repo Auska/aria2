@@ -42,7 +42,7 @@ namespace aria2 {
 
 namespace bittorrent {
 
-typedef ValueBaseDiskWriter<BencodeParser> BencodeDiskWriter;
+using BencodeDiskWriter = ValueBaseDiskWriter<BencodeParser>;
 
 } // namespace bittorrent
 

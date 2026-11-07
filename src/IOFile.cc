@@ -54,14 +54,14 @@ IOFile::operator unspecified_bool_type() const
   return ok ? &IOFile::goodState : nullptr;
 }
 
-size_t IOFile::read(void* ptr, size_t count) { return onRead(ptr, count); }
+size_t IOFile::read(std::span<std::byte> data) { return onRead(data); }
 
-size_t IOFile::write(const void* ptr, size_t count)
+size_t IOFile::write(std::span<const std::byte> data) { return onWrite(data); }
+
+size_t IOFile::write(const char* str)
 {
-  return onWrite(ptr, count);
+  return write(std::as_bytes(std::span{str, strlen(str)}));
 }
-
-size_t IOFile::write(const char* str) { return write(str, strlen(str)); }
 
 char* IOFile::gets(char* s, int size) { return onGets(s, size); }
 
@@ -106,10 +106,11 @@ bool IOFile::eof() { return !isOpen() || isEOF(); }
 size_t IOFile::transfer(std::ostream& out)
 {
   size_t count = 0;
-  std::array<char, 4_k> buf;
+  std::array<std::byte, 4_k> buf;
   while (1) {
-    size_t r = this->read(buf.data(), buf.size());
-    out.write(buf.data(), r);
+    size_t r = this->read(std::span{buf});
+    out.write(reinterpret_cast<const char*>(buf.data()),
+              static_cast<std::streamsize>(r));
     count += r;
     if (r < buf.size()) {
       break;

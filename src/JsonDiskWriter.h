@@ -42,7 +42,7 @@ namespace aria2 {
 
 namespace json {
 
-typedef ValueBaseDiskWriter<JsonParser> JsonDiskWriter;
+using JsonDiskWriter = ValueBaseDiskWriter<JsonParser>;
 
 } // namespace json
 

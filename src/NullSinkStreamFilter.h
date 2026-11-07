@@ -50,10 +50,9 @@ public:
 
   virtual ssize_t transform(const std::shared_ptr<BinaryStream>& out,
                             const std::shared_ptr<Segment>& segment,
-                            const unsigned char* inbuf,
-                            size_t inlen) override
+                            std::span<const std::byte> inbuf) override
   {
-    bytesProcessed_ = inlen;
+    bytesProcessed_ = inbuf.size();
     return bytesProcessed_;
   }
 

@@ -57,14 +57,14 @@ BufferedFile::BufferedFile(FILE* fp)
 
 BufferedFile::~BufferedFile() { close(); }
 
-size_t BufferedFile::onRead(void* ptr, size_t count)
+size_t BufferedFile::onRead(std::span<std::byte> data)
 {
-  return fread(ptr, 1, count, fp_);
+  return fread(data.data(), 1, data.size(), fp_);
 }
 
-size_t BufferedFile::onWrite(const void* ptr, size_t count)
+size_t BufferedFile::onWrite(std::span<const std::byte> data)
 {
-  return fwrite(ptr, 1, count, fp_);
+  return fwrite(data.data(), 1, data.size(), fp_);
 }
 
 char* BufferedFile::onGets(char* s, int size) { return fgets(s, size, fp_); }

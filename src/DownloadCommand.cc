@@ -35,6 +35,8 @@
 #include "DownloadCommand.h"
 
 #include <cassert>
+#include <cstddef>
+#include <span>
 
 #include "Request.h"
 #include "RequestGroup.h"
@@ -180,17 +182,19 @@ bool DownloadCommand::executeInternal()
       else {
         bufSize = getSocketRecvBuffer()->getBufferLength();
       }
-      streamFilter_->transform(diskAdaptor, segment,
-                               getSocketRecvBuffer()->getBuffer(), bufSize);
+      streamFilter_->transform(
+          diskAdaptor, segment,
+          std::as_bytes(std::span{getSocketRecvBuffer()->getBuffer(), bufSize}));
     }
     else {
       // It is possible that segment is completed but we have some bytes
       // of stream to read. For example, chunked encoding has "0"+CRLF
       // after data. After we read data(at this moment segment is
       // completed), we need another 3bytes(or more if it has trailers).
-      streamFilter_->transform(diskAdaptor, segment,
-                               getSocketRecvBuffer()->getBuffer(),
-                               getSocketRecvBuffer()->getBufferLength());
+      streamFilter_->transform(
+          diskAdaptor, segment,
+          std::as_bytes(std::span{getSocketRecvBuffer()->getBuffer(),
+                                  getSocketRecvBuffer()->getBufferLength()}));
       bufSize = streamFilter_->getBytesProcessed();
     }
     getSocketRecvBuffer()->drain(bufSize);

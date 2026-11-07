@@ -1,7 +1,9 @@
 #include "SinkStreamFilter.h"
 
+#include <cstddef>
 #include <cstdlib>
 #include <iostream>
+#include <span>
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Segment.h"
@@ -65,9 +67,8 @@ void SinkStreamFilterTest::testTransform_with_length()
   // segment_->getLength()-segment_->getWrittenLength() bytes are
   // written.
   std::string msg("01234567890123456");
-  ssize_t r = filter_->transform(
-      writer_, segment_, reinterpret_cast<const unsigned char*>(msg.c_str()),
-      msg.size());
+  ssize_t r =
+      filter_->transform(writer_, segment_, std::as_bytes(std::span{msg}));
   CPPUNIT_ASSERT_EQUAL((ssize_t)16, r);
 }
 
@@ -76,9 +77,8 @@ void SinkStreamFilterTest::testTransform_without_length()
   // If segment_->getLength() == 0, all incoming bytes are written.
   segment_->length = 0;
   std::string msg("01234567890123456");
-  ssize_t r = filter_->transform(
-      writer_, segment_, reinterpret_cast<const unsigned char*>(msg.c_str()),
-      msg.size());
+  ssize_t r =
+      filter_->transform(writer_, segment_, std::as_bytes(std::span{msg}));
   CPPUNIT_ASSERT_EQUAL((ssize_t)17, r);
 }
 

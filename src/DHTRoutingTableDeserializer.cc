@@ -61,7 +61,8 @@ DHTRoutingTableDeserializer::DHTRoutingTableDeserializer(int family)
 DHTRoutingTableDeserializer::~DHTRoutingTableDeserializer() = default;
 
 #define READ_CHECK(fp, ptr, count)                                             \
-  if (fp.read((ptr), (count)) != (count)) {                                    \
+  if (fp.read(std::span{reinterpret_cast<std::byte*>(ptr),                     \
+                        static_cast<size_t>(count)}) != (count)) {             \
     throw DL_ABORT_EX("Failed to load DHT routing table.");                    \
   }
 

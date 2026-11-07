@@ -48,8 +48,8 @@ public:
   virtual ~GZipFile();
 
 protected:
-  virtual size_t onRead(void* ptr, size_t count) override;
-  virtual size_t onWrite(const void* ptr, size_t count) override;
+  virtual size_t onRead(std::span<std::byte> data) override;
+  virtual size_t onWrite(std::span<const std::byte> data) override;
   virtual char* onGets(char* s, int size) override;
   virtual int onVprintf(const char* format, va_list va) override;
   virtual int onFlush() override;

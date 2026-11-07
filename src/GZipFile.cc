@@ -98,9 +98,10 @@ bool GZipFile::isEOF() const { return gzeof(fp_); }
 
 bool GZipFile::isOpen() const { return fp_; }
 
-size_t GZipFile::onRead(void* ptr, size_t count)
+size_t GZipFile::onRead(std::span<std::byte> buf)
 {
-  char* data = reinterpret_cast<char*>(ptr);
+  char* data = reinterpret_cast<char*>(buf.data());
+  size_t count = buf.size();
   size_t read = 0;
   while (count) {
     size_t len = std::min(count, (size_t)std::numeric_limits<unsigned>::max());
@@ -115,9 +116,10 @@ size_t GZipFile::onRead(void* ptr, size_t count)
   return read;
 }
 
-size_t GZipFile::onWrite(const void* ptr, size_t count)
+size_t GZipFile::onWrite(std::span<const std::byte> buf)
 {
-  const char* data = reinterpret_cast<const char*>(ptr);
+  const char* data = reinterpret_cast<const char*>(buf.data());
+  size_t count = buf.size();
   size_t written = 0;
   while (count) {
     size_t len = std::min(count, (size_t)std::numeric_limits<unsigned>::max());

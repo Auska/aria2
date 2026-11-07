@@ -50,9 +50,9 @@ public:
 
 protected:
   // wrapper for fread. Using 1 for 2nd argument of fread.
-  virtual size_t onRead(void* ptr, size_t count) override;
+  virtual size_t onRead(std::span<std::byte> data) override;
   // wrapper for fwrite. Using 1 for 2nd argument of fwrite.
-  virtual size_t onWrite(const void* ptr, size_t count) override;
+  virtual size_t onWrite(std::span<const std::byte> data) override;
   // wrapper for fgets
   virtual char* onGets(char* s, int size) override;
   virtual int onVprintf(const char* format, va_list va) override;

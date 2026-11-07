@@ -96,7 +96,7 @@ bool ServerStatMan::save(const std::string& filename) const
     for (auto& e : serverStats_) {
       std::string l = e->toString();
       l += "\n";
-      if (fp.write(l.data(), l.size()) != l.size()) {
+      if (fp.write(std::as_bytes(std::span{l})) != l.size()) {
         A2_LOG_ERROR(
             fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename.c_str()));
       }

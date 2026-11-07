@@ -81,13 +81,13 @@ void ChunkedDecodingStreamFilter::init() {}
 ssize_t
 ChunkedDecodingStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
                                        const std::shared_ptr<Segment>& segment,
-                                       const unsigned char* inbuf, size_t inlen)
+                                       std::span<const std::byte> inbuf)
 {
   ssize_t outlen = 0;
   size_t i;
   bytesProcessed_ = 0;
-  for (i = 0; i < inlen; ++i) {
-    unsigned char c = inbuf[i];
+  for (i = 0; i < inbuf.size(); ++i) {
+    unsigned char c = static_cast<unsigned char>(inbuf[i]);
     switch (state_) {
     case PREV_CHUNK_SIZE:
       if (util::isHexDigit(c)) {
@@ -137,9 +137,11 @@ ChunkedDecodingStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       }
       break;
     case CHUNK: {
-      int64_t readlen =
-          std::min(chunkRemaining_, static_cast<int64_t>(inlen - i));
-      outlen += getDelegate()->transform(out, segment, inbuf + i, readlen);
+      auto readlen =
+          std::min<int64_t>(chunkRemaining_,
+                            static_cast<int64_t>(inbuf.size() - i));
+      outlen += getDelegate()->transform(out, segment,
+                                         inbuf.subspan(i, readlen));
       chunkRemaining_ -= readlen;
       i += readlen - 1;
       if (chunkRemaining_ == 0) {

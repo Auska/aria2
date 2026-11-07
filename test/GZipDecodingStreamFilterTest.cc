@@ -1,7 +1,10 @@
 #include "GZipDecodingStreamFilter.h"
 
+#include <array>
 #include <cassert>
+#include <cstddef>
 #include <iostream>
+#include <span>
 #include <fstream>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -62,11 +65,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION(GZipDecodingStreamFilterTest);
 
 void GZipDecodingStreamFilterTest::testTransform()
 {
-  unsigned char buf[4_k];
+  std::array<std::byte, 4_k> buf;
   std::ifstream in(A2_TEST_DIR "/gzip_decode_test.gz", std::ios::binary);
   while (in) {
-    in.read(reinterpret_cast<char*>(buf), sizeof(buf));
-    filter_->transform(writer_, segment_, buf, in.gcount());
+    in.read(reinterpret_cast<char*>(buf.data()), buf.size());
+    filter_->transform(writer_, segment_, std::span{buf}.first(in.gcount()));
   }
   CPPUNIT_ASSERT(filter_->finished());
   std::string data = writer_->getString();

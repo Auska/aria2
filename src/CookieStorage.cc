@@ -153,7 +153,7 @@ bool DomainNode::writeCookie(BufferedFile& fp) const
     for (const auto& c : *cookies_) {
       std::string data = c->toNsCookieFormat();
       data += "\n";
-      if (fp.write(data.data(), data.size()) != data.size()) {
+      if (fp.write(std::as_bytes(std::span{data})) != data.size()) {
         return false;
       }
     }
@@ -439,7 +439,7 @@ bool CookieStorage::load(const std::string& filename, time_t now)
       A2_LOG_ERROR(fmt("Failed to open cookie file {}", filename.c_str()));
       return false;
     }
-    headlen = fp.read(header, sizeof(header));
+    headlen = fp.read(std::as_writable_bytes(std::span{header}));
   }
   try {
     if (headlen == 16 && memcmp(header, "SQLite format 3\0", 16) == 0) {

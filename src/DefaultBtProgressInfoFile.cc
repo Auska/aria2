@@ -103,7 +103,8 @@ bool DefaultBtProgressInfoFile::isTorrentDownload()
 }
 
 #define WRITE_CHECK(fp, ptr, count)                                            \
-  if (fp.write((ptr), (count)) != (count)) {                                   \
+  if (fp.write(std::span{reinterpret_cast<const std::byte*>(ptr),              \
+                         static_cast<size_t>(count)}) != (count)) {            \
     throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_WRITE, filename_.c_str()));          \
   }
 
@@ -224,7 +225,8 @@ void DefaultBtProgressInfoFile::save()
 }
 
 #define READ_CHECK(fp, ptr, count)                                             \
-  if (fp.read((ptr), (count)) != (count)) {                                    \
+  if (fp.read(std::span{reinterpret_cast<std::byte*>(ptr),                     \
+                        static_cast<size_t>(count)}) != (count)) {             \
     throw DL_ABORT_EX(fmt(EX_SEGMENT_FILE_READ, filename_.c_str()));           \
   }
 

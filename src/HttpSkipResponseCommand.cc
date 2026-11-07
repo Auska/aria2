@@ -33,6 +33,9 @@
  */
 /* copyright --> */
 #include "HttpSkipResponseCommand.h"
+
+#include <cstddef>
+#include <span>
 #include "HttpConnection.h"
 #include "HttpResponse.h"
 #include "message.h"
@@ -131,10 +134,10 @@ bool HttpSkipResponseCommand::executeInternal()
       else {
         // receivedBytes_ is not updated if transferEncoding is set.
         // The return value is safely ignored here.
-        streamFilter_->transform(std::shared_ptr<BinaryStream>(),
-                                 std::shared_ptr<Segment>(),
-                                 getSocketRecvBuffer()->getBuffer(),
-                                 getSocketRecvBuffer()->getBufferLength());
+        streamFilter_->transform(
+            std::shared_ptr<BinaryStream>(), std::shared_ptr<Segment>(),
+            std::as_bytes(std::span{getSocketRecvBuffer()->getBuffer(),
+                                    getSocketRecvBuffer()->getBufferLength()}));
         bufSize = streamFilter_->getBytesProcessed();
       }
       getSocketRecvBuffer()->drain(bufSize);

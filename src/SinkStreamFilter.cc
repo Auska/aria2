@@ -53,19 +53,19 @@ SinkStreamFilter::SinkStreamFilter(WrDiskCache* wrDiskCache, bool hashUpdate)
 
 ssize_t SinkStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
                                     const std::shared_ptr<Segment>& segment,
-                                    const unsigned char* inbuf, size_t inlen)
+                                    std::span<const std::byte> inbuf)
 {
   size_t wlen;
-  if (inlen > 0) {
+  if (!inbuf.empty()) {
     if (segment->getLength() > 0) {
       // We must not write data larger than available space in
       // segment.
       assert(segment->getLength() >= segment->getWrittenLength());
       size_t lenAvail = segment->getLength() - segment->getWrittenLength();
-      wlen = std::min(inlen, lenAvail);
+      wlen = std::min(inbuf.size(), lenAvail);
     }
     else {
-      wlen = inlen;
+      wlen = inbuf.size();
     }
     const std::shared_ptr<Piece>& piece = segment->getPiece();
     if (piece->getWrDiskCacheEntry()) {
@@ -75,22 +75,24 @@ ssize_t SinkStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       // cache buffer at least 4KiB and append the data to the
       // contagious cache data.
       size_t alen = piece->appendWrCache(
-          wrDiskCache_, segment->getPositionToWrite(), inbuf, wlen);
+          wrDiskCache_, segment->getPositionToWrite(),
+          reinterpret_cast<const unsigned char*>(inbuf.data()), wlen);
       if (alen < wlen) {
         size_t len = wlen - alen;
         size_t capacity = std::max(len, static_cast<size_t>(4_k));
         auto dataCopy = std::make_unique<unsigned char[]>(capacity);
-        memcpy(dataCopy.get(), inbuf + alen, len);
+        memcpy(dataCopy.get(), inbuf.data() + alen, len);
         piece->updateWrCache(wrDiskCache_, std::move(dataCopy), 0, len, capacity,
                              segment->getPositionToWrite() + alen);
       }
     }
     else {
-      out->writeData(std::as_bytes(std::span{inbuf, wlen}),
-                     segment->getPositionToWrite());
+      out->writeData(inbuf.first(wlen), segment->getPositionToWrite());
     }
     if (hashUpdate_) {
-      segment->updateHash(segment->getWrittenLength(), inbuf, wlen);
+      segment->updateHash(segment->getWrittenLength(),
+                          reinterpret_cast<const unsigned char*>(inbuf.data()),
+                          wlen);
     }
     segment->updateWrittenLength(wlen);
   }

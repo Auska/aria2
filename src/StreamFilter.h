@@ -37,8 +37,10 @@
 
 #include "common.h"
 
-#include <string>
+#include <cstddef>
 #include <memory>
+#include <span>
+#include <string>
 
 namespace aria2 {
 
@@ -61,7 +63,7 @@ public:
   // Returns the number of bytes written to sink
   virtual ssize_t transform(const std::shared_ptr<BinaryStream>& out,
                             const std::shared_ptr<Segment>& segment,
-                            const unsigned char* inbuf, size_t inlen) = 0;
+                            std::span<const std::byte> inbuf) = 0;
 
   virtual bool finished() = 0;
 
