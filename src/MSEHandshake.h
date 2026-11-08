@@ -39,7 +39,9 @@
 
 #include <vector>
 #include <memory>
+#include <optional>
 
+#include "ARC4Encryptor.h"
 #include "BtConstants.h"
 #include "SocketBuffer.h"
 #include "Command.h"
@@ -49,7 +51,6 @@ namespace aria2 {
 class Option;
 class SocketCore;
 class DHKeyExchange;
-class ARC4Encryptor;
 class DownloadContext;
 class MessageDigest;
 
@@ -82,8 +83,8 @@ private:
 
   CryptoType negotiatedCryptoType_;
   std::unique_ptr<DHKeyExchange> dh_;
-  std::unique_ptr<ARC4Encryptor> encryptor_;
-  std::unique_ptr<ARC4Encryptor> decryptor_;
+  std::optional<ARC4Encryptor> encryptor_;
+  std::optional<ARC4Encryptor> decryptor_;
   unsigned char infoHash_[INFO_HASH_LENGTH];
   unsigned char secret_[KEY_LENGTH];
   bool initiator_;
@@ -173,19 +174,13 @@ public:
 
   CryptoType getNegotiatedCryptoType() const { return negotiatedCryptoType_; }
 
-  const std::unique_ptr<ARC4Encryptor>& getEncryptor() const
-  {
-    return encryptor_;
-  }
+  std::optional<ARC4Encryptor>& getEncryptor() { return encryptor_; }
 
-  const std::unique_ptr<ARC4Encryptor>& getDecryptor() const
-  {
-    return decryptor_;
-  }
+  std::optional<ARC4Encryptor>& getDecryptor() { return decryptor_; }
 
-  std::unique_ptr<ARC4Encryptor> popEncryptor();
+  std::optional<ARC4Encryptor> popEncryptor();
 
-  std::unique_ptr<ARC4Encryptor> popDecryptor();
+  std::optional<ARC4Encryptor> popDecryptor();
 
   const unsigned char* getBuffer() const { return rbuf_; }
 

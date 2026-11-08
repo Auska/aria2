@@ -234,8 +234,8 @@ size_t PeerConnection::readData(std::span<unsigned char> data, bool encryption)
   return length;
 }
 
-void PeerConnection::enableEncryption(std::unique_ptr<ARC4Encryptor> encryptor,
-                                      std::unique_ptr<ARC4Encryptor> decryptor)
+void PeerConnection::enableEncryption(std::optional<ARC4Encryptor> encryptor,
+                                      std::optional<ARC4Encryptor> decryptor)
 {
   encryptor_ = std::move(encryptor);
   decryptor_ = std::move(decryptor);

@@ -38,18 +38,20 @@
 #include "common.h"
 
 #include <unistd.h>
+
 #include <memory>
+#include <optional>
 
 #include "SocketBuffer.h"
 #include "Command.h"
 #include "a2functional.h"
+#include "ARC4Encryptor.h"
 #include "BtConstants.h"
 
 namespace aria2 {
 
 class Peer;
 class SocketCore;
-class ARC4Encryptor;
 
 // The maximum length of buffer. If the message length (including 4
 // bytes length and payload length) is larger than this value, it is
@@ -88,8 +90,8 @@ private:
   SocketBuffer socketBuffer_;
 
   bool encryptionEnabled_;
-  std::unique_ptr<ARC4Encryptor> encryptor_;
-  std::unique_ptr<ARC4Encryptor> decryptor_;
+  std::optional<ARC4Encryptor> encryptor_;
+  std::optional<ARC4Encryptor> decryptor_;
 
   bool prevPeek_;
 
@@ -120,8 +122,8 @@ public:
   bool receiveHandshake(unsigned char* data, size_t& dataLength,
                         bool peek = false);
 
-  void enableEncryption(std::unique_ptr<ARC4Encryptor> encryptor,
-                        std::unique_ptr<ARC4Encryptor> decryptor);
+  void enableEncryption(std::optional<ARC4Encryptor> encryptor,
+                        std::optional<ARC4Encryptor> decryptor);
 
   void presetBuffer(const unsigned char* data, size_t length);
 

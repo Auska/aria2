@@ -32,6 +32,7 @@ test-driver
 libaria2api
 libaria2ex
 libaria2wx
+test_outdir/
 .dirstamp
 .libs
 compile

@@ -2,7 +2,7 @@
 /*
  * aria2 - The high speed download utility
  *
- * Copyright (C) 2006 Tatsuhiro Tsujikawa
+ * Copyright (C) 2013 Nils Maier
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,10 +37,24 @@
 
 #include "common.h"
 
-#ifdef USE_INTERNAL_ARC4
-#  include "InternalARC4Encryptor.h"
-#elif HAVE_OPENSSL
-#  include "LibsslARC4Encryptor.h"
-#endif
+#include <cstddef>
+#include <span>
+
+namespace aria2 {
+
+class ARC4Encryptor {
+private:
+  unsigned char state_[256];
+  unsigned i = 0, j = 0;
+
+public:
+  void init(const unsigned char* key, size_t keyLength);
+
+  // Encrypts in.size() bytes from |in| to |out|. |in| and |out| can
+  // refer to the same buffer.
+  void encrypt(std::span<std::byte> out, std::span<const std::byte> in);
+};
+
+} // namespace aria2
 
 #endif // D_ARC4_ENCRYPTOR_H

@@ -196,7 +196,7 @@ void MSEHandshake::initCipher(const unsigned char* infoHash)
   sha1_->reset();
   message_digest::digest(localCipherKey, sizeof(localCipherKey), sha1_.get(),
                          std::as_bytes(std::span{s}));
-  encryptor_ = make_unique<ARC4Encryptor>();
+  encryptor_.emplace();
   encryptor_->init(localCipherKey, sizeof(localCipherKey));
 
   unsigned char peerCipherKey[20];
@@ -204,7 +204,7 @@ void MSEHandshake::initCipher(const unsigned char* infoHash)
   sha1_->reset();
   message_digest::digest(peerCipherKey, sizeof(peerCipherKey), sha1_.get(),
                          std::as_bytes(std::span{s}));
-  decryptor_ = make_unique<ARC4Encryptor>();
+  decryptor_.emplace();
   decryptor_->init(peerCipherKey, sizeof(peerCipherKey));
 
   // discard first 1024 bytes ARC4 output.
@@ -585,14 +585,14 @@ bool MSEHandshake::getWantWrite() const
   return !socketBuffer_.sendBufferIsEmpty();
 }
 
-std::unique_ptr<ARC4Encryptor> MSEHandshake::popEncryptor()
+std::optional<ARC4Encryptor> MSEHandshake::popEncryptor()
 {
-  return std::move(encryptor_);
+  return std::exchange(encryptor_, std::nullopt);
 }
 
-std::unique_ptr<ARC4Encryptor> MSEHandshake::popDecryptor()
+std::optional<ARC4Encryptor> MSEHandshake::popDecryptor()
 {
-  return std::move(decryptor_);
+  return std::exchange(decryptor_, std::nullopt);
 }
 
 } // namespace aria2

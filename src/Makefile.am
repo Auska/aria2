@@ -302,10 +302,6 @@ SRCS += \
 	InternalDHKeyExchange.cc InternalDHKeyExchange.h
 endif
 
-if USE_INTERNAL_ARC4
-SRCS += InternalARC4Encryptor.cc InternalARC4Encryptor.h
-endif
-
 if USE_INTERNAL_MD
 SRCS += \
 	InternalMessageDigestImpl.cc\
@@ -314,7 +310,6 @@ endif # USE_INTERNAL_MD
 
 if HAVE_OPENSSL
 SRCS += \
-	LibsslARC4Encryptor.cc LibsslARC4Encryptor.h \
 	LibsslDHKeyExchange.cc LibsslDHKeyExchange.h
 SRCS += \
 	LibsslTLSContext.cc LibsslTLSContext.h \
@@ -346,6 +341,7 @@ endif # ENABLE_ASYNC_DNS
 
 if ENABLE_BITTORRENT
 SRCS += \
+	ARC4Encryptor.cc \
 	AbstractBtMessage.cc AbstractBtMessage.h\
 	ActivePeerConnectionCommand.cc ActivePeerConnectionCommand.h\
 	AnnounceList.h AnnounceList.cc\

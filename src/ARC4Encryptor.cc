@@ -2,7 +2,7 @@
 /*
  * aria2 - The high speed download utility
  *
- * Copyright (C) 2006 Tatsuhiro Tsujikawa
+ * Copyright (C) 2013 Nils Maier
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,45 +32,43 @@
  * files in the program, then also delete it here.
  */
 /* copyright --> */
-#ifndef D_LIBSSL_ARC4_ENCRYPTOR_H
-#define D_LIBSSL_ARC4_ENCRYPTOR_H
 
-#include "common.h"
+#include "ARC4Encryptor.h"
 
-#include <cstddef>
-#include <span>
-
-#include <cstdlib>
-
-#include <openssl/opensslv.h>
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-#  include <openssl/evp.h>
-#else // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
-#  include <openssl/rc4.h>
-#endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
+#include <cassert>
 
 namespace aria2 {
 
-class ARC4Encryptor {
-private:
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  EVP_CIPHER_CTX* ctx_;
-#else  // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
-  RC4_KEY key_;
-#endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
+void ARC4Encryptor::init(const unsigned char* key, size_t keyLength)
+{
+  j = 0;
+  for (auto& c : state_)
+    c = j++;
 
-public:
-  ARC4Encryptor();
+  j = 0;
+  for (i = 0; i < sizeof(state_); ++i) {
+    j = (j + state_[i] + key[i % keyLength]) & 0xff;
+    auto tmp = state_[i];
+    state_[i] = state_[j];
+    state_[j] = tmp;
+  }
+  i = j = 0;
+}
 
-  ~ARC4Encryptor() noexcept;
-
-  void init(const unsigned char* key, size_t keyLength);
-
-  // Encrypts in.size() bytes from |in| to |out|. |in| and |out| can
-  // refer to the same buffer.
-  void encrypt(std::span<std::byte> out, std::span<const std::byte> in);
-};
+void ARC4Encryptor::encrypt(std::span<std::byte> out,
+                            std::span<const std::byte> in)
+{
+  assert(out.size() >= in.size());
+  auto outPtr = reinterpret_cast<unsigned char*>(out.data());
+  auto inPtr = reinterpret_cast<const unsigned char*>(in.data());
+  for (size_t c = 0; c < in.size(); ++c) {
+    i = (i + 1) & 0xff;
+    j = (j + state_[i]) & 0xff;
+    auto sj = state_[i];
+    auto si = state_[i] = state_[j];
+    state_[j] = sj;
+    outPtr[c] = inPtr[c] ^ state_[(si + sj) & 0xff];
+  }
+}
 
 } // namespace aria2
-
-#endif // D_LIBSSL_ARC4_ENCRYPTOR_H
