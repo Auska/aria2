@@ -1,5 +1,7 @@
 # 任务：清理确认死代码、加固 LibuvEventPoll（唯一 IO 后端）与清理 configure.ac 死探测
 
+> 状态：✅ 已完成（2026-11-08）
+
 ## 目标
 
 1. 删除经 grep/编译双重确认的死代码（5 处，全部零引用）。
@@ -22,6 +24,8 @@
 | 3 | `src/util.h:731` + `src/util.cc:2143` `strless()` | 声明 + 定义，零调用 |
 | 4 | `src/OpenedFileCounter.h:63` + `src/OpenedFileCounter.cc:111` `deactivate()` | 零调用（`rgman_` 仍被 `ensureMaxOpenFileLimit`/`reduceNumOfOpenedFile` 使用，成员保留） |
 | 5 | `src/prefs.h:164` + `src/prefs.cc:208` `PREF_MAX_DOWNLOADS` | 无 `OptionHandlerFactory` 注册、无读取点，`--help=#all` 中无 `--max-downloads` |
+
+（审查 #1：`deactivate()` 曾被列入此表，实际被 `src/RequestGroupMan.cc:135` 的 `RequestGroupMan::~RequestGroupMan()` 调用，已从范围移除；`crypto_hash.cc par()`、`criteriaFind` 覆盖缺口亦为误判，见备注。）
 
 `LibuvEventPoll` 现状（`src/LibuvEventPoll.cc` / `.h`）：
 
@@ -49,18 +53,18 @@
 
 ## 分步计划
 
-1. [ ] **阶段1：删 5 处死代码**
+1. [x] **阶段1：删 4 处死代码**（提交 `2d27648d`）
    - 删 `src/HashFuncEntry.h`，同时删 `src/Makefile.am:116` 的 `HashFuncEntry.h \` 行。
    - 删 `test/CookieBoxTest.cc`（`criteriaFind` 的断言已由 `test/CookieStorageTest.cc` 覆盖：12 处调用，含 host/path/expires/numeric-host 用例）。
    - 删 `src/util.h:731` 声明与 `src/util.cc:2143` 定义（`strless`）。
-   - 删 `src/OpenedFileCounter.h:63` 声明（含其上注释）与 `src/OpenedFileCounter.cc:111` 定义（`deactivate`）；保留 `rgman_` 成员。
+   - 删 `src/OpenedFileCounter.h:63` 声明条目**已撤销**：`deactivate()` 被 `src/RequestGroupMan.cc:135` 调用，见审查 #3。
    - 删 `src/prefs.h:164` 与 `src/prefs.cc:208`（`PREF_MAX_DOWNLOADS`）。
-2. [ ] **阶段2：`LibuvEventPoll` 加固 + 单测**
+2. [x] **阶段2：`LibuvEventPoll` 加固 + 单测**（提交 `93eca640`）
    - `src/LibuvEventPoll.h`：`KPoll` 增加 `int err_`，构造时存 `uv_poll_init_socket` 返回码（成功才设 `handle_.data`），`start()` 返回 `int`（0 成功）；`LibuvEventPoll` 增加成员 `uv_timer_t timer_;` 与 `bool timerInited_;`，`good()` 追加 `timerInited_` 条件。
    - `src/LibuvEventPoll.cc`：构造函数初始化 `timer_`/`timerInited_`；`poll()` 复用 `timer_`（`timeout` 取 `std::max(0, ...)`，repeat 传 0），检查 `uv_timer_start` 返回值，日志用 `A2_LOG_WARN` + `uv_err_name(r)`；删不可达 `else` 分支；析构里先 `uv_close(&timer_)` 再 `uv_run(...)` + `uv_loop_delete`；`addEvents` 两个分支都检查 `start()` 返回码，失败时 WARN + 回滚 + `return false`。
-   - 新增 `test/LibuvEventPollTest.cc`（4 个用例：READ 触发、WRITE 触发、`deleteEvents` 后不再触发、无注册时空 `poll` 按时返回），并加进 `test/Makefile.am` 的 `aria2c_SOURCES` 基表。
-3. [ ] **阶段3：清 `configure.ac` 死探测**
-   - 删 `AC_FUNC_STRFTIME`(:347)/`AC_FUNC_VPRINTF`(:348)/`AC_FUNC_FORK`(:349)。
+   - 新增 `test/LibuvEventPollTest.cc`（5 个用例：READ 触发、WRITE 触发、`deleteEvents` 后不再触发、无注册时空 `poll` 按时返回、已关闭 fd 被拒），并加进 `test/Makefile.am` 的 `aria2c_SOURCES` 基表。
+3. [x] **阶段3：清 `configure.ac` 死探测**（提交 `79679cfd`）
+   - 删 `AC_FUNC_STRFTIME`(:347)/`AC_FUNC_VPRINTF`(:348)；**保留 `AC_FUNC_FORK`**（`src/daemon.cc:45` 使用 `HAVE_WORKING_FORK`，审查 #2）。
    - 从 `AC_CHECK_FUNCS` 长列表删上面 37 项，保留 7 项有引用的。
    - 跑 `autoreconf -i` 重生成 `configure`/`config.h.in`，确认 `config.h` 里不再出现被删的 `HAVE_*`。
 
@@ -95,9 +99,12 @@ git hash-object src/includes/aria2/aria2.h      # 期望 132c72d9f055756769456c3
 
 通过标准：
 
-- `test/aria2c.log` 出现 `OK (911)`（阶段2 后应为 `OK (915)`：新增 4 个用例），且没有新增 warning（既存 libtool `-version-info` 提示除外）。
-- 阶段2：`test_outdir` 里 4 个新用例名可见；冒烟 `python3 -m http.server 18080` + `./src/aria2c -d /tmp/a2dl -o got.bin http://127.0.0.1:18080/f.bin` 后 `cmp` 一致；`curl -d '{"jsonrpc":"2.0","id":"1","method":"aria2.getVersion","params":[]}'` 的 RPC 冒烟（后台起 + `pkill -x aria2c`）。
-- 阶段3：`grep -cE "HAVE_(STRFTIME|VPRINTF|FORK|VFORK|WORKING_FORK|WORKING_VFORK|MEMCHR|STRDUP|TZSET|UNSETENV|UTIME|UTIMES|POW|SOCKET|MKDIR|GETCWD|STRERROR|SETLOCALE|PUTENV|RMDIR|ATEXIT|MEMSET|MEMMOVE|STRCHR|STRSTR|STRTOL|STRTOUL|STRTOULL|STPCPY|STRCASECMP|STRNCASECMP|STRCSPN|NL_LANGINFO|GETPAGESIZE|MUNMAP|FTRUNCATE|GETENTROPY|GETHOSTBYADDR|GETHOSTBYNAME|__ARGZ_COUNT|__ARGZ_NEXT|__ARGZ_STRINGIFY)" config.h` = 0；`make check` 仍 `OK (915)`。
+- `test/aria2c.log` 出现 `OK (911)`（阶段2 后应为 `OK (916)`：新增 5 个用例），且没有新增 warning（既存 libtool `-version-info` 提示除外）。
+- 阶段2：`test/aria2c.log` 里 5 个新用例名可见；冒烟 `python3 -m http.server 18080` + `./src/aria2c -d /tmp/a2dl -o got.bin http://127.0.0.1:18080/f.bin` 后 `cmp` 一致；`curl -d '{"jsonrpc":"2.0","id":"1","method":"aria2.getVersion","params":[]}'` 的 RPC 冒烟（后台起 + `pkill -x aria2c`）。
+- 阶段3：`grep -nE "HAVE_(STRFTIME|VPRINTF|MEMCHR|STRDUP|TZSET|UNSETENV|UTIME|UTIMES|POW|SOCKET|MKDIR|GETCWD|STRERROR|SETLOCALE|PUTENV|RMDIR|ATEXIT|MEMSET|MEMMOVE|STRCHR|STRSTR|STRTOL|STRTOUL|STRTOULL|STPCPY|STRCASECMP|STRNCASECMP|STRCSPN|NL_LANGINFO|GETPAGESIZE|MUNMAP|MEMPCPY|GETHOSTBYADDR|GETHOSTBYNAME|__ARGZ_COUNT|__ARGZ_NEXT|__ARGZ_STRINGIFY|FTRUNCATE|GETENTROPY)\\b" ./config.h` 无输出（`HAVE_VFORK`/`HAVE_WORKING_VFORK` 由保留的 `AC_FUNC_FORK` 产生，属正常）；`make check` 仍 `OK (916)`。
+- 阶段1：`git grep -n "HashFuncEntry\|strless\|PREF_MAX_DOWNLOADS\|CookieBoxTest"` 无输出，`make check` 仍 `OK (911)`。
+
+实测结果（2026-11-08）：阶段1 `OK (911)` / 0 warning；阶段2 `OK (916)` + 下载 `cmp` 一致 + RPC `aria2.getVersion` 正常；阶段3 `OK (916)` + 被删宏在 `config.h` 中无残留；三次 `git hash-object src/includes/aria2/aria2.h` 均为 `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
 - 阶段1：`git grep -n "HashFuncEntry\|strless\|deactivate\|PREF_MAX_DOWNLOADS\|CookieBoxTest"` 只剩 `plans/` 与无关命中（如 `DeferredTest` 里的同名局部变量），`make check` 仍 `OK (911)`。
 
 ## 验收标准
@@ -120,3 +127,5 @@ git hash-object src/includes/aria2/aria2.h      # 期望 132c72d9f055756769456c3
 - 用户授权：m00415「创建修复计划，全部都做」= 计划 + 执行三个阶段。
 - 三个决策均由用户在提问中选择推荐项（见上表）。
 - 审查 #1：审查报告里「`crypto_hash.cc:49 par()` 零调用」是误判——`par` 通过宏 `r2`/`r4`（`src/crypto_hash.cc:402,404`）作为 `r(f, k, ...)` 的 `f` 参数使用，属裸标识符用法，`grep "par("` 抓不到；已从阶段1 范围移除。同理「`CookieStorage::criteriaFind` 无覆盖」也是误判（先前 `git grep ... | head -5` 被 `CookieBoxTest.cc` 的 5 行截断），实际 `test/CookieStorageTest.cc` 有 12 处调用，故阶段1 直接删 `CookieBoxTest.cc`，不需要移植断言。
+- 审查 #2：`AC_FUNC_FORK` 的产物并非全零引用——`src/daemon.cc:45` 的 `#ifdef HAVE_WORKING_FORK` 依赖它；阶段3 因此保留 `AC_FUNC_FORK`，实际删除 `AC_FUNC_STRFTIME`/`AC_FUNC_VPRINTF` 两个宏探测与 37 项函数探测。
+- 审查 #3（执行中）：`OpenedFileCounter::deactivate()` 一度被当作死代码删除，门禁报 `RequestGroupMan.cc:135:23: error: ... has no member named 'deactivate'`（`RequestGroupMan::~RequestGroupMan()` 调用它），已原样恢复；教训是审查阶段 `git grep | head -N` 的截断会产生假阳性的「零引用」结论。
