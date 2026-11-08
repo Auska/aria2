@@ -106,7 +106,8 @@ if HAVE_SQLITE3
 aria2c_SOURCES += Sqlite3CookieParserTest.cc
 endif # HAVE_SQLITE3
 
-aria2c_SOURCES += MessageDigestHelperTest.cc\
+aria2c_SOURCES += LibuvEventPollTest.cc\
+	MessageDigestHelperTest.cc\
 	IteratableChunkChecksumValidatorTest.cc\
 	IteratableChecksumValidatorTest.cc\
 	MessageDigestTest.cc

@@ -53,11 +53,6 @@
 namespace {
 using namespace aria2;
 
-template <typename T> static void close_callback(uv_handle_t* handle)
-{
-  delete reinterpret_cast<T*>(handle);
-}
-
 static void timer_callback(uv_timer_t* handle) { uv_stop(handle->loop); }
 } // namespace
 
@@ -90,17 +85,32 @@ int LibuvEventPoll::KSocketEntry::getEvents() const
   return events;
 }
 
-LibuvEventPoll::LibuvEventPoll() { loop_ = uv_loop_new(); }
+LibuvEventPoll::LibuvEventPoll() : loop_(nullptr), timerInited_(false)
+{
+  loop_ = uv_loop_new();
+  if (!loop_) {
+    return;
+  }
+  if (uv_timer_init(loop_, &timer_) < 0) {
+    A2_LOG_WARN("uv_timer_init failed");
+    return;
+  }
+  timerInited_ = true;
+}
 
 LibuvEventPoll::~LibuvEventPoll() noexcept
 {
   for (auto& p : polls_) {
     p.second->close();
   }
-  // Actually kill the polls, and timers, if any.
-  uv_run(loop_, static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT));
-
   if (loop_) {
+    if (timerInited_) {
+      uv_timer_stop(&timer_);
+      uv_close((uv_handle_t*)&timer_, nullptr);
+    }
+    // Actually kill the polls, and timers, if any.
+    uv_run(loop_, static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT));
+
     uv_loop_delete(loop_);
     loop_ = nullptr;
   }
@@ -111,25 +121,23 @@ LibuvEventPoll::~LibuvEventPoll() noexcept
 
 void LibuvEventPoll::poll(const struct timeval& tv)
 {
-  const int timeout = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  if (!timerInited_) {
+    return;
+  }
+
+  const int64_t timeout =
+      static_cast<int64_t>(tv.tv_sec) * 1000 + tv.tv_usec / 1000;
 
   // timeout == 0 will tick once
-  if (timeout >= 0) {
-    auto timer = new uv_timer_t;
-    uv_timer_init(loop_, timer);
-    uv_timer_start(timer, timer_callback, timeout, timeout);
-
-    uv_run(loop_, UV_RUN_DEFAULT);
-
-    // Remove timer again.
-    uv_timer_stop(timer);
-    uv_close((uv_handle_t*)timer, close_callback<uv_timer_t>);
+  int r = uv_timer_start(&timer_, timer_callback,
+                         std::max<int64_t>(timeout, 0), 0);
+  if (r < 0) {
+    A2_LOG_WARN(fmt("uv_timer_start failed: {}", uv_err_name(r)));
+    return;
   }
-  else {
-    while (uv_run(loop_,
-                  static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT)) > 0) {
-    }
-  }
+
+  uv_run(loop_, UV_RUN_DEFAULT);
+  uv_timer_stop(&timer_);
 
 #ifdef ENABLE_ASYNC_DNS
   // It turns out that we have to call ares_process_fd before ares's
@@ -211,7 +219,11 @@ bool LibuvEventPoll::addEvents(sock_t socket,
     if (poll == polls_.end()) {
       throw std::logic_error("Invalid socket");
     }
-    poll->second->start();
+    int r = poll->second->start();
+    if (r < 0) {
+      A2_LOG_DEBUG(fmt("uv_poll_start failed: {}", uv_err_name(r)));
+      return false;
+    }
     return true;
   }
 
@@ -219,8 +231,20 @@ bool LibuvEventPoll::addEvents(sock_t socket,
   auto& socketEntry = i->second;
   event.addSelf(&socketEntry);
   auto poll = new KPoll(this, &socketEntry, socket);
+  if (!poll->good()) {
+    A2_LOG_DEBUG(fmt("uv_poll_init_socket failed for socket {}", socket));
+    delete poll;
+    socketEntries_.erase(i);
+    return false;
+  }
+  int r = poll->start();
+  if (r < 0) {
+    A2_LOG_DEBUG(fmt("uv_poll_start failed: {}", uv_err_name(r)));
+    poll->close();
+    socketEntries_.erase(i);
+    return false;
+  }
   polls_[socket] = poll;
-  poll->start();
   return true;
 }
 
@@ -264,7 +288,11 @@ bool LibuvEventPoll::deleteEvents(sock_t socket,
     return true;
   }
 
-  poll->second->start();
+  int r = poll->second->start();
+  if (r < 0) {
+    A2_LOG_DEBUG(fmt("uv_poll_start failed: {}", uv_err_name(r)));
+    return false;
+  }
   return true;
 }
 

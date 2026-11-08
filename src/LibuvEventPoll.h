@@ -78,6 +78,7 @@ private:
     LibuvEventPoll* eventer_;
     KSocketEntry* entry_;
     uv_poll_t handle_;
+    int err_;
 
     static void poll_callback(uv_poll_t* handle, int status, int events)
     {
@@ -91,14 +92,19 @@ private:
 
   public:
     inline KPoll(LibuvEventPoll* eventer, KSocketEntry* entry, sock_t sock)
-        : eventer_(eventer), entry_(entry)
+        : eventer_(eventer), entry_(entry), err_(0)
     {
-      uv_poll_init_socket(eventer->loop_, &handle_, sock);
+      err_ = uv_poll_init_socket(eventer->loop_, &handle_, sock);
+      if (err_ < 0) {
+        return;
+      }
       handle_.data = this;
     }
-    inline void start()
+    inline bool good() const { return err_ == 0; }
+    inline int start()
     {
-      uv_poll_start(&handle_, entry_->getEvents() & IEV_RW, poll_callback);
+      return uv_poll_start(&handle_, entry_->getEvents() & IEV_RW,
+                           poll_callback);
     }
     inline void stop() { uv_poll_stop(&handle_); }
     inline void processEvents(int events) { entry_->processEvents(events); }
@@ -120,6 +126,8 @@ private:
 #endif // ENABLE_ASYNC_DNS
 
   uv_loop_t* loop_;
+  uv_timer_t timer_;
+  bool timerInited_;
   KSocketEntrySet socketEntries_;
   KPolls polls_;
 
@@ -144,7 +152,7 @@ public:
   LibuvEventPoll();
   virtual ~LibuvEventPoll() noexcept;
 
-  bool good() const { return loop_; }
+  bool good() const { return loop_ && timerInited_; }
 
   virtual void poll(const struct timeval& tv) override;
 
