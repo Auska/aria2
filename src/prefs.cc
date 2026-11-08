@@ -204,8 +204,6 @@ PrefPtr PREF_NETRC_PATH = makePref("netrc-path");
 PrefPtr PREF_CONTINUE = makePref("continue");
 // value:
 PrefPtr PREF_NO_NETRC = makePref("no-netrc");
-// value: 1*digit
-PrefPtr PREF_MAX_DOWNLOADS = makePref("max-downloads");
 // value: string that your file system recognizes as a file name.
 PrefPtr PREF_INPUT_FILE = makePref("input-file");
 // value: true | false

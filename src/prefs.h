@@ -160,8 +160,6 @@ extern PrefPtr PREF_CONTINUE;
 extern PrefPtr PREF_NO_NETRC;
 // value: 1*digit
 extern PrefPtr PREF_MAX_OVERALL_DOWNLOAD_LIMIT;
-// value: 1*digit
-extern PrefPtr PREF_MAX_DOWNLOADS;
 // value: string that your file system recognizes as a file name.
 extern PrefPtr PREF_INPUT_FILE;
 // value: true | false

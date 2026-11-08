@@ -2140,8 +2140,6 @@ bool iendsWith(const std::string& a, const std::string& b)
   return iendsWith(a.begin(), a.end(), b.begin(), b.end());
 }
 
-bool strless(const char* a, const char* b) { return strcmp(a, b) < 0; }
-
 #ifdef ENABLE_SSL
 TLSVersion toTLSVersion(const std::string& ver)
 {

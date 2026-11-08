@@ -113,7 +113,6 @@ SRCS =  \
 	GeomStreamPieceSelector.cc GeomStreamPieceSelector.h\
 	GroupId.cc GroupId.h\
 	GrowSegment.cc GrowSegment.h\
-	HashFuncEntry.h \
 	HaveEraseCommand.cc HaveEraseCommand.h\
 	help_tags.cc help_tags.h\
 	HttpConnection.cc HttpConnection.h\
