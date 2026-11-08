@@ -41,20 +41,20 @@ std::shared_ptr<Exception> DlRetryEx::copy() const
   return std::make_shared<DlRetryEx>(*this);
 }
 
-DlRetryEx::DlRetryEx(const char* file, int line, const std::string& msg)
-    : RecoverableException(file, line, msg)
+DlRetryEx::DlRetryEx(const std::string& msg, std::source_location location)
+    : RecoverableException(msg, location)
 {
 }
 
-DlRetryEx::DlRetryEx(const char* file, int line, const std::string& msg,
-                     const Exception& cause)
-    : RecoverableException(file, line, msg, cause)
+DlRetryEx::DlRetryEx(const std::string& msg, const Exception& cause,
+                     std::source_location location)
+    : RecoverableException(msg, cause, location)
 {
 }
 
-DlRetryEx::DlRetryEx(const char* file, int line, const std::string& msg,
-                     error_code::Value code)
-    : RecoverableException(file, line, msg, code)
+DlRetryEx::DlRetryEx(const std::string& msg, error_code::Value code,
+                     std::source_location location)
+    : RecoverableException(msg, code, location)
 {
 }
 

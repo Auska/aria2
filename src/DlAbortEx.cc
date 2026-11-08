@@ -41,32 +41,32 @@ std::shared_ptr<Exception> DlAbortEx::copy() const
   return std::make_shared<DlAbortEx>(*this);
 }
 
-DlAbortEx::DlAbortEx(const char* file, int line, const std::string& msg)
-    : RecoverableException(file, line, msg)
+DlAbortEx::DlAbortEx(const std::string& msg, std::source_location location)
+    : RecoverableException(msg, location)
 {
 }
 
-DlAbortEx::DlAbortEx(const char* file, int line, const std::string& msg,
-                     const Exception& cause)
-    : RecoverableException(file, line, msg, cause)
+DlAbortEx::DlAbortEx(const std::string& msg, const Exception& cause,
+                     std::source_location location)
+    : RecoverableException(msg, cause, location)
 {
 }
 
-DlAbortEx::DlAbortEx(const char* file, int line, const std::string& msg,
-                     error_code::Value code)
-    : RecoverableException(file, line, msg, code)
+DlAbortEx::DlAbortEx(const std::string& msg, error_code::Value code,
+                     std::source_location location)
+    : RecoverableException(msg, code, location)
 {
 }
 
-DlAbortEx::DlAbortEx(const char* file, int line, int errNum,
-                     const std::string& msg)
-    : RecoverableException(file, line, errNum, msg)
+DlAbortEx::DlAbortEx(int errNum, const std::string& msg,
+                     std::source_location location)
+    : RecoverableException(errNum, msg, location)
 {
 }
 
-DlAbortEx::DlAbortEx(const char* file, int line, int errNum,
-                     const std::string& msg, error_code::Value errorCode)
-    : RecoverableException(file, line, errNum, msg, errorCode)
+DlAbortEx::DlAbortEx(int errNum, const std::string& msg, error_code::Value code,
+                     std::source_location location)
+    : RecoverableException(errNum, msg, code, location)
 {
 }
 

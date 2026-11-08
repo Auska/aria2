@@ -41,19 +41,19 @@ namespace {
 constexpr auto MESSAGE = _("Unknown option '{}'");
 } // namespace
 
-UnknownOptionException::UnknownOptionException(const char* file, int line,
-                                               const std::string& unknownOption)
-    : RecoverableException(file, line, fmt(MESSAGE, unknownOption),
-                           error_code::OPTION_ERROR),
+UnknownOptionException::UnknownOptionException(const std::string& unknownOption,
+                                               std::source_location location)
+    : RecoverableException(fmt(MESSAGE, unknownOption),
+                           error_code::OPTION_ERROR, location),
       unknownOption_(unknownOption)
 {
 }
 
-UnknownOptionException::UnknownOptionException(const char* file, int line,
-                                               const std::string& unknownOption,
-                                               const Exception& cause)
-    : RecoverableException(file, line, fmt(MESSAGE, unknownOption),
-                           error_code::OPTION_ERROR, cause),
+UnknownOptionException::UnknownOptionException(const std::string& unknownOption,
+                                               const Exception& cause,
+                                               std::source_location location)
+    : RecoverableException(fmt(MESSAGE, unknownOption),
+                           error_code::OPTION_ERROR, cause, location),
       unknownOption_(unknownOption)
 {
 }

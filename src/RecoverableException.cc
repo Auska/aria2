@@ -41,44 +41,44 @@ std::shared_ptr<Exception> RecoverableException::copy() const
   return std::make_shared<RecoverableException>(*this);
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           const std::string& msg)
-    : Exception(file, line, msg)
+RecoverableException::RecoverableException(std::string const& msg,
+                                           std::source_location location)
+    : Exception(msg, location)
 {
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           const std::string& msg,
+RecoverableException::RecoverableException(std::string const& msg,
                                            error_code::Value errorCode,
-                                           const Exception& cause)
-    : Exception(file, line, msg, errorCode, cause)
+                                           const Exception& cause,
+                                           std::source_location location)
+    : Exception(msg, errorCode, cause, location)
 {
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           const std::string& msg,
-                                           const Exception& cause)
-    : Exception(file, line, msg, cause)
+RecoverableException::RecoverableException(std::string const& msg,
+                                           const Exception& cause,
+                                           std::source_location location)
+    : Exception(msg, cause, location)
 {
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           const std::string& msg,
-                                           error_code::Value errorCode)
-    : Exception(file, line, msg, errorCode)
+RecoverableException::RecoverableException(std::string const& msg,
+                                           error_code::Value errorCode,
+                                           std::source_location location)
+    : Exception(msg, errorCode, location)
 {
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           int errNum, const std::string& msg)
-    : Exception(file, line, errNum, msg)
+RecoverableException::RecoverableException(int errNum, std::string const& msg,
+                                           std::source_location location)
+    : Exception(errNum, msg, location)
 {
 }
 
-RecoverableException::RecoverableException(const char* file, int line,
-                                           int errNum, const std::string& msg,
-                                           error_code::Value errorCode)
-    : Exception(file, line, errNum, msg, errorCode)
+RecoverableException::RecoverableException(int errNum, std::string const& msg,
+                                           error_code::Value errorCode,
+                                           std::source_location location)
+    : Exception(errNum, msg, errorCode, location)
 {
 }
 

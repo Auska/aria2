@@ -38,19 +38,19 @@
 
 namespace aria2 {
 
-Exception::Exception(const char* file, int line, const std::string& msg)
-    : file_(file),
-      line_(line),
+Exception::Exception(const std::string& msg, std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
       errNum_(0),
       msg_(msg),
       errorCode_(error_code::UNKNOWN_ERROR)
 {
 }
 
-Exception::Exception(const char* file, int line, const std::string& msg,
-                     error_code::Value errorCode, const Exception& cause)
-    : file_(file),
-      line_(line),
+Exception::Exception(const std::string& msg, error_code::Value errorCode,
+                     const Exception& cause, std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
       errNum_(0),
       msg_(msg),
       errorCode_(errorCode),
@@ -58,10 +58,10 @@ Exception::Exception(const char* file, int line, const std::string& msg,
 {
 }
 
-Exception::Exception(const char* file, int line, const std::string& msg,
-                     const Exception& cause)
-    : file_(file),
-      line_(line),
+Exception::Exception(const std::string& msg, const Exception& cause,
+                     std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
       errNum_(0),
       msg_(msg),
       errorCode_(cause.errorCode_),
@@ -69,26 +69,30 @@ Exception::Exception(const char* file, int line, const std::string& msg,
 {
 }
 
-Exception::Exception(const char* file, int line, const std::string& msg,
-                     error_code::Value errorCode)
-    : file_(file), line_(line), errNum_(0), msg_(msg), errorCode_(errorCode)
+Exception::Exception(const std::string& msg, error_code::Value errorCode,
+                     std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
+      errNum_(0),
+      msg_(msg),
+      errorCode_(errorCode)
 {
 }
 
-Exception::Exception(const char* file, int line, int errNum,
-                     const std::string& msg)
-    : file_(file),
-      line_(line),
+Exception::Exception(int errNum, const std::string& msg,
+                     std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
       errNum_(errNum),
       msg_(msg),
       errorCode_(error_code::UNKNOWN_ERROR)
 {
 }
 
-Exception::Exception(const char* file, int line, int errNum,
-                     const std::string& msg, error_code::Value errorCode)
-    : file_(file),
-      line_(line),
+Exception::Exception(int errNum, const std::string& msg,
+                     error_code::Value errorCode, std::source_location location)
+    : file_(location.file_name()),
+      line_(static_cast<int>(location.line())),
       errNum_(errNum),
       msg_(msg),
       errorCode_(errorCode)

@@ -42,19 +42,19 @@ constexpr auto MESSAGE =
     _("We encountered a problem while processing the option '--{}'.");
 } // namespace
 
-OptionHandlerException::OptionHandlerException(const char* file, int line,
-                                               PrefPtr pref)
-    : RecoverableException(file, line, fmt(MESSAGE, pref->k),
-                           error_code::OPTION_ERROR),
+OptionHandlerException::OptionHandlerException(PrefPtr pref,
+                                               std::source_location location)
+    : RecoverableException(fmt(MESSAGE, pref->k), error_code::OPTION_ERROR,
+                           location),
       pref_(pref)
 {
 }
 
-OptionHandlerException::OptionHandlerException(const char* file, int line,
-                                               PrefPtr pref,
-                                               const Exception& cause)
-    : RecoverableException(file, line, fmt(MESSAGE, pref->k),
-                           error_code::OPTION_ERROR, cause),
+OptionHandlerException::OptionHandlerException(PrefPtr pref,
+                                               const Exception& cause,
+                                               std::source_location location)
+    : RecoverableException(fmt(MESSAGE, pref->k), error_code::OPTION_ERROR,
+                           cause, location),
       pref_(pref)
 {
 }

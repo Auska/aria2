@@ -36,6 +36,8 @@
 #define D_RECOVERABLE_EXCEPTION_H
 #include "Exception.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 class RecoverableException : public Exception {
@@ -43,22 +45,30 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  RecoverableException(const char* file, int line, const std::string& msg);
+  RecoverableException(
+      const std::string& msg,
+      std::source_location location = std::source_location::current());
 
-  RecoverableException(const char* file, int line, const std::string& msg,
-                       error_code::Value errorCode, const Exception& cause);
+  RecoverableException(
+      const std::string& msg, error_code::Value errorCode,
+      const Exception& cause,
+      std::source_location location = std::source_location::current());
 
-  RecoverableException(const char* file, int line, const std::string& msg,
-                       const Exception& cause);
+  RecoverableException(
+      const std::string& msg, const Exception& cause,
+      std::source_location location = std::source_location::current());
 
-  RecoverableException(const char* file, int line, const std::string& msg,
-                       error_code::Value errorCode);
+  RecoverableException(
+      const std::string& msg, error_code::Value errorCode,
+      std::source_location location = std::source_location::current());
 
-  RecoverableException(const char* file, int line, int errNum,
-                       const std::string& msg);
+  RecoverableException(
+      int errNum, const std::string& msg,
+      std::source_location location = std::source_location::current());
 
-  RecoverableException(const char* file, int line, int errNum,
-                       const std::string& msg, error_code::Value errorCode);
+  RecoverableException(
+      int errNum, const std::string& msg, error_code::Value errorCode,
+      std::source_location location = std::source_location::current());
 };
 
 } // namespace aria2

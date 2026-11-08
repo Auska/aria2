@@ -36,6 +36,8 @@
 #define D_DL_RETRY_EX_H
 #include "RecoverableException.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 class DlRetryEx : public RecoverableException {
@@ -43,17 +45,18 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  DlRetryEx(const char* file, int line, const std::string& msg);
+  DlRetryEx(const std::string& msg,
+            std::source_location location = std::source_location::current());
 
-  DlRetryEx(const char* file, int line, const std::string& msg,
-            const Exception& cause);
+  DlRetryEx(const std::string& msg, const Exception& cause,
+            std::source_location location = std::source_location::current());
 
-  DlRetryEx(const char* file, int line, const std::string& msg,
-            error_code::Value code);
+  DlRetryEx(const std::string& msg, error_code::Value code,
+            std::source_location location = std::source_location::current());
 };
 
-#define DL_RETRY_EX(arg) DlRetryEx(__FILE__, __LINE__, arg)
-#define DL_RETRY_EX2(arg1, arg2) DlRetryEx(__FILE__, __LINE__, arg1, arg2)
+#define DL_RETRY_EX(arg) DlRetryEx(arg)
+#define DL_RETRY_EX2(arg1, arg2) DlRetryEx(arg1, arg2)
 
 } // namespace aria2
 

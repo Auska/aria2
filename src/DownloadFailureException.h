@@ -36,6 +36,8 @@
 #define D_DOWNLOAD_FAILURE_EXCEPTION_H
 #include "RecoverableException.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 /**
@@ -47,24 +49,28 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  DownloadFailureException(const char* file, int line, const std::string& msg);
+  DownloadFailureException(
+      const std::string& msg,
+      std::source_location location = std::source_location::current());
 
-  DownloadFailureException(const char* file, int line, const std::string& msg,
-                           const Exception& cause);
+  DownloadFailureException(
+      const std::string& msg, const Exception& cause,
+      std::source_location location = std::source_location::current());
 
-  DownloadFailureException(const char* file, int line, const std::string& msg,
-                           error_code::Value code);
+  DownloadFailureException(
+      const std::string& msg, error_code::Value code,
+      std::source_location location = std::source_location::current());
 
-  DownloadFailureException(const char* file, int line, int errNum,
-                           const std::string& msg, error_code::Value code);
+  DownloadFailureException(
+      int errNum, const std::string& msg, error_code::Value code,
+      std::source_location location = std::source_location::current());
 };
 
-#define DOWNLOAD_FAILURE_EXCEPTION(arg)                                        \
-  DownloadFailureException(__FILE__, __LINE__, arg)
+#define DOWNLOAD_FAILURE_EXCEPTION(arg) DownloadFailureException(arg)
 #define DOWNLOAD_FAILURE_EXCEPTION2(arg1, arg2)                                \
-  DownloadFailureException(__FILE__, __LINE__, arg1, arg2)
+  DownloadFailureException(arg1, arg2)
 #define DOWNLOAD_FAILURE_EXCEPTION3(arg1, arg2, arg3)                          \
-  DownloadFailureException(__FILE__, __LINE__, arg1, arg2, arg3)
+  DownloadFailureException(arg1, arg2, arg3)
 
 } // namespace aria2
 

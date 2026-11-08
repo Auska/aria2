@@ -36,6 +36,8 @@
 #define D_FATAL_EXCEPTION_H
 #include "Exception.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 class FatalException : public Exception {
@@ -43,15 +45,16 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  FatalException(const char* file, int line, const std::string& msg);
+  FatalException(const std::string& msg, std::source_location location =
+                                             std::source_location::current());
 
-  FatalException(const char* file, int line, const std::string& msg,
-                 const Exception& cause);
+  FatalException(
+      const std::string& msg, const Exception& cause,
+      std::source_location location = std::source_location::current());
 };
 
-#define FATAL_EXCEPTION(arg) FatalException(__FILE__, __LINE__, arg)
-#define FATAL_EXCEPTION2(arg1, arg2)                                           \
-  FatalException(__FILE__, __LINE__, arg1, arg2)
+#define FATAL_EXCEPTION(arg) FatalException(arg)
+#define FATAL_EXCEPTION2(arg1, arg2) FatalException(arg1, arg2)
 
 } // namespace aria2
 

@@ -36,6 +36,8 @@
 #define D_UNKNOWN_OPTION_EXCEPTION_H
 #include "RecoverableException.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 class UnknownOptionException : public RecoverableException {
@@ -46,22 +48,21 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  UnknownOptionException(const char* file, int line,
-                         const std::string& unknownOption);
+  UnknownOptionException(
+      const std::string& unknownOption,
+      std::source_location location = std::source_location::current());
 
-  UnknownOptionException(const char* file, int line,
-                         const std::string& unknownOption,
-                         const Exception& cause);
+  UnknownOptionException(
+      const std::string& unknownOption, const Exception& cause,
+      std::source_location location = std::source_location::current());
 
   virtual ~UnknownOptionException() noexcept;
 
   const std::string& getUnknownOption() const { return unknownOption_; }
 };
 
-#define UNKNOWN_OPTION_EXCEPTION(arg)                                          \
-  UnknownOptionException(__FILE__, __LINE__, arg)
-#define UNKNOWN_OPTION_EXCEPTION2(arg1, arg2)                                  \
-  UnknownOptionException(__FILE__, __LINE__, arg1, arg2)
+#define UNKNOWN_OPTION_EXCEPTION(arg) UnknownOptionException(arg)
+#define UNKNOWN_OPTION_EXCEPTION2(arg1, arg2) UnknownOptionException(arg1, arg2)
 
 } // namespace aria2
 

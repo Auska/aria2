@@ -120,14 +120,14 @@ public:
     const std::shared_ptr<aria2::Logger>& logger =                             \
         aria2::LogFactory::getInstance();                                      \
     if (logger->levelEnabled(level))                                           \
-      logger->log(level, __FILE__, __LINE__, msg);                             \
+      logger->log(level, msg);                                                 \
   }
 #define A2_LOG_EX(level, msg, ex)                                              \
   {                                                                            \
     const std::shared_ptr<aria2::Logger>& logger =                             \
         aria2::LogFactory::getInstance();                                      \
     if (logger->levelEnabled(level))                                           \
-      logger->log(level, __FILE__, __LINE__, msg, ex);                         \
+      logger->log(level, msg, ex);                                             \
   }
 
 #define A2_LOG_DEBUG(msg) A2_LOG(Logger::LEVEL::A2_DEBUG, msg)

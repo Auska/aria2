@@ -36,6 +36,8 @@
 #define D_DL_ABORT_EX_H
 #include "RecoverableException.h"
 
+#include <source_location>
+
 namespace aria2 {
 
 class DlAbortEx : public RecoverableException {
@@ -43,24 +45,25 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  DlAbortEx(const char* file, int line, const std::string& msg);
+  DlAbortEx(const std::string& msg,
+            std::source_location location = std::source_location::current());
 
-  DlAbortEx(const char* file, int line, const std::string& msg,
-            const Exception& cause);
+  DlAbortEx(const std::string& msg, const Exception& cause,
+            std::source_location location = std::source_location::current());
 
-  DlAbortEx(const char* file, int line, const std::string& msg,
-            error_code::Value code);
+  DlAbortEx(const std::string& msg, error_code::Value code,
+            std::source_location location = std::source_location::current());
 
-  DlAbortEx(const char* file, int line, int errNum, const std::string& msg);
+  DlAbortEx(int errNum, const std::string& msg,
+            std::source_location location = std::source_location::current());
 
-  DlAbortEx(const char* file, int line, int errNum, const std::string& msg,
-            error_code::Value code);
+  DlAbortEx(int errNum, const std::string& msg, error_code::Value code,
+            std::source_location location = std::source_location::current());
 };
 
-#define DL_ABORT_EX(arg) DlAbortEx(__FILE__, __LINE__, arg)
-#define DL_ABORT_EX2(arg1, arg2) DlAbortEx(__FILE__, __LINE__, arg1, arg2)
-#define DL_ABORT_EX3(arg1, arg2, arg3)                                         \
-  DlAbortEx(__FILE__, __LINE__, arg1, arg2, arg3)
+#define DL_ABORT_EX(arg) DlAbortEx(arg)
+#define DL_ABORT_EX2(arg1, arg2) DlAbortEx(arg1, arg2)
+#define DL_ABORT_EX3(arg1, arg2, arg3) DlAbortEx(arg1, arg2, arg3)
 
 } // namespace aria2
 

@@ -35,6 +35,8 @@
 #ifndef D_OPTION_HANDLER_EXCEPTION_H
 #define D_OPTION_HANDLER_EXCEPTION_H
 #include "RecoverableException.h"
+
+#include <source_location>
 #include "prefs.h"
 
 namespace aria2 {
@@ -47,20 +49,20 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  OptionHandlerException(const char* file, int line, PrefPtr pref);
+  OptionHandlerException(PrefPtr pref, std::source_location location =
+                                           std::source_location::current());
 
-  OptionHandlerException(const char* file, int line, PrefPtr pref,
-                         const Exception& cause);
+  OptionHandlerException(
+      PrefPtr pref, const Exception& cause,
+      std::source_location location = std::source_location::current());
 
   virtual ~OptionHandlerException() noexcept;
 
   PrefPtr getPref() const { return pref_; }
 };
 
-#define OPTION_HANDLER_EXCEPTION(arg)                                          \
-  OptionHandlerException(__FILE__, __LINE__, arg)
-#define OPTION_HANDLER_EXCEPTION2(arg1, arg2)                                  \
-  OptionHandlerException(__FILE__, __LINE__, arg1, arg2)
+#define OPTION_HANDLER_EXCEPTION(arg) OptionHandlerException(arg)
+#define OPTION_HANDLER_EXCEPTION2(arg1, arg2) OptionHandlerException(arg1, arg2)
 
 } // namespace aria2
 

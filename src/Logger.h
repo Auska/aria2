@@ -39,6 +39,7 @@
 
 #include <string>
 #include <memory>
+#include <source_location>
 
 namespace aria2 {
 
@@ -68,8 +69,8 @@ private:
   Logger(const Logger&);
   Logger& operator=(const Logger&);
 
-  void writeLog(Logger::LEVEL level, const char* sourceFile, int lineNum,
-                const char* msg, const char* trace);
+  void writeLog(Logger::LEVEL level, std::source_location location,
+                const std::string& msg, const char* trace);
 
   // Returns true if message with log level |level| will be outputted
   // to file.
@@ -83,16 +84,11 @@ public:
 
   ~Logger();
 
-  void log(LEVEL level, const char* sourceFile, int lineNum, const char* msg);
+  void log(LEVEL level, const std::string& msg,
+           std::source_location location = std::source_location::current());
 
-  void log(LEVEL level, const char* sourceFile, int lineNum,
-           const std::string& msg);
-
-  void log(LEVEL level, const char* sourceFile, int lineNum, const char* msg,
-           const Exception& ex);
-
-  void log(LEVEL level, const char* sourceFile, int lineNum,
-           const std::string& msg, const Exception& ex);
+  void log(LEVEL level, const std::string& msg, const Exception& ex,
+           std::source_location location = std::source_location::current());
 
   void openFile(const std::string& filename);
 

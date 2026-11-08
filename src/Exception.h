@@ -39,6 +39,7 @@
 
 #include <string>
 #include <memory>
+#include <source_location>
 
 #include "error_code.h"
 
@@ -47,7 +48,6 @@ namespace aria2 {
 class Exception : public std::exception {
 private:
   const char* file_;
-
   int line_;
   // This is low-level system error code, typically errno in Linux.
   int errNum_;
@@ -63,21 +63,24 @@ protected:
   virtual std::shared_ptr<Exception> copy() const = 0;
 
 public:
-  Exception(const char* file, int line, const std::string& msg);
+  Exception(const std::string& msg,
+            std::source_location location = std::source_location::current());
 
-  Exception(const char* file, int line, const std::string& msg,
-            error_code::Value errorCode, const Exception& cause);
+  Exception(const std::string& msg, error_code::Value errorCode,
+            const Exception& cause,
+            std::source_location location = std::source_location::current());
   // errorCode_ is initializedwith cause.errorCode_.
-  Exception(const char* file, int line, const std::string& msg,
-            const Exception& cause);
+  Exception(const std::string& msg, const Exception& cause,
+            std::source_location location = std::source_location::current());
 
-  Exception(const char* file, int line, const std::string& msg,
-            error_code::Value errorCode);
+  Exception(const std::string& msg, error_code::Value errorCode,
+            std::source_location location = std::source_location::current());
 
-  Exception(const char* file, int line, int errNum, const std::string& msg);
+  Exception(int errNum, const std::string& msg,
+            std::source_location location = std::source_location::current());
 
-  Exception(const char* file, int line, int errNum, const std::string& msg,
-            error_code::Value errorCode);
+  Exception(int errNum, const std::string& msg, error_code::Value errorCode,
+            std::source_location location = std::source_location::current());
 
   virtual ~Exception() noexcept;
 

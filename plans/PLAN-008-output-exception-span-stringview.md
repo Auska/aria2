@@ -134,7 +134,7 @@ public:
 ## 分步计划
 
 1. [x] **阶段 1：输出层去 `vprintf`/`printf`** — `src/OutputFile.h`、`src/IOFile.{h,cc}`、`src/NullOutputFile.h`、`src/BufferedFile.*`、`src/GZipFile.*`、`src/SHA1IOFile.*`（4 个 `onVprintf` 实现）+ 12 个调用文件 + 3 处 `stringstream`；干净 worktree 门禁；提交 `PLAN-008 阶段1: 输出层移除 C 可变参数接口`。
-2. [ ] **阶段 2：异常层改用 `std::source_location`** — `src/Exception.{h,cc}`、`src/RecoverableException.{h,cc}`、6 个异常子类头、`src/LogFactory.{h,cc}`/`src/Logger.{h,cc}`；干净 worktree 门禁；提交 `PLAN-008 阶段2: 异常与日志改用 std::source_location`。
+2. [x] **阶段 2：异常层改用 `std::source_location`** — `src/Exception.{h,cc}`、`src/RecoverableException.{h,cc}`、6 个异常子类头、`src/LogFactory.{h,cc}`/`src/Logger.{h,cc}`；干净 worktree 门禁；提交 `PLAN-008 阶段2: 异常与日志改用 std::source_location`。
 3. [ ] **阶段 3：残余 ptr+len → `std::span`** — `src/BitfieldMan.{h,cc}` 8 个函数 + `src/DefaultPieceStorage.*`、`src/PieceStatMan.*`、`src/StreamPieceSelector.h` + 4 实现、`src/UnknownLengthPieceStorage.*`、`src/bittorrent_helper.*`、`src/ValueBase.*`、测试；干净 worktree 门禁；提交 `PLAN-008 阶段3: 残余指针加长度参数改用 std::span`。
 4. [ ] **阶段 4：只读形参 → `std::string_view`** — 159 个头文件的 672 处 `const std::string&`（`src/includes/aria2/aria2.h` 除外）+ 对应实现与调用点；干净 worktree 门禁；提交 `PLAN-008 阶段4: 只读字符串形参改用 std::string_view`。
 5. [ ] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-008: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
@@ -146,6 +146,14 @@ public:
 - 编译修复 5 轮：①`src/Context.cc:showFiles()` 的裸 `write(...)` 被 ADL 解析成 `::write(int, const void*, size_t)` → 改 `global::cout()->write(...)`；②`src/main.cc` 的 `main()` 在 `namespace aria2` 外，`fmt` 需写 `aria2::fmt(...)`；③`src/OptionHandler.cc`、`src/ConsoleStatCalc.cc` 补 `#include "fmt.h"`；④`src/IOFile.h` 原 `vprintf` 位置留下了重复的 `int flush() override;`（已删）；⑤`src/BufferedFile.cc`/`src/IOFile.cc` 删 `<cstdarg>`。
 - 门禁（干净 worktree `/tmp/aria2-m8-p1`，base `d191e03a`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 - 遗留：`test/UtilSecurityTest.cc:439` 仍用 `printf`（stdio 自身的，非 `OutputFile` 接口），保留。
+
+### 阶段 2 实测（2026-11-08）
+
+- 改动 **19 文件 +234/−217**。`src/Exception` / `src/RecoverableException` 的 6 个构造重载全部改为「业务参数在前 + `std::source_location location = std::source_location::current()` 收尾」，`file_`/`line_` 由 `location.file_name()` / `location.line()` 填充（`errNum` 形态因此移到首参，与无 `errNum` 形态不再歧义）。
+- 6 个子类（`DlAbortEx`/`DlRetryEx`/`DownloadFailureException`/`FatalException`/`OptionHandlerException`/`UnknownOptionException`）的头与实现同步；`DL_ABORT_EX*`、`DL_RETRY_EX*`、`DOWNLOAD_FAILURE_EXCEPTION*`、`FATAL_EXCEPTION*`、`OPTION_HANDLER_EXCEPTION*`、`UNKNOWN_OPTION_EXCEPTION*` 共 **16 个宏全部保留原名**，宏体只去掉 `__FILE__, __LINE__`，因此 **402 处调用点零改动**。
+- `__FILE__`/`__LINE__` 在 `src` 与 `test` 中 **已清零**（`git grep` 0 命中）。
+- `src/Logger`：4 个 `log()` 合并为 2 个（`const std::string&` + 可选 `const Exception&`，均带 `source_location` 默认参数）；`writeLog()` / 内部 `writeHeader()` 改收 `std::source_location`，输出格式 `[file:line]` 保持不变。`src/LogFactory.h` 的 `A2_LOG` / `A2_LOG_EX` 宏体改为 `logger->log(level, msg[, ex])`，调用点同样零改动。
+- 门禁（干净 worktree `/tmp/aria2-m8-p2`，base `6434ec32`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 
 ## 预计修改的文件
 

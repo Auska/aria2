@@ -120,8 +120,7 @@ const char* levelToString(Logger::LEVEL level)
 
 namespace {
 template <typename Output>
-void writeHeader(Output& fp, Logger::LEVEL level, const char* sourceFile,
-                 int lineNum)
+void writeHeader(Output& fp, Logger::LEVEL level, std::source_location location)
 {
   struct timeval tv;
   gettimeofday(&tv, nullptr);
@@ -134,7 +133,7 @@ void writeHeader(Output& fp, Logger::LEVEL level, const char* sourceFile,
       strftime(datestr, sizeof(datestr), "%Y-%m-%d %H:%M:%S", &tm);
   assert(dateLength <= (size_t)20);
   fp.write(fmt("{}.{:06} [{}] [{}:{}] ", datestr, (unsigned long)tv.tv_usec,
-               levelToString(level), sourceFile, lineNum));
+               levelToString(level), location.file_name(), location.line()));
 }
 } // namespace
 
@@ -189,11 +188,11 @@ void writeStackTrace(Output& fp, const char* stackTrace)
 }
 } // namespace
 
-void Logger::writeLog(Logger::LEVEL level, const char* sourceFile, int lineNum,
-                      const char* msg, const char* trace)
+void Logger::writeLog(Logger::LEVEL level, std::source_location location,
+                      const std::string& msg, const char* trace)
 {
   if (fileLogEnabled(level)) {
-    writeHeader(*fpp_, level, sourceFile, lineNum);
+    writeHeader(*fpp_, level, location);
     fpp_->write(fmt("{}\n", msg));
     writeStackTrace(*fpp_, trace);
     fpp_->flush();
@@ -207,28 +206,16 @@ void Logger::writeLog(Logger::LEVEL level, const char* sourceFile, int lineNum,
   }
 }
 
-void Logger::log(LEVEL level, const char* sourceFile, int lineNum,
-                 const char* msg)
+void Logger::log(LEVEL level, const std::string& msg,
+                 std::source_location location)
 {
-  writeLog(level, sourceFile, lineNum, msg, "");
+  writeLog(level, location, msg, "");
 }
 
-void Logger::log(LEVEL level, const char* sourceFile, int lineNum,
-                 const std::string& msg)
+void Logger::log(LEVEL level, const std::string& msg, const Exception& ex,
+                 std::source_location location)
 {
-  log(level, sourceFile, lineNum, msg.c_str());
-}
-
-void Logger::log(LEVEL level, const char* sourceFile, int lineNum,
-                 const char* msg, const Exception& ex)
-{
-  writeLog(level, sourceFile, lineNum, msg, ex.stackTrace().c_str());
-}
-
-void Logger::log(LEVEL level, const char* sourceFile, int lineNum,
-                 const std::string& msg, const Exception& ex)
-{
-  log(level, sourceFile, lineNum, msg.c_str(), ex);
+  writeLog(level, location, msg, ex.stackTrace().c_str());
 }
 
 } // namespace aria2

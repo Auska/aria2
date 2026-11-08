@@ -41,31 +41,30 @@ std::shared_ptr<Exception> DownloadFailureException::copy() const
   return std::make_shared<DownloadFailureException>(*this);
 }
 
-DownloadFailureException::DownloadFailureException(const char* file, int line,
-                                                   const std::string& msg)
-    : RecoverableException(file, line, msg)
+DownloadFailureException::DownloadFailureException(
+    const std::string& msg, std::source_location location)
+    : RecoverableException(msg, location)
 {
 }
 
-DownloadFailureException::DownloadFailureException(const char* file, int line,
-                                                   const std::string& msg,
-                                                   const Exception& cause)
-    : RecoverableException(file, line, msg, cause)
+DownloadFailureException::DownloadFailureException(
+    const std::string& msg, const Exception& cause,
+    std::source_location location)
+    : RecoverableException(msg, cause, location)
 {
 }
 
-DownloadFailureException::DownloadFailureException(const char* file, int line,
-                                                   const std::string& msg,
-                                                   error_code::Value code)
-    : RecoverableException(file, line, msg, code)
+DownloadFailureException::DownloadFailureException(
+    const std::string& msg, error_code::Value code,
+    std::source_location location)
+    : RecoverableException(msg, code, location)
 {
 }
 
-DownloadFailureException::DownloadFailureException(const char* file, int line,
-                                                   int errNum,
-                                                   const std::string& msg,
-                                                   error_code::Value code)
-    : RecoverableException(file, line, errNum, msg, code)
+DownloadFailureException::DownloadFailureException(
+    int errNum, const std::string& msg, error_code::Value code,
+    std::source_location location)
+    : RecoverableException(errNum, msg, code, location)
 {
 }
 
