@@ -343,7 +343,6 @@ AC_FUNC_ERROR_AT_LINE
 
 AC_FUNC_MEMCMP
 AC_FUNC_MKTIME
-AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
@@ -376,7 +375,6 @@ AC_CHECK_FUNCS([__argz_count \
                 pow \
                 putenv \
                 rmdir \
-                select \
                 setlocale \
                 sigaction \
                 sleep \
