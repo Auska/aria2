@@ -315,7 +315,7 @@ std::string normalizePath(std::string path)
     ++out;
   }
 
-  for (int i = 0; i < (int)range.size(); i += 2) {
+  for (int i = 0; i < static_cast<int>(range.size()); i += 2) {
     auto a = begin + range[i];
     auto b = begin + range[i + 1];
     if (a == out) {

@@ -310,7 +310,7 @@ std::shared_ptr<Request> FileEntry::findFasterRequest(
     }
   }
   if (!fastCands.empty()) {
-    std::sort(fastCands.begin(), fastCands.end(), ServerStatFaster());
+    std::ranges::sort(fastCands.begin(), fastCands.end(), ServerStatFaster());
     auto fastestRequest = std::make_shared<Request>();
     const std::string& uri = fastCands.front().second;
     A2_LOG_DEBUG(fmt("Selected {} from fastCands", uri));
@@ -415,13 +415,13 @@ void FileEntry::reuseUri(const std::vector<std::string>& ignore)
     }
   }
   std::deque<std::string> uris = spentUris_;
-  std::sort(uris.begin(), uris.end());
+  std::ranges::sort(uris.begin(), uris.end());
   uris.erase(std::unique(uris.begin(), uris.end()), uris.end());
 
   std::vector<std::string> errorUris(uriResults_.size());
   std::transform(uriResults_.begin(), uriResults_.end(), errorUris.begin(),
                  std::mem_fn(&URIResult::getURI));
-  std::sort(errorUris.begin(), errorUris.end());
+  std::ranges::sort(errorUris.begin(), errorUris.end());
   errorUris.erase(std::unique(errorUris.begin(), errorUris.end()),
                   errorUris.end());
   if (A2_LOG_DEBUG_ENABLED) {

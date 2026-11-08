@@ -157,9 +157,8 @@ DefaultBtInteractive::receiveHandshake(bool quickReply)
     peer_->setDHTEnabled(true);
     A2_LOG_INFO(fmt(MSG_DHT_ENABLED_PEER, cuid_));
   }
-  A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_,
-                  peer_->getIPAddress(), peer_->getPort(),
-                  message->toString()));
+  A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_, peer_->getIPAddress(),
+                  peer_->getPort(), message->toString()));
   return message;
 }
 
@@ -312,9 +311,8 @@ size_t DefaultBtInteractive::receiveMessages()
       break;
     }
     ++msgcount;
-    A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_,
-                    peer_->getIPAddress(), peer_->getPort(),
-                    message->toString()));
+    A2_LOG_INFO(fmt(MSG_RECEIVE_PEER_MESSAGE, cuid_, peer_->getIPAddress(),
+                    peer_->getPort(), message->toString()));
     message->doReceivedAction();
 
     switch (message->getId()) {
@@ -343,8 +341,9 @@ size_t DefaultBtInteractive::receiveMessages()
       (countOldOutstandingRequest - dispatcher_->countOutstandingRequest()) *
               4 >=
           maxOutstandingRequest_) {
-    maxOutstandingRequest_ = std::min((size_t)UB_MAX_OUTSTANDING_REQUEST,
-                                      maxOutstandingRequest_ * 2);
+    maxOutstandingRequest_ =
+        std::min(static_cast<size_t>(UB_MAX_OUTSTANDING_REQUEST),
+                 maxOutstandingRequest_ * 2);
   }
   return msgcount;
 }
@@ -506,8 +505,8 @@ void DefaultBtInteractive::addPeerExchangeMessage()
 {
   if (pexTimer_.difference(global::wallclock()) >=
       UTPexExtensionMessage::DEFAULT_INTERVAL) {
-    auto m = make_unique<UTPexExtensionMessage>(
-        peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX));
+    auto m = make_unique<UTPexExtensionMessage>(peer_->getExtensionMessageID(
+        ExtensionMessageRegistry::InterestingExtension::UT_PEX));
     auto& usedPeers = peerStorage_->getUsedPeers();
     for (auto i = std::begin(usedPeers), eoi = std::end(usedPeers);
          i != eoi && !m->freshPeersAreFull(); ++i) {
@@ -536,7 +535,8 @@ void DefaultBtInteractive::doInteractionProcessing()
     // PieceStorage is re-initialized with metadata_size in
     // HandshakeExtensionMessage::doReceivedAction().
     pieceStorage_ = downloadContext_->getOwnerRequestGroup()->getPieceStorage();
-    if (peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA) &&
+    if (peer_->getExtensionMessageID(
+            ExtensionMessageRegistry::InterestingExtension::UT_METADATA) &&
         downloadContext_->getTotalLength() > 0) {
       size_t num = utMetadataRequestTracker_->avail();
       if (num > 0) {
@@ -578,7 +578,8 @@ void DefaultBtInteractive::doInteractionProcessing()
       addRequests();
     }
   }
-  if (peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_PEX) &&
+  if (peer_->getExtensionMessageID(
+          ExtensionMessageRegistry::InterestingExtension::UT_PEX) &&
       utPexEnabled_) {
     addPeerExchangeMessage();
   }

@@ -90,13 +90,16 @@ void ServerStat::updateSingleConnectionAvgSpeed(int downloadSpeed)
   if (counter_ == 0)
     return;
   if (counter_ < 5) {
-    avgDownloadSpeed = ((((float)counter_ - 1) / (float)counter_) *
-                        (float)singleConnectionAvgSpeed_) +
-                       ((1.0 / (float)counter_) * (float)downloadSpeed);
+    avgDownloadSpeed =
+        (((static_cast<float>(counter_) - 1) / static_cast<float>(counter_)) *
+         static_cast<float>(singleConnectionAvgSpeed_)) +
+        ((1.0 / static_cast<float>(counter_)) *
+         static_cast<float>(downloadSpeed));
   }
   else {
-    avgDownloadSpeed = ((4.0 / 5.0) * (float)singleConnectionAvgSpeed_) +
-                       ((1.0 / 5.0) * (float)downloadSpeed);
+    avgDownloadSpeed =
+        ((4.0 / 5.0) * static_cast<float>(singleConnectionAvgSpeed_)) +
+        ((1.0 / 5.0) * static_cast<float>(downloadSpeed));
   }
   if (avgDownloadSpeed < static_cast<int>(0.80 * singleConnectionAvgSpeed_)) {
     A2_LOG_DEBUG(fmt("ServerStat:{}: resetting counter since single connection"
@@ -106,9 +109,10 @@ void ServerStat::updateSingleConnectionAvgSpeed(int downloadSpeed)
   }
   A2_LOG_DEBUG(fmt("ServerStat:{}: singleConnectionAvgSpeed_ old:{:.2f}KB/s"
                    " new:{:.2f}KB/s last:{:.2f}KB/s",
-                   getHostname(), (float)singleConnectionAvgSpeed_ / 1024,
-                   (float)avgDownloadSpeed / 1024,
-                   (float)downloadSpeed / 1024));
+                   getHostname(),
+                   static_cast<float>(singleConnectionAvgSpeed_) / 1024,
+                   static_cast<float>(avgDownloadSpeed) / 1024,
+                   static_cast<float>(downloadSpeed) / 1024));
   singleConnectionAvgSpeed_ = static_cast<int>(avgDownloadSpeed);
 }
 
@@ -123,19 +127,23 @@ void ServerStat::updateMultiConnectionAvgSpeed(int downloadSpeed)
   if (counter_ == 0)
     return;
   if (counter_ < 5) {
-    avgDownloadSpeed = ((((float)counter_ - 1) / (float)counter_) *
-                        (float)multiConnectionAvgSpeed_) +
-                       ((1.0 / (float)counter_) * (float)downloadSpeed);
+    avgDownloadSpeed =
+        (((static_cast<float>(counter_) - 1) / static_cast<float>(counter_)) *
+         static_cast<float>(multiConnectionAvgSpeed_)) +
+        ((1.0 / static_cast<float>(counter_)) *
+         static_cast<float>(downloadSpeed));
   }
   else {
-    avgDownloadSpeed = ((4.0 / 5.0) * (float)multiConnectionAvgSpeed_) +
-                       ((1.0 / 5.0) * (float)downloadSpeed);
+    avgDownloadSpeed =
+        ((4.0 / 5.0) * static_cast<float>(multiConnectionAvgSpeed_)) +
+        ((1.0 / 5.0) * static_cast<float>(downloadSpeed));
   }
   A2_LOG_DEBUG(fmt("ServerStat:{}: multiConnectionAvgSpeed_ old:{:.2f}KB/s"
                    " new:{:.2f}KB/s last:{:.2f}KB/s",
-                   getHostname(), (float)multiConnectionAvgSpeed_ / 1024,
-                   (float)avgDownloadSpeed / 1024,
-                   (float)downloadSpeed / 1024));
+                   getHostname(),
+                   static_cast<float>(multiConnectionAvgSpeed_) / 1024,
+                   static_cast<float>(avgDownloadSpeed) / 1024,
+                   static_cast<float>(downloadSpeed) / 1024));
   multiConnectionAvgSpeed_ = static_cast<int>(avgDownloadSpeed);
 }
 

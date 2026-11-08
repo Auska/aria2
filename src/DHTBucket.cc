@@ -105,7 +105,8 @@ bool DHTBucket::isInRange(const DHTID& nodeID, const DHTID& max,
 bool DHTBucket::addNode(const std::shared_ptr<DHTNode>& node)
 {
   notifyUpdate();
-  auto itr = std::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
+  auto itr =
+      std::ranges::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
   if (itr == nodes_.end()) {
     if (nodes_.size() < K) {
       nodes_.push_back(node);
@@ -141,7 +142,8 @@ void DHTBucket::cacheNode(const std::shared_ptr<DHTNode>& node)
 void DHTBucket::dropNode(const std::shared_ptr<DHTNode>& node)
 {
   if (!cachedNodes_.empty()) {
-    auto itr = std::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
+    auto itr =
+        std::ranges::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
     if (itr != nodes_.end()) {
       nodes_.erase(itr);
       nodes_.push_back(cachedNodes_.front());
@@ -152,7 +154,8 @@ void DHTBucket::dropNode(const std::shared_ptr<DHTNode>& node)
 
 void DHTBucket::moveToHead(const std::shared_ptr<DHTNode>& node)
 {
-  auto itr = std::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
+  auto itr =
+      std::ranges::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
   if (itr != nodes_.end()) {
     nodes_.erase(itr);
     nodes_.push_front(node);
@@ -161,7 +164,8 @@ void DHTBucket::moveToHead(const std::shared_ptr<DHTNode>& node)
 
 void DHTBucket::moveToTail(const std::shared_ptr<DHTNode>& node)
 {
-  auto itr = std::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
+  auto itr =
+      std::ranges::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
   if (itr != nodes_.end()) {
     nodes_.erase(itr);
     nodes_.push_back(node);
@@ -222,7 +226,8 @@ std::shared_ptr<DHTNode> DHTBucket::getNode(const DHTID& nodeID,
   auto node = std::make_shared<DHTNode>(nodeID);
   node->setIPAddress(ipaddr);
   node->setPort(port);
-  auto itr = std::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
+  auto itr =
+      std::ranges::find_if(nodes_.begin(), nodes_.end(), derefEqual(node));
   if (itr == nodes_.end() || (*itr)->getIPAddress() != ipaddr ||
       (*itr)->getPort() != port) {
     return nullptr;
@@ -257,13 +262,14 @@ public:
 
 bool DHTBucket::containsQuestionableNode() const
 {
-  return std::find_if(nodes_.begin(), nodes_.end(), FindQuestionableNode()) !=
-         nodes_.end();
+  return std::ranges::find_if(nodes_.begin(), nodes_.end(),
+                              FindQuestionableNode()) != nodes_.end();
 }
 
 std::shared_ptr<DHTNode> DHTBucket::getLRUQuestionableNode() const
 {
-  auto i = std::find_if(nodes_.begin(), nodes_.end(), FindQuestionableNode());
+  auto i = std::ranges::find_if(nodes_.begin(), nodes_.end(),
+                                FindQuestionableNode());
   if (i == nodes_.end()) {
     return nullptr;
   }

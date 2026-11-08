@@ -117,11 +117,33 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 
 ## 分步计划
 
-1. [ ] **阶段 1**：A 组缺陷（A1 拷贝控制 + static_assert、A2 `gmtime_r`、A3 `localtime_r`、A4 `readAll()`）→ 门禁 → 提交 `PLAN-009 阶段1: 修复 WrDiskCacheEntry 所有权与非线程安全时间函数`
-2. [ ] **阶段 2**：B1 39 处 cast + B2 15 find/18 sort + B5 2 个透明比较器 → 门禁 → 提交 `PLAN-009 阶段2: C 风格转换与 find/sort 改用 static_cast 与 std::ranges`
+1. [x] **阶段 1**：A 组缺陷（A1 拷贝控制 + static_assert、A2 `gmtime_r`、A3 `localtime_r`、A4 `readAll()`）→ 门禁 → 提交 `PLAN-009 阶段1: 修复 WrDiskCacheEntry 所有权与非线程安全时间函数`
+2. [x] **阶段 2**：B1 39 处 cast + B2 15 find/18 sort + B5 2 个透明比较器 → 门禁 → 提交 `PLAN-009 阶段2: C 风格转换与 find/sort 改用 static_cast 与 std::ranges`
 3. [ ] **阶段 3**：B3 34 处索引循环 → `views::enumerate`（+ `zip`）→ 门禁 → 提交 `PLAN-009 阶段3: 索引 for 循环改用 std::views::enumerate`
 4. [ ] **阶段 4**：B4 265 处声明 + 257 处定义加 `noexcept` → 门禁 → 提交 `PLAN-009 阶段4: 析构函数标注 noexcept`
 5. [ ] **阶段 5**：文档收尾 → 提交 `PLAN-009: 勾选全部阶段、标记计划完成并记录实测门禁结果`
+
+### 阶段 1 实测（2026-11-08）
+
+- `src/WrDiskCacheEntry.h`：加 `WrDiskCacheEntry(const WrDiskCacheEntry&) = delete;` / `operator=` 版 + 两行注释；`test/WrDiskCacheEntryTest.cc` 加 `#include <type_traits>` 与两个 `static_assert`。
+- `src/TimeA2.cc:71-74`：`struct tm* tms = gmtime(&t)` → `struct tm tms; gmtime_r(&t, &tms);`，`strftime(..., &tms)`。
+- `src/ConsoleStatCalc.cc`：删外层未用的 `time_t now; time(&now);` 两行；内层 `struct tm* staticNowtmPtr` + `localtime` → `struct tm nowtm` + `localtime_r`，`asctime_r(&nowtm, buf)`。`std::stringstream o` 按要求保留。
+- `src/LibsslTLSContext.cc`：`std::ostringstream ss; …transfer(ss); auto data = ss.str();` → `auto data = BufferedFile(…).readAll();`，删 `#include <sstream>`。
+- 门禁：干净 worktree `/tmp/aria2-m9-p1`（base `4a05252a`）+ `git apply /tmp/p9-stage1.patch`（114 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）+ `make -j8 check` rc=0 → `# TOTAL: 1` / `# PASS: 1` / `FAIL 0` / `ERROR 0`、`OK (914)`、`error:` 0、`Failures !!!` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+- 提交 `52774b20`（5 文件 +18/−14）。
+- 专项验证：`git grep -nE '\bgmtime\(|\blocaltime\(' -- src` → 0 命中；`git grep 'transfer(ss)\|ostringstream' -- src/LibsslTLSContext.cc` → 0 命中。
+
+### 阶段 2 实测（2026-11-08）
+
+- **B1 36 处**（非原估 39）：`src/ServerStat.cc` 20、`src/Context.cc` 6、`src/AdaptiveURISelector.cc` 3、`src/DefaultBtProgressInfoFile.cc` 2、`src/ColorizedStream.h` 1、`src/DefaultBtInteractive.cc` 1、`src/Logger.cc` 1、`src/LpdMessageDispatcher.cc` 1、`src/uri.cc` 1。全部由 `/tmp/p9_cast.py` 生成 —— 脚本用括号配平找出操作数起点到「成员/调用/下标链」终点，替换成 `static_cast<T>(operand)`。**首版朴素正则把操作数截成单个标识符**（`(float)a + b` → `static_cast<float>(a) + b` 尚可，但 `((((float)counter_` 里 `(((` 前缀导致括号失衡）产生 39 个 `unterminated argument list` 错误，已重写。
+- **B2 15 `find`/`find_if` + 16 排序** → `std::ranges::` 版。`src/BtLeecherStateChoke.cc:146,163` 的 2 处 `std::partition` **保留**（返回 iterator 被 `std::shuffle` 直接消费，ranges 版返回 `subrange` 反而更绕）。
+- **排序改 ranges 的两个坑**：`std::ranges::sort` 用 `std::less<>` 作默认比较器，对**没有 `operator<=>`** 的类型无法用 `std::totally_ordered` 约束 → `src/BtSeederStateChoke.cc:125`、`src/BtLeecherStateChoke.cc:166` 必须显式传 `std::less<>{}`（`PeerEntry::operator<` 是自定义 `bool`，不满足 `strict_weak_order` 概念所需的 `bool` 返回 + total order 推导）。
+- **B5**：`src/ValueBase.h:251-254` `ValueType` 加 `std::less<>`，`Dict::get/operator[]/containsKey/removeKey/popValue` 形参 → `std::string_view`；`src/DefaultPeerStorage.h:75 badPeers_` 加 `std::less<>`，`PeerStorage::isBadPeer`/`DefaultPeerStorage::isBadPeer` → `std::string_view`（`test/MockPeerStorage.h:79` 同步）。
+  - 坑：`dict_.erase(std::string_view)` **GCC 14 libstdc++ 未实现 C++23 透明 erase**（`no matching function for call to erase(std::string_view&)`）→ `removeKey` 改成 `find` + `erase(iterator)`。
+- 门禁：干净 worktree `/tmp/aria2-m9-p2`（base `52774b20`）+ `git apply /tmp/p9-stage2.patch`（1024 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0 + `make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`error:` 0、ABI 哈希不变。
+- 提交 `cb2b02c6`（35 文件 +177/−133）。
+- 专项验证：`git grep -cE '\((int|size_t|uint64_t|int64_t|float|double|char|unsigned char|unsigned long|ssize_t)\)[A-Za-z_(]' -- 'src/*.cc' 'src/*.h'` → 0 命中；`git grep -nE 'std::(find|find_if|sort|stable_sort)\(' -- src` → 0 命中。
+- 教训：本地 `make check` 前必须 `touch test/*.cc test/*.h`，否则改了 `test/MockPeerStorage.h` 这类公共测试头后本地绿、干净 worktree 报 `marked 'override', but does not override`。
 
 ## 预计修改的文件
 

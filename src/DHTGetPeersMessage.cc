@@ -98,11 +98,12 @@ void DHTGetPeersMessage::addLocalPeer(std::vector<std::shared_ptr<Peer>>& peers)
   }
 
   auto tcpPort = btRegistry_->getTcpPort();
-  if (std::find_if(std::begin(peers), std::end(peers),
-                   [&externalIP, tcpPort](const std::shared_ptr<Peer>& peer) {
-                     return peer->getIPAddress() == externalIP &&
-                            peer->getPort() == tcpPort;
-                   }) != std::end(peers)) {
+  if (std::ranges::find_if(
+          std::begin(peers), std::end(peers),
+          [&externalIP, tcpPort](const std::shared_ptr<Peer>& peer) {
+            return peer->getIPAddress() == externalIP &&
+                   peer->getPort() == tcpPort;
+          }) != std::end(peers)) {
     return;
   }
 
@@ -130,7 +131,8 @@ void DHTGetPeersMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTGetPeersMessage::getArgument()
 {
   auto aDict = Dict::g();
-  aDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  aDict->put(DHTMessage::ID,
+             String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   aDict->put(INFO_HASH, String::g(infoHash_.data(), infoHash_.size()));
   return aDict;
 }

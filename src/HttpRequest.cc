@@ -255,10 +255,11 @@ std::string HttpRequest::createRequest()
     }
   }
   for (const auto& builtinHd : builtinHds) {
-    auto it = std::find_if(std::begin(headers_), std::end(headers_),
-                           [&builtinHd](const std::string& hd) {
-                             return util::istartsWith(hd, builtinHd.first);
-                           });
+    auto it =
+        std::ranges::find_if(std::begin(headers_), std::end(headers_),
+                             [&builtinHd](const std::string& hd) {
+                               return util::istartsWith(hd, builtinHd.first);
+                             });
     if (it == std::end(headers_)) {
       requestLine += builtinHd.first;
       requestLine += ' ';

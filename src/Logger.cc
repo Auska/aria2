@@ -132,8 +132,9 @@ void writeHeader(Output& fp, Logger::LEVEL level, std::source_location location)
   size_t dateLength =
       strftime(datestr, sizeof(datestr), "%Y-%m-%d %H:%M:%S", &tm);
   assert(dateLength <= (size_t)20);
-  fp.write(fmt("{}.{:06} [{}] [{}:{}] ", datestr, (unsigned long)tv.tv_usec,
-               levelToString(level), location.file_name(), location.line()));
+  fp.write(fmt("{}.{:06} [{}] [{}:{}] ", datestr,
+               static_cast<unsigned long>(tv.tv_usec), levelToString(level),
+               location.file_name(), location.line()));
 }
 } // namespace
 

@@ -99,7 +99,8 @@ bool BtDependency::resolve()
           dependee->getPieceStorage()->getDiskAdaptor();
       diskAdaptor->openExistingFile();
       std::string content = util::toString(diskAdaptor);
-      if (dependee->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
+      if (dependee->getDownloadContext()->hasAttribute(
+              ContextAttributeType::BT)) {
         auto attrs =
             bittorrent::getTorrentAttrs(dependee->getDownloadContext());
         bittorrent::loadFromMemory(bittorrent::metadata2Torrent(content, attrs),
@@ -137,7 +138,8 @@ bool BtDependency::resolve()
           e->setRequested(false);
           destFiles.push_back(e);
         }
-        std::sort(std::begin(destFiles), std::end(destFiles), EntryCmp());
+        std::ranges::sort(std::begin(destFiles), std::end(destFiles),
+                          EntryCmp());
         // Copy file path in dependant_'s FileEntries to newly created
         // context's FileEntries to endorse the path structure of
         // dependant_.  URIs and singleHostMultiConnection are also copied.
@@ -146,8 +148,8 @@ bool BtDependency::resolve()
                                           std::end(destFiles), e, EntryCmp());
           if (d == std::end(destFiles) ||
               (*d)->getOriginalName() != e->getOriginalName()) {
-            throw DL_ABORT_EX(fmt("No entry {} in torrent file",
-                                  e->getOriginalName()));
+            throw DL_ABORT_EX(
+                fmt("No entry {} in torrent file", e->getOriginalName()));
           }
           else {
             copyValues(*d, e);

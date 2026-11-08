@@ -650,7 +650,7 @@ void parsePrioritizePieceRange(
           fmt("Unrecognized token {}", std::string(i.first, i.second)));
     }
   }
-  std::sort(indexes.begin(), indexes.end());
+  std::ranges::sort(indexes.begin(), indexes.end());
   indexes.erase(std::unique(indexes.begin(), indexes.end()), indexes.end());
   result.insert(result.end(), indexes.begin(), indexes.end());
 }

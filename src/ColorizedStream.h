@@ -96,7 +96,7 @@ public:
 
   traits_t::int_type overflow(traits_t::int_type c) override
   {
-    elems.back().second.push_back((char)c);
+    elems.back().second.push_back(static_cast<char>(c));
     return std::char_traits<char>::not_eof(c);
   }
 

@@ -259,8 +259,8 @@ std::unique_ptr<Cookie> parse(const std::string& cookieStr,
     ++nvEnd;
   }
   for (std::string::const_iterator i = nvEnd; i != end;) {
-    std::string::const_iterator j = std::find(i, end, ';');
-    std::string::const_iterator eq = std::find(i, j, '=');
+    std::string::const_iterator j = std::ranges::find(i, end, ';');
+    std::string::const_iterator eq = std::ranges::find(i, j, '=');
     p = util::stripIter(i, eq);
     std::pair<std::string::const_iterator, std::string::const_iterator> attrp;
     if (eq == j) {

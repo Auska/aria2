@@ -871,7 +871,7 @@ bool RequestGroupMan::isSameFileBeingDownloaded(
                      std::mem_fn(&FileEntry::getPath));
     }
   }
-  std::sort(files.begin(), files.end());
+  std::ranges::sort(files.begin(), files.end());
   const std::vector<std::shared_ptr<FileEntry>>& entries =
       requestGroup->getDownloadContext()->getFileEntries();
   return sameFilePathExists(files.begin(), files.end(), entries.begin(),
@@ -1026,7 +1026,7 @@ void RequestGroupMan::getUsedHosts(
       }
     }
   }
-  std::sort(tempHosts.begin(), tempHosts.end());
+  std::ranges::sort(tempHosts.begin(), tempHosts.end());
   std::transform(tempHosts.begin(), tempHosts.end(),
                  std::back_inserter(usedHosts),
                  [](const std::tuple<size_t, int, std::string>& x) {

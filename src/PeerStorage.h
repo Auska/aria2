@@ -41,6 +41,7 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <string_view>
 
 #include "TransferStat.h"
 #include "Command.h"
@@ -98,7 +99,7 @@ public:
    * Returns true if peer with ipaddr should be ignored because, for
    * example, it sends bad data.
    */
-  virtual bool isBadPeer(const std::string& ipaddr) = 0;
+  virtual bool isBadPeer(std::string_view ipaddr) = 0;
 
   /**
    * Adds peer with ipaddr in bad peer set.

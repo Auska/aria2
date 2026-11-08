@@ -41,6 +41,8 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <string_view>
+#include <type_traits>
 
 #include "a2functional.h"
 
@@ -246,7 +248,10 @@ private:
 
 class Dict : public ValueBase {
 public:
-  using ValueType = std::map<std::string, std::unique_ptr<ValueBase>>;
+  // std::less<> lets lookups take a std::string_view without building a
+  // temporary std::string.
+  using ValueType =
+      std::map<std::string, std::unique_ptr<ValueBase>, std::less<>>;
 
   Dict();
 
@@ -259,20 +264,20 @@ public:
   // Putting string is so common that we provide shortcut function.
   void put(std::string key, String::ValueType string);
 
-  ValueBase* get(const std::string& key) const;
+  ValueBase* get(std::string_view key) const;
 
   // Returns the reference to object associated with given key.  If
   // the key is not found, nullptr is returned.
-  ValueBase* operator[](const std::string& key) const;
+  ValueBase* operator[](std::string_view key) const;
 
   // Returns true if the given key is found in dict.
-  bool containsKey(const std::string& key) const;
+  bool containsKey(std::string_view key) const;
 
   // Removes specified key from dict.
-  void removeKey(const std::string& key);
+  void removeKey(std::string_view key);
 
   // Removes specified key from dict and return its associated value.
-  std::unique_ptr<ValueBase> popValue(const std::string& key);
+  std::unique_ptr<ValueBase> popValue(std::string_view key);
 
   // Returns a read/write iterator that points to the first pair in
   // the dict.

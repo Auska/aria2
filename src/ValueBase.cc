@@ -174,7 +174,7 @@ void Dict::put(std::string key, String::ValueType string)
   put(std::move(key), String::g(std::move(string)));
 }
 
-ValueBase* Dict::get(const std::string& key) const
+ValueBase* Dict::get(std::string_view key) const
 {
   auto itr = dict_.find(key);
   if (itr == std::end(dict_)) {
@@ -185,16 +185,24 @@ ValueBase* Dict::get(const std::string& key) const
   }
 }
 
-ValueBase* Dict::operator[](const std::string& key) const { return get(key); }
+ValueBase* Dict::operator[](std::string_view key) const { return get(key); }
 
-bool Dict::containsKey(const std::string& key) const
+bool Dict::containsKey(std::string_view key) const
 {
   return dict_.contains(key);
 }
 
-void Dict::removeKey(const std::string& key) { dict_.erase(key); }
+void Dict::removeKey(std::string_view key)
+{
+  // Transparent erase-by-key is C++23 but not implemented in every library,
+  // so find first and erase by iterator.
+  auto i = dict_.find(key);
+  if (i != std::end(dict_)) {
+    dict_.erase(i);
+  }
+}
 
-std::unique_ptr<ValueBase> Dict::popValue(const std::string& key)
+std::unique_ptr<ValueBase> Dict::popValue(std::string_view key)
 {
   auto i = dict_.find(key);
   if (i == std::end(dict_)) {

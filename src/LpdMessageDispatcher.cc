@@ -89,8 +89,8 @@ bool LpdMessageDispatcher::init(const std::string& localAddr, unsigned char ttl,
 bool LpdMessageDispatcher::sendMessage()
 {
   return socket_->writeData(std::as_bytes(std::span{request_}),
-                            multicastAddress_,
-                            multicastPort_) == (ssize_t)request_.size();
+                            multicastAddress_, multicastPort_) ==
+         static_cast<ssize_t>(request_.size());
 }
 
 bool LpdMessageDispatcher::isAnnounceReady() const

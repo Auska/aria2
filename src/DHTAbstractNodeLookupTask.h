@@ -194,8 +194,8 @@ public:
     }
     A2_LOG_DEBUG(fmt("{} node lookup entries added.",
                      static_cast<unsigned long>(count)));
-    std::stable_sort(std::begin(entries_), std::end(entries_),
-                     DHTIDCloser(targetID_));
+    std::ranges::stable_sort(std::begin(entries_), std::end(entries_),
+                             DHTIDCloser(targetID_));
     entries_.erase(
         std::unique(std::begin(entries_), std::end(entries_),
                     DerefEqualTo<std::unique_ptr<DHTNodeLookupEntry>>{}),

@@ -122,7 +122,7 @@ void BtSeederStateChoke::unchoke(
 {
   int count = (round_ == 2) ? 4 : 3;
 
-  std::sort(std::begin(peers), std::end(peers));
+  std::ranges::sort(std::begin(peers), std::end(peers), std::less<>{});
 
   auto r = std::begin(peers);
   for (; r != std::end(peers) && count; ++r, --count) {
@@ -144,8 +144,7 @@ void BtSeederStateChoke::unchoke(
 
       peer->optUnchoking(true);
 
-      A2_LOG_INFO(
-          fmt("POU: {}:{}", peer->getIPAddress(), peer->getPort()));
+      A2_LOG_INFO(fmt("POU: {}:{}", peer->getIPAddress(), peer->getPort()));
     }
   }
 }

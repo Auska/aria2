@@ -218,7 +218,7 @@ const std::deque<std::shared_ptr<Peer>>& DefaultPeerStorage::getDroppedPeers()
 
 bool DefaultPeerStorage::isPeerAvailable() { return !unusedPeers_.empty(); }
 
-bool DefaultPeerStorage::isBadPeer(const std::string& ipaddr)
+bool DefaultPeerStorage::isBadPeer(std::string_view ipaddr)
 {
   auto i = badPeers_.find(ipaddr);
   if (i == std::end(badPeers_)) {

@@ -38,6 +38,7 @@
 #include "PeerStorage.h"
 
 #include <string>
+#include <string_view>
 #include <map>
 
 #include "TimerA2.h"
@@ -71,7 +72,7 @@ private:
 
   Timer lastTransferStatMapUpdated_;
 
-  std::map<std::string, Timer> badPeers_;
+  std::map<std::string, Timer, std::less<>> badPeers_;
   Timer lastBadPeerCleaned_;
 
   bool isPeerAlreadyAdded(const std::shared_ptr<Peer>& peer);
@@ -101,12 +102,11 @@ public:
 
   virtual const PeerSet& getUsedPeers() override;
 
-  virtual const std::deque<std::shared_ptr<Peer>>&
-  getDroppedPeers() override;
+  virtual const std::deque<std::shared_ptr<Peer>>& getDroppedPeers() override;
 
   virtual bool isPeerAvailable() override;
 
-  virtual bool isBadPeer(const std::string& ipaddr) override;
+  virtual bool isBadPeer(std::string_view ipaddr) override;
 
   virtual void addBadPeer(const std::string& ipaddr) override;
 

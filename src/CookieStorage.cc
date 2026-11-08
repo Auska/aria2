@@ -95,7 +95,7 @@ bool DomainNode::addCookie(std::unique_ptr<Cookie> cookie, time_t now)
     }
   }
 
-  auto i = std::find_if(
+  auto i = std::ranges::find_if(
       std::begin(*cookies_), std::end(*cookies_),
       [&](const std::unique_ptr<Cookie>& c) { return *c == *cookie; });
   if (i == std::end(*cookies_)) {
@@ -414,7 +414,7 @@ CookieStorage::criteriaFind(const std::string& requestHost,
   auto divs = std::vector<CookiePathDivider>{};
   std::transform(std::begin(res), std::end(res), std::back_inserter(divs),
                  CookiePathDividerConverter{});
-  std::sort(std::begin(divs), std::end(divs), OrderByPathDepthDesc{});
+  std::ranges::sort(std::begin(divs), std::end(divs), OrderByPathDepthDesc{});
   std::transform(std::begin(divs), std::end(divs), std::begin(res),
                  CookiePathDividerConverter{});
   return res;
@@ -502,8 +502,7 @@ bool CookieStorage::saveNsFormat(const std::string& filename)
     return true;
   }
   else {
-    A2_LOG_ERROR(fmt("Could not rename file {} as {}", tempfilename,
-                     filename));
+    A2_LOG_ERROR(fmt("Could not rename file {} as {}", tempfilename, filename));
     return false;
   }
 }

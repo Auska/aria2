@@ -196,14 +196,15 @@ AdaptiveURISelector::getBestMirror(const std::deque<std::string>& uris) const
     std::string uri = getMaxDownloadSpeedUri(uris);
     A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing the best mirror :"
                      " {:.2f}KB/s {} (other mirrors are at least 25% slower)",
-                     (float)max / 1024, uri));
+                     static_cast<float>(max) / 1024, uri));
     return uri;
   }
   else {
     std::string uri = selectRandomUri(bests);
     A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing randomly one of the best"
                      " mirrors (range [{:.2f}KB/s, {:.2f}KB/s]): {}",
-                     (float)min / 1024, (float)max / 1024, uri));
+                     static_cast<float>(min) / 1024,
+                     static_cast<float>(max) / 1024, uri));
     return uri;
   }
 }

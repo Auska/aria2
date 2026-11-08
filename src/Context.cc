@@ -179,18 +179,21 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
         int errNum = errno;
         A2_LOG_WARN(fmt("Failed to set rlimit NO_FILE from {} to "
                         "{}: {}",
-                        (uint64_t)r.rlim_cur, (uint64_t)rlim_new,
+                        static_cast<uint64_t>(r.rlim_cur),
+                        static_cast<uint64_t>(rlim_new),
                         util::safeStrerror(errNum)));
       }
       else {
         A2_LOG_DEBUG(fmt("Set rlimit NO_FILE from {} to {}",
-                         (uint64_t)r.rlim_cur, (uint64_t)rlim_new));
+                         static_cast<uint64_t>(r.rlim_cur),
+                         static_cast<uint64_t>(rlim_new)));
       }
     }
     else {
       rlim_new = op->getAsInt(PREF_RLIMIT_NOFILE);
       A2_LOG_DEBUG(fmt("Not setting rlimit NO_FILE: {} >=",
-                       (uint64_t)r.rlim_cur, (uint64_t)rlim_new));
+                       static_cast<uint64_t>(r.rlim_cur),
+                       static_cast<uint64_t>(rlim_new)));
     }
   }
 #endif // defined(HAVE_SYS_RESOURCE_H) && defined(RLIMIT_NOFILE)

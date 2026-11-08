@@ -134,7 +134,7 @@ Range HttpHeader::getRange() const
       ++byteRangeSpec;
     }
   }
-  auto slash = std::find(byteRangeSpec, rangeStr.end(), '/');
+  auto slash = std::ranges::find(byteRangeSpec, rangeStr.end(), '/');
   if (slash == rangeStr.end() || slash + 1 == rangeStr.end() ||
       (byteRangeSpec + 1 == slash && *byteRangeSpec == '*') ||
       (slash + 2 == rangeStr.end() && *(slash + 1) == '*')) {
@@ -143,7 +143,7 @@ Range HttpHeader::getRange() const
     // not satisfiable) status.
     return Range();
   }
-  auto minus = std::find(byteRangeSpec, slash, '-');
+  auto minus = std::ranges::find(byteRangeSpec, slash, '-');
   if (minus == slash) {
     return Range();
   }

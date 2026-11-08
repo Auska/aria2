@@ -4,6 +4,7 @@
 #  include "PeerStorage.h"
 
 #  include <algorithm>
+#  include <string_view>
 
 #  include "Peer.h"
 
@@ -27,8 +28,7 @@ public:
     return true;
   }
 
-  virtual void
-  addPeer(const std::vector<std::shared_ptr<Peer>>& peers) override
+  virtual void addPeer(const std::vector<std::shared_ptr<Peer>>& peers) override
   {
     unusedPeers.insert(unusedPeers.end(), peers.begin(), peers.end());
   }
@@ -39,8 +39,7 @@ public:
   }
 
   virtual std::shared_ptr<Peer>
-  addAndCheckoutPeer(const std::shared_ptr<Peer>& peer,
-                     cuid_t cuid) override
+  addAndCheckoutPeer(const std::shared_ptr<Peer>& peer, cuid_t cuid) override
   {
     unusedPeers.push_back(peer);
     return nullptr;
@@ -51,8 +50,7 @@ public:
     return unusedPeers.size() + usedPeers.size();
   }
 
-  virtual const std::deque<std::shared_ptr<Peer>>&
-  getDroppedPeers() override
+  virtual const std::deque<std::shared_ptr<Peer>>& getDroppedPeers() override
   {
     return droppedPeers;
   }
@@ -76,10 +74,7 @@ public:
 
   virtual const PeerSet& getUsedPeers() override { return usedPeers; }
 
-  virtual bool isBadPeer(const std::string& ipaddr) override
-  {
-    return false;
-  }
+  virtual bool isBadPeer(std::string_view ipaddr) override { return false; }
 
   virtual void addBadPeer(const std::string& ipaddr) override {}
 

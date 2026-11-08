@@ -490,7 +490,7 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
   std::vector<std::string> urlList;
   extractUrlList(torrent.get(), urlList, rootDict->get(C_URL_LIST));
   urlList.insert(urlList.end(), uris.begin(), uris.end());
-  std::sort(urlList.begin(), urlList.end());
+  std::ranges::sort(urlList.begin(), urlList.end());
   urlList.erase(std::unique(urlList.begin(), urlList.end()), urlList.end());
 
   // retrieve file entries

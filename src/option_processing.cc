@@ -152,7 +152,7 @@ void showCandidates(const std::string& unknownOption,
   if (cands.empty()) {
     return;
   }
-  std::sort(cands.begin(), cands.end());
+  std::ranges::sort(cands.begin(), cands.end());
   int threshold = cands[0].first;
   // threshold value 12 is a magic value.
   if (threshold > 12) {

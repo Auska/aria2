@@ -73,7 +73,8 @@ void HttpResponse::validateResponse() const
   switch (statusCode) {
   case 200: // OK
   case 206: // Partial Content
-    if (!httpHeader_->defined(HttpHeader::InterestingHeader::TRANSFER_ENCODING)) {
+    if (!httpHeader_->defined(
+            HttpHeader::InterestingHeader::TRANSFER_ENCODING)) {
       // compare the received range against the requested range
       auto responseRange = httpHeader_->getRange();
       if (!httpRequest_->isRangeSatisfied(responseRange)) {
@@ -125,8 +126,7 @@ std::string HttpResponse::determineFilename(bool contentDispositionUTF8) const
     return file;
   }
 
-  A2_LOG_INFO(
-      fmt(MSG_CONTENT_DISPOSITION_DETECTED, cuid_, contentDisposition));
+  A2_LOG_INFO(fmt(MSG_CONTENT_DISPOSITION_DETECTED, cuid_, contentDisposition));
   return contentDisposition;
 }
 
@@ -159,13 +159,13 @@ void HttpResponse::processRedirect()
 {
   const auto& req = httpRequest_->getRequest();
   if (!req->redirectUri(util::percentEncodeMini(getRedirectURI()))) {
-    throw DL_RETRY_EX(fmt(
-        "CUID#{} - Redirect to {} failed. It may not be a valid URI.",
-        cuid_, req->getCurrentUri()));
+    throw DL_RETRY_EX(
+        fmt("CUID#{} - Redirect to {} failed. It may not be a valid URI.",
+            cuid_, req->getCurrentUri()));
   }
 
-  A2_LOG_NOTICE(fmt(MSG_REDIRECT, cuid_,
-                    httpRequest_->getRequest()->getCurrentUri()));
+  A2_LOG_NOTICE(
+      fmt(MSG_REDIRECT, cuid_, httpRequest_->getRequest()->getCurrentUri()));
 }
 
 const std::string& HttpResponse::getRedirectURI() const
@@ -244,7 +244,8 @@ std::string HttpResponse::getContentType() const
     return A2STR::NIL;
   }
 
-  const auto& ctype = httpHeader_->find(HttpHeader::InterestingHeader::CONTENT_TYPE);
+  const auto& ctype =
+      httpHeader_->find(HttpHeader::InterestingHeader::CONTENT_TYPE);
   auto i = std::ranges::find(ctype, ';');
   Scip p = util::stripIter(ctype.begin(), i);
   return std::string(p.first, p.second);
@@ -269,7 +270,8 @@ int HttpResponse::getStatusCode() const { return httpHeader_->getStatusCode(); }
 
 Time HttpResponse::getLastModifiedTime() const
 {
-  return Time::parseHTTPDate(httpHeader_->find(HttpHeader::InterestingHeader::LAST_MODIFIED));
+  return Time::parseHTTPDate(
+      httpHeader_->find(HttpHeader::InterestingHeader::LAST_MODIFIED));
 }
 
 bool HttpResponse::supportsPersistentConnection() const
@@ -304,7 +306,7 @@ void HttpResponse::getDigest(std::vector<Checksum>& result) const
     }
   }
 
-  std::sort(result.begin(), result.end(), HashTypeStronger());
+  std::ranges::sort(result.begin(), result.end(), HashTypeStronger());
   std::vector<Checksum> temp;
   for (auto i = result.begin(), eoi = result.end(); i != eoi;) {
     bool ok = true;

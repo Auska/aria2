@@ -153,8 +153,7 @@ void BtLeecherStateChoke::plannedOptimisticUnchoke(
 
     ent.enableOptUnchoking();
 
-    A2_LOG_INFO(
-        fmt("POU: {}:{}", peer->getIPAddress(), peer->getPort()));
+    A2_LOG_INFO(fmt("POU: {}:{}", peer->getIPAddress(), peer->getPort()));
   }
 }
 
@@ -163,7 +162,7 @@ void BtLeecherStateChoke::regularUnchoke(std::vector<PeerEntry>& peerEntries)
   auto rest = std::partition(std::begin(peerEntries), std::end(peerEntries),
                              std::mem_fn(&PeerEntry::isRegularUnchoker));
 
-  std::sort(std::begin(peerEntries), rest);
+  std::ranges::sort(std::begin(peerEntries), rest, std::less<>{});
   std::shuffle(rest, std::end(peerEntries), *SimpleRandomizer::getInstance());
 
   // the number of regular unchokers
@@ -198,8 +197,7 @@ void BtLeecherStateChoke::regularUnchoke(std::vector<PeerEntry>& peerEntries)
 
       auto& peer = p.getPeer();
 
-      A2_LOG_INFO(
-          fmt("OU: {}:{}", peer->getIPAddress(), peer->getPort()));
+      A2_LOG_INFO(fmt("OU: {}:{}", peer->getIPAddress(), peer->getPort()));
 
       break;
     }

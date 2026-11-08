@@ -331,7 +331,8 @@ void DefaultBtProgressInfoFile::load()
                           expectedBitfieldLength, bitfieldLength));
   }
 
-  auto savedBitfield = make_unique<unsigned char[]>((size_t)bitfieldLength);
+  auto savedBitfield =
+      make_unique<unsigned char[]>(static_cast<size_t>(bitfieldLength));
   READ_CHECK(fp, savedBitfield.get(), bitfieldLength);
   if (pieceLength == static_cast<uint32_t>(dctx_->getPieceLength())) {
     pieceStorage_->setBitfield({savedBitfield.get(), bitfieldLength});
@@ -373,7 +374,8 @@ void DefaultBtProgressInfoFile::load()
                 static_cast<unsigned long>(piece->getBitfieldLength()),
                 bitfieldLength));
       }
-      auto pieceBitfield = make_unique<unsigned char[]>((size_t)bitfieldLength);
+      auto pieceBitfield =
+          make_unique<unsigned char[]>(static_cast<size_t>(bitfieldLength));
       READ_CHECK(fp, pieceBitfield.get(), bitfieldLength);
       piece->setBitfield({pieceBitfield.get(), bitfieldLength});
       piece->setHashType(dctx_->getPieceHashType());

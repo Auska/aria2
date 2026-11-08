@@ -65,7 +65,7 @@ public:
   void normalize()
   {
     if (!segs_.empty()) {
-      std::sort(std::begin(segs_), std::end(segs_));
+      std::ranges::sort(std::begin(segs_), std::end(segs_));
       std::vector<std::pair<T, T>> s;
       s.push_back(segs_.front());
       for (size_t i = 1, len = segs_.size(); i < len; ++i) {

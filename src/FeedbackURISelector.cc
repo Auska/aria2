@@ -165,7 +165,7 @@ std::string FeedbackURISelector::selectFaster(
   }
   else {
     A2_LOG_DEBUG("Selected from fastCands");
-    std::sort(fastCands.begin(), fastCands.end(), ServerStatFaster());
+    std::ranges::sort(fastCands.begin(), fastCands.end(), ServerStatFaster());
     return fastCands.front().second;
   }
 }
