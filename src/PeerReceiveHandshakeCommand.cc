@@ -140,7 +140,7 @@ bool PeerReceiveHandshakeCommand::executeInternal()
         getDownloadEngine()->addCommand(make_unique<PeerInteractionCommand>(
             getCuid(), downloadContext->getOwnerRequestGroup(), getPeer(),
             getDownloadEngine(), btRuntime, pieceStorage, peerStorage,
-            getSocket(), PeerInteractionCommand::RECEIVER_WAIT_HANDSHAKE,
+            getSocket(), PeerInteractionCommand::Seq::RECEIVER_WAIT_HANDSHAKE,
             std::move(peerConnection_)));
         A2_LOG_DEBUG(
             fmt(MSG_INCOMING_PEER_CONNECTION, getCuid(), getPeer()->usedBy()));

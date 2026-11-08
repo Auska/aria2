@@ -118,15 +118,15 @@ bool ServerStatMan::save(const std::string& filename) const
 
 namespace {
 // Field and FIELD_NAMES must have same order except for MAX_FIELD.
-enum Field {
-  S_COUNTER,
-  S_DL_SPEED,
-  S_HOST,
-  S_LAST_UPDATED,
-  S_MC_AVG_SPEED,
-  S_PROTOCOL,
-  S_SC_AVG_SPEED,
-  S_STATUS,
+enum class Field {
+  COUNTER,
+  DL_SPEED,
+  HOSTNAME,
+  LAST_UPDATED,
+  MC_AVG_SPEED,
+  PROTOCOL,
+  SC_AVG_SPEED,
+  STATUS,
   MAX_FIELD
 };
 
@@ -140,7 +140,7 @@ namespace {
 int idField(std::string::const_iterator first, std::string::const_iterator last)
 {
   int i;
-  for (i = 0; i < MAX_FIELD; ++i) {
+  for (i = 0; i < static_cast<int>(Field::MAX_FIELD); ++i) {
     if (util::streq(first, last, FIELD_NAMES[i])) {
       return i;
     }
@@ -179,52 +179,52 @@ bool ServerStatMan::load(const std::string& filename)
     }
     std::vector<Scip> items;
     util::splitIter(p.first, p.second, std::back_inserter(items), ',');
-    std::vector<std::string> m(MAX_FIELD);
+    std::vector<std::string> m(static_cast<size_t>(Field::MAX_FIELD));
     for (std::vector<Scip>::const_iterator i = items.begin(), eoi = items.end();
          i != eoi; ++i) {
       auto p = util::divide((*i).first, (*i).second, '=');
       int id = idField(p.first.first, p.first.second);
-      if (id != MAX_FIELD) {
+      if (id != static_cast<int>(Field::MAX_FIELD)) {
         m[id].assign(p.second.first, p.second.second);
       }
     }
-    if (m[S_HOST].empty() || m[S_PROTOCOL].empty()) {
+    if (m[static_cast<size_t>(Field::HOSTNAME)].empty() || m[static_cast<size_t>(Field::PROTOCOL)].empty()) {
       continue;
     }
-    auto sstat = std::make_shared<ServerStat>(m[S_HOST], m[S_PROTOCOL]);
+    auto sstat = std::make_shared<ServerStat>(m[static_cast<size_t>(Field::HOSTNAME)], m[static_cast<size_t>(Field::PROTOCOL)]);
 
     uint32_t uintval;
-    if (!util::parseUIntNoThrow(uintval, m[S_DL_SPEED])) {
+    if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::DL_SPEED)])) {
       continue;
     }
     sstat->setDownloadSpeed(uintval);
     // Old serverstat file doesn't contains SC_AVG_SPEED
-    if (!m[S_SC_AVG_SPEED].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[S_SC_AVG_SPEED])) {
+    if (!m[static_cast<size_t>(Field::SC_AVG_SPEED)].empty()) {
+      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::SC_AVG_SPEED)])) {
         continue;
       }
       sstat->setSingleConnectionAvgSpeed(uintval);
     }
     // Old serverstat file doesn't contains MC_AVG_SPEED
-    if (!m[S_MC_AVG_SPEED].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[S_MC_AVG_SPEED])) {
+    if (!m[static_cast<size_t>(Field::MC_AVG_SPEED)].empty()) {
+      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::MC_AVG_SPEED)])) {
         continue;
       }
       sstat->setMultiConnectionAvgSpeed(uintval);
     }
     // Old serverstat file doesn't contains COUNTER_SPEED
-    if (!m[S_COUNTER].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[S_COUNTER])) {
+    if (!m[static_cast<size_t>(Field::COUNTER)].empty()) {
+      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::COUNTER)])) {
         continue;
       }
       sstat->setCounter(uintval);
     }
     int32_t intval;
-    if (!util::parseIntNoThrow(intval, m[S_LAST_UPDATED])) {
+    if (!util::parseIntNoThrow(intval, m[static_cast<size_t>(Field::LAST_UPDATED)])) {
       continue;
     }
     sstat->setLastUpdated(Time(intval));
-    sstat->setStatus(m[S_STATUS]);
+    sstat->setStatus(m[static_cast<size_t>(Field::STATUS)]);
     add(sstat);
   }
   A2_LOG_NOTICE(fmt(MSG_SERVER_STAT_LOADED, filename.c_str()));

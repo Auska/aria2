@@ -49,21 +49,21 @@ namespace aria2 {
 template <typename SeqType, typename ValueType, typename ReferenceType,
           typename PointerType, typename SeqIteratorType>
 struct IndexedListIterator {
-  typedef IndexedListIterator<SeqType, ValueType, ValueType&, ValueType*,
-                              typename SeqType::iterator>
-      iterator;
-  typedef IndexedListIterator<SeqType, ValueType, const ValueType&,
-                              const ValueType*,
-                              typename SeqType::const_iterator>
-      const_iterator;
+  using iterator = IndexedListIterator<SeqType, ValueType, ValueType&,
+                                       ValueType*,
+                                       typename SeqType::iterator>;
+  using const_iterator = IndexedListIterator<SeqType, ValueType,
+                                             const ValueType&,
+                                             const ValueType*,
+                                             typename SeqType::const_iterator>;
 
-  typedef typename SeqIteratorType::iterator_category iterator_category;
-  typedef ValueType value_type;
-  typedef PointerType pointer;
-  typedef ReferenceType reference;
-  typedef typename SeqType::size_type size_type;
-  typedef typename SeqType::difference_type difference_type;
-  typedef IndexedListIterator SelfType;
+  using iterator_category = typename SeqIteratorType::iterator_category;
+  using value_type = ValueType;
+  using pointer = PointerType;
+  using reference = ReferenceType;
+  using size_type = typename SeqType::size_type;
+  using difference_type = typename SeqType::difference_type;
+  using SelfType = IndexedListIterator;
 
   IndexedListIterator() = default;
   IndexedListIterator(const iterator& other) : p(other.p) {}
@@ -310,18 +310,17 @@ public:
   IndexedList() = default;
   ~IndexedList() = default;
 
-  typedef KeyType key_type;
-  typedef ValuePtrType value_type;
-  typedef std::unordered_map<KeyType, ValuePtrType> IndexType;
-  typedef std::deque<std::pair<KeyType, ValuePtrType>> SeqType;
+  using key_type = KeyType;
+  using value_type = ValuePtrType;
+  using IndexType = std::unordered_map<KeyType, ValuePtrType>;
+  using SeqType = std::deque<std::pair<KeyType, ValuePtrType>>;
 
-  typedef IndexedListIterator<SeqType, ValuePtrType, ValuePtrType&,
-                              ValuePtrType*, typename SeqType::iterator>
-      iterator;
-  typedef IndexedListIterator<SeqType, ValuePtrType, const ValuePtrType&,
-                              const ValuePtrType*,
-                              typename SeqType::const_iterator>
-      const_iterator;
+  using iterator =
+      IndexedListIterator<SeqType, ValuePtrType, ValuePtrType&, ValuePtrType*,
+                          typename SeqType::iterator>;
+  using const_iterator =
+      IndexedListIterator<SeqType, ValuePtrType, const ValuePtrType&,
+                          const ValuePtrType*, typename SeqType::const_iterator>;
 
   ValuePtrType& operator[](size_t n) { return seq_[n].second; }
 

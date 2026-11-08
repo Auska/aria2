@@ -317,7 +317,7 @@ std::shared_ptr<Request> FileEntry::findFasterRequest(
     // Candidate URIs where already parsed when populating fastCands.
     (void)fastestRequest->setUri(uri);
     fastestRequest->setReferer(base->getReferer());
-    uris_.erase(std::find(uris_.begin(), uris_.end(), uri));
+    uris_.erase(std::ranges::find(uris_, uri));
     spentUris_.push_back(uri);
     inFlightRequests_.insert(fastestRequest);
     lastFasterReplace_ = global::wallclock();
@@ -438,8 +438,8 @@ void FileEntry::reuseUri(const std::vector<std::string>& ignore)
   for (auto i = reusableURIs.begin(), eoi = reusableURIs.end(); i != eoi; ++i) {
     uri_split_result us;
     if (uri_split(&us, (*i).c_str()) == 0 &&
-        std::find(ignore.begin(), ignore.end(),
-                  uri::getFieldString(us, USR_HOST, (*i).c_str())) ==
+        std::ranges::find(ignore, uri::getFieldString(us, USR_HOST,
+                                                      (*i).c_str())) ==
             ignore.end()) {
       if (i != insertionPoint) {
         *insertionPoint = *i;
@@ -500,9 +500,9 @@ InputIterator findRequestByUri(InputIterator first, InputIterator last,
 
 bool FileEntry::removeUri(const std::string& uri)
 {
-  auto itr = std::find(spentUris_.begin(), spentUris_.end(), uri);
+  auto itr = std::ranges::find(spentUris_, uri);
   if (itr == spentUris_.end()) {
-    itr = std::find(uris_.begin(), uris_.end(), uri);
+    itr = std::ranges::find(uris_, uri);
     if (itr == uris_.end()) {
       return false;
     }

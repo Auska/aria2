@@ -333,12 +333,12 @@ std::unique_ptr<ValueBase> removeDownload(const RpcRequest& req,
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (group) {
-    if (group->getState() == RequestGroup::STATE_ACTIVE) {
+    if (group->getState() == RequestGroup::State::ACTIVE) {
       if (forceRemove) {
-        group->setForceHaltRequested(true, RequestGroup::USER_REQUEST);
+        group->setForceHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
       }
       else {
-        group->setHaltRequested(true, RequestGroup::USER_REQUEST);
+        group->setHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
       }
       e->setRefreshInterval(std::chrono::milliseconds(0));
     }
@@ -381,7 +381,7 @@ std::unique_ptr<ValueBase> pauseDownload(const RpcRequest& req,
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
   if (group) {
-    bool reserved = group->getState() == RequestGroup::STATE_WAITING;
+    bool reserved = group->getState() == RequestGroup::State::WAITING;
     if (pauseRequestGroup(group, reserved, forcePause)) {
       e->setRefreshInterval(std::chrono::milliseconds(0));
       return createGIDResponse(gid);
@@ -447,7 +447,7 @@ std::unique_ptr<ValueBase> UnpauseRpcMethod::process(const RpcRequest& req,
 
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
-  if (!group || group->getState() != RequestGroup::STATE_WAITING ||
+  if (!group || group->getState() != RequestGroup::State::WAITING ||
       !group->isPauseRequested()) {
     throw DL_ABORT_EX(
         fmt("GID#{} cannot be unpaused now", GroupId::toHex(gid).c_str()));
@@ -728,7 +728,7 @@ void gatherProgress(Dict* entryDict, const std::shared_ptr<RequestGroup>& group,
 {
   gatherProgressCommon(entryDict, group, keys);
 #ifdef ENABLE_BITTORRENT
-  if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
+  if (group->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
     gatherProgressBitTorrent(
         entryDict, group,
         bittorrent::getTorrentAttrs(group->getDownloadContext()),
@@ -848,9 +848,9 @@ void gatherStoppedDownload(Dict* entryDict,
   }
 
 #ifdef ENABLE_BITTORRENT
-  if (ds->attrs.size() > CTX_ATTR_BT && ds->attrs[CTX_ATTR_BT]) {
+  if (ds->attrs.size() > static_cast<size_t>(ContextAttributeType::BT) && ds->attrs[static_cast<size_t>(ContextAttributeType::BT)]) {
     const auto attrs =
-        static_cast<TorrentAttribute*>(ds->attrs[CTX_ATTR_BT].get());
+        static_cast<TorrentAttribute*>(ds->attrs[static_cast<size_t>(ContextAttributeType::BT)].get());
     if (requested_key(keys, KEY_BITTORRENT)) {
       auto btDict = Dict::g();
       gatherBitTorrentMetadata(btDict.get(), attrs);
@@ -955,7 +955,7 @@ std::unique_ptr<ValueBase> TellStatusRpcMethod::process(const RpcRequest& req,
   }
   else {
     if (requested_key(keys, KEY_STATUS)) {
-      if (group->getState() == RequestGroup::STATE_ACTIVE) {
+      if (group->getState() == RequestGroup::State::ACTIVE) {
         entryDict->put(KEY_STATUS, VLB_ACTIVE);
       }
       else {
@@ -1055,7 +1055,7 @@ std::unique_ptr<ValueBase> ChangeOptionRpcMethod::process(const RpcRequest& req,
   if (group) {
     Option option;
     std::shared_ptr<Option> pendingOption;
-    if (group->getState() == RequestGroup::STATE_ACTIVE) {
+    if (group->getState() == RequestGroup::State::ACTIVE) {
       pendingOption = std::make_shared<Option>();
       gatherChangeableOption(&option, pendingOption.get(), optsParam);
       if (!pendingOption->emptyLocal()) {
@@ -1204,7 +1204,7 @@ std::unique_ptr<ValueBase> GetServersRpcMethod::process(const RpcRequest& req,
 
   a2_gid_t gid = str2Gid(gidParam);
   auto group = e->getRequestGroupMan()->findGroup(gid);
-  if (!group || group->getState() != RequestGroup::STATE_ACTIVE) {
+  if (!group || group->getState() != RequestGroup::State::ACTIVE) {
     throw DL_ABORT_EX(
         fmt("No active download for GID#{}", GroupId::toHex(gid).c_str()));
   }
@@ -1406,10 +1406,10 @@ bool pauseRequestGroup(const std::shared_ptr<RequestGroup>& group,
       // Call setHaltRequested before setPauseRequested because
       // setHaltRequested calls setPauseRequested(false) internally.
       if (forcePause) {
-        group->setForceHaltRequested(true, RequestGroup::NONE);
+        group->setForceHaltRequested(true, RequestGroup::HaltReason::NONE);
       }
       else {
-        group->setHaltRequested(true, RequestGroup::NONE);
+        group->setHaltRequested(true, RequestGroup::HaltReason::NONE);
       }
     }
     group->setPauseRequested(true);
@@ -1471,7 +1471,7 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
     }
     else if (group->getMetadataInfo()
 #ifdef ENABLE_BITTORRENT
-             && !dctx->hasAttribute(CTX_ATTR_BT)
+             && !dctx->hasAttribute(ContextAttributeType::BT)
 #endif // ENABLE_BITTORRENT
     ) {
       // Downloads generated from metadata always use suffixPath.
@@ -1483,7 +1483,7 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
   }
 #ifdef ENABLE_BITTORRENT
   if (option.defined(PREF_DIR) || option.defined(PREF_INDEX_OUT)) {
-    if (dctx->hasAttribute(CTX_ATTR_BT)) {
+    if (dctx->hasAttribute(ContextAttributeType::BT)) {
       std::istringstream indexOutIn(grOption->get(PREF_INDEX_OUT));
       std::vector<std::pair<size_t, std::string>> indexPaths =
           util::createIndexPaths(indexOutIn);

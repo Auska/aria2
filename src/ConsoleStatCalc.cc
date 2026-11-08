@@ -243,6 +243,7 @@ void printProgressSummary(const RequestGroupList& groups, size_t cols,
   const char SEP_CHAR = '=';
   time_t now;
   time(&now);
+  // shortcut: formatDownloadResult* take std::ostream&, so keep the sink.
   std::stringstream o;
   o << " *** Download Progress Summary";
   {
@@ -300,7 +301,7 @@ void ConsoleStatCalc::calculateStat(const DownloadEngine* e)
 #ifdef HAVE_TERMIOS_H
     struct winsize size;
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0) {
-      cols = std::max(0, (int)size.ws_col - 1);
+      cols = std::max(0, static_cast<int>(size.ws_col) - 1);
     }
 #endif // HAVE_TERMIOS_H
     std::string line(cols, ' ');

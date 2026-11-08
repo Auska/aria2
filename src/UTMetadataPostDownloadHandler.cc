@@ -60,7 +60,7 @@ public:
   virtual bool match(const RequestGroup* requestGroup) const override
   {
     auto& dctx = requestGroup->getDownloadContext();
-    if (dctx->hasAttribute(CTX_ATTR_BT)) {
+    if (dctx->hasAttribute(ContextAttributeType::BT)) {
       if (bittorrent::getTorrentAttrs(dctx)->metadata.empty()) {
         return true;
       }

@@ -526,7 +526,7 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
     torrent->createdBy = util::encodeNonUtf8(createdBy->s());
   }
 
-  ctx->setAttribute(CTX_ATTR_BT, std::move(torrent));
+  ctx->setAttribute(ContextAttributeType::BT, std::move(torrent));
 }
 } // namespace
 
@@ -610,7 +610,7 @@ TorrentAttribute* getTorrentAttrs(const std::shared_ptr<DownloadContext>& dctx)
 
 TorrentAttribute* getTorrentAttrs(DownloadContext* dctx)
 {
-  return static_cast<TorrentAttribute*>(dctx->getAttribute(CTX_ATTR_BT).get());
+  return static_cast<TorrentAttribute*>(dctx->getAttribute(ContextAttributeType::BT).get());
 }
 
 std::array<unsigned char, INFO_HASH_LENGTH>
@@ -976,7 +976,7 @@ std::unique_ptr<TorrentAttribute> parseMagnet(const std::string& magnet)
 void loadMagnet(const std::string& magnet,
                 const std::shared_ptr<DownloadContext>& dctx)
 {
-  dctx->setAttribute(CTX_ATTR_BT, parseMagnet(magnet));
+  dctx->setAttribute(ContextAttributeType::BT, parseMagnet(magnet));
 }
 
 std::string metadata2Torrent(const std::string& metadata,

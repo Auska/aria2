@@ -42,7 +42,7 @@ namespace aria2 {
 
 class CheckIntegrityEntry;
 
-typedef SequentialPicker<CheckIntegrityEntry> CheckIntegrityMan;
+using CheckIntegrityMan = SequentialPicker<CheckIntegrityEntry>;
 
 } // namespace aria2
 

@@ -50,9 +50,9 @@ private:
   int64_t cachedFilteredCompletedLength_;
   int64_t cachedFilteredTotalLength_;
 
-  unsigned char* bitfield_;
-  unsigned char* useBitfield_;
-  unsigned char* filterBitfield_;
+  std::vector<unsigned char> bitfield_;
+  std::vector<unsigned char> useBitfield_;
+  std::vector<unsigned char> filterBitfield_;
 
   size_t bitfieldLength_;
   size_t cachedNumMissingBlock_;
@@ -212,7 +212,7 @@ public:
   // filterBitfield_ is NULL, returns false.
   bool isFilterBitSet(size_t index) const;
 
-  const unsigned char* getBitfield() const { return bitfield_; }
+  const unsigned char* getBitfield() const { return bitfield_.data(); }
 
   size_t getBitfieldLength() const { return bitfieldLength_; }
 
@@ -281,7 +281,12 @@ public:
 
   int64_t getMissingUnusedLength(size_t startingIndex) const;
 
-  const unsigned char* getFilterBitfield() const { return filterBitfield_; }
+  // Returns nullptr when no filter is set.
+  // Returns nullptr when no filter is set.
+  const unsigned char* getFilterBitfield() const
+  {
+    return filterBitfield_.empty() ? nullptr : filterBitfield_.data();
+  }
 };
 
 } // namespace aria2

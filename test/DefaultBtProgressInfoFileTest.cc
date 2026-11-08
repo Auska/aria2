@@ -74,7 +74,7 @@ public:
     {
       auto torrentAttrs = make_unique<TorrentAttribute>();
       torrentAttrs->infoHash.assign(std::begin(infoHash), std::end(infoHash));
-      dctx_->setAttribute(CTX_ATTR_BT, std::move(torrentAttrs));
+      dctx_->setAttribute(ContextAttributeType::BT, std::move(torrentAttrs));
     }
     const std::shared_ptr<FileEntry> fileEntries[] = {
         std::shared_ptr<FileEntry>(

@@ -94,7 +94,7 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
                     RequestGroup* requestGroup, DownloadEngine* e,
                     const Option* option)
 {
-  if (!requestGroup->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
+  if (!requestGroup->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
     return;
   }
   auto torrentAttrs =

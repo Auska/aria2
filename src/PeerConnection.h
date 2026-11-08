@@ -58,11 +58,20 @@ constexpr size_t MAX_BUFFER_CAPACITY = MAX_BLOCK_LENGTH + 128;
 
 class PeerConnection {
 private:
+  enum class MsgState {
+    // Before reading first byte of message length
+    PREV_READ_LENGTH,
+    // Reading 4 bytes message length
+    READ_LENGTH,
+    // Reading message payload following message length
+    READ_PAYLOAD
+  };
+
   cuid_t cuid_;
   std::shared_ptr<Peer> peer_;
   std::shared_ptr<SocketCore> socket_;
 
-  int msgState_;
+  MsgState msgState_;
   // The capacity of the buffer resbuf_
   size_t bufferCapacity_;
   // The internal buffer of incoming handshakes and messages

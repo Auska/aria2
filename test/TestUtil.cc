@@ -97,7 +97,7 @@ std::shared_ptr<RequestGroup> findReservedGroup(RequestGroupMan* rgman,
 {
   auto rg = rgman->findGroup(gid);
   if (rg) {
-    if (rg->getState() == RequestGroup::STATE_WAITING) {
+    if (rg->getState() == RequestGroup::State::WAITING) {
       return rg;
     }
     else {

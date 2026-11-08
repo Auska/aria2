@@ -269,7 +269,7 @@ std::shared_ptr<Segment> SegmentMan::getCleanSegmentIfOwnerIsIdle(cuid_t cuid,
       }
       cuid_t owner = segmentEntry->cuid;
       std::shared_ptr<PeerStat> ps = getPeerStat(owner);
-      if (!ps || ps->getStatus() == NetStat::IDLE) {
+      if (!ps || ps->getStatus() == NetStat::STATUS::IDLE) {
         cancelSegment(owner);
         return getSegmentWithIndex(cuid, index);
       }
@@ -375,8 +375,8 @@ bool SegmentMan::completeSegment(cuid_t cuid,
   pieceStorage_->completePiece(segment->getPiece());
   pieceStorage_->advertisePiece(cuid, segment->getPiece()->getIndex(),
                                 global::wallclock());
-  auto itr = std::find_if(usedSegmentEntries_.begin(),
-                          usedSegmentEntries_.end(), FindSegmentEntry(segment));
+  auto itr =
+      std::ranges::find_if(usedSegmentEntries_, FindSegmentEntry(segment));
   if (itr == usedSegmentEntries_.end()) {
     return false;
   }
@@ -438,8 +438,8 @@ public:
 void SegmentMan::updateFastestPeerStat(
     const std::shared_ptr<PeerStat>& peerStat)
 {
-  auto i = std::find_if(fastestPeerStats_.begin(), fastestPeerStats_.end(),
-                        PeerStatHostProtoEqual(peerStat));
+  auto i = std::ranges::find_if(fastestPeerStats_,
+                                PeerStatHostProtoEqual(peerStat));
   if (i == fastestPeerStats_.end()) {
     fastestPeerStats_.push_back(peerStat);
   }

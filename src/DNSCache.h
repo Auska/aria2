@@ -97,9 +97,9 @@ private:
     bool operator==(const CacheEntry& e) const;
   };
 
-  typedef std::set<std::shared_ptr<CacheEntry>,
-                   DerefLess<std::shared_ptr<CacheEntry>>>
-      CacheEntrySet;
+  using CacheEntrySet =
+      std::set<std::shared_ptr<CacheEntry>,
+               DerefLess<std::shared_ptr<CacheEntry>>>;
   CacheEntrySet entries_;
 
 public:

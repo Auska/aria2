@@ -77,12 +77,12 @@ class PeerStorage;
 
 class RequestGroup {
 public:
-  enum HaltReason { NONE, SHUTDOWN_SIGNAL, USER_REQUEST };
-  enum State {
+  enum class HaltReason { NONE, SHUTDOWN_SIGNAL, USER_REQUEST };
+  enum class State {
     // Waiting in the reserved queue
-    STATE_WAITING,
+    WAITING,
     // Download has begun
-    STATE_ACTIVE
+    ACTIVE
   };
 
 private:
@@ -141,7 +141,7 @@ private:
   // Timeout used for HTTP/FTP downloads.
   std::chrono::seconds timeout_;
 
-  int state_;
+  State state_;
 
   int numConcurrentCommand_;
 
@@ -340,9 +340,11 @@ public:
 
   bool isPreLocalFileCheckEnabled() const { return preLocalFileCheckEnabled_; }
 
-  void setHaltRequested(bool f, HaltReason = SHUTDOWN_SIGNAL);
+  void setHaltRequested(bool f,
+                        HaltReason = HaltReason::SHUTDOWN_SIGNAL);
 
-  void setForceHaltRequested(bool f, HaltReason = SHUTDOWN_SIGNAL);
+  void setForceHaltRequested(
+      bool f, HaltReason = HaltReason::SHUTDOWN_SIGNAL);
 
   bool isHaltRequested() const { return haltRequested_; }
 
@@ -501,9 +503,9 @@ public:
     return metadataInfo_;
   }
 
-  int getState() const { return state_; }
+  State getState() const { return state_; }
 
-  void setState(int state) { state_ = state; }
+  void setState(State state) { state_ = state; }
 
   bool isSeedOnlyEnabled() { return seedOnly_; }
 

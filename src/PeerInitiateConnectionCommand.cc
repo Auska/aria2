@@ -92,7 +92,7 @@ bool PeerInitiateConnectionCommand::executeInternal()
     getDownloadEngine()->addCommand(make_unique<PeerInteractionCommand>(
         getCuid(), requestGroup_, getPeer(), getDownloadEngine(), btRuntime_,
         pieceStorage_, peerStorage_, getSocket(),
-        PeerInteractionCommand::INITIATOR_SEND_HANDSHAKE));
+        PeerInteractionCommand::Seq::INITIATOR_SEND_HANDSHAKE));
   }
   return true;
 }

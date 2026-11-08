@@ -65,9 +65,9 @@ public:
   void removeStaleServerStat(const std::chrono::seconds& timeout);
 
 private:
-  typedef std::set<std::shared_ptr<ServerStat>,
-                   DerefLess<std::shared_ptr<ServerStat>>>
-      ServerStatSet;
+  using ServerStatSet =
+      std::set<std::shared_ptr<ServerStat>,
+               DerefLess<std::shared_ptr<ServerStat>>>;
   ServerStatSet serverStats_;
 };
 

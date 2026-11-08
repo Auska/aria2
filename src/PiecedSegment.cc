@@ -56,7 +56,7 @@ size_t PiecedSegment::getIndex() const { return piece_->getIndex(); }
 
 int64_t PiecedSegment::getPosition() const
 {
-  return ((int64_t)piece_->getIndex()) * pieceLength_;
+  return static_cast<int64_t>(piece_->getIndex()) * pieceLength_;
 }
 
 int64_t PiecedSegment::getPositionToWrite() const

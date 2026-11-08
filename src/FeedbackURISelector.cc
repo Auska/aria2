@@ -79,7 +79,7 @@ std::string FeedbackURISelector::select(
   }
   if (!uri.empty()) {
     std::deque<std::string>& uris = fileEntry->getRemainingUris();
-    uris.erase(std::find(uris.begin(), uris.end(), uri));
+    uris.erase(std::ranges::find(uris, uri));
   }
   A2_LOG_DEBUG(fmt("FeedbackURISelector selected {}", uri.c_str()));
   return uri;

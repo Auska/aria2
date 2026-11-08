@@ -131,7 +131,7 @@ RequestGroup::RequestGroup(const std::shared_ptr<GroupId>& gid,
       followingGID_(0),
       lastModifiedTime_(Time::null()),
       timeout_(option->getAsInt(PREF_TIMEOUT)),
-      state_(STATE_WAITING),
+      state_(State::WAITING),
       numConcurrentCommand_(option->getAsInt(PREF_SPLIT)),
       numStreamConnection_(0),
       numStreamCommand_(0),
@@ -140,7 +140,7 @@ RequestGroup::RequestGroup(const std::shared_ptr<GroupId>& gid,
       maxDownloadSpeedLimit_(option->getAsInt(PREF_MAX_DOWNLOAD_LIMIT)),
       maxUploadSpeedLimit_(option->getAsInt(PREF_MAX_UPLOAD_LIMIT)),
       resumeFailureCount_(0),
-      haltReason_(RequestGroup::NONE),
+      haltReason_(HaltReason::NONE),
       lastErrorCode_(error_code::UNDEFINED),
       saveControlFile_(true),
       preLocalFileCheckEnabled_(true),
@@ -190,12 +190,12 @@ std::pair<error_code::Value, std::string> RequestGroup::downloadResult() const
     return std::make_pair(error_code::FINISHED, "");
   }
 
-  if (haltReason_ == RequestGroup::USER_REQUEST) {
+  if (haltReason_ == HaltReason::USER_REQUEST) {
     return std::make_pair(error_code::REMOVED, "");
   }
 
   if (lastErrorCode_ == error_code::UNDEFINED) {
-    if (haltReason_ == RequestGroup::SHUTDOWN_SIGNAL) {
+    if (haltReason_ == HaltReason::SHUTDOWN_SIGNAL) {
       return std::make_pair(error_code::IN_PROGRESS, "");
     }
     return std::make_pair(error_code::UNKNOWN_ERROR, "");
@@ -274,7 +274,7 @@ void RequestGroup::createInitialCommand(
   // is unknown, session timer will not be reset.
   downloadContext_->resetDownloadStartTime();
 #ifdef ENABLE_BITTORRENT
-  if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
+  if (downloadContext_->hasAttribute(ContextAttributeType::BT)) {
     auto torrentAttrs = bittorrent::getTorrentAttrs(downloadContext_);
     bool metadataGetMode = torrentAttrs->metadata.empty();
     if (option_->getAsBool(PREF_DRY_RUN)) {
@@ -557,13 +557,13 @@ void RequestGroup::initPieceStorage()
       // content-length = 0. Google's dl server used this before.
       (downloadContext_->getTotalLength() > 0
 #ifdef ENABLE_BITTORRENT
-       || downloadContext_->hasAttribute(CTX_ATTR_BT)
+       || downloadContext_->hasAttribute(ContextAttributeType::BT)
 #endif // ENABLE_BITTORRENT
            )) {
 #ifdef ENABLE_BITTORRENT
     auto ps =
         std::make_shared<DefaultPieceStorage>(downloadContext_, option_.get());
-    if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
+    if (downloadContext_->hasAttribute(ContextAttributeType::BT)) {
       if (isUriSuppliedForRequsetFileEntry(
               downloadContext_->getFileEntries().begin(),
               downloadContext_->getFileEntries().end())) {
@@ -1153,7 +1153,7 @@ std::shared_ptr<DownloadResult> RequestGroup::createDownloadResult() const
                              pieceStorage_->getBitfieldLength());
   }
 #ifdef ENABLE_BITTORRENT
-  if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
+  if (downloadContext_->hasAttribute(ContextAttributeType::BT)) {
     auto infoHash = bittorrent::getInfoHash(downloadContext_);
     res->infoHash.assign(infoHash.begin(), infoHash.end());
   }
@@ -1172,7 +1172,7 @@ void RequestGroup::reportDownloadFinished()
                         : downloadContext_->getBasePath().c_str()));
   uriSelector_->resetCounters();
 #ifdef ENABLE_BITTORRENT
-  if (downloadContext_->hasAttribute(CTX_ATTR_BT)) {
+  if (downloadContext_->hasAttribute(ContextAttributeType::BT)) {
     TransferStat stat = calculateStat();
     int64_t completedLength = getCompletedLength();
     double shareRatio = completedLength == 0
@@ -1271,7 +1271,7 @@ void RequestGroup::setDownloadContext(
 bool RequestGroup::p2pInvolved() const
 {
 #ifdef ENABLE_BITTORRENT
-  return downloadContext_->hasAttribute(CTX_ATTR_BT);
+  return downloadContext_->hasAttribute(ContextAttributeType::BT);
 #else  // !ENABLE_BITTORRENT
   return false;
 #endif // !ENABLE_BITTORRENT
@@ -1294,7 +1294,7 @@ void RequestGroup::enableSeedOnly()
 bool RequestGroup::isSeeder() const
 {
 #ifdef ENABLE_BITTORRENT
-  return downloadContext_->hasAttribute(CTX_ATTR_BT) &&
+  return downloadContext_->hasAttribute(ContextAttributeType::BT) &&
          !bittorrent::getTorrentAttrs(downloadContext_)->metadata.empty() &&
          downloadFinished();
 #else  // !ENABLE_BITTORRENT

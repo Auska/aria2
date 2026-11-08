@@ -38,7 +38,7 @@
 namespace aria2 {
 
 NetStat::NetStat()
-    : status_(NetStat::IDLE),
+    : status_(STATUS::IDLE),
       avgDownloadSpeed_(0),
       avgUploadSpeed_(0),
       sessionDownloadLength_(0),
@@ -109,7 +109,7 @@ void NetStat::reset()
   downloadSpeed_.reset();
   uploadSpeed_.reset();
   downloadStartTime_ = global::wallclock();
-  status_ = IDLE;
+  status_ = STATUS::IDLE;
   sessionDownloadLength_ = 0;
   sessionUploadLength_ = 0;
 }
@@ -117,14 +117,14 @@ void NetStat::reset()
 void NetStat::downloadStart()
 {
   reset();
-  status_ = ACTIVE;
+  status_ = STATUS::ACTIVE;
 }
 
 void NetStat::downloadStop()
 {
   calculateAvgDownloadSpeed();
   calculateAvgUploadSpeed();
-  status_ = IDLE;
+  status_ = STATUS::IDLE;
 }
 
 TransferStat NetStat::toTransferStat()

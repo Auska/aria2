@@ -101,8 +101,8 @@ bool WrDiskCacheEntry::cacheData(DataCell* dataCell)
   }
 }
 
-size_t WrDiskCacheEntry::append(int64_t goff, const unsigned char* data,
-                                size_t len)
+size_t WrDiskCacheEntry::append(int64_t goff,
+                                std::span<const std::byte> data)
 {
   if (set_.empty()) {
     return 0;
@@ -110,8 +110,8 @@ size_t WrDiskCacheEntry::append(int64_t goff, const unsigned char* data,
   auto i = set_.end();
   --i;
   if (static_cast<int64_t>((*i)->goff + (*i)->len) == goff) {
-    size_t wlen = std::min((*i)->capacity - (*i)->len, len);
-    memcpy((*i)->data.get() + (*i)->offset + (*i)->len, data, wlen);
+    size_t wlen = std::min((*i)->capacity - (*i)->len, data.size());
+    memcpy((*i)->data.get() + (*i)->offset + (*i)->len, data.data(), wlen);
     (*i)->len += wlen;
     size_ += wlen;
     return wlen;

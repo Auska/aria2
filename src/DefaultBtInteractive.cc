@@ -557,7 +557,7 @@ void DefaultBtInteractive::doInteractionProcessing()
       }
       if (pieceStorage_->downloadFinished()) {
         downloadContext_->getOwnerRequestGroup()->setForceHaltRequested(
-            true, RequestGroup::NONE);
+            true, RequestGroup::HaltReason::NONE);
       }
     }
   }

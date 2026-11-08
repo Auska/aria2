@@ -253,7 +253,7 @@ bool DownloadCommand::executeInternal()
 #ifdef ENABLE_BITTORRENT
               // TODO Is this necessary?
               (!getPieceStorage()->isEndGame() ||
-               !getDownloadContext()->hasAttribute(CTX_ATTR_BT)) &&
+               !getDownloadContext()->hasAttribute(ContextAttributeType::BT)) &&
 #endif // ENABLE_BITTORRENT
               segment->isHashCalculated()) {
             A2_LOG_DEBUG(fmt("Hash is available! index={}",

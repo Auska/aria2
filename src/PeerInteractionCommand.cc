@@ -95,7 +95,7 @@ PeerInteractionCommand::PeerInteractionCommand(
       sequence_{sequence}
 {
   // TODO move following bunch of processing to separate method, like init()
-  if (sequence_ == INITIATOR_SEND_HANDSHAKE) {
+  if (sequence_ == Seq::INITIATOR_SEND_HANDSHAKE) {
     disableReadCheckSocket();
     setWriteCheckSocket(getSocket());
     setTimeout(std::chrono::seconds(
@@ -159,7 +159,7 @@ PeerInteractionCommand::PeerInteractionCommand(
     peerConnection = make_unique<PeerConnection>(cuid, getPeer(), getSocket());
   }
   else {
-    if (sequence_ == RECEIVER_WAIT_HANDSHAKE &&
+    if (sequence_ == Seq::RECEIVER_WAIT_HANDSHAKE &&
         peerConnection->getBufferLength() > 0) {
       setStatus(Command::STATUS_ONESHOT_REALTIME);
       getDownloadEngine()->setNoWait(true);
@@ -300,7 +300,7 @@ bool PeerInteractionCommand::executeInternal()
   bool done = false;
   while (!done) {
     switch (sequence_) {
-    case INITIATOR_SEND_HANDSHAKE:
+    case Seq::INITIATOR_SEND_HANDSHAKE:
       if (!getSocket()->isWritable(0)) {
         done = true;
         break;
@@ -310,9 +310,9 @@ bool PeerInteractionCommand::executeInternal()
       // socket->setBlockingMode();
       setTimeout(std::chrono::seconds(getOption()->getAsInt(PREF_BT_TIMEOUT)));
       btInteractive_->initiateHandshake();
-      sequence_ = INITIATOR_WAIT_HANDSHAKE;
+      sequence_ = Seq::INITIATOR_WAIT_HANDSHAKE;
       break;
-    case INITIATOR_WAIT_HANDSHAKE: {
+    case Seq::INITIATOR_WAIT_HANDSHAKE: {
       if (btInteractive_->countPendingMessage() > 0) {
         btInteractive_->sendPendingMessage();
         if (btInteractive_->countPendingMessage() > 0) {
@@ -326,20 +326,20 @@ bool PeerInteractionCommand::executeInternal()
         break;
       }
       btInteractive_->doPostHandshakeProcessing();
-      sequence_ = WIRED;
+      sequence_ = Seq::WIRED;
       break;
     }
-    case RECEIVER_WAIT_HANDSHAKE: {
+    case Seq::RECEIVER_WAIT_HANDSHAKE: {
       auto handshakeMessage = btInteractive_->receiveAndSendHandshake();
       if (!handshakeMessage) {
         done = true;
         break;
       }
       btInteractive_->doPostHandshakeProcessing();
-      sequence_ = WIRED;
+      sequence_ = Seq::WIRED;
       break;
     }
-    case WIRED:
+    case Seq::WIRED:
       btInteractive_->doInteractionProcessing();
       if (btInteractive_->countReceivedMessageInIteration() > 0) {
         updateKeepAlive();

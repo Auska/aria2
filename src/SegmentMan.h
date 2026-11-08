@@ -68,7 +68,7 @@ struct SegmentEntry {
   SegmentEntry& operator=(const SegmentEntry&);
 };
 
-typedef std::deque<std::shared_ptr<SegmentEntry>> SegmentEntries;
+using SegmentEntries = std::deque<std::shared_ptr<SegmentEntry>>;
 
 /**
  * This class holds the download progress of the one download entry.

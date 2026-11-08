@@ -1,5 +1,7 @@
 #include "Piece.h"
 
+#include <cstddef>
+#include <span>
 #include <string>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -108,8 +110,7 @@ void PieceTest::testAppendWrCache()
   data = std::make_unique<unsigned char[]>(capacity);
   memcpy(data.get(), "foo", 3);
   p.updateWrCache(&dc, std::move(data), 0, 3, capacity, 0);
-  size_t alen = p.appendWrCache(
-      &dc, 3, reinterpret_cast<const unsigned char*>("barbaz"), 6);
+  size_t alen = p.appendWrCache(&dc, 3, std::as_bytes(std::span{"barbaz"}.first(6)));
   CPPUNIT_ASSERT_EQUAL((size_t)3, alen);
   p.flushWrCache(&dc);
   CPPUNIT_ASSERT_EQUAL(std::string("foobar"), writer_->getString());

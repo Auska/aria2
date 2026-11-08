@@ -331,12 +331,12 @@ int removeDownload(Session* session, A2Gid gid, bool force)
   auto& e = session->context->reqinfo->getDownloadEngine();
   std::shared_ptr<RequestGroup> group = e->getRequestGroupMan()->findGroup(gid);
   if (group) {
-    if (group->getState() == RequestGroup::STATE_ACTIVE) {
+    if (group->getState() == RequestGroup::State::ACTIVE) {
       if (force) {
-        group->setForceHaltRequested(true, RequestGroup::USER_REQUEST);
+        group->setForceHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
       }
       else {
-        group->setHaltRequested(true, RequestGroup::USER_REQUEST);
+        group->setHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
       }
       e->setRefreshInterval(std::chrono::milliseconds(0));
     }
@@ -360,7 +360,7 @@ int pauseDownload(Session* session, A2Gid gid, bool force)
   auto& e = session->context->reqinfo->getDownloadEngine();
   std::shared_ptr<RequestGroup> group = e->getRequestGroupMan()->findGroup(gid);
   if (group) {
-    bool reserved = group->getState() == RequestGroup::STATE_WAITING;
+    bool reserved = group->getState() == RequestGroup::State::WAITING;
     if (pauseRequestGroup(group, reserved, force)) {
       e->setRefreshInterval(std::chrono::milliseconds(0));
       return 0;
@@ -373,7 +373,7 @@ int unpauseDownload(Session* session, A2Gid gid)
 {
   auto& e = session->context->reqinfo->getDownloadEngine();
   std::shared_ptr<RequestGroup> group = e->getRequestGroupMan()->findGroup(gid);
-  if (!group || group->getState() != RequestGroup::STATE_WAITING ||
+  if (!group || group->getState() != RequestGroup::State::WAITING ||
       !group->isPauseRequested()) {
     return -1;
   }
@@ -403,7 +403,7 @@ int changeOption(Session* session, A2Gid gid, const KeyVals& options)
   if (group) {
     Option option;
     try {
-      if (group->getState() == RequestGroup::STATE_ACTIVE) {
+      if (group->getState() == RequestGroup::State::ACTIVE) {
         apiGatherChangeableOption(&option, options,
                                   OptionParser::getInstance());
       }
@@ -623,7 +623,7 @@ struct RequestGroupDH : public DownloadHandle {
   virtual ~RequestGroupDH() = default;
   virtual DownloadStatus getStatus() override
   {
-    if (group->getState() == RequestGroup::STATE_ACTIVE) {
+    if (group->getState() == RequestGroup::State::ACTIVE) {
       return DOWNLOAD_ACTIVE;
     }
     else {
@@ -663,7 +663,7 @@ struct RequestGroupDH : public DownloadHandle {
   virtual const std::string& getInfoHash() override
   {
 #ifdef ENABLE_BITTORRENT
-    if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
+    if (group->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
       return bittorrent::getTorrentAttrs(group->getDownloadContext())->infoHash;
     }
 #endif // ENABLE_BITTORRENT
@@ -724,7 +724,7 @@ struct RequestGroupDH : public DownloadHandle {
   {
     BtMetaInfoData res;
 #ifdef ENABLE_BITTORRENT
-    if (group->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
+    if (group->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
       auto torrentAttrs =
           bittorrent::getTorrentAttrs(group->getDownloadContext());
       res.announceList = torrentAttrs->announceList;

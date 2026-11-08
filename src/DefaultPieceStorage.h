@@ -76,8 +76,8 @@ private:
   std::unique_ptr<BitfieldMan> bitfieldMan_;
   std::shared_ptr<DiskAdaptor> diskAdaptor_;
   std::shared_ptr<DiskWriterFactory> diskWriterFactory_;
-  typedef std::set<std::shared_ptr<Piece>, DerefLess<std::shared_ptr<Piece>>>
-      UsedPieceSet;
+  using UsedPieceSet =
+      std::set<std::shared_ptr<Piece>, DerefLess<std::shared_ptr<Piece>>>;
   UsedPieceSet usedPieces_;
 
   bool endGame_;

@@ -139,12 +139,12 @@ bool RequestGroupMan::setupOptimizeConcurrentDownloads(void)
       option_->getAsBool(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS);
   if (optimizeConcurrentDownloads_) {
     if (option_->defined(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFA)) {
-      optimizeConcurrentDownloadsCoeffA_ = strtod(
-          option_->get(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFA).c_str(),
-          nullptr);
-      optimizeConcurrentDownloadsCoeffB_ = strtod(
-          option_->get(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFB).c_str(),
-          nullptr);
+      util::parseDoubleNoThrow(
+          optimizeConcurrentDownloadsCoeffA_,
+          option_->get(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFA));
+      util::parseDoubleNoThrow(
+          optimizeConcurrentDownloadsCoeffB_,
+          option_->get(PREF_OPTIMIZE_CONCURRENT_DOWNLOADS_COEFFB));
     }
   }
   return optimizeConcurrentDownloads_;
@@ -401,7 +401,7 @@ public:
           // FileEntry::getPath() does not return actual file path, so
           // we don't remove it.
           if (group->getOption()->getAsBool(PREF_BT_REMOVE_UNSELECTED_FILE) &&
-              !group->inMemoryDownload() && dctx->hasAttribute(CTX_ATTR_BT)) {
+              !group->inMemoryDownload() && dctx->hasAttribute(ContextAttributeType::BT)) {
             A2_LOG_INFO(fmt(MSG_REMOVING_UNSELECTED_FILE,
                             GroupId::toHex(group->getGID()).c_str()));
             const std::vector<std::shared_ptr<FileEntry>>& files =
@@ -432,7 +432,7 @@ public:
         A2_LOG_ERROR_EX(EX_EXCEPTION_CAUGHT, ex);
       }
       if (group->isPauseRequested()) {
-        group->setState(RequestGroup::STATE_WAITING);
+        group->setState(RequestGroup::State::WAITING);
         reservedGroups_.push_front(group->getGID(), group);
         group->releaseRuntimeResource(e_);
         group->setForceHaltRequested(false);
@@ -555,7 +555,7 @@ void RequestGroupMan::fillRequestGroupFromReserver(DownloadEngine* e)
     groupToAdd->dropPieceStorage();
     configureRequestGroup(groupToAdd);
     groupToAdd->setRequestGroupMan(this);
-    groupToAdd->setState(RequestGroup::STATE_ACTIVE);
+    groupToAdd->setState(RequestGroup::State::ACTIVE);
     ++numActive_;
     requestGroups_.push_back(groupToAdd->getGID(), groupToAdd);
     try {
@@ -647,11 +647,11 @@ RequestGroupMan::DownloadStat RequestGroupMan::getDownloadStat() const
   return DownloadStat(error, inprogress, reservedGroups_.size(), lastError);
 }
 
-enum DownloadResultStatus {
-  A2_STATUS_OK,
-  A2_STATUS_INPR,
-  A2_STATUS_RM,
-  A2_STATUS_ERR
+enum class DownloadResultStatus {
+  OK,
+  INPR,
+  RM,
+  ERR
 };
 
 namespace {
@@ -659,28 +659,28 @@ const char* getStatusStr(DownloadResultStatus status, bool useColor)
 {
   // status string is formatted in 4 characters wide.
   switch (status) {
-  case (A2_STATUS_OK):
+  case DownloadResultStatus::OK:
     if (useColor) {
       return "\033[1;32mOK\033[0m  ";
     }
     else {
       return "OK  ";
     }
-  case (A2_STATUS_INPR):
+  case DownloadResultStatus::INPR:
     if (useColor) {
       return "\033[1;34mINPR\033[0m";
     }
     else {
       return "INPR";
     }
-  case (A2_STATUS_RM):
+  case DownloadResultStatus::RM:
     if (useColor) {
       return "\033[1mRM\033[0m  ";
     }
     else {
       return "RM  ";
     }
-  case (A2_STATUS_ERR):
+  case DownloadResultStatus::ERR:
     if (useColor) {
       return "\033[1;31mERR\033[0m ";
     }
@@ -726,19 +726,19 @@ void RequestGroupMan::showDownloadResults(OutputFile& o, bool full) const
     const char* status;
     switch (dr->result) {
     case error_code::FINISHED:
-      status = getStatusStr(A2_STATUS_OK, useColor);
+      status = getStatusStr(DownloadResultStatus::OK, useColor);
       ++ok;
       break;
     case error_code::IN_PROGRESS:
-      status = getStatusStr(A2_STATUS_INPR, useColor);
+      status = getStatusStr(DownloadResultStatus::INPR, useColor);
       ++inpr;
       break;
     case error_code::REMOVED:
-      status = getStatusStr(A2_STATUS_RM, useColor);
+      status = getStatusStr(DownloadResultStatus::RM, useColor);
       ++rm;
       break;
     default:
-      status = getStatusStr(A2_STATUS_ERR, useColor);
+      status = getStatusStr(DownloadResultStatus::ERR, useColor);
       ++err;
     }
     if (full) {
@@ -803,6 +803,7 @@ void RequestGroupMan::formatDownloadResultFull(
     if (!f->isRequested()) {
       continue;
     }
+    // shortcut: writeFilePath/formatDownloadResult take std::ostream&.
     std::stringstream o;
     if (head) {
       formatDownloadResultCommon(o, status, downloadResult);

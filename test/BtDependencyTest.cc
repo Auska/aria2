@@ -131,7 +131,7 @@ void BtDependencyTest::testResolve_originalNameNoMatch()
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
 
-  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(CTX_ATTR_BT));
+  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(ContextAttributeType::BT));
 }
 
 void BtDependencyTest::testResolve_singleFileWithoutOriginalName()
@@ -145,7 +145,7 @@ void BtDependencyTest::testResolve_singleFileWithoutOriginalName()
   dependee->getPieceStorage()->markAllPiecesDone();
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
-  CPPUNIT_ASSERT(dependant->getDownloadContext()->hasAttribute(CTX_ATTR_BT));
+  CPPUNIT_ASSERT(dependant->getDownloadContext()->hasAttribute(ContextAttributeType::BT));
 }
 
 void BtDependencyTest::testResolve_multiFile()
@@ -162,7 +162,7 @@ void BtDependencyTest::testResolve_multiFile()
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
 
-  CPPUNIT_ASSERT(dependant->getDownloadContext()->hasAttribute(CTX_ATTR_BT));
+  CPPUNIT_ASSERT(dependant->getDownloadContext()->hasAttribute(ContextAttributeType::BT));
 
   const std::vector<std::shared_ptr<FileEntry>>& fileEntries =
       dependant->getDownloadContext()->getFileEntries();
@@ -194,7 +194,7 @@ void BtDependencyTest::testResolve_metadata()
   pieceStorage->setDiskAdaptor(diskAdaptor);
   pieceStorage->setDownloadFinished(true);
   dependee->setPieceStorage(pieceStorage);
-  dependee->getDownloadContext()->setAttribute(CTX_ATTR_BT,
+  dependee->getDownloadContext()->setAttribute(ContextAttributeType::BT,
                                                make_unique<TorrentAttribute>());
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
@@ -215,7 +215,7 @@ void BtDependencyTest::testResolve_loadError()
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
 
-  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(CTX_ATTR_BT));
+  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(ContextAttributeType::BT));
   CPPUNIT_ASSERT_EQUAL(std::string("/tmp/outfile.path"),
                        dependant->getFirstFilePath());
 }
@@ -228,7 +228,7 @@ void BtDependencyTest::testResolve_dependeeFailure()
   BtDependency dep(dependant.get(), dependee);
   CPPUNIT_ASSERT(dep.resolve());
 
-  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(CTX_ATTR_BT));
+  CPPUNIT_ASSERT(!dependant->getDownloadContext()->hasAttribute(ContextAttributeType::BT));
   CPPUNIT_ASSERT_EQUAL(std::string("/tmp/outfile.path"),
                        dependant->getFirstFilePath());
 }

@@ -90,7 +90,7 @@ void UTMetadataDataExtensionMessageTest::testDoReceivedAction()
   {
     auto attrs = make_unique<TorrentAttribute>();
     attrs->infoHash = std::string(&infoHash[0], &infoHash[20]);
-    dctx->setAttribute(CTX_ATTR_BT, std::move(attrs));
+    dctx->setAttribute(ContextAttributeType::BT, std::move(attrs));
   }
   UTMetadataDataExtensionMessage m(1);
   m.setPieceStorage(pieceStorage.get());

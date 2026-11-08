@@ -57,7 +57,7 @@ ServerStat::ServerStat(const std::string& hostname, const std::string& protocol)
       singleConnectionAvgSpeed_(0),
       multiConnectionAvgSpeed_(0),
       counter_(0),
-      status_(OK)
+      status_(STATUS::OK)
 {
 }
 
@@ -74,7 +74,7 @@ void ServerStat::updateDownloadSpeed(int downloadSpeed)
 {
   downloadSpeed_ = downloadSpeed;
   if (downloadSpeed > 0) {
-    status_ = OK;
+    status_ = STATUS::OK;
   }
   lastUpdated_.reset();
 }
@@ -98,7 +98,7 @@ void ServerStat::updateSingleConnectionAvgSpeed(int downloadSpeed)
     avgDownloadSpeed = ((4.0 / 5.0) * (float)singleConnectionAvgSpeed_) +
                        ((1.0 / 5.0) * (float)downloadSpeed);
   }
-  if (avgDownloadSpeed < (int)(0.80 * singleConnectionAvgSpeed_)) {
+  if (avgDownloadSpeed < static_cast<int>(0.80 * singleConnectionAvgSpeed_)) {
     A2_LOG_DEBUG(fmt("ServerStat:{}: resetting counter since single connection"
                      " speed dropped",
                      getHostname().c_str()));
@@ -109,7 +109,7 @@ void ServerStat::updateSingleConnectionAvgSpeed(int downloadSpeed)
           " new:{:.2f}KB/s last:{:.2f}KB/s",
           getHostname().c_str(), (float)singleConnectionAvgSpeed_ / 1024,
           (float)avgDownloadSpeed / 1024, (float)downloadSpeed / 1024));
-  singleConnectionAvgSpeed_ = (int)avgDownloadSpeed;
+  singleConnectionAvgSpeed_ = static_cast<int>(avgDownloadSpeed);
 }
 
 void ServerStat::setMultiConnectionAvgSpeed(int multiConnectionAvgSpeed)
@@ -136,7 +136,7 @@ void ServerStat::updateMultiConnectionAvgSpeed(int downloadSpeed)
           " new:{:.2f}KB/s last:{:.2f}KB/s",
           getHostname().c_str(), (float)multiConnectionAvgSpeed_ / 1024,
           (float)avgDownloadSpeed / 1024, (float)downloadSpeed / 1024));
-  multiConnectionAvgSpeed_ = (int)avgDownloadSpeed;
+  multiConnectionAvgSpeed_ = static_cast<int>(avgDownloadSpeed);
 }
 
 void ServerStat::increaseCounter() { ++counter_; }
@@ -147,7 +147,7 @@ void ServerStat::setStatus(STATUS status) { status_ = status; }
 
 void ServerStat::setStatus(const std::string& status)
 {
-  for (int i = 0; i < MAX_STATUS; ++i) {
+  for (auto i = 0; i < static_cast<int>(STATUS::MAX_STATUS); ++i) {
     if (strcmp(status.c_str(), STATUS_STRING[i]) == 0) {
       status_ = static_cast<STATUS>(i);
       break;
@@ -158,15 +158,16 @@ void ServerStat::setStatus(const std::string& status)
 void ServerStat::setStatusInternal(STATUS status)
 {
   A2_LOG_DEBUG(fmt("ServerStat: set status {} for {} ({})",
-                   STATUS_STRING[status], hostname_.c_str(),
+                   STATUS_STRING[static_cast<size_t>(status)],
+                   hostname_.c_str(),
                    protocol_.c_str()));
   status_ = status;
   lastUpdated_.reset();
 }
 
-void ServerStat::setOK() { setStatusInternal(OK); }
+void ServerStat::setOK() { setStatusInternal(STATUS::OK); }
 
-void ServerStat::setError() { setStatusInternal(A2_ERROR); }
+void ServerStat::setError() { setStatusInternal(STATUS::A2_ERROR); }
 
 bool ServerStat::operator<(const ServerStat& serverStat) const
 {
@@ -187,7 +188,7 @@ std::string ServerStat::toString() const
              getHostname().c_str(), getProtocol().c_str(), getDownloadSpeed(),
              getSingleConnectionAvgSpeed(), getMultiConnectionAvgSpeed(),
              static_cast<int64_t>(getLastUpdated().getTimeFromEpoch()),
-             getCounter(), STATUS_STRING[getStatus()]);
+             getCounter(), STATUS_STRING[static_cast<size_t>(getStatus())]);
 }
 
 } // namespace aria2

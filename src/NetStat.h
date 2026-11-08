@@ -44,7 +44,7 @@ namespace aria2 {
 
 class NetStat {
 public:
-  enum STATUS {
+  enum class STATUS {
     IDLE,
     ACTIVE,
   };

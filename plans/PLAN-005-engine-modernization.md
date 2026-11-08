@@ -298,7 +298,7 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    `static_cast<void*>(&x)` 语法不成立 —— 属可解释残余。
    `src/WrDiskCacheEntry.h:82 append(int64_t, const unsigned char*, size_t)`
    的 span 化留到阶段 3（唯一调用点 `src/Piece.cc:369` 在 Peer/Piece 链）。
-3. [ ] **阶段 3 — C-Peer/Piece/RequestGroup（112 文件）**：**BitfieldMan 专项**
+3. [x] **阶段 3 — C-Peer/Piece/RequestGroup（112 文件）**：**BitfieldMan 专项**
    （三个成员 vector 化、`expr::array` 调用点、34 个 `getBitfield()` +
    3 个 `getFilterBitfield()` 消费点、8 条 `test/BitfieldManTest.cc` 断言）；
    Peer/Piece 链 span 化（PLAN-004 留的债）；`src/Piece.cc:349`
@@ -309,6 +309,40 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    `reference`/`difference_type`）换 `using`。`src/Context.cc`、
    `src/ConsoleStatCalc.cc`、`src/RequestGroupMan.cc`、`src/ServerStatMan.cc`、
    `src/NetStat.h`、`src/ServerStat.h`、`src/ContextAttribute.h` 均属 C 簇。
+   实测（2026-11-08）：`typedef` 25 处 / 9 文件全部换 `using`
+   （`src/IndexedList.h:52-66,313-322` 的 iterator traits 用
+   `using SelfType = IndexedListIterator;` 注入模板参数）；
+   `std::find`→`std::ranges::find` 10 处（`src/AdaptiveURISelector.cc:93`、
+   `src/FeedbackURISelector.cc:82`、`src/FileEntry.cc:320,441,503,505`、
+   `src/Piece.cc:290,295`、`src/SegmentMan.cc:378,441`）；
+   C cast→`static_cast` 14 处；`src/RequestGroupMan.cc:142,145` 的 `strtod`
+   → `util::parseDoubleNoThrow`。
+   **BitfieldMan 专项**：`src/BitfieldMan.h:53-55` 三个
+   `unsigned char*` 成员改 `std::vector<unsigned char>`
+   （`getBitfield()` 返回 `bitfield_.data()`，`getFilterBitfield()` 在
+   `filterBitfield_.empty()` 时返回 `nullptr` 保持旧契约），
+   `src/BitfieldMan.cc` 的 9 处 `new unsigned char[]` + 7 处 `delete[]` 全消失，
+   28 处 `expr::array(x)` → `expr::array(x.data())`，`bitfield.h` 整族签名不变。
+   **span 化**：`src/WrDiskCacheEntry.h:84 append(int64_t, std::span<const std::byte>)`
+   与 `src/Piece.h:192 appendWrCache(WrDiskCache*, int64_t, std::span<const std::byte>)`，
+   调用点 `src/Piece.cc:369`、`src/SinkStreamFilter.cc:77` 与
+   `test/PieceTest.cc:111`、`test/WrDiskCacheEntryTest.cc:64,68` 同步改。
+   **枚举**：C 簇 8 个全部 enum class 化 —— `src/NetStat.h:47 STATUS`、
+   `src/PeerInteractionCommand.h:52 Seq`、`src/RequestGroup.h:80 HaltReason`
+   与 `:81 State`（`getState()`/`setState()` 由 `int` 改 `State`）、
+   `src/ServerStat.h:53 STATUS`（`STATUS_STRING[static_cast<size_t>(...)]`）、
+   `src/ContextAttribute.h:46 ContextAttributeType`（`CTX_ATTR_BT`→`BT`、
+   `MAX_CTX_ATTR`→`MAX`，23 文件 60+ 处调用点 + `static_cast<size_t>` 下标）、
+   `src/RequestGroupMan.cc:650 DownloadResultStatus`（`A2_STATUS_*`→`OK/INPR/RM/ERR`）、
+   `src/ServerStatMan.cc:121 Field`、`src/PeerConnection.h:57 MsgState`。
+   `MAX_FIELD`/`Field::HOST` 改名 `Field::HOSTNAME`：`Field::HOST` 与
+   `config.h:411` 的 `#define HOST "x86_64-pc-linux-gnu"` 宏冲突。
+   可解释残余：`src/Piece.cc:349` `new WrDiskCacheEntry::DataCell()`
+   （`DataCellSet` 是 `std::set<DataCell*>`、`cacheData` 收裸指针、
+   `test/TestUtil.h:51` 返回裸指针）、`src/ConsoleStatCalc.cc:246` 与
+   `src/RequestGroupMan.cc:806,827,838` 的 `std::stringstream`
+   （共用 `std::ostream&` 接口）—— 均已加 `shortcut:` 注释。
+
    门禁通过后提交。
 4. [ ] **阶段 4 — D-命令/引擎/编排（142 文件）**：D 簇 4 个枚举
    （`src/Command.h:46` `STATUS`、`src/InitiatorMSEHandshakeCommand.h:51` 与

@@ -49,7 +49,7 @@ class Option;
 
 class PeerInteractionCommand : public PeerAbstractCommand {
 public:
-  enum Seq {
+  enum class Seq {
     INITIATOR_SEND_HANDSHAKE,
     INITIATOR_WAIT_HANDSHAKE,
     RECEIVER_WAIT_HANDSHAKE,

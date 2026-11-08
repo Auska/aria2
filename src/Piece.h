@@ -38,6 +38,8 @@
 #include "common.h"
 
 #include <stdint.h>
+#include <cstddef>
+#include <span>
 #include <vector>
 #include <string>
 #include <memory>
@@ -188,7 +190,7 @@ public:
     updateWrCache(diskCache, std::move(data), offset, len, len, goff);
   }
   size_t appendWrCache(WrDiskCache* diskCache, int64_t goff,
-                       const unsigned char* data, size_t len);
+                       std::span<const std::byte> data);
   void releaseWrCache(WrDiskCache* diskCache);
   WrDiskCacheEntry* getWrDiskCacheEntry() const { return wrCache_.get(); }
 };

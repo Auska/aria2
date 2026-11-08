@@ -39,7 +39,7 @@ namespace aria2 {
 const char* strContextAttributeType(ContextAttributeType key)
 {
   switch (key) {
-  case CTX_ATTR_BT:
+  case ContextAttributeType::BT:
     return "BitTorrent";
   default:
     return "UNKNOWN";

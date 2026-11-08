@@ -75,7 +75,7 @@ void ServerStatManTest::testSave()
   localhost_ftp->setLastUpdated(Time(1210000001));
   std::shared_ptr<ServerStat> mirror(new ServerStat("mirror", "http"));
   mirror->setDownloadSpeed(0);
-  mirror->setStatus(ServerStat::A2_ERROR);
+  mirror->setStatus(ServerStat::STATUS::A2_ERROR);
   mirror->setLastUpdated(Time(1210000002));
 
   ServerStatMan ssm;
@@ -138,11 +138,11 @@ void ServerStatManTest::testLoad()
   CPPUNIT_ASSERT_EQUAL(6, localhost_http->getCounter());
   CPPUNIT_ASSERT_EQUAL(static_cast<time_t>(1210000000),
                        localhost_http->getLastUpdated().getTimeFromEpoch());
-  CPPUNIT_ASSERT_EQUAL(ServerStat::OK, localhost_http->getStatus());
+  CPPUNIT_ASSERT(ServerStat::STATUS::OK == localhost_http->getStatus());
 
   std::shared_ptr<ServerStat> mirror = ssm.find("mirror", "http");
   CPPUNIT_ASSERT(mirror);
-  CPPUNIT_ASSERT_EQUAL(ServerStat::A2_ERROR, mirror->getStatus());
+  CPPUNIT_ASSERT(ServerStat::STATUS::A2_ERROR == mirror->getStatus());
 }
 
 void ServerStatManTest::testRemoveStaleServerStat()
@@ -157,7 +157,7 @@ void ServerStatManTest::testRemoveStaleServerStat()
   localhost_ftp->setLastUpdated(Time(1210000001));
   std::shared_ptr<ServerStat> mirror(new ServerStat("mirror", "http"));
   mirror->setDownloadSpeed(0);
-  mirror->setStatus(ServerStat::A2_ERROR);
+  mirror->setStatus(ServerStat::STATUS::A2_ERROR);
   mirror->setLastUpdated(Time(1210000002));
 
   ServerStatMan ssm;

@@ -42,7 +42,7 @@ public:
     messageFactory_ = make_unique<WrapExtBtMessageFactory>();
     dispatcher_ = make_unique<MockBtMessageDispatcher>();
     dctx_ = make_unique<DownloadContext>();
-    dctx_->setAttribute(CTX_ATTR_BT, make_unique<TorrentAttribute>());
+    dctx_->setAttribute(ContextAttributeType::BT, make_unique<TorrentAttribute>());
     peer_ = std::make_shared<Peer>("host", 6880);
     peer_->allocateSessionResource(0, 0);
     peer_->setExtension(ExtensionMessageRegistry::InterestingExtension::UT_METADATA, 1);

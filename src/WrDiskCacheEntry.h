@@ -37,7 +37,9 @@
 
 #include "common.h"
 
+#include <cstddef>
 #include <set>
+#include <span>
 #include <vector>
 #include <memory>
 
@@ -79,7 +81,7 @@ public:
 
   // Appends into last dataCell in set_ if the region is
   // contagious. Returns the number of copied bytes.
-  size_t append(int64_t goff, const unsigned char* data, size_t len);
+  size_t append(int64_t goff, std::span<const std::byte> data);
 
   size_t getSize() const { return size_; }
   void setSizeKey(size_t sizeKey) { sizeKey_ = sizeKey; }

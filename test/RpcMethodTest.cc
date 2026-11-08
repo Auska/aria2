@@ -824,11 +824,11 @@ void RpcMethodTest::testGatherStoppedDownload_bt()
   auto d = std::make_shared<DownloadResult>();
   d->gid = GroupId::create();
   d->infoHash = "2089b05ecca3d829cee5497d2703803b52216d19";
-  d->attrs = std::vector<std::shared_ptr<ContextAttribute>>(MAX_CTX_ATTR);
+  d->attrs = std::vector<std::shared_ptr<ContextAttribute>>(static_cast<size_t>(ContextAttributeType::MAX));
 
   auto torrentAttr = std::make_shared<TorrentAttribute>();
   torrentAttr->creationDate = 1000000007;
-  d->attrs[CTX_ATTR_BT] = torrentAttr;
+  d->attrs[static_cast<size_t>(ContextAttributeType::BT)] = torrentAttr;
 
   auto entry = Dict::g();
   gatherStoppedDownload(entry.get(), d, {});

@@ -52,23 +52,12 @@
 
 namespace aria2 {
 
-namespace {
-enum {
-  // Before reading first byte of message length
-  BT_MSG_PREV_READ_LENGTH,
-  // Reading 4 bytes message length
-  BT_MSG_READ_LENGTH,
-  // Reading message payload following message length
-  BT_MSG_READ_PAYLOAD
-};
-} // namespace
-
 PeerConnection::PeerConnection(cuid_t cuid, const std::shared_ptr<Peer>& peer,
                                const std::shared_ptr<SocketCore>& socket)
     : cuid_(cuid),
       peer_(peer),
       socket_(socket),
-      msgState_(BT_MSG_PREV_READ_LENGTH),
+      msgState_(MsgState::PREV_READ_LENGTH),
       bufferCapacity_(MAX_BUFFER_CAPACITY),
       resbuf_(make_unique<unsigned char[]>(bufferCapacity_)),
       resbufLength_(0),
@@ -101,12 +90,12 @@ bool PeerConnection::receiveMessage(unsigned char* data, size_t& dataLength)
     for (i = resbufOffset_; i < resbufLength_ && !done; ++i) {
       unsigned char c = resbuf_[i];
       switch (msgState_) {
-      case (BT_MSG_PREV_READ_LENGTH):
+      case MsgState::PREV_READ_LENGTH:
         msgOffset_ = i;
         currentPayloadLength_ = 0;
-        msgState_ = BT_MSG_READ_LENGTH;
+        msgState_ = MsgState::READ_LENGTH;
       // Fall through
-      case (BT_MSG_READ_LENGTH):
+      case MsgState::READ_LENGTH:
         currentPayloadLength_ <<= 8;
         currentPayloadLength_ += c;
         // The message length is uint32_t
@@ -117,21 +106,21 @@ bool PeerConnection::receiveMessage(unsigned char* data, size_t& dataLength)
           if (currentPayloadLength_ == 0) {
             // Length == 0 means keep-alive message.
             done = true;
-            msgState_ = BT_MSG_PREV_READ_LENGTH;
+            msgState_ = MsgState::PREV_READ_LENGTH;
           }
           else {
-            msgState_ = BT_MSG_READ_PAYLOAD;
+            msgState_ = MsgState::READ_PAYLOAD;
           }
         }
         break;
-      case (BT_MSG_READ_PAYLOAD):
+      case MsgState::READ_PAYLOAD:
         // We chose the bufferCapacity_ so that whole message,
         // including 4 bytes length and payload, in it. So here we
         // just make sure that it happens.
         if (resbufLength_ - msgOffset_ >= 4 + currentPayloadLength_) {
           i = msgOffset_ + 4 + currentPayloadLength_ - 1;
           done = true;
-          msgState_ = BT_MSG_PREV_READ_LENGTH;
+          msgState_ = MsgState::PREV_READ_LENGTH;
         }
         else {
           // We need another read.

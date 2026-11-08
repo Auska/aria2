@@ -75,8 +75,7 @@ ssize_t SinkStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       // cache buffer at least 4KiB and append the data to the
       // contagious cache data.
       size_t alen = piece->appendWrCache(
-          wrDiskCache_, segment->getPositionToWrite(),
-          reinterpret_cast<const unsigned char*>(inbuf.data()), wlen);
+          wrDiskCache_, segment->getPositionToWrite(), inbuf.first(wlen));
       if (alen < wlen) {
         size_t len = wlen - alen;
         size_t capacity = std::max(len, static_cast<size_t>(4_k));

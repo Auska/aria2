@@ -50,7 +50,7 @@ namespace aria2 {
 // InOrderURISelector: this is default.
 class ServerStat {
 public:
-  enum STATUS { OK = 0, A2_ERROR, MAX_STATUS };
+  enum class STATUS { OK = 0, A2_ERROR, MAX_STATUS };
 
   ServerStat(const std::string& hostname, const std::string& protocol);
 
@@ -98,12 +98,12 @@ public:
 
   STATUS getStatus() const { return status_; }
 
-  bool isOK() const { return status_ == OK; }
+  bool isOK() const { return status_ == STATUS::OK; }
 
   // set status OK and update lastUpdated_
   void setOK();
 
-  bool isError() const { return status_ == A2_ERROR; }
+  bool isError() const { return status_ == STATUS::A2_ERROR; }
 
   // set status ERROR and update lastUpdated_
   void setError();

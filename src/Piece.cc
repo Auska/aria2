@@ -239,7 +239,7 @@ void updateHashWithRead(MessageDigest* mdctx,
   ldiv_t res = ldiv(len, buf.size());
   for (int j = 0; j < res.quot; ++j) {
     ssize_t nread = adaptor->readData(buf, offset);
-    if ((size_t)nread != buf.size()) {
+    if (static_cast<size_t>(nread) != buf.size()) {
       throw DL_ABORT_EX(fmt(EX_FILE_READ, "n/a", "data is too short"));
     }
     mdctx->update(std::span{buf}.first(static_cast<size_t>(nread)));
@@ -287,12 +287,12 @@ void Piece::destroyHashContext()
 
 bool Piece::usedBy(cuid_t cuid) const
 {
-  return std::find(users_.begin(), users_.end(), cuid) != users_.end();
+  return std::ranges::find(users_, cuid) != users_.end();
 }
 
 void Piece::addUser(cuid_t cuid)
 {
-  if (std::find(users_.begin(), users_.end(), cuid) == users_.end()) {
+  if (std::ranges::find(users_, cuid) == users_.end()) {
     users_.push_back(cuid);
   }
 }
@@ -346,6 +346,8 @@ void Piece::updateWrCache(WrDiskCache* diskCache,
   assert(wrCache_);
   A2_LOG_DEBUG(fmt("updateWrCache entry={:p}",
                    static_cast<const void*>(wrCache_.get())));
+  // shortcut: DataCellSet/DerefLess/cacheData all take raw DataCell*, so a
+  // unique_ptr would ripple into WrDiskCacheEntry's public API and 6 tests.
   auto cell = new WrDiskCacheEntry::DataCell();
   cell->goff = goff;
   cell->data = std::move(data);
@@ -360,13 +362,13 @@ void Piece::updateWrCache(WrDiskCache* diskCache,
 }
 
 size_t Piece::appendWrCache(WrDiskCache* diskCache, int64_t goff,
-                            const unsigned char* data, size_t len)
+                            std::span<const std::byte> data)
 {
   if (!diskCache) {
     return 0;
   }
   assert(wrCache_);
-  size_t delta = wrCache_->append(goff, data, len);
+  size_t delta = wrCache_->append(goff, data);
   bool rv;
   if (delta > 0) {
     rv = diskCache->update(wrCache_.get(), delta);

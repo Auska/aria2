@@ -2,6 +2,9 @@
 
 #include <cstring>
 
+#include <cstddef>
+#include <span>
+
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "TestUtil.h"
@@ -61,11 +64,11 @@ void WrDiskCacheEntryTest::testAppend()
   cell->capacity = capacity;
   e.cacheData(cell);
   CPPUNIT_ASSERT_EQUAL((size_t)3,
-                       e.append(3, (const unsigned char*)"barbaz", 6));
+                       e.append(3, std::as_bytes(std::span{"barbaz", 6})));
   CPPUNIT_ASSERT_EQUAL((size_t)6, cell->len);
   CPPUNIT_ASSERT_EQUAL((size_t)6, e.getSize());
 
-  CPPUNIT_ASSERT_EQUAL((size_t)0, e.append(7, (const unsigned char*)"FOO", 3));
+  CPPUNIT_ASSERT_EQUAL((size_t)0, e.append(7, std::as_bytes(std::span{"FOO", 3})));
 }
 
 void WrDiskCacheEntryTest::testClear()

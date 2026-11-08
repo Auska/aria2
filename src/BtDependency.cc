@@ -99,7 +99,7 @@ bool BtDependency::resolve()
           dependee->getPieceStorage()->getDiskAdaptor();
       diskAdaptor->openExistingFile();
       std::string content = util::toString(diskAdaptor);
-      if (dependee->getDownloadContext()->hasAttribute(CTX_ATTR_BT)) {
+      if (dependee->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
         auto attrs =
             bittorrent::getTorrentAttrs(dependee->getDownloadContext());
         bittorrent::loadFromMemory(bittorrent::metadata2Torrent(content, attrs),

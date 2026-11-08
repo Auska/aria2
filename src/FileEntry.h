@@ -60,8 +60,8 @@ class ServerStatMan;
 
 class FileEntry {
 public:
-  typedef std::set<std::shared_ptr<Request>, RefLess<Request>>
-      InFlightRequestSet;
+  using InFlightRequestSet =
+      std::set<std::shared_ptr<Request>, RefLess<Request>>;
 
 private:
   class RequestFaster {
@@ -69,7 +69,7 @@ private:
     bool operator()(const std::shared_ptr<Request>& lhs,
                     const std::shared_ptr<Request>& rhs) const;
   };
-  typedef std::set<std::shared_ptr<Request>, RequestFaster> RequestPool;
+  using RequestPool = std::set<std::shared_ptr<Request>, RequestFaster>;
 
   int64_t length_;
   int64_t offset_;

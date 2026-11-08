@@ -50,7 +50,7 @@ namespace aria2 {
 
 class Peer;
 
-typedef std::set<std::shared_ptr<Peer>, RefLess<Peer>> PeerSet;
+using PeerSet = std::set<std::shared_ptr<Peer>, RefLess<Peer>>;
 
 class PeerStorage {
 public:
