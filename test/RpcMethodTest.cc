@@ -3,7 +3,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "DownloadEngine.h"
-#include "SelectEventPoll.h"
+#include "LibuvEventPoll.h"
 #include "Option.h"
 #include "RequestGroupMan.h"
 #include "RequestGroup.h"
@@ -89,7 +89,7 @@ public:
     option_->put(PREF_PIECE_LENGTH, "1048576");
     option_->put(PREF_MAX_DOWNLOAD_RESULT, "10");
     File(option_->get(PREF_DIR)).mkdirs();
-    e_ = make_unique<DownloadEngine>(make_unique<SelectEventPoll>());
+    e_ = make_unique<DownloadEngine>(make_unique<LibuvEventPoll>());
     e_->setOption(option_.get());
     e_->setRequestGroupMan(make_unique<RequestGroupMan>(
         std::vector<std::shared_ptr<RequestGroup>>{}, 1, option_.get()));

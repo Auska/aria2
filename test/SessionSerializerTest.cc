@@ -12,7 +12,6 @@
 #include "Option.h"
 #include "a2functional.h"
 #include "FileEntry.h"
-#include "SelectEventPoll.h"
 #include "DownloadEngine.h"
 
 namespace aria2 {

@@ -93,7 +93,6 @@ _aria2c()
                      '--file-allocation',
                      '--log-level',
                      '--uri-selector',
-                     '--event-poll',
                      '--follow-torrent',
                      '--stream-piece-selector',
                      '--download-result',

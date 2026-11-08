@@ -496,8 +496,6 @@
     "                              Content-Disposition header as UTF-8 instead of\n" \
     "                              ISO-8859-1, for example, the filename parameter,\n" \
     "                              but not the extended version filename*.")
-#define TEXT_EVENT_POLL                                                 \
-  _(" --event-poll=POLL            Specify the method for polling events.")
 #define TEXT_BT_EXTERNAL_IP                                             \
   _(" --bt-external-ip=IPADDRESS   Specify the external IP address to use in\n" \
     "                              BitTorrent download and DHT. It may be sent to\n" \

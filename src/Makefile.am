@@ -148,6 +148,7 @@ SRCS =  \
 	json.cc json.h\
 	JsonDiskWriter.h\
 	JsonParser.cc JsonParser.h\
+	LibuvEventPoll.cc LibuvEventPoll.h\
 	Lock.h \
 	LogFactory.cc LogFactory.h\
 	Logger.cc Logger.h\
@@ -215,7 +216,6 @@ SRCS =  \
 	SegList.h\
 	Segment.h\
 	SegmentMan.cc SegmentMan.h\
-	SelectEventPoll.cc SelectEventPoll.h\
 	SequentialDispatcherCommand.h\
 	SequentialPicker.h\
 	ServerStat.cc ServerStat.h\
@@ -286,10 +286,6 @@ endif # !ENABLE_WEBSOCKET
 if HAVE_SOME_FALLOCATE
 SRCS += FallocFileAllocationIterator.cc FallocFileAllocationIterator.h
 endif # HAVE_SOME_FALLOCATE
-
-if HAVE_EPOLL
-SRCS += EpollEventPoll.cc EpollEventPoll.h
-endif # HAVE_EPOLL
 
 if ENABLE_SSL
 SRCS += TLSContext.h TLSSession.h
@@ -522,14 +518,6 @@ endif # ENABLE_BITTORRENT
 if !HAVE_DAEMON
 SRCS += daemon.cc daemon.h
 endif # !HAVE_DAEMON
-
-if HAVE_POLL
-SRCS += PollEventPoll.cc PollEventPoll.h
-endif # HAVE_POLL
-
-if HAVE_LIBUV
-SRCS += LibuvEventPoll.cc LibuvEventPoll.h
-endif # HAVE_LIBUV
 
 AR = @AR@
 

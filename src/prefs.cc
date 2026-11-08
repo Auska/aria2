@@ -136,10 +136,6 @@ const std::string V_INORDER("inorder");
 const std::string A2_V_RANDOM("random");
 const std::string V_FEEDBACK("feedback");
 const std::string V_ADAPTIVE("adaptive");
-const std::string V_LIBUV("libuv");
-const std::string V_EPOLL("epoll");
-const std::string V_POLL("poll");
-const std::string V_SELECT("select");
 const std::string V_BINARY("binary");
 const std::string V_ASCII("ascii");
 const std::string V_GET("get");
@@ -261,8 +257,6 @@ PrefPtr PREF_SERVER_STAT_OF = makePref("server-stat-of");
 PrefPtr PREF_REMOTE_TIME = makePref("remote-time");
 // value: 1*digit
 PrefPtr PREF_MAX_FILE_NOT_FOUND = makePref("max-file-not-found");
-// value: epoll | select
-PrefPtr PREF_EVENT_POLL = makePref("event-poll");
 // value: true | false
 PrefPtr PREF_ENABLE_RPC = makePref("enable-rpc");
 // value: 1*digit

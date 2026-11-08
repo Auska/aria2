@@ -36,7 +36,6 @@ AC_DEFINE_UNQUOTED([HOST], ["$host"], [Define build-type])
 AC_DEFINE_UNQUOTED([TARGET], ["$target"], [Define target-type])
 
 # Checks for arguments.
-ARIA2_ARG_WITH([libuv])
 ARIA2_ARG_WITHOUT([openssl])
 ARIA2_ARG_WITHOUT([sqlite3])
 ARIA2_ARG_WITHOUT([libcares])
@@ -46,7 +45,6 @@ ARIA2_ARG_WITH([jemalloc])
 ARIA2_ARG_DISABLE([ssl])
 ARIA2_ARG_DISABLE([bittorrent])
 ARIA2_ARG_DISABLE([websocket])
-ARIA2_ARG_DISABLE([epoll])
 ARIA2_ARG_ENABLE([libaria2])
 ARIA2_ARG_ENABLE([werror])
 
@@ -160,17 +158,8 @@ if test "x$with_libz" = "xyes"; then
   fi
 fi
 
-have_libuv=no
-if test "x$with_libuv" = "xyes"; then
-  PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13],
-                    [have_libuv=yes], [have_libuv=no])
-  if test "x$have_libuv" = "xyes"; then
-    AC_DEFINE([HAVE_LIBUV], [1], [Define to 1 if you have libuv.])
-  elif test "x$with_libuv_requested" = "xyes"; then
-    ARIA2_DEP_NOT_MET([libuv])
-  fi
-fi
-AM_CONDITIONAL([HAVE_LIBUV], [test "x$have_libuv" = "xyes"])
+have_libuv=yes
+PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13])
 
 have_sqlite3=no
 if test "x$with_sqlite3" = "xyes"; then
@@ -434,15 +423,6 @@ if test "x$with_jemalloc" = "xyes"; then
   fi
 fi
 
-have_epoll=no
-if test "x$enable_epoll" = "xyes"; then
-  AC_CHECK_FUNCS([epoll_create], [have_epoll=yes])
-  if test "x$have_epoll" = "xyes"; then
-    AC_DEFINE([HAVE_EPOLL], [1], [Define to 1 if epoll is available.])
-  fi
-fi
-AM_CONDITIONAL([HAVE_EPOLL], [test "x$have_epoll" = "xyes"])
-
 AC_CHECK_FUNCS([posix_fallocate],[have_posix_fallocate=yes])
 ARIA2_CHECK_FALLOCATE
 if test "x$have_posix_fallocate" = "xyes" ||
@@ -584,7 +564,6 @@ CA Bundle:      $ca_bundle
 LibCares:       $have_libcares (CFLAGS='$LIBCARES_CFLAGS' LIBS='$LIBCARES_LIBS')
 Zlib:           $have_zlib (CFLAGS='$ZLIB_CFLAGS' LIBS='$ZLIB_LIBS')
 Jemalloc:       $have_jemalloc (CFLAGS='$JEMALLOC_CFLAGS' LIBS='$JEMALLOC_LIBS')
-Epoll:          $have_epoll
 Bittorrent:     $enable_bittorrent
 Message Digest: $use_md
 WebSocket:      $enable_websocket (CFLAGS='$WSLAY_CFLAGS' LIBS='$WSLAY_LIBS')

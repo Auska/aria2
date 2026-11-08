@@ -1220,13 +1220,6 @@ Advanced Options
 
    Default: ``false``
 
-.. option:: --event-poll=<POLL>
-
-  Specify the method for polling events.  The possible values are
-  ``epoll``, ``poll`` and ``select``.  ``epoll`` and ``poll`` are available
-  if the system supports them.  ``epoll`` is available on recent Linux.
-  The default value may vary depending on the system you use.
-
 .. option:: --file-allocation=<METHOD>
 
   Specify file allocation method.

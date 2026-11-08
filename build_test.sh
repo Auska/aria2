@@ -54,8 +54,6 @@ case "$1" in
 	build "--without-sqlite3" "nosqlite3"
 	# Feature combinations
 	build "--disable-bittorrent" "nobt"
-	build "--disable-epoll" "noepoll"
-	build "--disable-epoll --without-libcares" "noepoll_nocares"
 	build "--enable-libaria2" "libaria2"
 	;;
 esac

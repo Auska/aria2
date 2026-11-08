@@ -17,7 +17,7 @@
 #include "RecoverableException.h"
 #include "util.h"
 #include "DownloadEngine.h"
-#include "SelectEventPoll.h"
+#include "LibuvEventPoll.h"
 #include "UriListParser.h"
 
 namespace aria2 {
@@ -49,7 +49,7 @@ public:
     // To enable paused RequestGroup
     option_->put(PREF_ENABLE_RPC, A2_V_TRUE);
     File(option_->get(PREF_DIR)).mkdirs();
-    e_ = make_unique<DownloadEngine>(make_unique<SelectEventPoll>());
+    e_ = make_unique<DownloadEngine>(make_unique<LibuvEventPoll>());
     e_->setOption(option_.get());
     auto rgman = make_unique<RequestGroupMan>(
         std::vector<std::shared_ptr<RequestGroup>>{}, 3, option_.get());

@@ -93,10 +93,6 @@ extern const std::string V_INORDER;
 extern const std::string A2_V_RANDOM;
 extern const std::string V_FEEDBACK;
 extern const std::string V_ADAPTIVE;
-extern const std::string V_LIBUV;
-extern const std::string V_EPOLL;
-extern const std::string V_POLL;
-extern const std::string V_SELECT;
 extern const std::string V_BINARY;
 extern const std::string V_ASCII;
 extern const std::string V_GET;
@@ -214,8 +210,6 @@ extern PrefPtr PREF_SERVER_STAT_OF;
 extern PrefPtr PREF_REMOTE_TIME;
 // value: 1*digit
 extern PrefPtr PREF_MAX_FILE_NOT_FOUND;
-// value: epoll | select
-extern PrefPtr PREF_EVENT_POLL;
 // value: true | false
 extern PrefPtr PREF_ENABLE_RPC;
 // value: 1*digit

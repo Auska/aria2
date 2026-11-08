@@ -269,32 +269,6 @@ OptionHandlerFactory::createOptionHandlers()
     handlers.push_back(std::move(op));
   }
   {
-    auto op = std::make_unique<ParameterOptionHandler>(PREF_EVENT_POLL,
-                                                       TEXT_EVENT_POLL,
-#if defined(HAVE_EPOLL)
-                                                       V_EPOLL,
-#elif defined(HAVE_LIBUV)
-                                                       V_LIBUV,
-#elif defined(HAVE_POLL)
-                                                       V_POLL,
-#else  // defined(HAVE_EPOLL)
-                                                       V_SELECT,
-#endif // defined(HAVE_EPOLL)
-                                                       std::vector<std::string>{
-#ifdef HAVE_EPOLL
-                                                           V_EPOLL,
-#endif // HAVE_EPOLL
-#ifdef HAVE_LIBUV
-                                                           V_LIBUV,
-#endif // HAVE_LIBUV
-#ifdef HAVE_POLL
-                                                           V_POLL,
-#endif // HAVE_POLL
-                                                           V_SELECT});
-    op->addTag(HelpTag::TAG_ADVANCED);
-    handlers.push_back(std::move(op));
-  }
-  {
     auto op = std::make_unique<ParameterOptionHandler>(
         PREF_FILE_ALLOCATION, TEXT_FILE_ALLOCATION, V_PREALLOC,
         std::vector<std::string>{V_NONE, V_PREALLOC, V_TRUNC,

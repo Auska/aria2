@@ -58,16 +58,7 @@
 #include "a2io.h"
 #include "DownloadContext.h"
 #include "EvictSocketPoolCommand.h"
-#ifdef HAVE_LIBUV
-#  include "LibuvEventPoll.h"
-#endif // HAVE_LIBUV
-#ifdef HAVE_EPOLL
-#  include "EpollEventPoll.h"
-#endif // HAVE_EPOLL
-#ifdef HAVE_POLL
-#  include "PollEventPoll.h"
-#endif // HAVE_POLL
-#include "SelectEventPoll.h"
+#include "LibuvEventPoll.h"
 #include "DlAbortEx.h"
 #include "FileAllocationEntry.h"
 #include "HttpListenCommand.h"
@@ -78,42 +69,13 @@ namespace aria2 {
 DownloadEngineFactory::DownloadEngineFactory() = default;
 
 namespace {
-std::unique_ptr<EventPoll> createEventPoll(Option* op)
+std::unique_ptr<EventPoll> createEventPoll()
 {
-  const std::string& pollMethod = op->get(PREF_EVENT_POLL);
-#ifdef HAVE_LIBUV
-  if (pollMethod == V_LIBUV) {
-    auto ep = make_unique<LibuvEventPoll>();
-    if (!ep->good()) {
-      throw DL_ABORT_EX("Initializing LibuvEventPoll failed."
-                        " Try --event-poll=select");
-    }
-    return std::move(ep);
+  auto ep = make_unique<LibuvEventPoll>();
+  if (!ep->good()) {
+    throw DL_ABORT_EX("Initializing LibuvEventPoll failed.");
   }
-  else
-#endif // HAVE_LIBUV
-#ifdef HAVE_EPOLL
-      if (pollMethod == V_EPOLL) {
-    auto ep = make_unique<EpollEventPoll>();
-    if (!ep->good()) {
-      throw DL_ABORT_EX("Initializing EpollEventPoll failed."
-                        " Try --event-poll=select");
-    }
-    return ep;
-  }
-  else
-#endif // HAVE_EPLL
-#ifdef HAVE_POLL
-      if (pollMethod == V_POLL) {
-    return make_unique<PollEventPoll>();
-  }
-  else
-#endif // HAVE_POLL
-    if (pollMethod == V_SELECT) {
-      return make_unique<SelectEventPoll>();
-    }
-  assert(0);
-  return nullptr;
+  return ep;
 }
 } // namespace
 
@@ -122,7 +84,7 @@ std::unique_ptr<DownloadEngine> DownloadEngineFactory::newDownloadEngine(
 {
   const size_t MAX_CONCURRENT_DOWNLOADS =
       op->getAsInt(PREF_MAX_CONCURRENT_DOWNLOADS);
-  auto e = make_unique<DownloadEngine>(createEventPoll(op));
+  auto e = make_unique<DownloadEngine>(createEventPoll());
   e->setOption(op);
   {
     auto requestGroupMan = make_unique<RequestGroupMan>(
