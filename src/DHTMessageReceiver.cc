@@ -109,7 +109,7 @@ DHTMessageReceiver::receiveMessage(const std::string& remoteAddr,
         return handleUnknownMessage(data, remoteAddr, remotePort);
       }
       onMessageReceived(message.get());
-      return std::move(message);
+      return message;
     }
   }
   catch (RecoverableException& e) {
@@ -130,9 +130,10 @@ void DHTMessageReceiver::onMessageReceived(DHTMessage* message)
 
 void DHTMessageReceiver::handleTimeout() { tracker_->handleTimeout(); }
 
-std::unique_ptr<DHTUnknownMessage> DHTMessageReceiver::handleUnknownMessage(
-    std::span<const unsigned char> data, const std::string& remoteAddr,
-    uint16_t remotePort)
+std::unique_ptr<DHTUnknownMessage>
+DHTMessageReceiver::handleUnknownMessage(std::span<const unsigned char> data,
+                                         const std::string& remoteAddr,
+                                         uint16_t remotePort)
 {
   auto m = factory_->createUnknownMessage(data, remoteAddr, remotePort);
   A2_LOG_INFO(fmt("Message received: {}", m->toString()));

@@ -91,7 +91,7 @@ DefaultExtensionMessageFactory::createMessage(std::span<const std::byte> data)
     auto m = HandshakeExtensionMessage::create(data);
     m->setPeer(peer_);
     m->setDownloadContext(dctx_);
-    return std::move(m);
+    return m;
   }
   else {
     const char* extensionName = registry_->getExtensionName(extensionMessageID);
@@ -104,7 +104,7 @@ DefaultExtensionMessageFactory::createMessage(std::span<const std::byte> data)
       // uTorrent compatible Peer-Exchange
       auto m = UTPexExtensionMessage::create(data);
       m->setPeerStorage(peerStorage_);
-      return std::move(m);
+      return m;
     }
     else if (strcmp(extensionName, "ut_metadata") == 0) {
       if (length == 0) {
@@ -134,7 +134,7 @@ DefaultExtensionMessageFactory::createMessage(std::span<const std::byte> data)
         m->setPeer(peer_);
         m->setBtMessageFactory(messageFactory_);
         m->setBtMessageDispatcher(dispatcher_);
-        return std::move(m);
+        return m;
       }
       case 1: {
         if (end == length) {
@@ -154,14 +154,14 @@ DefaultExtensionMessageFactory::createMessage(std::span<const std::byte> data)
         m->setPieceStorage(
             dctx_->getOwnerRequestGroup()->getPieceStorage().get());
         m->setDownloadContext(dctx_);
-        return std::move(m);
+        return m;
       }
       case 2: {
         auto m =
             make_unique<UTMetadataRejectExtensionMessage>(extensionMessageID);
         m->setIndex(index->i());
         // No need to inject tracker because peer will be disconnected.
-        return std::move(m);
+        return m;
       }
       default:
         throw DL_ABORT_EX(

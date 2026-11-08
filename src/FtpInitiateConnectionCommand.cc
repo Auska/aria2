@@ -121,7 +121,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandProxied(
       return nullptr;
     }
     setupBackupConnection(hostname, addr, port, c.get());
-    return std::move(c);
+    return c;
   }
 
   setConnectedAddrInfo(getRequest(), hostname, pooledSocket);
@@ -150,7 +150,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandProxied(
       getCuid(), getRequest(), getFileEntry(), getRequestGroup(), hc,
       getDownloadEngine(), pooledSocket);
   c->setProxyRequest(proxyRequest);
-  return std::move(c);
+  return c;
 }
 
 std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandPlain(
@@ -177,7 +177,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandPlain(
 
     c->setControlChain(std::make_shared<FtpNegotiationConnectChain>());
     setupBackupConnection(hostname, addr, port, c.get());
-    return std::move(c);
+    return c;
   }
 
   setConnectedAddrInfo(getRequest(), hostname, pooledSocket);

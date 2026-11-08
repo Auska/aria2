@@ -137,7 +137,7 @@ AuthConfigFactory::createHttpAuthResolver(const Option* op) const
   }
   resolver->setUserDefinedCred(op->get(PREF_HTTP_USER),
                                op->get(PREF_HTTP_PASSWD));
-  return std::move(resolver);
+  return resolver;
 }
 
 std::unique_ptr<AuthResolver>
@@ -155,7 +155,7 @@ AuthConfigFactory::createFtpAuthResolver(const Option* op) const
   resolver->setUserDefinedCred(op->get(PREF_FTP_USER),
                                op->get(PREF_FTP_PASSWD));
   resolver->setDefaultCred(AUTH_DEFAULT_USER, AUTH_DEFAULT_PASSWD);
-  return std::move(resolver);
+  return resolver;
 }
 
 void AuthConfigFactory::setNetrc(std::unique_ptr<Netrc> netrc)

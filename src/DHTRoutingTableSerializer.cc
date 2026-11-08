@@ -90,8 +90,8 @@ void DHTRoutingTableSerializer::serialize(const std::string& filename)
   char header[8];
   memset(header, 0, sizeof(header));
   // magic
-  header[0] = 0xa1u;
-  header[1] = 0xa2u;
+  header[0] = static_cast<char>(0xa1u);
+  header[1] = static_cast<char>(0xa2u);
   // format ID
   header[2] = 0x02u;
   // version

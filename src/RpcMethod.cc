@@ -64,7 +64,7 @@ std::unique_ptr<ValueBase> RpcMethod::createErrorResponse(const Exception& e,
   auto params = Dict::g();
   params->put((req.jsonRpc ? "code" : "faultCode"), Integer::g(1));
   params->put((req.jsonRpc ? "message" : "faultString"), std::string(e.what()));
-  return std::move(params);
+  return params;
 }
 
 void RpcMethod::authorize(RpcRequest& req, DownloadEngine* e)

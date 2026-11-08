@@ -86,8 +86,8 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
   char header[8];
   memset(header, 0, sizeof(header));
   // magic
-  header[0] = 0xa1u;
-  header[1] = 0xa2u;
+  header[0] = static_cast<char>(0xa1u);
+  header[1] = static_cast<char>(0xa2u);
   // format ID
   header[2] = 0x02u;
   // version
@@ -97,8 +97,8 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
   char headerCompat[8];
   memset(headerCompat, 0, sizeof(headerCompat));
   // magic
-  headerCompat[0] = 0xa1u;
-  headerCompat[1] = 0xa2u;
+  headerCompat[0] = static_cast<char>(0xa1u);
+  headerCompat[1] = static_cast<char>(0xa2u);
   // format ID
   headerCompat[2] = 0x02u;
   // version

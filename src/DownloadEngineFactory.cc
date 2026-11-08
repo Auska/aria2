@@ -100,7 +100,7 @@ std::unique_ptr<EventPoll> createEventPoll(Option* op)
       throw DL_ABORT_EX("Initializing EpollEventPoll failed."
                         " Try --event-poll=select");
     }
-    return std::move(ep);
+    return ep;
   }
   else
 #endif // HAVE_EPLL

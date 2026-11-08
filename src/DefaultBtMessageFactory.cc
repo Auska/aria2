@@ -231,7 +231,7 @@ DefaultBtMessageFactory::createBtMessage(std::span<const std::byte> data)
     }
   }
   setCommonProperty(msg.get());
-  return std::move(msg);
+  return msg;
 }
 
 void DefaultBtMessageFactory::setCommonProperty(AbstractBtMessage* msg)
@@ -340,9 +340,8 @@ DefaultBtMessageFactory::createNotInterestedMessage()
 std::unique_ptr<BtBitfieldMessage>
 DefaultBtMessageFactory::createBitfieldMessage()
 {
-  auto msg = make_unique<BtBitfieldMessage>(
-      std::span{pieceStorage_->getBitfield(),
-                pieceStorage_->getBitfieldLength()});
+  auto msg = make_unique<BtBitfieldMessage>(std::span{
+      pieceStorage_->getBitfield(), pieceStorage_->getBitfieldLength()});
   setCommonProperty(msg.get());
   return msg;
 }

@@ -175,7 +175,18 @@ void visit(const String&) override;
 - 就地 `make -j8 -C src` + `make -j8 -C test` 均 rc=0、0 error。`clang-format -i` 后 `77 files changed, 349 insertions(+), 494 deletions(-)`。
 - 干净 worktree `/tmp/aria2-m11-p1`（base `d21f4c11`）+ `git apply /tmp/p11-stage1.patch` + `autoreconf -i` + `./configure --enable-werror`（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）+ `make -j8 check` → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (915)`、`error:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
 
-2. [ ] 阶段 2：真实警告 46 处（redundant-move 38 / overflow 8 / ignored-qualifiers 2 / vla 1）→ 提交 `PLAN-011 阶段2: 修复剩余编译器警告`
+2. [x] 阶段 2：真实警告 46 处（redundant-move 38 / overflow 8 / ignored-qualifiers 2 / vla 1）→ 提交 `PLAN-011 阶段2: 修复剩余编译器警告`
+
+### 阶段 2 实测（2026-11-08）
+
+- `-Wredundant-move`：**35 个唯一站点**全部 `return std::move(X);` → `return X;`（均在 `src/RpcMethodImpl.cc` 14、`src/DefaultExtensionMessageFactory.cc` 5、`src/HttpInitiateConnectionCommand.cc` 3、`src/FtpInitiateConnectionCommand.cc` 3、`src/AuthConfigFactory.cc` 2、`src/RequestGroup.cc` 2、`src/DHTMessageReceiver.cc` 1、`src/DefaultBtMessageFactory.cc` 1、`src/DownloadEngineFactory.cc` 1、`src/MultiUrlRequestInfo.cc` 1、`src/RpcMethod.cc` 1）。**保留 10 处 `std::move(member_)`**（`src/bencode2.cc:73`、`src/DefaultPieceStorage.cc:843`、`src/DHTMessageTrackerEntry.cc:107`、`src/HttpConnection.cc:79`、`src/HttpHeaderProcessor.cc:465`、`src/RequestGroupEntry.cc:61`、`src/ValueBase.cc:57`、`src/ValueBaseParserController.cc:96`、`src/DHTMessageReceiver.cc:102`、`src/DownloadEngineFactory.cc:92`）—— 这 10 处是移出成员/解引用指针，编译器不报。
+- `-Woverflow` 8 处：`src/DHTRoutingTableDeserializer.cc` 4 + `src/DHTRoutingTableSerializer.cc` 2 的 `header[0] = 0xa1u;` 等 → `static_cast<char>(0xa1u)`；`src/util.cc:667,670` 的 `dest += 0xc2u/0xc3u` → `dest += static_cast<char>(...)`（同时 `dest += c & (~0x40u)` 也加了 `static_cast<char>`，行为不变）。
+- `-Wignored-qualifiers` 2 处：`src/DHTGetPeersReplyMessage.cc:95,138` 的 `std::make_unsigned<decltype(clen)>::type` 因 `clen` 是 `const auto` 而使结果带 const → `std::make_unsigned_t<std::remove_cv_t<decltype(clen)>>`。
+- `-Wvla` 1 处：`src/InternalDHKeyExchange.cc:72` 的 `unsigned char buf[pbytes]` → `std::vector<unsigned char> buf(pbytes)` + `std::as_writable_bytes(std::span{buf})` + `n(buf.data(), pbytes)`，补 `#include <vector>`。该 TU 本机默认不编译（`USE_INTERNAL_BIGNUM` 未定义），单独 `-fsyntax-only` 验证。
+- 验证：`/tmp/wextra5.log`（src）**0 条 warning**、`error:` 0；`/tmp/wextra_test4.log`（test）只剩 `test/IndexedListTest.cc` 的 12 条 `-Wdeprecated-copy`（阶段 5 删除后消失）+ 1 条 `test/CookieBoxTest.cc` 的 `CookieBox.h: No such file`（该文件未被 `test/Makefile.am` 引用，是历史死文件，非本次引入）。
+- 就地 `make -j8 -C src` + `make -j8 -C test` 均 rc=0。`clang-format -i` 后 `17 files changed, 62 insertions(+), 58 deletions(-)`。
+- 干净 worktree `/tmp/aria2-m11-p2`（base `67757636`）门禁：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (915)`、`error:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
+
 3. [ ] 阶段 3：`configure.ac` 加 `-Wextra`、CI 加 `--enable-werror` → 提交 `PLAN-011 阶段3: 打开 -Wextra 警告门禁`
 4. [ ] 阶段 4：移除 `array_fun.h` 表达式模板 + 62 个死 include → 提交 `PLAN-011 阶段4: 移除 array_fun 表达式模板`
 5. [ ] 阶段 5：`IndexedList` → `IndexedDeque`（或 `std::deque`）→ 提交 `PLAN-011 阶段5: 用标准容器替换自研 IndexedList`

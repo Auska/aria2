@@ -664,12 +664,12 @@ std::string iso8859p1ToUtf8(std::span<const std::byte> src)
     auto c = static_cast<unsigned char>(b);
     if (0xa0u <= c) {
       if (c <= 0xbfu) {
-        dest += 0xc2u;
+        dest += static_cast<char>(0xc2u);
       }
       else {
-        dest += 0xc3u;
+        dest += static_cast<char>(0xc3u);
       }
-      dest += c & (~0x40u);
+      dest += static_cast<char>(c & (~0x40u));
     }
     else if (0x80u <= c && c <= 0x9fu) {
       return "";

@@ -78,7 +78,8 @@ void DHTGetPeersReplyMessage::doReceivedAction()
 std::unique_ptr<Dict> DHTGetPeersReplyMessage::getResponse()
 {
   auto rDict = Dict::g();
-  rDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  rDict->put(DHTMessage::ID,
+             String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   rDict->put(TOKEN, token_);
   // TODO want parameter
   if (!closestKNodes_.empty()) {
@@ -92,10 +93,11 @@ std::unique_ptr<Dict> DHTGetPeersReplyMessage::getResponse()
       auto compactlen = bittorrent::packcompact(
           compact.data(), (*i)->getIPAddress(), (*i)->getPort());
       auto cclen =
-          static_cast<std::make_unsigned<decltype(clen)>::type>((clen));
+          static_cast<std::make_unsigned_t<std::remove_cv_t<decltype(clen)>>>(
+              clen);
       if (clen >= 0 && compactlen == cclen) {
-        last = std::copy(std::begin((*i)->getID()), std::end((*i)->getID()),
-                         last);
+        last =
+            std::copy(std::begin((*i)->getID()), std::end((*i)->getID()), last);
         last = std::copy_n(std::begin(compact), compactlen, last);
         ++k;
       }
@@ -135,7 +137,8 @@ std::unique_ptr<Dict> DHTGetPeersReplyMessage::getResponse()
       auto compactlen = bittorrent::packcompact(
           compact.data(), (*i)->getIPAddress(), (*i)->getPort());
       auto cclen =
-          static_cast<std::make_unsigned<decltype(clen)>::type>((clen));
+          static_cast<std::make_unsigned_t<std::remove_cv_t<decltype(clen)>>>(
+              clen);
       if (clen > 0 && compactlen == cclen) {
         valuesList->append(String::g(compact.data(), compactlen));
       }

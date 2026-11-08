@@ -358,7 +358,7 @@ protected:
     if (offset < 0) {
       std::reverse(list->begin(), list->end());
     }
-    return std::move(list);
+    return list;
   }
 
   virtual const ItemListType& getItems(DownloadEngine* e) const = 0;
