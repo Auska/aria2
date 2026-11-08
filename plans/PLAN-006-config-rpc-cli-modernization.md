@@ -1,5 +1,7 @@
 # 任务：配置 / RPC / CLI 层现代化（cfg79 口径）
 
+> 状态：✅ 已完成（2026-11-08）
+
 ## 目标
 
 把 PLAN-003/004/005 未覆盖的最后一层——配置、RPC 与 CLI（79 文件 /
@@ -468,9 +470,63 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
      `OK (914)`、`grep -c 'error:'` = 0、`git hash-object src/includes/aria2/aria2.h`
      = `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 
-4. [ ] **收尾**：勾选全部阶段、加状态行、补「实测门禁结果」与「实际偏差」，
+4. [x] **收尾**：勾选全部阶段、加状态行、补「实测门禁结果」与「实际偏差」，
    记录原始债务表与结束债务表对比；提交
    `PLAN-006: 勾选阶段3、标记计划完成并记录实测门禁与偏差`。
+
+## 实测门禁结果
+
+每阶段都在干净 worktree 上 `autoreconf -i` + `./configure --enable-werror`
+（`CXX = g++ -std=c++20`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）
++ `make -j24 check`：
+
+| 阶段 | 提交 | worktree | 用例 | 干净 worktree 结果 | ABI 哈希 |
+|------|------|----------|------|--------------------|----------|
+| P1 配置与选项 | `6e3ed2d1` | `/tmp/aria2-m6-p1` | `OK (914)` | `# TOTAL: 1` / `# PASS: 1` / 无 `error:` | 未变 |
+| P2 RPC | `61201d68` | `/tmp/aria2-m6-p2` | `OK (914)` | `# TOTAL: 1` / `# PASS: 1` / 无 `error:` | 未变 |
+| P3 CLI 与输出 | `7a292614` | `/tmp/aria2-m6-p3` | `OK (914)` | `# TOTAL: 1` / `# PASS: 1` / 无 `error:` | 未变 |
+
+`git hash-object src/includes/aria2/aria2.h` 三阶段结束均为
+`2216641161b15acb3c3ddf2600dc19e3decd59d5`（与 PLAN-003 起的基线一致）。
+
+## 实际偏差
+
+1. **ck79 债务收口结果**（剥注释正则，79 文件）：`typedef 12 → 3`、`enum 8 → 2`、
+   裸 `new 204 → 0`、`std::find 1 → 0`、`stringstream 7 → 3`、`str→num 1 → 1`、
+   `.c_str() 30 → 18`、`printf 13 → 13`。残余逐条说明见下。
+2. **裸 `new` 清零**：`src/OptionHandlerFactory.cc` 的 196 处构造全部改
+   `std::make_unique`，`src/wallclock.cc:43` 的 `static auto t = new Timer();`
+   改 `static Timer t;`。`src/OptionHandlerImpl.h:283`、`src/RpcMethod.h:59,63`、
+   `src/usage_text.h:176,753,954` 的 "new" 是英文单词/帮助文本，正则误命中。
+3. **`typedef` 残余 3 个**：`src/uri_split.h:45,59,63` 是 C 头（与 `src/uri_split.c`
+   共用，`uri_split_field`/`uri_split_flag`/`uri_split_result`），按计划不动。
+4. **非 scoped `enum` 残余 2 个**：`src/error_code.h:44 enum Value`（用户决策保留，
+   227 处跨层引用）、`src/uri.cc:214 enum { NPATH_* }`（21 处两重嵌套 `switch`，
+   已加 `shortcut:` 注释）。`src/uri_split.h` 的两个 C 枚举未计入该数字。
+5. **`stringstream` 残余 3 处**：`src/RpcResponse.cc:103,151` 与 `src/json.cc:101`
+   —— `encodeJsonAll`/`encodeJsonBatchAll` 是 `template <typename OutputStream>`，
+   与 `HAVE_ZLIB` 下的 `GZipEncoder` 共用 `operator<<`，换 `std::string` 要拆两套
+   实现；三处均已加 `shortcut:` 注释。
+6. **`str→num` 残余 1 处**：`src/OptionHandlerFactory.cc:1815` 的
+   `std::sscanf(PACKAGE_VERSION, "%d.%d.%d", ...)` 解析构建期三段版本号常量，
+   `from_chars` 需三次手写切分，收益为零；已加 `shortcut:` 注释。
+7. **`.c_str()` 残余 18 处**：`getopt_long` 的 `optstring.c_str()`
+   （`src/OptionParser.cc`）、`GZipFile`/`BufferedFile` 的 `tempFilename.c_str()`
+   （`src/SessionSerializer.cc`）、`OutputFile::printf` 路径（`src/OptionHandler.cc`）
+   —— 都是 C 风格接口的实参，符合 PLAN-003 起的「C API 边界保留」约定。
+8. **`printf` 13 处全部保留**：`src/Logger.cc` 6、`src/OptionHandler.cc` 4、
+   `src/MultiUrlRequestInfo.cc` 1、`src/main.cc` 1、`src/Platform.cc` 1，全部是
+   `OutputFile::printf` 虚接口调用（`src/OutputFile.h:51-52`），是输出契约本身。
+9. **偏离原计划的 3 处**（都记在阶段小节里）：
+   ① `HelpTag` 的形参从 `uint32_t` 直接换成 `HelpTag`（原计划说保持 `uint32_t` +
+      调用点 `static_cast`；实测调用点全是 `TAG_*` 常量，无需转换，反而更干净）；
+   ② `FeatureConfig::strSupportedFeature` 形参从 `int` 换成 `FeatureType`（同上）；
+   ③ `OptimizeConcurrentDownloadsOptionHandler` 的调用删掉了原先多传的第 4 实参
+      `OptionHandler::OPT_ARG`（该类构造第 4 形参是 `char shortName`，旧代码把枚举
+      值 1 当短选项名传进去，会凭空生成一个 `\x01` 短选项——这是上游笔误，修正后
+      `make check` 914 全绿）。
+10. **`Logger::LEVEL` 未加 `: uint8_t`**：实际引用只有 4 个文件的 37 处，
+    `level >= logLevel_` 在 `enum class` 下照常成立，加底层类型无收益。
 
 ## 预计修改的文件
 
