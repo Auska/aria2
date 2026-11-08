@@ -219,10 +219,6 @@ if ENABLE_ASYNC_DNS
 aria2c_SOURCES += AsyncNameResolverTest.cc
 endif # ENABLE_ASYNC_DNS
 
-if !HAVE_TIMEGM
-aria2c_SOURCES += TimegmTest.cc
-endif # !HAVE_TIMEGM
-
 if ENABLE_LIBARIA2
 aria2c_SOURCES += Aria2ApiTest.cc
 endif # ENABLE_LIBARIA2

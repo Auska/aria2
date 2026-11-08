@@ -524,26 +524,6 @@ SRCS += \
 	ZeroBtMessage.cc ZeroBtMessage.h
 endif # ENABLE_BITTORRENT
 
-if !HAVE_BASENAME
-SRCS += libgen.c libgen.h
-endif # !HAVE_BASENAME
-
-if !HAVE_GETADDRINFO
-SRCS += getaddrinfo.c getaddrinfo.h
-endif # !HAVE_GETADDRINFO
-
-if !HAVE_GAI_STRERROR
-SRCS += gai_strerror.c gai_strerror.h
-endif # !HAVE_GAI_STRERROR
-
-if !HAVE_STRPTIME
-SRCS += strptime.c strptime.h
-endif # !HAVE_STRPTIME
-
-if !HAVE_TIMEGM
-SRCS += timegm.c timegm.h
-endif # !HAVE_TIMEGM
-
 if !HAVE_DAEMON
 SRCS += daemon.cc daemon.h
 endif # !HAVE_DAEMON
@@ -590,8 +570,7 @@ AM_CPPFLAGS = \
 AM_LDFLAGS = \
 	@EXTRALDFLAGS@
 
-EXTLDADD = @ALLOCA@ \
-	@EXTRALIBS@ \
+EXTLDADD = @EXTRALIBS@ \
 	@ZLIB_LIBS@ \
 	@LIBUV_LIBS@ \
 	@SQLITE3_LIBS@ \

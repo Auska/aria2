@@ -40,14 +40,6 @@
 
 #include <chrono>
 
-#ifndef HAVE_STRPTIME
-#  include "strptime.h"
-#endif // HAVE_STRPTIME
-
-#ifndef HAVE_TIMEGM
-#  include "timegm.h"
-#endif // HAVE_TIMEGM
-
 #ifndef HAVE_A2_STRUCT_TIMESPEC
 #  include "timespec.h"
 #endif // !HAVE_A2_STRUCT_TIMESPEC

@@ -287,7 +287,6 @@ AM_CONDITIONAL([HAVE_ZLIB], [test "x$have_zlib" = "xyes"])
 AM_CONDITIONAL([HAVE_SQLITE3], [test "x$have_sqlite3" = "xyes"])
 
 # Checks for header files.
-AC_FUNC_ALLOCA
 AC_PROG_EGREP
 
 AC_CHECK_HEADERS([argz.h \
@@ -461,27 +460,11 @@ fi
 AM_CONDITIONAL([HAVE_SOME_FALLOCATE],
   [test "x$have_posix_fallocate" = "xyes" || test "x$have_fallocate" = "xyes"])
 
-AC_CHECK_FUNCS([basename],
-        [AM_CONDITIONAL([HAVE_BASENAME], true)],
-        [AM_CONDITIONAL([HAVE_BASENAME], false)])
-AC_CHECK_FUNCS([gai_strerror],
-        [AM_CONDITIONAL([HAVE_GAI_STRERROR], true)],
-        [AM_CONDITIONAL([HAVE_GAI_STRERROR], false)])
-AC_CHECK_FUNCS([getaddrinfo],
-        [AM_CONDITIONAL([HAVE_GETADDRINFO], true)],
-        [AM_CONDITIONAL([HAVE_GETADDRINFO], false)])
-AC_CHECK_FUNCS([strptime],
-        [AM_CONDITIONAL([HAVE_STRPTIME], true)],
-        [AM_CONDITIONAL([HAVE_STRPTIME], false)])
 AC_CHECK_FUNCS([daemon], [have_daemon=yes])
 AM_CONDITIONAL([HAVE_DAEMON], [test "x$have_daemon" = "xyes"])
 
 AC_CHECK_FUNCS([poll], [have_poll=yes])
 AM_CONDITIONAL([HAVE_POLL], [test "x$have_poll" = "xyes"])
-
-AC_CHECK_FUNCS([timegm],
-    [AM_CONDITIONAL([HAVE_TIMEGM], true)],
-    [AM_CONDITIONAL([HAVE_TIMEGM], false)])
 
 AC_CHECK_MEMBER([struct sockaddr_in.sin_len],
                 [AC_DEFINE([HAVE_SOCKADDR_IN_SIN_LEN],[1],
