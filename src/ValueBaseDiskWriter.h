@@ -81,7 +81,12 @@ public:
     return 0;
   }
 
-  int finalize() { return parser_.parseFinal(std::span<const std::byte>{}); }
+  // Returns 0 on success, or a negative error code on failure.
+  int finalize()
+  {
+    auto rv = parser_.parseFinal(std::span<const std::byte>{});
+    return rv ? 0 : static_cast<int>(rv.error());
+  }
 
   std::unique_ptr<ValueBase> getResult() { return psm_.getResult(); }
 

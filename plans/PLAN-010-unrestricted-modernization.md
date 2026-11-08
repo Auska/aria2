@@ -198,6 +198,19 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 - `src/bencode2.cc:69`、`src/download_helper.cc:314`、`src/BtPostDownloadHandler.cc:97`、`src/HttpServerBodyCommand.cc:229`、`src/JsonParser.cc:102,528`、`test/ValueBaseBencodeParserTest.cc` 等。
 - `ErrorType` 通过 **`Parser` 类**暴露，不是状态机：`src/BencodeParser.h` 加 `using ErrorType = BencodeError;`、`src/JsonParser.h` 加 `using ErrorType = JsonError;`；`src/GenericParser.h` 里 `using ErrorType = typename Parser::ErrorType;`（`Parser` 已是模板参数，见 `src/GenericParser.h:45-46`）。**不能**放到 `src/StructParserStateMachine.h` —— 那个状态机被 bencode 与 json 两种 parser 共用。
 
+### 阶段 5 实测（2026-11-08）
+
+- `src/BencodeParser.h`：加 `<expected>`/`<optional>`，`using ErrorType = BencodeError;`，`std::expected<size_t, BencodeError> parseUpdate/parseFinal(std::span<const std::byte>)`，私有 `std::optional<BencodeError> pushState(int)`，成员 `int lastError_` → `BencodeError lastError_`（初值 `BencodeError::UNEXPECTED_CHAR_BEFORE_VAL`）。`src/BencodeParser.cc` 7 处跨行 `return lastError_ = static_cast<int>(X);` 全改 `lastError_ = X; return std::unexpected(lastError_);`。
+- `src/JsonParser.{h,cc}` 同形态，17 处错误返回（13 处 `return lastError_ = static_cast<int>(` + 4 处双行缩进形态）改写；`consumeLowSurrogate` 分支改 `lastError_ = static_cast<JsonError>(rv); return std::unexpected(lastError_);`。
+- `src/GenericParser.h`：`using ErrorType = typename Parser::ErrorType;`；`parseFinal` 去掉 `ssize_t& consumed` 出参，改返回 `std::expected<ResultType, ErrorType>`；新增 `size_t getConsumed() const` + 成员 `consumed_`，因为 `bencode2::decode(span, size_t& end)` 的 `end`（trailing garbage 位置）语义必须保留 —— 调用方 `src/DefaultExtensionMessageFactory.cc:115,140,151` 靠它切片。
+- `src/bencode2.cc` `decode(span, size_t& end)`：`if (!res) throw DL_ABORT_EX2(...)`，`end = parser.getConsumed()`。
+- `src/ValueBaseDiskWriter.h::finalize()` 保持返回 `int`（`rv ? 0 : static_cast<int>(rv.error())`）—— `src/BtPostDownloadHandler.cc:79` 与 `src/HttpServerBodyCommand.cc:235` 都用 `error == 0`。
+- `src/WebSocketSession.{h,cc}`：`parseUpdate` → `std::expected<size_t, json::JsonError>`，`parseFinal(span, ssize_t&)` → `std::expected<std::unique_ptr<ValueBase>, json::JsonError> parseFinal(span)`；`onMsgRecvCallback` 改 `auto json = wsSession->parseFinal({}); if (!json) {...}` + `downcast<Dict>(*json)`。
+- `src/download_helper.cc:314`、`src/BtPostDownloadHandler.cc:97`、`src/HttpServerBodyCommand.cc:229` 迁移。
+- 测试：`test/ValueBaseBencodeParserTest.cc` 加 `parseValue()` 辅助（取 `std::expected` 并断言成功），15 处 `shared_ptr<ValueBase> x = parser.parseFinal(...)` → `auto x = parseValue(parser, src);`；trailing garbage 用例改 `parser.getConsumed()` 断言 `(size_t)7`。`test/ValueBaseJsonParserTest.cc` 18 处 `downcast<X>(r)` → `downcast<X>(*r)`，两处 `error` 断言改 `parser.getConsumed()`（`(size_t)2`）。
+- 门禁（`/tmp/aria2-m10-p5`，base `00640811`，patch `/tmp/p10-stage5.patch` 1271 行，14 文件 +255/−234）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）、`make -j8 check` → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`Failures` 0、`error:` 0、ABI 哈希 `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
+- 过程教训：局部 `make -C test` 单目标编译成功 ≠ 全量通过；`downcast<X>(expected)` 这种模板实参推导错误只在真正实例化该 TU 时暴露（`../src/ValueBase.h:350:8: error: 'const class std::unique_ptr<aria2::ValueBase>' has no member named 'accept'`），必须跑全量 `make check`。
+
 ### 阶段 6：出参数组 → 返回值（16 处，排除 3 处误命中）
 
 逐个改成返回值：
@@ -231,7 +244,7 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 2. [x] 阶段 2：公开 ABI 头现代化（提交 `PLAN-010 阶段2: 公开 ABI 头现代化`，随后记录新哈希）
 3. [x] 阶段 3：`error_code::Value` → `enum class`（提交 `PLAN-010 阶段3: error_code::Value 改为 enum class`）
 4. [x] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
-5. [ ] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
+5. [x] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
 6. [ ] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）
 7. [ ] 阶段 7：`src/util.cc` 拆分 + `src/util.h` 前向声明化（提交 `PLAN-010 阶段7: 拆分 util 巨型文件并瘦身头文件`）
 8. [ ] 阶段 8：收尾勾选与实测记录（提交 `PLAN-010: 勾选全部阶段、标记计划完成并记录实测门禁结果`）

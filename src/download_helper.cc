@@ -310,8 +310,10 @@ void createRequestGroupForBitTorrent(
     torrent = parseFile(parser, metaInfoUri);
   }
   else {
-    ssize_t error;
-    torrent = parser.parseFinal(std::as_bytes(std::span{torrentData}), error);
+    auto res = parser.parseFinal(std::as_bytes(std::span{torrentData}));
+    if (res) {
+      torrent = std::move(*res);
+    }
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Bencode decoding failed",

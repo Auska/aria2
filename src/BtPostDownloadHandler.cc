@@ -93,9 +93,11 @@ void BtPostDownloadHandler::getNextRequestGroups(
       requestGroup->getPieceStorage()->getDiskAdaptor()->closeFile();
       throw;
     }
-    ssize_t error;
-    torrent = bittorrent::ValueBaseBencodeParser().parseFinal(
-        std::as_bytes(std::span{content}), error);
+    auto res = bittorrent::ValueBaseBencodeParser().parseFinal(
+        std::as_bytes(std::span{content}));
+    if (res) {
+      torrent = std::move(*res);
+    }
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Could not parse BitTorrent metainfo",

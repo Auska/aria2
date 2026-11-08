@@ -88,7 +88,7 @@ JsonParser::JsonParser(StructParserStateMachine* psm)
       expSign_(1),
       exp_(0),
       numConsumed_(0),
-      lastError_(0)
+      lastError_(JsonError::UNEXPECTED_CHAR_BEFORE_VAL)
 {
   stateStack_.push(JSON_FINISH);
 }
@@ -99,7 +99,8 @@ namespace {
 bool isSpace(char c) { return util::isLws(c) || util::isCRLF(c); }
 } // namespace
 
-ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
+std::expected<size_t, JsonError>
+JsonParser::parseUpdate(std::span<const std::byte> dataIn)
 {
   const char* data = reinterpret_cast<const char*>(dataIn.data());
   size_t size = dataIn.size();
@@ -108,7 +109,7 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
     return 0;
   }
   else if (currentState_ == JSON_ERROR) {
-    return lastError_;
+    return std::unexpected(lastError_);
   }
   for (i = 0; i < size && currentState_ != JSON_FINISH; ++i) {
     char c = data[i];
@@ -122,9 +123,9 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         break;
       }
       else {
-        int rv = pushState(currentState_);
-        if (rv < 0) {
-          return rv;
+        auto rv = pushState(currentState_);
+        if (rv) {
+          return std::unexpected(*rv);
         }
         currentState_ = JSON_VALUE;
         runBeginCallback(StructElementType::ARRAY_DATA);
@@ -176,8 +177,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         }
         else if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ =
-                     static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_VAL);
+          lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_VAL;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -191,7 +192,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
+        lastError_ = JsonError::UNEXPECTED_LITERAL;
+        return std::unexpected(lastError_);
       }
       break;
     case JSON_FALSE:
@@ -204,7 +206,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
+        lastError_ = JsonError::UNEXPECTED_LITERAL;
+        return std::unexpected(lastError_);
       }
       break;
     case JSON_NULL:
@@ -216,15 +219,16 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       }
       else {
         currentState_ = JSON_ERROR;
-        return lastError_ = static_cast<int>(JsonError::UNEXPECTED_LITERAL);
+        lastError_ = JsonError::UNEXPECTED_LITERAL;
+        return std::unexpected(lastError_);
       }
       break;
     case JSON_OBJECT_KEY:
       switch (c) {
       case '"': {
-        int rv = pushState(currentState_);
-        if (rv < 0) {
-          return rv;
+        auto rv = pushState(currentState_);
+        if (rv) {
+          return std::unexpected(*rv);
         }
         currentState_ = JSON_STRING;
         runBeginCallback(StructElementType::DICT_KEY);
@@ -236,8 +240,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(
-                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_KEY);
+          lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_KEY;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -252,8 +256,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(
-                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_VAL);
+          lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_VAL;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -268,8 +272,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(
-                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_SEP);
+          lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_SEP;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -286,8 +290,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(
-                     JsonError::UNEXPECTED_CHAR_BEFORE_ARRAY_SEP);
+          lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_ARRAY_SEP;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -353,8 +357,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ =
-                     static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+          lastError_ = JsonError::INVALID_UNICODE_POINT;
+          return std::unexpected(lastError_);
         }
       }
       i = j - 1;
@@ -367,7 +371,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         break;
       default:
         currentState_ = JSON_ERROR;
-        return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+        lastError_ = JsonError::INVALID_UNICODE_POINT;
+        return std::unexpected(lastError_);
       }
       break;
     case JSON_STRING_LOW_SURROGATE_U:
@@ -379,7 +384,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         break;
       default:
         currentState_ = JSON_ERROR;
-        return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+        lastError_ = JsonError::INVALID_UNICODE_POINT;
+        return std::unexpected(lastError_);
       }
       break;
     case JSON_STRING_LOW_SURROGATE: {
@@ -389,14 +395,14 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
           int rv = consumeLowSurrogate(data[j]);
           if (rv != 0) {
             currentState_ = JSON_ERROR;
-            lastError_ = rv;
-            return rv;
+            lastError_ = static_cast<JsonError>(rv);
+            return std::unexpected(lastError_);
           }
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ =
-                     static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+          lastError_ = JsonError::INVALID_UNICODE_POINT;
+          return std::unexpected(lastError_);
         }
       }
       i = j - 1;
@@ -407,7 +413,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       for (j = i; j < size && in(data[j], '0', '9'); ++j) {
         if ((INT64_MAX - (data[j] - '0')) / 10 < number_) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::NUMBER_OUT_OF_RANGE);
+          lastError_ = JsonError::NUMBER_OUT_OF_RANGE;
+          return std::unexpected(lastError_);
         }
         number_ *= 10;
         number_ += data[j] - '0';
@@ -416,7 +423,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
+          lastError_ = JsonError::INVALID_NUMBER;
+          return std::unexpected(lastError_);
         }
         switch (data[j]) {
         case '.':
@@ -456,7 +464,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
+          lastError_ = JsonError::INVALID_NUMBER;
+          return std::unexpected(lastError_);
         }
         switch (data[j]) {
         case 'e':
@@ -503,14 +512,16 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         exp_ += data[j] - '0';
         if (exp_ > 18) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::NUMBER_OUT_OF_RANGE);
+          lastError_ = JsonError::NUMBER_OUT_OF_RANGE;
+          return std::unexpected(lastError_);
         }
       }
       numConsumed_ += j - i;
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::INVALID_NUMBER);
+          lastError_ = JsonError::INVALID_NUMBER;
+          return std::unexpected(lastError_);
         }
         switch (data[j]) {
         default:
@@ -525,14 +536,12 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
   return i;
 }
 
-ssize_t JsonParser::parseFinal(std::span<const std::byte> data)
+std::expected<size_t, JsonError>
+JsonParser::parseFinal(std::span<const std::byte> data)
 {
-  ssize_t rv;
-  rv = parseUpdate(data);
-  if (rv >= 0) {
-    if (currentState_ != JSON_FINISH) {
-      rv = static_cast<int>(JsonError::PREMATURE_DATA);
-    }
+  auto rv = parseUpdate(data);
+  if (rv && currentState_ != JSON_FINISH) {
+    return std::unexpected(JsonError::PREMATURE_DATA);
   }
   return rv;
 }
@@ -541,7 +550,7 @@ void JsonParser::reset()
 {
   psm_->reset();
   currentState_ = JSON_VALUE;
-  lastError_ = 0;
+  lastError_ = JsonError::UNEXPECTED_CHAR_BEFORE_VAL;
   while (!stateStack_.empty()) {
     stateStack_.pop();
   }
@@ -610,14 +619,14 @@ void JsonParser::onValueEnd()
   }
 }
 
-int JsonParser::pushState(int state)
+std::optional<JsonError> JsonParser::pushState(int state)
 {
   if (stateStack_.size() >= 50) {
-    return static_cast<int>(JsonError::STRUCTURE_TOO_DEEP);
+    return JsonError::STRUCTURE_TOO_DEEP;
   }
   else {
     stateStack_.push(state);
-    return 0;
+    return std::nullopt;
   }
 }
 

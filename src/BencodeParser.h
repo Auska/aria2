@@ -37,6 +37,8 @@
 
 #include "common.h"
 
+#include <expected>
+#include <optional>
 #include <span>
 #include <stack>
 
@@ -61,22 +63,22 @@ class BencodeParser {
 public:
   BencodeParser(StructParserStateMachine* psm);
   ~BencodeParser() noexcept;
+  using ErrorType = BencodeError;
   // Parses |size| bytes of data |data| and returns the number of
-  // bytes processed. On error, one of the negative error codes is
-  // returned.
-  ssize_t parseUpdate(std::span<const std::byte> data);
-  // Parses |size| bytes of data |data| and returns the number of
-  // bytes processed. On error, one of the negative error codes is
-  // returned. Call this function to signal the parser that this is
-  // the last piece of data. This function does NOT reset the internal
-  // state.
-  ssize_t parseFinal(std::span<const std::byte> data);
+  // bytes processed, or BencodeError on failure.
+  std::expected<size_t, BencodeError>
+  parseUpdate(std::span<const std::byte> data);
+  // Same as parseUpdate(), but call this function to signal the parser
+  // that this is the last piece of data. This function does NOT reset
+  // the internal state.
+  std::expected<size_t, BencodeError>
+  parseFinal(std::span<const std::byte> data);
   // Resets the internal state of the parser and makes it ready for
   // reuse.
   void reset();
 
 private:
-  int pushState(int state);
+  std::optional<BencodeError> pushState(int state);
   int stateTop() const;
   int popState();
   void runBeginCallback(StructElementType elementType);
@@ -97,7 +99,7 @@ private:
   int numberSign_;
   int64_t number_;
   size_t numConsumed_;
-  int lastError_;
+  BencodeError lastError_;
 };
 
 } // namespace bittorrent

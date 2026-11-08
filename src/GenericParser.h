@@ -36,6 +36,7 @@
 #define D_GENERIC_PARSER_H
 
 #include <array>
+#include <expected>
 #include <span>
 #include "common.h"
 #include "a2io.h"
@@ -55,36 +56,42 @@ public:
   ~GenericParser() noexcept = default;
 
   using ResultType = typename ParserStateMachine::ResultType;
+  using ErrorType = typename Parser::ErrorType;
   using ParserStateMachineType = ParserStateMachine;
 
-  // Parses |data| and returns the number of bytes processed. On error,
-  // one of the negative error codes is returned.
-  ssize_t parseUpdate(std::span<const std::byte> data)
+  // Parses |data| and returns the number of bytes processed, or an
+  // error code on failure.
+  std::expected<size_t, ErrorType> parseUpdate(std::span<const std::byte> data)
   {
     return parser_.parseUpdate(data);
   }
 
-  // Parses |data| and returns the result. The |consumed| argument
-  // receives the number of bytes processed (>= 0) on success or one of
-  // the negative error codes on failure. This function also resets the
-  // underlying parser and makes it ready to reuse.
-  ResultType parseFinal(std::span<const std::byte> data, ssize_t& consumed)
+  // Parses |data| and returns the result, or an error code on failure.
+  // This function also resets the underlying parser and makes it ready
+  // to reuse.
+  std::expected<ResultType, ErrorType>
+  parseFinal(std::span<const std::byte> data)
   {
-    ResultType res;
-    consumed = parser_.parseFinal(data);
-    if (consumed < 0) {
-      res = ParserStateMachine::noResult();
+    auto rv = parser_.parseFinal(data);
+    std::expected<ResultType, ErrorType> res;
+    if (rv) {
+      consumed_ = *rv;
+      res = psm_.getResult();
     }
     else {
-      res = psm_.getResult();
+      res = std::unexpected(rv.error());
     }
     parser_.reset();
     return res;
   }
 
+  // Number of bytes consumed by the last successful parseFinal().
+  size_t getConsumed() const { return consumed_; }
+
 private:
   ParserStateMachine psm_;
   Parser parser_;
+  size_t consumed_ = 0;
 };
 
 template <typename Parser>
@@ -103,15 +110,15 @@ typename Parser::ResultType parseFile(Parser& parser,
   auto fdclose = defer(fd, close);
   std::array<char, 4_k> buf;
   ssize_t nread;
-  ssize_t nproc;
   while ((nread = read(fd, buf.data(), buf.size())) > 0) {
-    nproc = parser.parseUpdate(
+    auto rv = parser.parseUpdate(
         std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
-    if (nproc < 0) {
+    if (!rv) {
       break;
     }
   }
-  return parser.parseFinal(std::span<const std::byte>{}, nproc);
+  auto res = parser.parseFinal(std::span<const std::byte>{});
+  return res ? std::move(*res) : Parser::ParserStateMachineType::noResult();
 }
 
 } // namespace aria2

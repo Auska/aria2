@@ -69,14 +69,15 @@ BencodeParser::BencodeParser(StructParserStateMachine* psm)
       numberSign_(1),
       number_(0),
       numConsumed_(0),
-      lastError_(0)
+      lastError_(BencodeError::UNEXPECTED_CHAR_BEFORE_VAL)
 {
   stateStack_.push(BENCODE_FINISH);
 }
 
 BencodeParser::~BencodeParser() noexcept = default;
 
-ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
+std::expected<size_t, BencodeError>
+BencodeParser::parseUpdate(std::span<const std::byte> data)
 {
   const char* d = reinterpret_cast<const char*>(data.data());
   size_t size = data.size();
@@ -85,7 +86,7 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
     return 0;
   }
   else if (currentState_ == BENCODE_ERROR) {
-    return lastError_;
+    return std::unexpected(lastError_);
   }
   for (i = 0; i < size && currentState_ != BENCODE_FINISH; ++i) {
     char c = d[i];
@@ -96,9 +97,9 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
         break;
       }
       else {
-        int rv = pushState(currentState_);
-        if (rv < 0) {
-          return rv;
+        auto rv = pushState(currentState_);
+        if (rv) {
+          return std::unexpected(*rv);
         }
         currentState_ = BENCODE_VALUE;
         runBeginCallback(StructElementType::ARRAY_DATA);
@@ -133,8 +134,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
         }
         else {
           currentState_ = BENCODE_ERROR;
-          return lastError_ =
-                     static_cast<int>(BencodeError::UNEXPECTED_CHAR_BEFORE_VAL);
+          lastError_ = BencodeError::UNEXPECTED_CHAR_BEFORE_VAL;
+          return std::unexpected(lastError_);
         }
       }
       break;
@@ -143,9 +144,9 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
         onDictEnd();
         break;
       }
-      int rv = pushState(currentState_);
-      if (rv < 0) {
-        return rv;
+      auto rv = pushState(currentState_);
+      if (rv) {
+        return std::unexpected(*rv);
       }
       strLength_ = 0;
       numConsumed_ = 0;
@@ -158,8 +159,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       for (j = i; j < size && in(d[j], '0', '9'); ++j) {
         if ((INT64_MAX - (d[j] - '0')) / 10 < strLength_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ =
-                     static_cast<int>(BencodeError::STRING_LENGTH_OUT_OF_RANGE);
+          lastError_ = BencodeError::STRING_LENGTH_OUT_OF_RANGE;
+          return std::unexpected(lastError_);
         }
         strLength_ *= 10;
         strLength_ += d[j] - '0';
@@ -168,8 +169,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       if (j != size) {
         if (d[j] != ':' || numConsumed_ == 0) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ =
-                     static_cast<int>(BencodeError::INVALID_STRING_LENGTH);
+          lastError_ = BencodeError::INVALID_STRING_LENGTH;
+          return std::unexpected(lastError_);
         }
         i = j;
         currentState_ = BENCODE_STRING;
@@ -217,8 +218,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       for (j = i; j < size && in(d[j], '0', '9'); ++j) {
         if ((INT64_MAX - (d[j] - '0')) / 10 < number_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ =
-                     static_cast<int>(BencodeError::NUMBER_OUT_OF_RANGE);
+          lastError_ = BencodeError::NUMBER_OUT_OF_RANGE;
+          return std::unexpected(lastError_);
         }
         number_ *= 10;
         number_ += d[j] - '0';
@@ -227,7 +228,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       if (j != size) {
         if (numConsumed_ == 0) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::INVALID_NUMBER);
+          lastError_ = BencodeError::INVALID_NUMBER;
+          return std::unexpected(lastError_);
         }
 
         auto c = d[j];
@@ -246,7 +248,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
 
         if (c != 'e') {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::INVALID_NUMBER);
+          lastError_ = BencodeError::INVALID_NUMBER;
+          return std::unexpected(lastError_);
         }
 
         i = j;
@@ -266,8 +269,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
 
       if (c != 'e') {
         currentState_ = BENCODE_ERROR;
-        return lastError_ =
-                   static_cast<int>(BencodeError::INVALID_FLOAT_NUMBER);
+        lastError_ = BencodeError::INVALID_FLOAT_NUMBER;
+        return std::unexpected(lastError_);
       }
 
       onNumberEnd();
@@ -278,14 +281,13 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
   return i;
 }
 
-ssize_t BencodeParser::parseFinal(std::span<const std::byte> data)
+std::expected<size_t, BencodeError>
+BencodeParser::parseFinal(std::span<const std::byte> data)
 {
-  ssize_t rv;
-  rv = parseUpdate(data);
-  if (rv >= 0) {
-    if (currentState_ != BENCODE_FINISH && currentState_ != BENCODE_INITIAL) {
-      rv = static_cast<int>(BencodeError::PREMATURE_DATA);
-    }
+  auto rv = parseUpdate(data);
+  if (rv && currentState_ != BENCODE_FINISH &&
+      currentState_ != BENCODE_INITIAL) {
+    return std::unexpected(BencodeError::PREMATURE_DATA);
   }
   return rv;
 }
@@ -294,7 +296,7 @@ void BencodeParser::reset()
 {
   psm_->reset();
   currentState_ = BENCODE_INITIAL;
-  lastError_ = 0;
+  lastError_ = BencodeError::UNEXPECTED_CHAR_BEFORE_VAL;
   while (!stateStack_.empty()) {
     stateStack_.pop();
   }
@@ -353,14 +355,14 @@ void BencodeParser::onValueEnd()
   }
 }
 
-int BencodeParser::pushState(int state)
+std::optional<BencodeError> BencodeParser::pushState(int state)
 {
   if (stateStack_.size() >= 50) {
-    return static_cast<int>(BencodeError::STRUCTURE_TOO_DEEP);
+    return BencodeError::STRUCTURE_TOO_DEEP;
   }
   else {
     stateStack_.push(state);
-    return 0;
+    return std::nullopt;
   }
 }
 

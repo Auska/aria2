@@ -168,23 +168,22 @@ void onMsgRecvCallback(wslay_event_context_ptr wsctx,
   WebSocketSession* wsSession = reinterpret_cast<WebSocketSession*>(userData);
   if (!wslay_is_ctrl_frame(arg->opcode)) {
     // TODO Only process text frame
-    ssize_t error = 0;
-    auto json = wsSession->parseFinal({}, error);
-    if (error < 0) {
+    auto json = wsSession->parseFinal({});
+    if (!json) {
       A2_LOG_INFO("Failed to parse JSON-RPC request");
       RpcResponse res(
           createJsonRpcErrorResponse(-32700, "Parse error.", Null::g()));
       addResponse(wsSession, res);
       return;
     }
-    Dict* jsondict = downcast<Dict>(json);
+    Dict* jsondict = downcast<Dict>(*json);
     auto e = wsSession->getDownloadEngine();
     if (jsondict) {
       RpcResponse res = processJsonRpcRequest(jsondict, e);
       addResponse(wsSession, res);
     }
     else {
-      List* jsonlist = downcast<List>(json);
+      List* jsonlist = downcast<List>(*json);
       if (jsonlist) {
         // This is batch call
         std::vector<RpcResponse> results;
@@ -315,7 +314,8 @@ bool WebSocketSession::closeSent()
   return wslay_event_get_close_sent(wsctx_);
 }
 
-ssize_t WebSocketSession::parseUpdate(std::span<const std::byte> data)
+std::expected<size_t, json::JsonError>
+WebSocketSession::parseUpdate(std::span<const std::byte> data)
 {
   // Cap the number of bytes to feed the parser
   size_t maxlen = e_->getOption()->getAsInt(PREF_RPC_MAX_REQUEST_SIZE);
@@ -328,10 +328,10 @@ ssize_t WebSocketSession::parseUpdate(std::span<const std::byte> data)
   return parser_.parseUpdate(data);
 }
 
-std::unique_ptr<ValueBase>
-WebSocketSession::parseFinal(std::span<const std::byte> data, ssize_t& error)
+std::expected<std::unique_ptr<ValueBase>, json::JsonError>
+WebSocketSession::parseFinal(std::span<const std::byte> data)
 {
-  auto res = parser_.parseFinal(data, error);
+  auto res = parser_.parseFinal(data);
   receivedLength_ = 0;
   return res;
 }

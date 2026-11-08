@@ -62,18 +62,15 @@ std::unique_ptr<ValueBase> decode(std::string_view data)
 
 std::unique_ptr<ValueBase> decode(std::span<const std::byte> data, size_t& end)
 {
-  ssize_t error;
   bittorrent::ValueBaseBencodeParser parser;
-  // The parser chain still takes a raw pointer and a length; they stay out
-  // of this refactor's scope.
-  auto res = parser.parseFinal(data, error);
-  if (error < 0) {
+  auto res = parser.parseFinal(data);
+  if (!res) {
     throw DL_ABORT_EX2(
-        fmt("Bencode decoding failed: error={}", static_cast<int>(error)),
+        fmt("Bencode decoding failed: error={}", static_cast<int>(res.error())),
         error_code::Value::BENCODE_PARSE_ERROR);
   }
-  end = error;
-  return res;
+  end = parser.getConsumed();
+  return std::move(*res);
 }
 
 std::string encode(const ValueBase* vlb)

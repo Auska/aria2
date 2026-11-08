@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include <cstddef>
+#include <expected>
 #include <memory>
 #include <span>
 
@@ -82,14 +83,14 @@ public:
   // Returns true if the close frame is sent.
   bool closeSent();
   // Parses partial request body. This function returns the number of
-  // bytes processed if it succeeds, or negative error code.
-  ssize_t parseUpdate(std::span<const std::byte> data);
-  // Parses final part of request body and returns result.  The
-  // |error| will be the number of bytes processed if this function
-  // succeeds, or negative error code. Whether success or failure,
-  // this function resets parser state and receivedLength_.
-  std::unique_ptr<ValueBase> parseFinal(std::span<const std::byte> data,
-                                        ssize_t& error);
+  // bytes processed, or JsonError on failure.
+  std::expected<size_t, json::JsonError>
+  parseUpdate(std::span<const std::byte> data);
+  // Parses final part of request body and returns result, or JsonError
+  // on failure. Whether success or failure, this function resets
+  // parser state and receivedLength_.
+  std::expected<std::unique_ptr<ValueBase>, json::JsonError>
+  parseFinal(std::span<const std::byte> data);
 
   const std::shared_ptr<SocketCore>& getSocket() const { return socket_; }
 

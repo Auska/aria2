@@ -225,9 +225,15 @@ bool HttpServerBodyCommand::execute()
           if (httpServer_->getRequestType() == RequestType::RPC_TYPE_JSONP) {
             json::JsonGetParam param = json::decodeGetParams(query);
             callback = param.callback;
-            ssize_t error = 0;
-            json = json::ValueBaseJsonParser().parseFinal(
-                std::as_bytes(std::span{param.request}), error);
+            auto res = json::ValueBaseJsonParser().parseFinal(
+                std::as_bytes(std::span{param.request}));
+            if (res) {
+              json = std::move(*res);
+              error = 0;
+            }
+            else {
+              error = static_cast<ssize_t>(res.error());
+            }
           }
           else {
             auto dw =
