@@ -1,5 +1,7 @@
 # 任务：解除限制后的全面现代化（PLAN-010）
 
+> 状态：⚠️ 部分完成（2026-11-08）——阶段 1~6 已提交，阶段 7（util 拆分）经用户要求取消，阶段 8 为收尾。
+
 ## 目标
 
 前 9 轮现代化（PLAN-001~009）都带着自我施加的限制：不动 `.c` 移植 shim、不动公开 ABI 头、不改 `memcpy`/`ssize_t`、不碰构建系统。本次用户明确「解除所有限制」，把这些此前被排除的方向纳入：
@@ -175,7 +177,6 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 调用点 56 处（`src/MultiDiskAdaptor.cc` 8、`src/SocketCore.cc` 6、`src/AbstractSingleDiskAdaptor.cc` 6、`src/PeerConnection.cc` 4 等）：多数只做 `ret > 0` / `ret == 0` 判断，`size_t` 语义等价；**必须逐处检查有没有 `ret < 0` / `ret == -1` 的判断**（有的话说明该函数属错误码族，不能进本阶段）。
 
 ### 阶段 4 实测（2026-11-08）
-
 - 只改「负数从不外泄」的族，共 16 文件 +59/−58：
   - `src/BinaryStream.h:52` `readData` 纯虚 + 5 个实现：`src/AbstractDiskWriter.{h,cc}`、`src/AbstractSingleDiskAdaptor.{h,cc}`（`readData` + `readDataDropCache`）、`src/ByteArrayDiskWriter.{h,cc}`、`src/MultiDiskAdaptor.{h,cc}`（3 个重载）、`src/ValueBaseDiskWriter.h`、`src/DiskAdaptor.h` 纯虚。`readDataInternal` 保持 `ssize_t`（内部判 `<0` 后抛异常）。
   - `src/SocketCore.{h,cc}` 6 个：`writeData`(3 重载含 `const std::string&` 便捷版)、`writeVector`、`readData`、`readDataFrom`。
@@ -239,7 +240,11 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 
 过程坑：`src/DHTEntryPointNameResolveCommand.cc:126` 的 `res.resolve(addrs, hostname)` 与 `src/FtpNegotiationCommand.cc:727` 的 `resolveHostname(addrs, ...)` 是改签名后仍残留的旧调用，`make -C src` 才逐轮暴露。
 
-### 阶段 7：巨型文件拆分 + 头文件前向声明化
+### 阶段 7：巨型文件拆分 + 头文件前向声明化（❌ 已取消）
+
+> 用户于 2026-11-08 明确要求：「util.h 不要拆分保留」「util 不要拆分保留」。本阶段**整体取消**，`src/util.cc`（2181 行）与 `src/util.h`（879 行）保持原样。取消前的一次尝试已完成 `src/util.cc` → 4 TU 拆分且 `src` 编译通过，但 `src/util.h` 的 include 瘦身会连锁波及 175 个 include 方（`DlAbortEx.h`/`prefs.h`/`fmt.h`/`a2functional.h` 的符号被头内模板 `fromHex`/`strjoin`/`toStream`/`PrefPtr` 形参直接使用），失败后按用户要求全量回滚，工作区恢复干净。
+
+以下为原方案，保留作记录：
 
 - `src/util.cc` 2181 行按职责拆 4 个 TU（实测函数边界，按行号）：
   - `src/util.cc`（保留）：`strip`(`:96`)、`itos`(`:103`)、`difftv`(`:127`)、`difftvsec`(`:137`)、`replace`(`:145`)、字符分类族(`:164-260`)、`isUtf8`(`:243`)、`getContentDispositionFilename`(`:1477`)、大小写转换(`:1508-1525`)、`getHomeDir`/`getXDGDir`/`getConfigFile`/`getDHTFile`(`:1582-1621`)、`getRealSize`/`abbrevSize`(`:1632-1664`)、`sleep`/`usleep`(`:1692-1703`)、`mkdirs`(`:1712`)、`toString`(`:1737`)、`allocateAlignedMemory`(`:1756`)、`getNumericNameInfo`(`:1768`)、`htmlEscape`(`:1783`)、`createIndexPaths`(`:1830`)、`generateRandomData`(`:1840`)、`saveAs`(`:1846`)、路径安全族(`:1869-2050`)、`makeString`/`safeStrerror`(`:2055-2063`)、`noProxyDomainMatch`/`tlsHostnameMatch`(`:2065-2073`)、`strieq`/`istartsWith`/`iendsWith`/`strless`(`:2114-2144`)、`make_fd_cloexec`(`:2162`)。
@@ -263,8 +268,8 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 4. [x] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
 5. [x] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
 6. [x] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）
-7. [ ] 阶段 7：`src/util.cc` 拆分 + `src/util.h` 前向声明化（提交 `PLAN-010 阶段7: 拆分 util 巨型文件并瘦身头文件`）
-8. [ ] 阶段 8：收尾勾选与实测记录（提交 `PLAN-010: 勾选全部阶段、标记计划完成并记录实测门禁结果`）
+7. [~] 阶段 7：`src/util.cc` 拆分 + `src/util.h` 前向声明化 —— **已取消**（用户 2026-11-08 要求 util 不拆分、util.h 保留），无提交
+8. [x] 阶段 8：收尾勾选与实测记录（提交 `PLAN-010: 勾选阶段 1~6、标记计划部分完成并记录实测门禁结果`）
 
 ### 阶段 1 实测（2026-11-08）
 
@@ -283,7 +288,7 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 - 删除：`src/alloca.c`、`src/getaddrinfo.{c,h}`、`src/gai_strerror.{c,h}`、`src/libgen.{c,h}`、`src/strptime.{c,h}`、`src/timegm.{c,h}`（12 文件）。
 - 构建：`configure.ac`、`src/Makefile.am`、`test/Makefile.am`。
 - 头文件：`src/a2netcompat.h`、`src/a2time.h`、`src/includes/aria2/aria2.h`、`src/error_code.h`、`src/BencodeParser.h`、`src/JsonParser.h`、`src/GenericParser.h`、`src/StructParserStateMachine.h`、`src/WebSocketSession.h`、`src/AbstractDiskWriter.h`、`src/SocketCore.h`、`src/SocketBuffer.h`、`src/BitfieldMan.h`、`src/CookieStorage.h`、`src/DefaultPieceStorage.h`、`src/HttpResponse.h`、`src/AsyncNameResolverMan.h`、`src/NameResolver.h`、`src/NameResolveCommand.h`、`src/DHTEntryPointNameResolveCommand.h`、`src/AbstractCommand.h`、`src/util.h`。
-- 实现：`src/aria2api.cc`、`src/BencodeParser.cc`、`src/JsonParser.cc`、`src/WebSocketSession.cc`、`src/AbstractDiskWriter.cc`、`src/SocketCore.cc`、`src/SocketBuffer.cc`、`src/BitfieldMan.cc`、`src/CookieStorage.cc`、`src/DefaultPieceStorage.cc`、`src/HttpResponse.cc`、`src/AsyncNameResolverMan.cc`、`src/NameResolver.cc`、`src/NameResolveCommand.cc`、`src/DHTEntryPointNameResolveCommand.cc`、`src/AbstractCommand.cc`、`src/util.cc` + 新增 `src/util_encoding.cc`、`src/util_parse.cc`、`src/util_file.cc`。
+- 实现：`src/aria2api.cc`、`src/BencodeParser.cc`、`src/JsonParser.cc`、`src/WebSocketSession.cc`、`src/AbstractDiskWriter.cc`、`src/SocketCore.cc`、`src/SocketBuffer.cc`、`src/BitfieldMan.cc`、`src/CookieStorage.cc`、`src/DefaultPieceStorage.cc`、`src/HttpResponse.cc`、`src/AsyncNameResolverMan.cc`、`src/NameResolver.cc`、`src/NameResolveCommand.cc`、`src/DHTEntryPointNameResolveCommand.cc`、`src/AbstractCommand.cc`（`src/util.cc` 实际未改 —— 阶段 7 取消）。
 - 测试：`test/ValueBaseBencodeParserTest.cc`、`test/ValueBaseJsonParserTest.cc`、`test/BitfieldManTest.cc`、`test/CookieStorageTest.cc`、`test/SocketCoreTest.cc`、`test/BufferedFileTest.cc`、`test/FileTest.cc`、`test/UtilTest2.cc`、`test/UriTest.cc`、`test/Bencode2Test.cc` 等（按阶段命中）。注：`test/IOFileTest.cc` **不存在**，IOFile 相关测试在 `test/BufferedFileTest.cc`。
 
 ## 测试与验证
@@ -300,7 +305,7 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 | 4 | `git grep -c 'ssize_t' -- src/SocketCore.h src/SocketBuffer.h src/AbstractDiskWriter.h` | 只剩 `readDataInternal`/`writeDataInternal`（内部用） |
 | 5 | `git grep -c 'ssize_t' -- src/BencodeParser.h src/GenericParser.h src/JsonParser.h` | 0 |
 | 6 | `git grep -nE '\(std::vector<[^>]+>& \w+' -- 'src/*.h'` | 只剩 3 处 Choke 类误命中 |
-| 7 | `wc -l src/util.cc src/util_*.cc` | `src/util.cc` < 900 行；`make check` 用例数仍 914 |
+| 7 | ~~`wc -l src/util.cc src/util_*.cc`~~ | **阶段已取消**，不适用 |
 
 **假绿风险与对策**：改公共头（阶段 2/3/5/6）后本地增量 `make` 会假绿（`.deps` 不追踪未变更的 TU）→ 每轮必须 `touch src/*.cc test/*.cc test/*.h` 再 `make`；最终判据只认干净 worktree。
 
@@ -312,10 +317,10 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 4. `src/SocketCore.h`/`src/SocketBuffer.h`/`src/AbstractDiskWriter.h` 的公开返回值无 `ssize_t`。
 5. `src/BencodeParser.h`/`src/GenericParser.h`/`src/JsonParser.h` 无 `ssize_t`；`parseFinal` 无出参。
 6. `src/*.h` 的「容器& 出参」只剩 3 处 Choke 类误命中。
-7. `src/util.cc` < 900 行。
+7. ~~`src/util.cc` < 900 行~~ —— **阶段 7 已取消**（用户要求 util 不拆分）。
 8. 每阶段干净 worktree 门禁 `OK (914)`、`# TOTAL: 1`/`# PASS: 1`、`error:` 0。
-9. 阶段 2 之后 ABI 哈希在各阶段保持一致（新值记录在文档）。
-10. 8 次提交（7 代码 + 1 收尾），无 `Co-authored-by`。
+9. 阶段 2 之后 ABI 哈希在各阶段保持一致（新值 `132c72d9f055756769456c35ca7f8e7a879fbaa8`）。
+10. 7 次提交（6 代码 + 1 收尾），无 `Co-authored-by`。
 
 ## 风险与权衡
 
@@ -324,11 +329,54 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 - **阶段 3 与阶段 2 耦合**：`src/aria2api.cc` 同时被两者改，阶段 2 先做、阶段 3 复用同一文件，避免两次大改同一 TU。
 - **阶段 4 的最大风险是误判**：把「错误码族」函数当「throw-on-error 族」改会让错误被静默成巨大 `size_t`。对策：改前对每个函数 grep 其所有调用点里的 `< 0` / `== -1` 判断，有则剔除。
 - **阶段 5 跨 68 个调用点 + 模板 trait**：`GenericParser` 是模板，`ErrorType` 需通过 `ParserStateMachine` 暴露；`parseFinal` 出参消失会改所有调用形态。
-- **阶段 7 `src/util.h` 前向声明化风险最高**：175 个 src include 方（含 test 255），任何遗漏都是全仓编译错误。做成独立提交、失败则整个阶段 7 只保留 `src/util.cc` 拆分。
+- **阶段 7 `src/util.h` 前向声明化风险最高**：175 个 src include 方（含 test 255），任何遗漏都是全仓编译错误。实测后按用户要求**取消该阶段**。
 - **条件编译未验证**：`ENABLE_BITTORRENT=1`/`ENABLE_SSL=1`/`HAVE_SQLITE3=1` 已启用；`ENABLE_LIBARIA2`/`HAVE_LIBUV`/`USE_INTERNAL_MD`/`USE_INTERNAL_ARC4`/`USE_INTERNAL_BIGNUM` 未定义 → 相关分支编译器兜不住，需人工 diff checklist。
 - **clang 未本地验证**：本机无 clang++，CI 是唯一 clang 验证渠道；本计划不含 CI 改动，故 clang 兼容性风险留存。
 
+## 实测门禁结果（干净 worktree + `--enable-werror` + `make -j8 check`）
+
+| 阶段 | 提交 | worktree base | 文件 | `# TOTAL`/`# PASS` | `OK (914)` | `error:` | ABI 哈希 |
+|---|---|---|---|---|---|---|---|
+| 1 | `238d2ebf` | `a644a5eb` | 19 (+289/−2380) | 1 / 1 | 1 | 0 | 旧值 `2216641161…` |
+| 2 | `0f4143e7` | `238d2ebf` | 17 (+188/−146) | 1 / 1 | 1 | 0 | **新值 `132c72d9…`** |
+| 3 | `48b03726` | `0f4143e7` | 42 (+189/−173) | 1 / 1 | 1 | 0 | `132c72d9…` |
+| 4 | `00640811` | `48b03726` | 17 (+70/−59) | 1 / 1 | 1 | 0 | `132c72d9…` |
+| 5 | `73a18d2c` | `00640811` | 15 (+269/−235) | 1 / 1 | 1 | 0 | `132c72d9…` |
+| 6 | `98bbe7f0` | `73a18d2c` | 37 (+249/−234) | 1 / 1 | 1 | 0 | `132c72d9…` |
+| 7 | — | — | 无（阶段取消） | — | — | — | — |
+| 8（收尾补清） | 本提交 | `98bbe7f0` | 2（`src/GenericParser.h` 清掉最后一个 `ssize_t` + 文档） | 1 / 1 | 1 | 0 | `132c72d9…` |
+
+每个 worktree 均在 `/tmp/aria2-m10-pN`（`N` = 阶段号），跑完即 `git worktree remove --force` + `prune`。全部阶段 `FAIL 0`、`ERROR 0`、无 `Failures !!!`，`CXX = g++ -std=c++23`，`WARNCXXFLAGS = -Wall -Werror -Wformat-security`。
+
+## 债务前后对比
+
+| 指标 | PLAN-009 结束（`a644a5eb`） | PLAN-010 结束（本收尾提交） |
+|---|---|---|
+| `src/*.c` 文件数 | 7 | **1**（仅 `src/uri_split.c`） |
+| `src/*.{h,cc,c}` 文件数 | 857 / 125 953 行 | **846 / 123 708 行**（删 11 文件、净减 2245 行） |
+| `src/includes/aria2/aria2.h` 非 scoped `enum` | 6 | **0** |
+| 同文件 `typedef` | 3 | **0** |
+| 同文件只读 `const std::string&` 形参 | 4 | **0**（全部 `std::string_view`） |
+| `src/error_code.h` | `enum Value` | **`enum class Value`** |
+| `ssize_t` 公开返回值（`SocketCore`/`SocketBuffer`/`AbstractDiskWriter`/`BitfieldMan`/`CookieStorage`/`DefaultPieceStorage`/`HttpResponse`/`AsyncNameResolverMan`/`NameResolver`） | 全族 | **0**（内部 `*Internal` 保留） |
+| parse 链 `ssize_t` + 出参 | `BencodeParser`/`JsonParser`/`GenericParser`/`WebSocketSession` 4 头 8 处 | **0**（`std::expected<size_t, Error>`） |
+| `src/*.h` 容器& 出参 | 19（16 真 + 3 误命中） | **3**（全为 Choke 类就地重排误命中） |
+| `aclocal.m4` 里 `HAVE_GETADDRINFO`/`HAVE_STRPTIME`/`HAVE_TIMEGM`/`HAVE_BASENAME`/`HAVE_GAI_STRERROR`/`C_ALLOCA` | 6 组 | **0** |
+| 测试用例数 | 914 | **914** |
+
+## 实际偏差
+
+1. **阶段 7 整体取消**（用户 2026-11-08 指令「util.h 不要拆分保留」「util 不要拆分保留」）。已实现并通过 `src` 编译的 `src/util.cc` → `util_encoding.cc`/`util_parse.cc`/`util_net.cc` 四 TU 拆分（`src/util.cc` 1623 行、三个新文件分别 271/284/261 行）与 `src/Makefile.am` 改动全部 `git checkout` 回滚，`src/util.h` 的 include 瘦身也从 `/tmp/util.h.bak` 恢复。工作区回到 `98bbe7f0` 干净态。
+2. **`src/util.h` 前向声明化失败原因（记录备查）**：尝试删除 `DlAbortEx.h`/`message.h`/`prefs.h`/`fmt.h`/`a2iterator.h`/`a2functional.h` 6 个头后，`src` 编译出 25 个错误，根因是 `src/util.h` 内的**模板函数体**直接用到这些符号：`src/util.h:354` 的 `toStream` 用 `os.printf(fmt(...))`（需 `fmt`）、`:464` 的 `split` 用 `strjoin`（在 `a2functional.h`）、`:767,771` 的 `preparseIndexPath` 形参是 `PrefPtr`（在 `prefs.h`）、`:510,518` 的 `split`/`splitIterM` 依赖 `a2iterator` 的 `Scip`/`Sip`；`src/AbstractCommand.cc:690-697` 还连带因 `SegList` 未声明而崩。结论：这 6 个头的符号是头内模板的**契约一部分**，不可前向声明化。
+3. **`src/DHTConnection.h` 的 `sendMessage`/`receiveMessage` 保持 `ssize_t`**（阶段 4 范围内但主动排除）：`src/DHTConnectionImpl.cc:92-115` 实现，与 `src/LpdMessageReceiver.cc:85`、`test/LpdMessageDispatcherTest.cc:66` 的 `>= 0` / `< 0` 判断耦合，改动风险大于收益。
+4. **`src/TLSSession.h:89`/`src/LibsslTLSSession.h:60` 的 `readData` 保持 `ssize_t`**：TLS 层用负返回值区分 `TLSErrorCode::WOULDBLOCK`（`src/SocketCore.cc` 内部据此置 `wantRead_`），属错误码族。
+5. **阶段 3 提交时的暂存区事故**：首次 `git commit` 混入阶段 2 残留 → `git reset --soft 238d2ebf && git reset` 拆分重做，阶段 3 单独重跑门禁后提交（`48b03726`）。教训：每阶段提交前必须 `git status` 确认暂存区只含本阶段。
+6. **`src/ValueBaseDiskWriter.h::finalize()` 保持返回 `int`**（而非 `std::expected`）：`src/BtPostDownloadHandler.cc:79` 与 `src/HttpServerBodyCommand.cc:235` 都用 `error == 0` 判断成功，返回 `rv ? 0 : static_cast<int>(rv.error())` 保持既有契约。
+7. **`GenericParser` 新增 `getConsumed()` 是 `bencode2::decode(span, size_t& end)` 的必要补充**：原 `parseFinal` 的 `consumed` 出参消失后，「消耗了多少字节」这一信息无其它通道可取，而 `src/DefaultExtensionMessageFactory.cc:115,140,151` 依赖它切分扩展消息。
+
 ## 备注
+
+- 收尾时清掉的最后一处 `ssize_t`：`src/GenericParser.h:112` 的 `ssize_t nread;`（`parseFile` 模板里的局部变量）——原写法 `while ((nread = read(...)) > 0)` 依赖 `ssize_t` 声明，改成 `for (;;) { auto nread = read(...); if (nread <= 0) break; ... }`，语义不变（`nread == 0` 与 `< 0` 都退出），使阶段 5 的「parse 链 0 处 `ssize_t`」验收项真正达成。
 
 - 用户授权原文（m10941）："解除所有限制，审查项目，创建现代化计划"。
 - 用户决策（m11037）：架构方向四项全选；`.c` shim「删 shim 并移除 configure 平台检查」；公开 ABI「彻底现代化，接受 breaking change」；工具链/CI 问题未回答 → 本计划按不含 CI 改动执行。

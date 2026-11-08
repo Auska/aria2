@@ -109,8 +109,11 @@ typename Parser::ResultType parseFile(Parser& parser,
   }
   auto fdclose = defer(fd, close);
   std::array<char, 4_k> buf;
-  ssize_t nread;
-  while ((nread = read(fd, buf.data(), buf.size())) > 0) {
+  for (;;) {
+    auto nread = read(fd, buf.data(), buf.size());
+    if (nread <= 0) {
+      break;
+    }
     auto rv = parser.parseUpdate(
         std::as_bytes(std::span{buf.data(), static_cast<size_t>(nread)}));
     if (!rv) {
