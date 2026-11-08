@@ -100,7 +100,7 @@ private:
     }
     if (inFlightMessage_ == 0) {
       A2_LOG_DEBUG(fmt("Finished node_lookup for node ID {}",
-                       util::toHex(std::as_bytes(std::span{targetID_})).c_str()));
+                       util::toHex(std::as_bytes(std::span{targetID_}))));
       onFinish();
       updateBucket();
       setFinished(true);
@@ -108,7 +108,7 @@ private:
     else {
       A2_LOG_DEBUG(fmt("{} in flight message for node ID {}",
                        static_cast<unsigned long>(inFlightMessage_),
-                       util::toHex(std::as_bytes(std::span{targetID_})).c_str()));
+                       util::toHex(std::as_bytes(std::span{targetID_}))));
     }
   }
 
@@ -184,9 +184,10 @@ public:
     size_t count = 0;
     for (auto& ne : newEntries) {
       if (getLocalNode()->getID() != ne->node->getID()) {
-        A2_LOG_DEBUG(fmt("Received nodes: id={}, ip={}",
-                         util::toHex(std::as_bytes(std::span{ne->node->getID()})).c_str(),
-                         ne->node->getIPAddress().c_str()));
+        A2_LOG_DEBUG(
+            fmt("Received nodes: id={}, ip={}",
+                util::toHex(std::as_bytes(std::span{ne->node->getID()})),
+                ne->node->getIPAddress()));
         entries_.push_front(std::move(ne));
         ++count;
       }
@@ -210,7 +211,7 @@ public:
   void onTimeout(const std::shared_ptr<DHTNode>& node)
   {
     A2_LOG_DEBUG(fmt("node lookup message timeout for node ID={}",
-                     util::toHex(std::as_bytes(std::span{node->getID()})).c_str()));
+                     util::toHex(std::as_bytes(std::span{node->getID()}))));
     --inFlightMessage_;
     for (auto i = std::begin(entries_), eoi = std::end(entries_); i != eoi;
          ++i) {

@@ -80,6 +80,8 @@ public:
   // Convenient method. Read data to end of file and write them into
   // given stream. Returns written size.
   size_t transfer(std::ostream& out);
+  // Convenient method. Reads the rest of the file into a string.
+  std::string readAll();
   int vprintf(const char* format, va_list va) override;
   // Mode for reading
   static const char READ[];

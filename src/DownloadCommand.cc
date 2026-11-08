@@ -184,7 +184,8 @@ bool DownloadCommand::executeInternal()
       }
       streamFilter_->transform(
           diskAdaptor, segment,
-          std::as_bytes(std::span{getSocketRecvBuffer()->getBuffer(), bufSize}));
+          std::as_bytes(
+              std::span{getSocketRecvBuffer()->getBuffer(), bufSize}));
     }
     else {
       // It is possible that segment is completed but we have some bytes
@@ -312,7 +313,7 @@ void DownloadCommand::checkLowestDownloadSpeed() const
     if (nowSpeed <= lowestDownloadSpeedLimit_) {
       throw DL_ABORT_EX2(fmt(EX_TOO_SLOW_DOWNLOAD_SPEED, nowSpeed,
                              lowestDownloadSpeedLimit_,
-                             getRequest()->getHost().c_str()),
+                             getRequest()->getHost()),
                          error_code::TOO_SLOW_DOWNLOAD_SPEED);
     }
   }
@@ -389,14 +390,14 @@ void DownloadCommand::validatePieceHash(const std::shared_ptr<Segment>& segment,
                                         const std::string& actualHash)
 {
   if (actualHash == expectedHash) {
-    A2_LOG_INFO(fmt(MSG_GOOD_CHUNK_CHECKSUM, util::toHex(actualHash).c_str()));
+    A2_LOG_INFO(fmt(MSG_GOOD_CHUNK_CHECKSUM, util::toHex(actualHash)));
     completeSegment(getCuid(), segment);
   }
   else {
     A2_LOG_INFO(fmt(EX_INVALID_CHUNK_CHECKSUM,
                     static_cast<unsigned long>(segment->getIndex()),
-                    segment->getPosition(), util::toHex(expectedHash).c_str(),
-                    util::toHex(actualHash).c_str()));
+                    segment->getPosition(), util::toHex(expectedHash),
+                    util::toHex(actualHash)));
     segment->clear(getPieceStorage()->getWrDiskCache());
     getSegmentMan()->cancelSegment(getCuid());
     throw DL_RETRY_EX(fmt("Invalid checksum index={}",

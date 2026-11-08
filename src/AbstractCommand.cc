@@ -128,7 +128,7 @@ void AbstractCommand::useFasterRequest(
     const std::shared_ptr<Request>& fasterRequest)
 {
   A2_LOG_INFO(fmt("CUID#{} - Use faster Request hostname={}, port={}",
-                  getCuid(), fasterRequest->getHost().c_str(),
+                  getCuid(), fasterRequest->getHost(),
                   fasterRequest->getPort()));
   // Cancel current Request object and use faster one.
   fileEntry_->removeRequest(req_);
@@ -189,7 +189,7 @@ bool AbstractCommand::execute()
     if (req_ && req_->removalRequested()) {
       A2_LOG_DEBUG(fmt("CUID#{} - Discard original URI={} because it is"
                        " requested.",
-                       getCuid(), req_->getUri().c_str()));
+                       getCuid(), req_->getUri()));
       return prepareForRetry(0);
     }
 
@@ -306,8 +306,7 @@ bool AbstractCommand::execute()
           req_->getHost(), req_->getProtocol());
       ss->setError();
 
-      throw DL_RETRY_EX(
-          fmt(MSG_NETWORK_PROBLEM, socket_->getSocketError().c_str()));
+      throw DL_RETRY_EX(fmt(MSG_NETWORK_PROBLEM, socket_->getSocketError()));
     }
 
     if (checkPoint_.difference(global::wallclock()) >= timeout_) {
@@ -319,8 +318,8 @@ bool AbstractCommand::execute()
       // empty.
       if (!req_->getConnectedAddr().empty()) {
         // Purging IP address cache to renew IP address.
-        A2_LOG_DEBUG(fmt("CUID#{} - Marking IP address {} as bad",
-                         getCuid(), req_->getConnectedAddr().c_str()));
+        A2_LOG_DEBUG(fmt("CUID#{} - Marking IP address {} as bad", getCuid(),
+                         req_->getConnectedAddr()));
         e_->markBadIPAddress(req_->getConnectedHostname(),
                              req_->getConnectedAddr(),
                              req_->getConnectedPort());
@@ -343,9 +342,8 @@ bool AbstractCommand::execute()
   catch (DlAbortEx& err) {
     requestGroup_->setLastErrorCode(err.getErrorCode(), err.what());
     if (req_) {
-      A2_LOG_ERROR_EX(
-          fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri().c_str()),
-          DL_ABORT_EX2(fmt("URI={}", req_->getCurrentUri().c_str()), err));
+      A2_LOG_ERROR_EX(fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri()),
+                      DL_ABORT_EX2(fmt("URI={}", req_->getCurrentUri()), err));
       fileEntry_->addURIResult(req_->getUri(), err.getErrorCode());
       if (err.getErrorCode() == error_code::CANNOT_RESUME) {
         requestGroup_->increaseResumeFailureCount();
@@ -360,9 +358,8 @@ bool AbstractCommand::execute()
   }
   catch (DlRetryEx& err) {
     assert(req_);
-    A2_LOG_INFO_EX(
-        fmt(MSG_RESTARTING_DOWNLOAD, getCuid(), req_->getUri().c_str()),
-        DL_RETRY_EX2(fmt("URI={}", req_->getCurrentUri().c_str()), err));
+    A2_LOG_INFO_EX(fmt(MSG_RESTARTING_DOWNLOAD, getCuid(), req_->getUri()),
+                   DL_RETRY_EX2(fmt("URI={}", req_->getCurrentUri()), err));
     req_->addTryCount();
     req_->resetRedirectCount();
     req_->resetUri();
@@ -371,8 +368,8 @@ bool AbstractCommand::execute()
     bool isAbort = maxTries != 0 && req_->getTryCount() >= maxTries;
     if (isAbort) {
       A2_LOG_INFO(fmt(MSG_MAX_TRY, getCuid(), req_->getTryCount()));
-      A2_LOG_ERROR_EX(
-          fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri().c_str()), err);
+      A2_LOG_ERROR_EX(fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri()),
+                      err);
       fileEntry_->addURIResult(req_->getUri(), err.getErrorCode());
       requestGroup_->setLastErrorCode(err.getErrorCode(), err.what());
       if (err.getErrorCode() == error_code::CANNOT_RESUME) {
@@ -395,9 +392,8 @@ bool AbstractCommand::execute()
   catch (DownloadFailureException& err) {
     requestGroup_->setLastErrorCode(err.getErrorCode(), err.what());
     if (req_) {
-      A2_LOG_ERROR_EX(
-          fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri().c_str()),
-          DL_ABORT_EX2(fmt("URI={}", req_->getCurrentUri().c_str()), err));
+      A2_LOG_ERROR_EX(fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri()),
+                      DL_ABORT_EX2(fmt("URI={}", req_->getCurrentUri()), err));
       fileEntry_->addURIResult(req_->getUri(), err.getErrorCode());
     }
     else {
@@ -424,8 +420,7 @@ void AbstractCommand::tryReserved()
       return;
     }
   }
-  A2_LOG_DEBUG(
-      fmt("CUID#{} - Trying reserved/pooled request.", getCuid()));
+  A2_LOG_DEBUG(fmt("CUID#{} - Trying reserved/pooled request.", getCuid()));
   std::vector<std::unique_ptr<Command>> commands;
   requestGroup_->createNextCommand(commands, e_, 1);
   e_->setNoWait(true);
@@ -445,8 +440,8 @@ bool AbstractCommand::prepareForRetry(time_t wait)
     req_->setMaxPipelinedRequest(1);
 
     fileEntry_->poolRequest(req_);
-    A2_LOG_DEBUG(fmt("CUID#{} - Pooling request URI={}", getCuid(),
-                     req_->getUri().c_str()));
+    A2_LOG_DEBUG(
+        fmt("CUID#{} - Pooling request URI={}", getCuid(), req_->getUri()));
     if (getSegmentMan()) {
       getSegmentMan()->recognizeSegmentFor(fileEntry_);
     }
@@ -745,8 +740,7 @@ std::shared_ptr<Request> AbstractCommand::createProxyRequest() const
       A2_LOG_DEBUG(fmt("CUID#{} - Using proxy", getCuid()));
     }
     else {
-      A2_LOG_DEBUG(
-          fmt("CUID#{} - Failed to parse proxy string", getCuid()));
+      A2_LOG_DEBUG(fmt("CUID#{} - Failed to parse proxy string", getCuid()));
       proxyRequest.reset();
     }
   }
@@ -765,8 +759,8 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
   e_->findAllCachedIPAddresses(std::back_inserter(addrs), hostname, port);
   if (!addrs.empty()) {
     auto ipaddr = addrs.front();
-    A2_LOG_INFO(fmt(MSG_DNS_CACHE_HIT, getCuid(), hostname.c_str(),
-                    strjoin(std::begin(addrs), std::end(addrs), ", ").c_str()));
+    A2_LOG_INFO(fmt(MSG_DNS_CACHE_HIT, getCuid(), hostname,
+                    strjoin(std::begin(addrs), std::end(addrs), ", ")));
     return ipaddr;
   }
 
@@ -783,9 +777,8 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
             ->getOrCreateServerStat(req_->getHost(), req_->getProtocol())
             ->setError();
       }
-      throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(),
-                             hostname.c_str(),
-                             asyncNameResolverMan_->getLastError().c_str()),
+      throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
+                             asyncNameResolverMan_->getLastError()),
                          error_code::NAME_RESOLVE_ERROR);
     case 0:
       return A2STR::NIL;
@@ -793,8 +786,8 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
     case 1:
       asyncNameResolverMan_->getResolvedAddress(addrs);
       if (addrs.empty()) {
-        throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(),
-                               hostname.c_str(), "No address returned"),
+        throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
+                               "No address returned"),
                            error_code::NAME_RESOLVE_ERROR);
       }
       break;
@@ -810,8 +803,8 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
     }
     res.resolve(addrs, hostname);
   }
-  A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname.c_str(),
-                  strjoin(std::begin(addrs), std::end(addrs), ", ").c_str()));
+  A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname,
+                  strjoin(std::begin(addrs), std::end(addrs), ", ")));
   for (const auto& addr : addrs) {
     e_->cacheIPAddress(hostname, addr, port);
   }
@@ -850,11 +843,11 @@ bool AbstractCommand::checkIfConnectionEstablished(
           ->getOrCreateServerStat(req_->getHost(), req_->getProtocol())
           ->setError();
     }
-    throw DL_RETRY_EX(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error.c_str()));
+    throw DL_RETRY_EX(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error));
   }
 
-  A2_LOG_INFO(fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(),
-                  connectedAddr.c_str(), connectedPort));
+  A2_LOG_INFO(fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(), connectedAddr,
+                  connectedPort));
   e_->setNoWait(true);
   e_->addCommand(
       InitiateConnectionCommandFactory::createInitiateConnectionCommand(

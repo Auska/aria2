@@ -329,8 +329,7 @@ std::string percentEncode(const std::string& target)
                                inRFC3986UnreservedChars) == target.end()) {
     return target;
   }
-  return percentEncode(
-      std::as_bytes(std::span{target.data(), target.size()}));
+  return percentEncode(std::as_bytes(std::span{target.data(), target.size()}));
 }
 
 std::string percentEncodeMini(const std::string& src)
@@ -549,11 +548,11 @@ SegList<int> parseIntSegments(const std::string& src)
         sgl.add(a, a + 1);
       }
       else {
-        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j).c_str()));
+        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j)));
       }
     }
     else if (p == i || p + 1 == j) {
-      throw DL_ABORT_EX(fmt(MSG_INCOMPLETE_RANGE, std::string(i, j).c_str()));
+      throw DL_ABORT_EX(fmt(MSG_INCOMPLETE_RANGE, std::string(i, j)));
     }
     else {
       int a, b;
@@ -562,7 +561,7 @@ SegList<int> parseIntSegments(const std::string& src)
         sgl.add(a, b + 1);
       }
       else {
-        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j).c_str()));
+        throw DL_ABORT_EX(fmt("Bad range {}", std::string(i, j)));
       }
     }
     if (j == eoi) {
@@ -648,7 +647,7 @@ void parsePrioritizePieceRange(
     }
     else {
       throw DL_ABORT_EX(
-          fmt("Unrecognized token {}", std::string(i.first, i.second).c_str()));
+          fmt("Unrecognized token {}", std::string(i.first, i.second)));
     }
   }
   std::sort(indexes.begin(), indexes.end());
@@ -1128,16 +1127,9 @@ enum {
   CD_VALUE_CHARS_PCT_ENCODED2
 };
 
-enum {
-  CD_FILENAME_FOUND = 1,
-  CD_EXT_FILENAME_FOUND = 1 << 1
-};
+enum { CD_FILENAME_FOUND = 1, CD_EXT_FILENAME_FOUND = 1 << 1 };
 
-enum {
-  CD_ENC_UNKNOWN,
-  CD_ENC_UTF8,
-  CD_ENC_ISO_8859_1
-};
+enum { CD_ENC_UNKNOWN, CD_ENC_UTF8, CD_ENC_ISO_8859_1 };
 
 ssize_t parse_content_disposition(std::span<std::byte> dest,
                                   std::span<const std::byte>* charsetp,
@@ -1146,8 +1138,8 @@ ssize_t parse_content_disposition(std::span<std::byte> dest,
 {
   const size_t destlen = dest.size();
   const char* const in_base = reinterpret_cast<const char*>(in.data());
-  const char *p = in_base, *eop = in_base + in.size(),
-             *mark_first = nullptr, *mark_last = nullptr;
+  const char *p = in_base, *eop = in_base + in.size(), *mark_first = nullptr,
+             *mark_last = nullptr;
   int state = CD_BEFORE_DISPOSITION_TYPE;
   int in_file_parm = 0;
   int flags = 0;
@@ -1575,14 +1567,14 @@ void setGlobalSignalHandler(int sig, sigset_t* mask, signal_handler_t handler,
   sigact.sa_mask = *mask;
   if (sigaction(sig, &sigact, nullptr) == -1) {
     auto errNum = errno;
-    A2_LOG_ERROR(fmt("sigaction() failed for signal {}: {}", sig,
-                     safeStrerror(errNum).c_str()));
+    A2_LOG_ERROR(
+        fmt("sigaction() failed for signal {}: {}", sig, safeStrerror(errNum)));
   }
 #else
   if (signal(sig, handler) == SIG_ERR) {
     auto errNum = errno;
-    A2_LOG_ERROR(fmt("signal() failed for signal {}: {}", sig,
-                     safeStrerror(errNum).c_str()));
+    A2_LOG_ERROR(
+        fmt("signal() failed for signal {}: {}", sig, safeStrerror(errNum)));
   }
 #endif // HAVE_SIGACTION
 }
@@ -1660,8 +1652,7 @@ int64_t getRealSize(const std::string& sizeWithUnit)
   }
   int64_t v;
   if (!parseLLIntNoThrow(v, size) || v < 0) {
-    throw DL_ABORT_EX(
-        fmt("Bad or negative value detected: {}", sizeWithUnit.c_str()));
+    throw DL_ABORT_EX(fmt("Bad or negative value detected: {}", sizeWithUnit));
   }
   if (INT64_MAX / mult < v) {
     throw DL_ABORT_EX(
@@ -1724,10 +1715,9 @@ void mkdirs(const std::string& dirpath)
   if (!dir.mkdirs()) {
     int errNum = errno;
     if (!dir.isDir()) {
-      throw DL_ABORT_EX3(
-          errNum,
-          fmt(EX_MAKE_DIR, dir.getPath().c_str(), safeStrerror(errNum).c_str()),
-          error_code::DIR_CREATE_ERROR);
+      throw DL_ABORT_EX3(errNum,
+                         fmt(EX_MAKE_DIR, dir.getPath(), safeStrerror(errNum)),
+                         error_code::DIR_CREATE_ERROR);
     }
   }
 }
@@ -1736,9 +1726,9 @@ void convertBitfield(BitfieldMan* dest, const BitfieldMan* src)
 {
   size_t numBlock = dest->countBlock();
   for (size_t index = 0; index < numBlock; ++index) {
-    if (src->isBitSetOffsetRange(
-            static_cast<int64_t>(index) * dest->getBlockLength(),
-            dest->getBlockLength())) {
+    if (src->isBitSetOffsetRange(static_cast<int64_t>(index) *
+                                     dest->getBlockLength(),
+                                 dest->getBlockLength())) {
       dest->setBit(index);
     }
   }
@@ -1749,8 +1739,8 @@ std::string toString(const std::shared_ptr<BinaryStream>& binaryStream)
   std::string result;
   std::array<std::byte, 2048> data;
   while (true) {
-    int32_t dataLength = static_cast<int32_t>(binaryStream->readData(
-        data, static_cast<int64_t>(result.size())));
+    int32_t dataLength = static_cast<int32_t>(
+        binaryStream->readData(data, static_cast<int64_t>(result.size())));
     result.append(reinterpret_cast<const char*>(data.data()), dataLength);
     if (dataLength == 0) {
       break;
@@ -1769,7 +1759,7 @@ void* allocateAlignedMemory(size_t alignment, size_t size)
   int res;
   if ((res = posix_memalign(&buffer, alignment, size)) != 0) {
     throw FATAL_EXCEPTION(
-        fmt("Error in posix_memalign: {}", util::safeStrerror(res).c_str()));
+        fmt("Error in posix_memalign: {}", util::safeStrerror(res)));
   }
   return buffer;
 }
@@ -1837,7 +1827,7 @@ std::pair<size_t, std::string> parseIndexPath(const std::string& line)
   return std::make_pair(index, std::string(p.second.first, p.second.second));
 }
 
-std::vector<std::pair<size_t, std::string>> createIndexPaths(std::istream& i)
+std::vector<std::pair<size_t, std::string>> createIndexPaths(std::string_view i)
 {
   std::vector<std::pair<size_t, std::string>> indexPaths;
   std::string line;
@@ -1904,8 +1894,7 @@ std::string fixTaintedBasename(const std::string& src)
 void generateRandomKey(unsigned char* key)
 {
   unsigned char bytes[40];
-  generateRandomData(
-      std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
+  generateRandomData(std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
   message_digest::digest(key, 20, MessageDigest::sha1().get(),
                          std::as_bytes(std::span{bytes}));
 }
@@ -1998,8 +1987,8 @@ void executeHook(const std::string& command, a2_gid_t gid, size_t numFiles,
 {
   const std::string gidStr = GroupId::toHex(gid);
   const std::string numFilesStr = util::uitos(numFiles);
-  A2_LOG_INFO(fmt("Executing user command: {} {} {} {}", command.c_str(),
-                  gidStr.c_str(), numFilesStr.c_str(), firstFilename.c_str()));
+  A2_LOG_INFO(fmt("Executing user command: {} {} {} {}", command, gidStr,
+                  numFilesStr, firstFilename));
   pid_t cpid = fork();
   if (cpid == 0) {
     // child!

@@ -97,7 +97,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandProxied(
   }
 
   if (!pooledSocket) {
-    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr.c_str(), port));
+    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr, port));
     createSocket();
     getSocket()->establishConnection(addr, port);
 
@@ -166,7 +166,7 @@ std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandPlain(
               ->getUser());
 
   if (!pooledSocket) {
-    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr.c_str(), port));
+    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), addr, port));
     createSocket();
     getSocket()->establishConnection(addr, port);
     getRequest()->setConnectedAddrInfo(hostname, addr, port);

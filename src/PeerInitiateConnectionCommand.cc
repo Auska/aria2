@@ -75,7 +75,7 @@ PeerInitiateConnectionCommand::~PeerInitiateConnectionCommand()
 bool PeerInitiateConnectionCommand::executeInternal()
 {
   A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(),
-                  getPeer()->getIPAddress().c_str(), getPeer()->getPort()));
+                  getPeer()->getIPAddress(), getPeer()->getPort()));
   createSocket();
   getSocket()->establishConnection(getPeer()->getIPAddress(),
                                    getPeer()->getPort(), false);

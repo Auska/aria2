@@ -39,7 +39,7 @@
 
 #include <cstring>
 #include <cassert>
-#include <istream>
+#include <string_view>
 #include <utility>
 
 #include "util.h"
@@ -147,10 +147,10 @@ std::string createOptstring(InputIterator first, InputIterator last)
 }
 } // namespace
 
-void OptionParser::parseArg(std::ostream& out,
-                            std::vector<std::string>& nonopts, int argc,
-                            char* argv[]) const
+std::string OptionParser::parseArg(std::vector<std::string>& nonopts, int argc,
+                                   char* argv[]) const
 {
+  std::string out;
   size_t numPublicOption =
       countPublicOption(handlers_.begin(), handlers_.end());
   int lopt;
@@ -215,24 +215,26 @@ void OptionParser::parseArg(std::ostream& out,
       throw UNKNOWN_OPTION_EXCEPTION(argv[optind - 1]);
     }
     assert(op);
-    out << op->getName() << "=";
+    out += op->getName();
+    out += '=';
     if (optarg) {
-      out << optarg;
+      out += optarg;
       if (op->getEraseAfterParse()) {
         for (char* p = optarg; *p != '\0'; ++p) {
           *p = '*';
         }
       }
     }
-    out << "\n";
+    out += '\n';
   }
   std::copy(argv + optind, argv + argc, std::back_inserter(nonopts));
+  return out;
 }
 
-void OptionParser::parse(Option& option, std::istream& is) const
+void OptionParser::parse(Option& option, std::string_view text) const
 {
   std::string line;
-  while (getline(is, line)) {
+  while (util::getline(text, line)) {
     if (line.empty() || line[0] == '#') {
       continue;
     }

@@ -276,8 +276,7 @@ bool FtpNegotiationCommand::recvPwd()
                        error_code::FTP_PROTOCOL_ERROR);
   }
   ftp_->setBaseWorkingDir(pwd);
-  A2_LOG_INFO(fmt("CUID#{} - base working directory is '{}'",
-                  getCuid(), pwd.c_str()));
+  A2_LOG_INFO(fmt("CUID#{} - base working directory is '{}'", getCuid(), pwd));
   sequence_ = Seq::SEQ_SEND_CWD_PREP;
   return true;
 }
@@ -358,8 +357,8 @@ bool FtpNegotiationCommand::recvMdtm()
   if (status == 213) {
     if (lastModifiedTime.good()) {
       getRequestGroup()->updateLastModifiedTime(lastModifiedTime);
-      A2_LOG_DEBUG(fmt("MDTM result was parsed as: {}",
-                       lastModifiedTime.toHTTPDate().c_str()));
+      A2_LOG_DEBUG(
+          fmt("MDTM result was parsed as: {}", lastModifiedTime.toHTTPDate()));
     }
     else {
       A2_LOG_DEBUG("MDTM response was returned, but it seems not to be"
@@ -435,8 +434,8 @@ bool FtpNegotiationCommand::onFileSizeDetermined(int64_t totalLength)
         getDownloadContext()->setChecksumVerified(true);
         sequence_ = Seq::SEQ_DOWNLOAD_ALREADY_COMPLETED;
         A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED,
-                          GroupId::toHex(getRequestGroup()->getGID()).c_str(),
-                          getRequestGroup()->getFirstFilePath().c_str()));
+                          GroupId::toHex(getRequestGroup()->getGID()),
+                          getRequestGroup()->getFirstFilePath()));
       }
       poolConnection();
       return false;
@@ -710,8 +709,8 @@ bool FtpNegotiationCommand::preparePasvConnect()
   else {
     auto endpoint = getSocket()->getPeerInfo();
     // make a data connection to the server.
-    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), endpoint.addr.c_str(),
-                    pasvPort_));
+    A2_LOG_INFO(
+        fmt(MSG_CONNECTING_TO_SERVER, getCuid(), endpoint.addr, pasvPort_));
     dataSocket_ = std::make_shared<SocketCore>();
     dataSocket_->establishConnection(endpoint.addr, pasvPort_, false);
     disableReadCheckSocket();
@@ -729,7 +728,7 @@ bool FtpNegotiationCommand::resolveProxy()
   if (proxyAddr_.empty()) {
     return false;
   }
-  A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), proxyAddr_.c_str(),
+  A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), proxyAddr_,
                   proxyReq->getPort()));
   dataSocket_ = std::make_shared<SocketCore>();
   dataSocket_->establishConnection(proxyAddr_, proxyReq->getPort());
@@ -756,15 +755,14 @@ bool FtpNegotiationCommand::sendTunnelRequest()
         if (nextProxyAddr.empty()) {
           getDownloadEngine()->removeCachedIPAddress(proxyReq->getHost(),
                                                      proxyReq->getPort());
-          throw DL_RETRY_EX(
-              fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error.c_str()));
+          throw DL_RETRY_EX(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error));
         }
         else {
-          A2_LOG_INFO(fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(),
-                          proxyAddr_.c_str(), proxyReq->getPort()));
+          A2_LOG_INFO(fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(), proxyAddr_,
+                          proxyReq->getPort()));
           proxyAddr_ = nextProxyAddr;
-          A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(),
-                          proxyAddr_.c_str(), proxyReq->getPort()));
+          A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), proxyAddr_,
+                          proxyReq->getPort()));
           dataSocket_->establishConnection(proxyAddr_, proxyReq->getPort());
           return false;
         }
@@ -822,7 +820,7 @@ bool FtpNegotiationCommand::sendRestPasv(
   // Check connection is made properly
   if (dataSocket_->isReadable(0)) {
     std::string error = dataSocket_->getSocketError();
-    throw DL_ABORT_EX2(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error.c_str()),
+    throw DL_ABORT_EX2(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error),
                        error_code::FTP_PROTOCOL_ERROR);
   }
   setReadCheckSocket(getSocket());

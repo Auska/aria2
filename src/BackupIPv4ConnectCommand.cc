@@ -82,8 +82,7 @@ bool BackupIPv4ConnectCommand::execute()
     retval = true;
   }
   else if (info_->cancel) {
-    A2_LOG_INFO(
-        fmt("CUID#{} - Backup connection canceled", getCuid()));
+    A2_LOG_INFO(fmt("CUID#{} - Backup connection canceled", getCuid()));
     retval = true;
   }
   else if (socket_) {
@@ -93,7 +92,7 @@ bool BackupIPv4ConnectCommand::execute()
         if (error.empty()) {
           A2_LOG_INFO(fmt("CUID#{} - Backup connection to {} "
                           "established",
-                          getCuid(), ipaddr_.c_str()));
+                          getCuid(), ipaddr_));
           info_->ipaddr = ipaddr_;
           e_->deleteSocketForWriteCheck(socket_, this);
           info_->socket.swap(socket_);
@@ -102,14 +101,13 @@ bool BackupIPv4ConnectCommand::execute()
           retval = true;
         }
         else {
-          A2_LOG_INFO(fmt("CUID#{} - Backup connection failed: {}",
-                          getCuid(), error.c_str()));
+          A2_LOG_INFO(
+              fmt("CUID#{} - Backup connection failed: {}", getCuid(), error));
           retval = true;
         }
       }
       catch (RecoverableException& e) {
-        A2_LOG_INFO_EX(
-            fmt("CUID#{} - Backup connection failed", getCuid()), e);
+        A2_LOG_INFO_EX(fmt("CUID#{} - Backup connection failed", getCuid()), e);
         retval = true;
       }
     }
@@ -127,16 +125,14 @@ bool BackupIPv4ConnectCommand::execute()
         timeoutCheck_ = global::wallclock();
       }
       catch (RecoverableException& e) {
-        A2_LOG_INFO_EX(
-            fmt("CUID#{} - Backup connection failed", getCuid()), e);
+        A2_LOG_INFO_EX(fmt("CUID#{} - Backup connection failed", getCuid()), e);
         socket_.reset();
         retval = true;
       }
     }
   }
   else if (timeoutCheck_.difference(global::wallclock()) >= timeout_) {
-    A2_LOG_INFO(
-        fmt("CUID#{} - Backup connection command timeout", getCuid()));
+    A2_LOG_INFO(fmt("CUID#{} - Backup connection command timeout", getCuid()));
     retval = true;
   }
   if (!retval) {

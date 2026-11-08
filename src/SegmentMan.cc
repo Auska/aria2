@@ -438,8 +438,8 @@ public:
 void SegmentMan::updateFastestPeerStat(
     const std::shared_ptr<PeerStat>& peerStat)
 {
-  auto i = std::ranges::find_if(fastestPeerStats_,
-                                PeerStatHostProtoEqual(peerStat));
+  auto i =
+      std::ranges::find_if(fastestPeerStats_, PeerStatHostProtoEqual(peerStat));
   if (i == fastestPeerStats_.end()) {
     fastestPeerStats_.push_back(peerStat);
   }
@@ -468,7 +468,7 @@ size_t SegmentMan::countFreePieceFrom(size_t index) const
 void SegmentMan::ignoreSegmentFor(const std::shared_ptr<FileEntry>& fileEntry)
 {
   A2_LOG_DEBUG(fmt("ignoring segment for path={}, offset={}, length={}",
-                   fileEntry->getPath().c_str(), fileEntry->getOffset(),
+                   fileEntry->getPath(), fileEntry->getOffset(),
                    fileEntry->getLength()));
   ignoreBitfield_.addFilter(fileEntry->getOffset(), fileEntry->getLength());
 }

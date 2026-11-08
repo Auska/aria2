@@ -46,6 +46,7 @@
 #include <cstddef>
 #include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <iosfwd>
 #include <ostream>
@@ -468,11 +469,32 @@ std::string joinPath(InputIterator first, InputIterator last)
   return strjoin(elements.begin(), elements.end(), "/");
 }
 
+// Consumes the next '\n'-terminated line of |text| into |line| (the
+// terminator is not stored) and advances |text| past it. Returns false when
+// |text| holds no character, i.e. when there is no line left to read; an
+// unterminated trailing line is still returned once.
+inline bool getline(std::string_view& text, std::string& line)
+{
+  if (text.empty()) {
+    return false;
+  }
+  auto eol = text.find('\n');
+  if (eol == std::string_view::npos) {
+    line.assign(text);
+    text = std::string_view{};
+    return true;
+  }
+  line.assign(text.substr(0, eol));
+  text.remove_prefix(eol + 1);
+  return true;
+}
+
 // Parses INDEX=PATH format string. INDEX must be an unsigned
 // integer.
 std::pair<size_t, std::string> parseIndexPath(const std::string& line);
 
-std::vector<std::pair<size_t, std::string>> createIndexPaths(std::istream& i);
+std::vector<std::pair<size_t, std::string>>
+createIndexPaths(std::string_view i);
 
 /**
  * Take a string [first, last) which is a delimited list and add its

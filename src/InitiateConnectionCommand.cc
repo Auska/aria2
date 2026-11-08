@@ -105,8 +105,7 @@ bool InitiateConnectionCommand::executeInternal()
     getDownloadEngine()->markBadIPAddress(hostname, ipaddr, port);
     if (!getDownloadEngine()->findCachedIPAddress(hostname, port).empty()) {
       A2_LOG_INFO_EX(EX_EXCEPTION_CAUGHT, ex);
-      A2_LOG_INFO(
-          fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(), ipaddr.c_str(), port));
+      A2_LOG_INFO(fmt(MSG_CONNECT_FAILED_AND_RETRY, getCuid(), ipaddr, port));
       auto command =
           InitiateConnectionCommandFactory::createInitiateConnectionCommand(
               getCuid(), getRequest(), getFileEntry(), getRequestGroup(),
@@ -153,7 +152,7 @@ InitiateConnectionCommand::createBackupIPv4ConnectCommand(
           getDownloadEngine()->newCUID(), *i, port, info, mainCommand,
           getRequestGroup(), getDownloadEngine());
       A2_LOG_INFO(fmt("Issue backup connection command CUID#{}, addr={}",
-                      command->getCuid(), (*i).c_str()));
+                      command->getCuid(), (*i)));
       getDownloadEngine()->addCommand(std::move(command));
       return info;
     }

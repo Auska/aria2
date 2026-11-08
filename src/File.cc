@@ -147,13 +147,13 @@ bool File::mkdirs()
       ++i;
     }
     std::string dir(begin, j);
-    A2_LOG_DEBUG(fmt("Making directory {}", dir.c_str()));
+    A2_LOG_DEBUG(fmt("Making directory {}", dir));
     if (File(dir).isDir()) {
-      A2_LOG_DEBUG(fmt("{} exists and is a directory.", dir.c_str()));
+      A2_LOG_DEBUG(fmt("{} exists and is a directory.", dir));
       continue;
     }
     if (a2mkdir(dir.c_str(), DIR_OPEN_MODE) == -1) {
-      A2_LOG_DEBUG(fmt("Failed to create {}", dir.c_str()));
+      A2_LOG_DEBUG(fmt("Failed to create {}", dir));
       return false;
     }
   }

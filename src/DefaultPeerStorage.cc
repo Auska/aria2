@@ -91,7 +91,7 @@ bool DefaultPeerStorage::addPeer(const std::shared_ptr<Peer>& peer)
   if (unusedPeers_.size() >= maxPeerListSize_) {
     A2_LOG_DEBUG(fmt("Adding {}:{} is rejected, since unused peer list is full "
                      "({} peers > {})",
-                     peer->getIPAddress().c_str(), peer->getPort(),
+                     peer->getIPAddress(), peer->getPort(),
                      static_cast<unsigned long>(unusedPeers_.size()),
                      static_cast<unsigned long>(maxPeerListSize_)));
     return false;
@@ -99,12 +99,12 @@ bool DefaultPeerStorage::addPeer(const std::shared_ptr<Peer>& peer)
   if (isPeerAlreadyAdded(peer)) {
     A2_LOG_DEBUG(fmt("Adding {}:{} is rejected because it has been already"
                      " added.",
-                     peer->getIPAddress().c_str(), peer->getPort()));
+                     peer->getIPAddress(), peer->getPort()));
     return false;
   }
   if (isBadPeer(peer->getIPAddress())) {
     A2_LOG_DEBUG(fmt("Adding {}:{} is rejected because it is marked bad.",
-                     peer->getIPAddress().c_str(), peer->getPort()));
+                     peer->getIPAddress(), peer->getPort()));
     return false;
   }
   const size_t peerListSize = unusedPeers_.size();
@@ -126,17 +126,17 @@ void DefaultPeerStorage::addPeer(
       if (isPeerAlreadyAdded(peer)) {
         A2_LOG_DEBUG(fmt("Adding {}:{} is rejected because it has been already"
                          " added.",
-                         peer->getIPAddress().c_str(), peer->getPort()));
+                         peer->getIPAddress(), peer->getPort()));
         continue;
       }
       else if (isBadPeer(peer->getIPAddress())) {
         A2_LOG_DEBUG(fmt("Adding {}:{} is rejected because it is marked bad.",
-                         peer->getIPAddress().c_str(), peer->getPort()));
+                         peer->getIPAddress(), peer->getPort()));
         continue;
       }
       else {
-        A2_LOG_DEBUG(fmt(MSG_ADDING_PEER, peer->getIPAddress().c_str(),
-                         peer->getPort()));
+        A2_LOG_DEBUG(
+            fmt(MSG_ADDING_PEER, peer->getIPAddress(), peer->getPort()));
       }
       unusedPeers_.push_back(peer);
       addUniqPeer(peer);
@@ -147,7 +147,7 @@ void DefaultPeerStorage::addPeer(
       A2_LOG_DEBUG(
           fmt("Adding {}:{} is rejected, since unused peer list is full "
               "({} peers > {})",
-              peer->getIPAddress().c_str(), peer->getPort(),
+              peer->getIPAddress(), peer->getPort(),
               static_cast<unsigned long>(unusedPeers_.size()),
               static_cast<unsigned long>(maxPeerListSize_)));
     }
@@ -165,13 +165,11 @@ DefaultPeerStorage::addAndCheckoutPeer(const std::shared_ptr<Peer>& peer,
                                        cuid_t cuid)
 {
   if (isPeerAlreadyAdded(peer)) {
-    auto it = std::ranges::find_if(unusedPeers_,
-                                   [&peer](const std::shared_ptr<Peer>& p) {
-                                     return p->getIPAddress() ==
-                                                peer->getIPAddress() &&
-                                            p->getOrigPort() ==
-                                                peer->getOrigPort();
-                                   });
+    auto it = std::ranges::find_if(
+        unusedPeers_, [&peer](const std::shared_ptr<Peer>& p) {
+          return p->getIPAddress() == peer->getIPAddress() &&
+                 p->getOrigPort() == peer->getOrigPort();
+        });
     if (it == std::end(unusedPeers_)) {
       // peer is in usedPeers_.
       return nullptr;
@@ -240,7 +238,7 @@ void DefaultPeerStorage::addBadPeer(const std::string& ipaddr)
   if (lastBadPeerCleaned_.difference(global::wallclock()) >= 1_h) {
     for (auto i = std::begin(badPeers_); i != std::end(badPeers_);) {
       if ((*i).second <= global::wallclock()) {
-        A2_LOG_DEBUG(fmt("Purge {} from bad peer", (*i).first.c_str()));
+        A2_LOG_DEBUG(fmt("Purge {} from bad peer", (*i).first));
         badPeers_.erase(i++);
         // badPeers_.end() will not be invalidated.
       }
@@ -250,7 +248,7 @@ void DefaultPeerStorage::addBadPeer(const std::string& ipaddr)
     }
     lastBadPeerCleaned_ = global::wallclock();
   }
-  A2_LOG_DEBUG(fmt("Added {} as bad peer", ipaddr.c_str()));
+  A2_LOG_DEBUG(fmt("Added {} as bad peer", ipaddr));
   // We use variable timeout to avoid many bad peers wake up at once.
   auto t = global::wallclock();
   t.advance(std::chrono::seconds(
@@ -264,8 +262,8 @@ void DefaultPeerStorage::deleteUnusedPeer(size_t delSize)
   for (; delSize > 0 && !unusedPeers_.empty(); --delSize) {
     auto& peer = unusedPeers_.back();
     onErasingPeer(peer);
-    A2_LOG_DEBUG(fmt("Remove peer {}:{}", peer->getIPAddress().c_str(),
-                     peer->getOrigPort()));
+    A2_LOG_DEBUG(
+        fmt("Remove peer {}:{}", peer->getIPAddress(), peer->getOrigPort()));
     unusedPeers_.pop_back();
   }
 }
@@ -278,15 +276,13 @@ std::shared_ptr<Peer> DefaultPeerStorage::checkoutPeer(cuid_t cuid)
   auto peer = unusedPeers_.front();
   unusedPeers_.pop_front();
   if (peer->usedBy() != 0) {
-    A2_LOG_WARN(fmt("CUID#{} is already set for peer {}:{}",
-                    peer->usedBy(), peer->getIPAddress().c_str(),
-                    peer->getOrigPort()));
+    A2_LOG_WARN(fmt("CUID#{} is already set for peer {}:{}", peer->usedBy(),
+                    peer->getIPAddress(), peer->getOrigPort()));
   }
   peer->usedBy(cuid);
   usedPeers_.insert(peer);
-  A2_LOG_DEBUG(fmt("Checkout peer {}:{} to CUID#{}",
-                   peer->getIPAddress().c_str(), peer->getOrigPort(),
-                   peer->usedBy()));
+  A2_LOG_DEBUG(fmt("Checkout peer {}:{} to CUID#{}", peer->getIPAddress(),
+                   peer->getOrigPort(), peer->usedBy()));
   return peer;
 }
 
@@ -313,16 +309,15 @@ void DefaultPeerStorage::onReturningPeer(const std::shared_ptr<Peer>& peer)
 
 void DefaultPeerStorage::returnPeer(const std::shared_ptr<Peer>& peer)
 {
-  A2_LOG_DEBUG(fmt("Peer {}:{} returned from CUID#{}",
-                   peer->getIPAddress().c_str(), peer->getOrigPort(),
-                   peer->usedBy()));
+  A2_LOG_DEBUG(fmt("Peer {}:{} returned from CUID#{}", peer->getIPAddress(),
+                   peer->getOrigPort(), peer->usedBy()));
   if (usedPeers_.erase(peer)) {
     onReturningPeer(peer);
     onErasingPeer(peer);
   }
   else {
     A2_LOG_WARN(fmt("Cannot find peer {}:{} in usedPeers_",
-                    peer->getIPAddress().c_str(), peer->getOrigPort()));
+                    peer->getIPAddress(), peer->getOrigPort()));
   }
 }
 

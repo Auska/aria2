@@ -47,8 +47,7 @@ UDPTrackerClient::UDPTrackerClient() : numWatchers_(0) {}
 
 namespace {
 template <typename InputIterator>
-void failRequest(InputIterator first, InputIterator last,
-                 UDPTrackerError error)
+void failRequest(InputIterator first, InputIterator last, UDPTrackerError error)
 {
   for (; first != last; ++first) {
     (*first)->state = UDPTrackerState::Complete;
@@ -74,8 +73,8 @@ void logInvalidLength(const std::string& remoteAddr, uint16_t remotePort,
 {
   A2_LOG_INFO(fmt("UDPT received {} reply from {}:{} invalid length "
                   "expected:{}, actual:{}",
-                  getUDPTrackerActionStr(action), remoteAddr.c_str(),
-                  remotePort, expected, actual));
+                  getUDPTrackerActionStr(action), remoteAddr, remotePort,
+                  expected, actual));
 }
 } // namespace
 
@@ -83,10 +82,9 @@ namespace {
 void logInvalidTransaction(const std::string& remoteAddr, uint16_t remotePort,
                            UDPTrackerAction action, uint32_t transactionId)
 {
-  A2_LOG_INFO(
-      fmt("UDPT received {} reply from {}:{} invalid transaction_id={:08x}",
-          getUDPTrackerActionStr(action), remoteAddr.c_str(), remotePort,
-          transactionId));
+  A2_LOG_INFO(fmt(
+      "UDPT received {} reply from {}:{} invalid transaction_id={:08x}",
+      getUDPTrackerActionStr(action), remoteAddr, remotePort, transactionId));
 }
 } // namespace
 
@@ -97,8 +95,8 @@ void logTooShortLength(const std::string& remoteAddr, uint16_t remotePort,
 {
   A2_LOG_INFO(fmt("UDPT received {} reply from {}:{} length too short "
                   "min:{}, actual:{}",
-                  getUDPTrackerActionStr(action), remoteAddr.c_str(),
-                  remotePort, minLength, actual));
+                  getUDPTrackerActionStr(action), remoteAddr, remotePort,
+                  minLength, actual));
 }
 } // namespace
 
@@ -161,7 +159,7 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
     A2_LOG_INFO(
         fmt("UDPT received CONNECT reply from {}:{} transaction_id={:08x},"
             "connection_id={:016x}",
-            remoteAddr.c_str(), remotePort, transactionId, connectionId));
+            remoteAddr, remotePort, transactionId, connectionId));
     UDPTrackerConnection c(UDPTrackerConnectionState::Connected, connectionId,
                            now);
     connectionIdCache_[std::make_pair(remoteAddr, remotePort)] = c;
@@ -212,10 +210,10 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
             "connection_id=%016{}, event={}, infohash={}, "
             "interval={}, leechers={}, "
             "seeders={}, num_peers={}",
-            remoteAddr.c_str(), remotePort, transactionId, req->connectionId,
-            getUDPTrackerEventStr(req->event),
-            util::toHex(req->infohash).c_str(), req->reply->interval,
-            req->reply->leechers, req->reply->seeders, numPeers));
+            remoteAddr, remotePort, transactionId, req->connectionId,
+            getUDPTrackerEventStr(req->event), util::toHex(req->infohash),
+            req->reply->interval, req->reply->leechers, req->reply->seeders,
+            numPeers));
 
     recvReq = std::move(req);
 
@@ -239,11 +237,11 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
     req->state = UDPTrackerState::Complete;
     req->error = UDPTrackerError::Tracker;
 
-    A2_LOG_INFO(fmt("UDPT received ERROR reply from {}:{} transaction_id={:08x},"
-                    "connection_id=%016{}, action={}, error_string={}",
-                    remoteAddr.c_str(), remotePort, transactionId,
-                    req->connectionId, getUDPTrackerActionStr(action),
-                    errorString.c_str()));
+    A2_LOG_INFO(
+        fmt("UDPT received ERROR reply from {}:{} transaction_id={:08x},"
+            "connection_id=%016{}, action={}, error_string={}",
+            remoteAddr, remotePort, transactionId, req->connectionId,
+            getUDPTrackerActionStr(action), errorString));
     if (req->action == UDPTrackerAction::Connect) {
       failConnect(req->remoteAddr, req->remotePort, UDPTrackerError::Tracker);
     }
@@ -253,12 +251,11 @@ int UDPTrackerClient::receiveReply(std::shared_ptr<UDPTrackerRequest>& recvReq,
     break;
   }
   case UDPTrackerAction::Scrape:
-    A2_LOG_INFO(fmt("unexpected scrape action reply from {}:{}",
-                    remoteAddr.c_str(), remotePort));
+    A2_LOG_INFO(fmt("unexpected scrape action reply from {}:{}", remoteAddr,
+                    remotePort));
     return -1;
   default:
-    A2_LOG_INFO(
-        fmt("unknown action reply from {}:{}", remoteAddr.c_str(), remotePort));
+    A2_LOG_INFO(fmt("unknown action reply from {}:{}", remoteAddr, remotePort));
     return -1;
   }
   return 0;
@@ -315,16 +312,14 @@ void UDPTrackerClient::requestSent(const Timer& now)
   switch (req->action) {
   case UDPTrackerAction::Connect:
     A2_LOG_INFO(fmt("UDPT sent CONNECT to {}:{} transaction_id={:08x}",
-                    req->remoteAddr.c_str(), req->remotePort,
-                    req->transactionId));
+                    req->remoteAddr, req->remotePort, req->transactionId));
     break;
   case UDPTrackerAction::Announce:
     A2_LOG_INFO(fmt("UDPT sent ANNOUNCE to {}:{} transaction_id={:08x}, "
                     "connection_id=%016{}, event={}, infohash={}",
-                    req->remoteAddr.c_str(), req->remotePort,
-                    req->transactionId, req->connectionId,
-                    getUDPTrackerEventStr(req->event),
-                    util::toHex(req->infohash).c_str()));
+                    req->remoteAddr, req->remotePort, req->transactionId,
+                    req->connectionId, getUDPTrackerEventStr(req->event),
+                    util::toHex(req->infohash)));
     break;
   default:
     // unreachable
@@ -349,17 +344,15 @@ void UDPTrackerClient::requestFail(UDPTrackerError error)
   switch (req->action) {
   case UDPTrackerAction::Connect:
     A2_LOG_INFO(fmt("UDPT fail CONNECT to {}:{} transaction_id={:08x}",
-                    req->remoteAddr.c_str(), req->remotePort,
-                    req->transactionId));
+                    req->remoteAddr, req->remotePort, req->transactionId));
     failConnect(req->remoteAddr, req->remotePort, error);
     break;
   case UDPTrackerAction::Announce:
     A2_LOG_INFO(fmt("UDPT fail ANNOUNCE to {}:{} transaction_id={:08x}, "
                     "connection_id=%016{}, event={}, infohash={}",
-                    req->remoteAddr.c_str(), req->remotePort,
-                    req->transactionId, req->connectionId,
-                    getUDPTrackerEventStr(req->event),
-                    util::toHex(req->infohash).c_str()));
+                    req->remoteAddr, req->remotePort, req->transactionId,
+                    req->connectionId, getUDPTrackerEventStr(req->event),
+                    util::toHex(req->infohash)));
     break;
   default:
     // unreachable
@@ -387,16 +380,16 @@ struct TimeoutCheck {
         switch (req->action) {
         case UDPTrackerAction::Connect:
           A2_LOG_INFO(fmt("UDPT resend CONNECT to {}:{} transaction_id={:08x}",
-                          req->remoteAddr.c_str(), req->remotePort,
+                          req->remoteAddr, req->remotePort,
                           req->transactionId));
           break;
         case UDPTrackerAction::Announce:
-          A2_LOG_INFO(fmt("UDPT resend ANNOUNCE to {}:{} transaction_id={:08x}, "
-                          "connection_id=%016{}, event={}, infohash={}",
-                          req->remoteAddr.c_str(), req->remotePort,
-                          req->transactionId, req->connectionId,
-                          getUDPTrackerEventStr(req->event),
-                          util::toHex(req->infohash).c_str()));
+          A2_LOG_INFO(
+              fmt("UDPT resend ANNOUNCE to {}:{} transaction_id={:08x}, "
+                  "connection_id=%016{}, event={}, infohash={}",
+                  req->remoteAddr, req->remotePort, req->transactionId,
+                  req->connectionId, getUDPTrackerEventStr(req->event),
+                  util::toHex(req->infohash)));
           break;
         default:
           // unreachable
@@ -415,18 +408,18 @@ struct TimeoutCheck {
         switch (req->action) {
         case UDPTrackerAction::Connect:
           A2_LOG_INFO(fmt("UDPT timeout CONNECT to {}:{} transaction_id={:08x}",
-                          req->remoteAddr.c_str(), req->remotePort,
+                          req->remoteAddr, req->remotePort,
                           req->transactionId));
           client->failConnect(req->remoteAddr, req->remotePort,
                               UDPTrackerError::Timeout);
           break;
         case UDPTrackerAction::Announce:
-          A2_LOG_INFO(fmt("UDPT timeout ANNOUNCE to {}:{} transaction_id={:08x}, "
-                          "connection_id=%016{}, event={}, infohash={}",
-                          req->remoteAddr.c_str(), req->remotePort,
-                          req->transactionId, req->connectionId,
-                          getUDPTrackerEventStr(req->event),
-                          util::toHex(req->infohash).c_str()));
+          A2_LOG_INFO(
+              fmt("UDPT timeout ANNOUNCE to {}:{} transaction_id={:08x}, "
+                  "connection_id=%016{}, event={}, infohash={}",
+                  req->remoteAddr, req->remotePort, req->transactionId,
+                  req->connectionId, getUDPTrackerEventStr(req->event),
+                  util::toHex(req->infohash)));
           break;
         default:
           // unreachable
@@ -504,8 +497,7 @@ struct FailConnectDelete {
   {
     if (req->action == UDPTrackerAction::Announce &&
         req->remoteAddr == remoteAddr && req->remotePort == remotePort) {
-      A2_LOG_INFO(
-          fmt("Force fail infohash={}", util::toHex(req->infohash).c_str()));
+      A2_LOG_INFO(fmt("Force fail infohash={}", util::toHex(req->infohash)));
       req->state = UDPTrackerState::Complete;
       req->error = error;
       return true;

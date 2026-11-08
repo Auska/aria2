@@ -91,8 +91,7 @@ bool PeerAbstractCommand::execute()
       checkPoint_ = global::wallclock();
     }
     else if (errorEventEnabled()) {
-      throw DL_ABORT_EX(
-          fmt(MSG_NETWORK_PROBLEM, socket_->getSocketError().c_str()));
+      throw DL_ABORT_EX(fmt(MSG_NETWORK_PROBLEM, socket_->getSocketError()));
     }
     if (checkPoint_.difference(global::wallclock()) >= timeout_) {
       throw DL_ABORT_EX(EX_TIME_OUT);
@@ -107,7 +106,7 @@ bool PeerAbstractCommand::execute()
   }
   catch (RecoverableException& err) {
     A2_LOG_DEBUG_EX(fmt(MSG_TORRENT_DOWNLOAD_ABORTED, getCuid()), err);
-    A2_LOG_DEBUG(fmt(MSG_PEER_BANNED, getCuid(), peer_->getIPAddress().c_str(),
+    A2_LOG_DEBUG(fmt(MSG_PEER_BANNED, getCuid(), peer_->getIPAddress(),
                      peer_->getPort()));
     onAbort();
     return prepareForNextPeer(0);

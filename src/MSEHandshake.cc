@@ -108,12 +108,11 @@ MSEHandshake::HandshakeType MSEHandshake::identifyHandshakeType()
   }
   if (rbuf_[0] == BtHandshakeMessage::PSTR_LENGTH &&
       memcmp(BtHandshakeMessage::BT_PSTR, rbuf_ + 1, 19) == 0) {
-    A2_LOG_DEBUG(
-        fmt("CUID#{} - This is legacy BitTorrent handshake.", cuid_));
+    A2_LOG_DEBUG(fmt("CUID#{} - This is legacy BitTorrent handshake.", cuid_));
     return HandshakeType::Legacy;
   }
-  A2_LOG_DEBUG(fmt(
-      "CUID#{} - This may be encrypted BitTorrent handshake.", cuid_));
+  A2_LOG_DEBUG(
+      fmt("CUID#{} - This may be encrypted BitTorrent handshake.", cuid_));
   return HandshakeType::Encrypted;
 }
 
@@ -444,7 +443,7 @@ bool MSEHandshake::receiveReceiverHashAndPadCLength(
     createReq23Hash(md, infohash.data());
     if (memcmp(md, rbufptr, sizeof(md)) == 0) {
       A2_LOG_DEBUG(fmt("CUID#{} - info hash found: {}", cuid_,
-                       util::toHex(std::as_bytes(std::span{infohash})).c_str()));
+                       util::toHex(std::as_bytes(std::span{infohash}))));
       downloadContext = ctx;
       break;
     }
@@ -549,8 +548,7 @@ void MSEHandshake::sendReceiverStep2()
 uint16_t MSEHandshake::verifyPadLength(const unsigned char* padlenbuf,
                                        const char* padName)
 {
-  A2_LOG_DEBUG(
-      fmt("CUID#{} - Verifying Pad length for {}", cuid_, padName));
+  A2_LOG_DEBUG(fmt("CUID#{} - Verifying Pad length for {}", cuid_, padName));
   uint16_t padLength = decodeLength16(padlenbuf);
   A2_LOG_DEBUG(fmt("CUID#{} - len({})={}", cuid_, padName, padLength));
   if (padLength > 512) {
@@ -565,8 +563,8 @@ void MSEHandshake::verifyVC(unsigned char* vcbuf)
   decryptor_->encrypt(std::as_writable_bytes(std::span{vcbuf, VC_LENGTH}),
                       std::as_bytes(std::span{vcbuf, VC_LENGTH}));
   if (!std::equal(std::begin(VC), std::end(VC), vcbuf)) {
-    throw DL_ABORT_EX(
-        fmt("Invalid VC: {}", util::toHex(std::as_bytes(std::span{vcbuf, VC_LENGTH})).c_str()));
+    throw DL_ABORT_EX(fmt("Invalid VC: {}", util::toHex(std::as_bytes(
+                                                std::span{vcbuf, VC_LENGTH}))));
   }
 }
 

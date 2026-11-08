@@ -117,8 +117,7 @@ void AdaptiveURISelector::mayRetryWithIncreasedTimeout(FileEntry* fileEntry)
       A2_LOG_DEBUG(
           fmt("AdaptiveURISelector: will retry server with increased"
               " timeout ({} s): {}",
-              static_cast<long int>(requestGroup_->getTimeout().count()),
-              uri.c_str()));
+              static_cast<long int>(requestGroup_->getTimeout().count()), uri));
     }
   }
 }
@@ -149,7 +148,7 @@ std::string AdaptiveURISelector::selectOne(const std::deque<std::string>& uris)
       if (notTested != A2STR::NIL) {
         A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing the first non tested"
                          " mirror: {}",
-                         notTested.c_str()));
+                         notTested));
         --nbServerToEvaluate_;
         return notTested;
       }
@@ -162,7 +161,7 @@ std::string AdaptiveURISelector::selectOne(const std::deque<std::string>& uris)
         /* Here we return the first untested mirror */
         A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing non tested mirror {}"
                          " for connection #{}",
-                         notTested.c_str(), nbConnections_));
+                         notTested, nbConnections_));
         return notTested;
       }
       else {
@@ -171,7 +170,7 @@ std::string AdaptiveURISelector::selectOne(const std::deque<std::string>& uris)
         if (toReTest != A2STR::NIL) {
           A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing mirror {} which has"
                            " not been tested recently for connection #{}",
-                           toReTest.c_str(), nbConnections_));
+                           toReTest, nbConnections_));
           return toReTest;
         }
         else {
@@ -197,14 +196,14 @@ AdaptiveURISelector::getBestMirror(const std::deque<std::string>& uris) const
     std::string uri = getMaxDownloadSpeedUri(uris);
     A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing the best mirror :"
                      " {:.2f}KB/s {} (other mirrors are at least 25% slower)",
-                     (float)max / 1024, uri.c_str()));
+                     (float)max / 1024, uri));
     return uri;
   }
   else {
     std::string uri = selectRandomUri(bests);
     A2_LOG_DEBUG(fmt("AdaptiveURISelector: choosing randomly one of the best"
                      " mirrors (range [{:.2f}KB/s, {:.2f}KB/s]): {}",
-                     (float)min / 1024, (float)max / 1024, uri.c_str()));
+                     (float)min / 1024, (float)max / 1024, uri));
     return uri;
   }
 }

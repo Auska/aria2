@@ -68,8 +68,7 @@ static inline size_t getBlockSize(const std::string& algorithm)
   }
 
 err:
-  throw FATAL_EXCEPTION(
-      fmt("HMAC does not support algorithm {}", algorithm.c_str()));
+  throw FATAL_EXCEPTION(fmt("HMAC does not support algorithm {}", algorithm));
 }
 
 } // namespace

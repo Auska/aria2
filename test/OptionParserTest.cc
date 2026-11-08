@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <memory>
-#include <sstream>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -175,14 +174,13 @@ void OptionParserTest::testParseArg()
                   argDir, nonopt1,       nonopt2};
   int argc = arraySize(argv);
 
-  std::stringstream s;
   std::vector<std::string> nonopts;
 
-  oparser_->parseArg(s, nonopts, argc, argv);
+  auto s = oparser_->parseArg(nonopts, argc, argv);
 
   CPPUNIT_ASSERT_EQUAL(std::string("timeout=ALPHA\n"
                                    "dir=BRAVO\n"),
-                       s.str());
+                       s);
 
   CPPUNIT_ASSERT_EQUAL((size_t)2, nonopts.size());
   CPPUNIT_ASSERT_EQUAL(std::string("nonopt1"), nonopts[0]);
@@ -194,10 +192,10 @@ void OptionParserTest::testParseArg()
 void OptionParserTest::testParse()
 {
   Option option;
-  std::istringstream in("timeout=Hello\n"
-                        "UNKNOWN=x\n"
-                        "\n"
-                        "dir=World");
+  std::string in = "timeout=Hello\n"
+                   "UNKNOWN=x\n"
+                   "\n"
+                   "dir=World";
   oparser_->parse(option, in);
   CPPUNIT_ASSERT_EQUAL(std::string("Hello"), option.get(PREF_TIMEOUT));
   CPPUNIT_ASSERT_EQUAL(std::string("World"), option.get(PREF_DIR));

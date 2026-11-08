@@ -180,19 +180,17 @@ bool OpenSSLTLSContext::addCredentialFile(const std::string& certfile,
   }
   if (SSL_CTX_use_PrivateKey_file(sslCtx_, keyfile.c_str(), SSL_FILETYPE_PEM) !=
       1) {
-    A2_LOG_ERROR(fmt("Failed to load private key from {}. Cause: {}",
-                     keyfile.c_str(),
+    A2_LOG_ERROR(fmt("Failed to load private key from {}. Cause: {}", keyfile,
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   if (SSL_CTX_use_certificate_chain_file(sslCtx_, certfile.c_str()) != 1) {
-    A2_LOG_ERROR(fmt("Failed to load certificate from {}. Cause: {}",
-                     certfile.c_str(),
+    A2_LOG_ERROR(fmt("Failed to load certificate from {}. Cause: {}", certfile,
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }
   A2_LOG_INFO(fmt("Credential files(cert={}, key={}) were successfully added.",
-                  certfile.c_str(), keyfile.c_str()));
+                  certfile, keyfile));
   return true;
 }
 bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
@@ -289,7 +287,7 @@ bool OpenSSLTLSContext::addSystemTrustedCACerts()
 bool OpenSSLTLSContext::addTrustedCACertFile(const std::string& certfile)
 {
   if (SSL_CTX_load_verify_locations(sslCtx_, certfile.c_str(), nullptr) != 1) {
-    A2_LOG_ERROR(fmt(MSG_LOADING_TRUSTED_CA_CERT_FAILED, certfile.c_str(),
+    A2_LOG_ERROR(fmt(MSG_LOADING_TRUSTED_CA_CERT_FAILED, certfile,
                      ERR_error_string(ERR_get_error(), nullptr)));
     return false;
   }

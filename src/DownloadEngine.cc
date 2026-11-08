@@ -304,7 +304,7 @@ void DownloadEngine::addRoutineCommand(std::unique_ptr<Command> command)
 void DownloadEngine::poolSocket(const std::string& key,
                                 const SocketPoolEntry& entry)
 {
-  A2_LOG_INFO(fmt("Pool socket for {}", key.c_str()));
+  A2_LOG_INFO(fmt("Pool socket for {}", key));
   std::multimap<std::string, SocketPoolEntry>::value_type p(key, entry);
   socketPool_.insert(p);
 }
@@ -338,9 +338,9 @@ std::string createSockPoolKey(const std::string& host, uint16_t port,
     key += util::percentEncode(username);
     key += "@";
   }
-  key += fmt("{}({})", host.c_str(), port);
+  key += fmt("{}({})", host, port);
   if (!proxyhost.empty()) {
-    key += fmt("/{}({})", proxyhost.c_str(), proxyport);
+    key += fmt("/{}({})", proxyhost, proxyport);
   }
   return key;
 }
@@ -438,7 +438,7 @@ DownloadEngine::findSocketPoolEntry(const std::string& key)
     // We assume that if socket is readable it means peer shutdowns
     // connection and the socket will receive EOF. So skip it.
     if (!e.isTimeout() && !e.getSocket()->isReadable(0)) {
-      A2_LOG_INFO(fmt("Found socket for {}", key.c_str()));
+      A2_LOG_INFO(fmt("Found socket for {}", key));
       return i;
     }
   }

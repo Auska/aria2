@@ -155,21 +155,21 @@ int NameResolveCommand::resolveHostname(std::vector<std::string>& res,
 
   switch (asyncNameResolverMan_->getStatus()) {
   case -1:
-    A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname.c_str(),
-                    asyncNameResolverMan_->getLastError().c_str()));
+    A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
+                    asyncNameResolverMan_->getLastError()));
     return -1;
   case 0:
     return 0;
   case 1:
     asyncNameResolverMan_->getResolvedAddress(res);
     if (res.empty()) {
-      A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname.c_str(),
+      A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                       "No address returned"));
       return -1;
     }
     else {
-      A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname.c_str(),
-                      res.front().c_str()));
+      A2_LOG_INFO(
+          fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
       return 1;
     }
   }

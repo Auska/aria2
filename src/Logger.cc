@@ -70,7 +70,7 @@ void Logger::openFile(const std::string& filename)
     fpp_ =
         std::make_shared<BufferedFile>(filename.c_str(), BufferedFile::APPEND);
     if (!*static_cast<BufferedFile*>(fpp_.get())) {
-      throw DL_ABORT_EX(fmt(EX_FILE_OPEN, filename.c_str(), "n/a"));
+      throw DL_ABORT_EX(fmt(EX_FILE_OPEN, filename, "n/a"));
     }
   }
 }

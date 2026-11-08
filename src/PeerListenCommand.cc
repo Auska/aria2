@@ -114,9 +114,9 @@ bool PeerListenCommand::execute()
       e_->addCommand(
           make_unique<ReceiverMSEHandshakeCommand>(cuid, peer, e_, peerSocket));
       A2_LOG_DEBUG(fmt("Accepted the connection from {}:{}.",
-                       peer->getIPAddress().c_str(), peer->getPort()));
-      A2_LOG_DEBUG(fmt(
-          "Added CUID#{} to receive BitTorrent/MSE handshake.", cuid));
+                       peer->getIPAddress(), peer->getPort()));
+      A2_LOG_DEBUG(
+          fmt("Added CUID#{} to receive BitTorrent/MSE handshake.", cuid));
     }
     catch (RecoverableException& ex) {
       A2_LOG_DEBUG_EX(fmt(MSG_ACCEPT_FAILURE, getCuid()), ex);

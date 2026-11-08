@@ -132,7 +132,7 @@ void Netrc::parse(const std::string& path)
   authenticators_.clear();
   BufferedFile fp(path.c_str(), BufferedFile::READ);
   if (!fp) {
-    throw DL_ABORT_EX(fmt("Cannot open file: {}", path.c_str()));
+    throw DL_ABORT_EX(fmt("Cannot open file: {}", path));
   }
   enum class State {
     GetToken,
@@ -181,7 +181,7 @@ void Netrc::parse(const std::string& path)
             throw DL_ABORT_EX(
                 fmt("Netrc:parse error. {} encountered where 'machine'"
                     " or 'default' expected.",
-                    std::string((*iter).first, (*iter).second).c_str()));
+                    std::string((*iter).first, (*iter).second)));
           }
           if (util::streq((*iter).first, (*iter).second, "login")) {
             state = State::SetLogin;
@@ -247,9 +247,9 @@ public:
 
 const Authenticator* Netrc::findAuthenticator(const std::string& hostname) const
 {
-  auto itr = std::find_if(std::ranges::begin(authenticators_),
-                          std::ranges::end(authenticators_),
-                          AuthHostMatch(hostname));
+  auto itr =
+      std::find_if(std::ranges::begin(authenticators_),
+                   std::ranges::end(authenticators_), AuthHostMatch(hostname));
   if (itr == std::end(authenticators_)) {
     return nullptr;
   }

@@ -64,9 +64,10 @@ void IteratableChecksumValidator::validateChunk()
   // Don't guard with !finished() to allow zero-length file to be
   // verified.
   std::array<std::byte, 4_k> buf;
-  size_t length = pieceStorage_->getDiskAdaptor()->readDataDropCache(
-      buf, currentOffset_);
-  ctx_->update(std::as_bytes(std::span{buf.data(), static_cast<size_t>(length)}));
+  size_t length =
+      pieceStorage_->getDiskAdaptor()->readDataDropCache(buf, currentOffset_);
+  ctx_->update(
+      std::as_bytes(std::span{buf.data(), static_cast<size_t>(length)}));
   currentOffset_ += length;
   if (finished()) {
     std::string actualDigest = ctx_->digest();
@@ -76,8 +77,8 @@ void IteratableChecksumValidator::validateChunk()
     }
     else {
       A2_LOG_INFO(fmt("Checksum validation failed. expected={}, actual={}",
-                      util::toHex(dctx_->getDigest()).c_str(),
-                      util::toHex(actualDigest).c_str()));
+                      util::toHex(dctx_->getDigest()),
+                      util::toHex(actualDigest)));
       BitfieldMan bitfield(dctx_->getPieceLength(), dctx_->getTotalLength());
       pieceStorage_->setBitfield(bitfield.getBitfield(),
                                  bitfield.getBitfieldLength());

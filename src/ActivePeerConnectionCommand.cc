@@ -142,8 +142,7 @@ void ActivePeerConnectionCommand::makeNewConnections(int num)
     command->setPeerStorage(peerStorage_);
     command->setPieceStorage(pieceStorage_);
     e_->addCommand(std::move(command));
-    A2_LOG_INFO(
-        fmt(MSG_CONNECTING_TO_PEER, getCuid(), peer->getIPAddress().c_str()));
+    A2_LOG_INFO(fmt(MSG_CONNECTING_TO_PEER, getCuid(), peer->getIPAddress()));
   }
 }
 

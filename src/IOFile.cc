@@ -119,6 +119,20 @@ size_t IOFile::transfer(std::ostream& out)
   return count;
 }
 
+std::string IOFile::readAll()
+{
+  std::string out;
+  std::array<std::byte, 4_k> buf;
+  while (1) {
+    size_t r = this->read(std::span{buf});
+    out.append(reinterpret_cast<const char*>(buf.data()), r);
+    if (r < buf.size()) {
+      break;
+    }
+  }
+  return out;
+}
+
 int IOFile::vprintf(const char* format, va_list va)
 {
   return onVprintf(format, va);

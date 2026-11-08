@@ -79,8 +79,7 @@ void AsyncNameResolverMan::startAsync(const std::string& hostname,
     startAsyncFamily(hostname, AF_INET, e, command);
     ++numResolver_;
   }
-  A2_LOG_INFO(
-      fmt(MSG_RESOLVING_HOSTNAME, command->getCuid(), hostname.c_str()));
+  A2_LOG_INFO(fmt(MSG_RESOLVING_HOSTNAME, command->getCuid(), hostname));
 }
 
 void AsyncNameResolverMan::startAsyncFamily(const std::string& hostname,
@@ -181,7 +180,8 @@ int AsyncNameResolverMan::getStatus() const
 const std::string& AsyncNameResolverMan::getLastError() const
 {
   for (size_t i = 0; i < numResolver_; ++i) {
-    if (asyncNameResolver_[i]->getStatus() == AsyncNameResolver::Status::ERROR) {
+    if (asyncNameResolver_[i]->getStatus() ==
+        AsyncNameResolver::Status::ERROR) {
       // TODO This is not last error chronologically.
       return asyncNameResolver_[i]->getError();
     }

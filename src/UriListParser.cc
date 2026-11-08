@@ -35,7 +35,6 @@
 #include "UriListParser.h"
 
 #include <cstring>
-#include <sstream>
 
 #include "util.h"
 #include "Option.h"
@@ -70,9 +69,7 @@ void UriListParser::parseNext(std::vector<std::string>& uris, Option& op)
       util::split(line_.begin(), line_.end(), std::back_inserter(uris), '\t',
                   true);
       // Read options
-      // shortcut: OptionParser::parse() takes std::istream&, so the buffer
-      // stays a stringstream (std::ispanstream is C++23), upgrade with C++23.
-      std::stringstream ss;
+      std::string opts;
       while (1) {
         line_ = fp_->getLine();
         if (line_.empty()) {
@@ -87,7 +84,8 @@ void UriListParser::parseNext(std::vector<std::string>& uris, Option& op)
           }
         }
         if (line_[0] == ' ' || line_[0] == '\t') {
-          ss << line_ << "\n";
+          opts += line_;
+          opts += '\n';
         }
         else if (line_[0] == '#') {
           continue;
@@ -96,7 +94,7 @@ void UriListParser::parseNext(std::vector<std::string>& uris, Option& op)
           break;
         }
       }
-      optparser->parse(op, ss);
+      optparser->parse(op, opts);
       return;
     }
     line_ = fp_->getLine();

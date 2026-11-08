@@ -153,8 +153,7 @@ std::vector<std::unique_ptr<Cookie>> Sqlite3CookieParser::parse()
     sqlite3_free(sqlite3ErrMsg);
   }
   if (SQLITE_OK != ret) {
-    throw DL_ABORT_EX(
-        fmt("Failed to read SQLite3 database: {}", errMsg.c_str()));
+    throw DL_ABORT_EX(fmt("Failed to read SQLite3 database: {}", errMsg));
   }
   return tcookies;
 }

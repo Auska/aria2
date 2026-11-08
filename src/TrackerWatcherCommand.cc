@@ -110,8 +110,8 @@ bool HTTPAnnRequest::processResponse(
     std::array<std::byte, 2048> data;
     rg_->getPieceStorage()->getDiskAdaptor()->openFile();
     while (1) {
-      ssize_t dataLength = rg_->getPieceStorage()->getDiskAdaptor()->readData(
-          data, res.size());
+      ssize_t dataLength =
+          rg_->getPieceStorage()->getDiskAdaptor()->readData(data, res.size());
       if (dataLength == 0) {
         break;
       }
@@ -127,7 +127,7 @@ bool HTTPAnnRequest::processResponse(
     auto uris = fe->getUris();
 
     A2_LOG_ERROR_EX(fmt("GID#{} - Tracker request {} failed",
-                        GroupId::toHex(rg_->getGID()).c_str(), uris[0].c_str()),
+                        GroupId::toHex(rg_->getGID()), uris[0]),
                     e);
     return false;
   }
@@ -287,8 +287,8 @@ void TrackerWatcherCommand::addConnection()
     command->setPeerStorage(peerStorage_);
     command->setPieceStorage(pieceStorage_);
     e_->addCommand(std::move(command));
-    A2_LOG_DEBUG(fmt("CUID#{} - Adding new command CUID#{}",
-                     getCuid(), peer->usedBy()));
+    A2_LOG_DEBUG(
+        fmt("CUID#{} - Adding new command CUID#{}", getCuid(), peer->usedBy()));
   }
 }
 
@@ -397,7 +397,7 @@ TrackerWatcherCommand::createHTTPAnnRequest(const std::string& uri)
   rg->clearPreDownloadHandler();
   rg->clearPostDownloadHandler();
   A2_LOG_INFO(fmt("Creating tracker request group GID#{}",
-                  GroupId::toHex(rg->getGID()).c_str()));
+                  GroupId::toHex(rg->getGID())));
   return make_unique<HTTPAnnRequest>(std::move(rg));
 }
 

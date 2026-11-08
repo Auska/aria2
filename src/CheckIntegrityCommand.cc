@@ -75,15 +75,14 @@ bool CheckIntegrityCommand::executeInternal()
     if (getRequestGroup()->downloadFinished()) {
       A2_LOG_NOTICE(
           fmt(MSG_VERIFICATION_SUCCESSFUL,
-              getRequestGroup()->getDownloadContext()->getBasePath().c_str()));
+              getRequestGroup()->getDownloadContext()->getBasePath()));
       std::vector<std::unique_ptr<Command>> commands;
       entry_->onDownloadFinished(commands, getDownloadEngine());
       getDownloadEngine()->addCommand(std::move(commands));
     }
     else {
-      A2_LOG_ERROR(
-          fmt(MSG_VERIFICATION_FAILED,
-              getRequestGroup()->getDownloadContext()->getBasePath().c_str()));
+      A2_LOG_ERROR(fmt(MSG_VERIFICATION_FAILED,
+                       getRequestGroup()->getDownloadContext()->getBasePath()));
       std::vector<std::unique_ptr<Command>> commands;
       entry_->onDownloadIncomplete(commands, getDownloadEngine());
       getDownloadEngine()->addCommand(std::move(commands));
@@ -100,9 +99,8 @@ bool CheckIntegrityCommand::executeInternal()
 bool CheckIntegrityCommand::handleException(Exception& e)
 {
   A2_LOG_ERROR_EX(fmt(MSG_FILE_VALIDATION_FAILURE, getCuid()), e);
-  A2_LOG_ERROR(
-      fmt(MSG_DOWNLOAD_NOT_COMPLETE, getCuid(),
-          getRequestGroup()->getDownloadContext()->getBasePath().c_str()));
+  A2_LOG_ERROR(fmt(MSG_DOWNLOAD_NOT_COMPLETE, getCuid(),
+                   getRequestGroup()->getDownloadContext()->getBasePath()));
   return true;
 }
 

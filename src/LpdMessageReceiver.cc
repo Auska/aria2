@@ -61,13 +61,12 @@ bool LpdMessageReceiver::init(const std::string& localAddr)
     socket_ = std::make_shared<SocketCore>(SOCK_DGRAM);
     socket_->bind(multicastAddress_.c_str(), multicastPort_, AF_INET);
     A2_LOG_DEBUG(fmt("Joining multicast group. {}:{}, localAddr={}",
-                     multicastAddress_.c_str(), multicastPort_,
-                     localAddr.c_str()));
+                     multicastAddress_, multicastPort_, localAddr));
     socket_->joinMulticastGroup(multicastAddress_, multicastPort_, localAddr);
     socket_->setNonBlockingMode();
     localAddress_ = localAddr;
     A2_LOG_INFO(fmt("Listening multicast group ({}:{}) packet",
-                    multicastAddress_.c_str(), multicastPort_));
+                    multicastAddress_, multicastPort_));
     return true;
   }
   catch (RecoverableException& e) {
@@ -104,20 +103,22 @@ std::unique_ptr<LpdMessage> LpdMessageReceiver::receiveMessage()
       continue;
     }
     auto header = proc.getResult();
-    const std::string& infoHashString = header->find(HttpHeader::InterestingHeader::INFOHASH);
+    const std::string& infoHashString =
+        header->find(HttpHeader::InterestingHeader::INFOHASH);
     uint32_t port = 0;
-    if (!util::parseUIntNoThrow(port, header->find(HttpHeader::InterestingHeader::PORT)) ||
+    if (!util::parseUIntNoThrow(
+            port, header->find(HttpHeader::InterestingHeader::PORT)) ||
         port > UINT16_MAX || port == 0) {
       A2_LOG_INFO(fmt("Bad LPD port={}", port));
       continue;
     }
     A2_LOG_INFO(fmt("LPD message received infohash={}, port={} from {}",
-                    infoHashString.c_str(), port, remoteEndpoint.addr.c_str()));
+                    infoHashString, port, remoteEndpoint.addr));
     std::string infoHash;
     if (infoHashString.size() != 40 ||
         (infoHash = util::fromHex(infoHashString.begin(), infoHashString.end()))
             .empty()) {
-      A2_LOG_INFO(fmt("LPD bad request. infohash={}", infoHashString.c_str()));
+      A2_LOG_INFO(fmt("LPD bad request. infohash={}", infoHashString));
       continue;
     }
     auto peer = std::make_shared<Peer>(remoteEndpoint.addr, port, false);

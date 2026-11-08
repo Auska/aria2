@@ -48,8 +48,8 @@ namespace {
 void handleError(const std::string& funName)
 {
   throw DL_ABORT_EX(
-      fmt("Exception in libssl routine {}(DHKeyExchange class): {}",
-          funName.c_str(), ERR_error_string(ERR_get_error(), nullptr)));
+      fmt("Exception in libssl routine {}(DHKeyExchange class): {}", funName,
+          ERR_error_string(ERR_get_error(), nullptr)));
 }
 } // namespace
 

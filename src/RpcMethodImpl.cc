@@ -38,7 +38,6 @@
 
 #include <cassert>
 #include <algorithm>
-#include <sstream>
 
 #include "Logger.h"
 #include "LogFactory.h"
@@ -1488,10 +1487,9 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
 #ifdef ENABLE_BITTORRENT
   if (option.defined(PREF_DIR) || option.defined(PREF_INDEX_OUT)) {
     if (dctx->hasAttribute(ContextAttributeType::BT)) {
-      // shortcut: util::createIndexPaths() takes std::istream&.
-      std::istringstream indexOutIn(grOption->get(PREF_INDEX_OUT));
       std::vector<std::pair<size_t, std::string>> indexPaths =
-          util::createIndexPaths(indexOutIn);
+          util::createIndexPaths(
+              std::string_view{grOption->get(PREF_INDEX_OUT)});
       for (std::vector<std::pair<size_t, std::string>>::const_iterator
                i = indexPaths.begin(),
                eoi = indexPaths.end();

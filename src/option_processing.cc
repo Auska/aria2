@@ -36,7 +36,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <sstream>
 
 #include <aria2/aria2.h>
 #include "Option.h"
@@ -179,8 +178,7 @@ error_code::Value option_processing(Option& op, bool standalone,
   try {
     bool noConf = false;
     std::string ucfname;
-    // shortcut: OptionParser::parse() takes std::istream&.
-    std::stringstream cmdstream;
+    std::string cmdline;
     {
       // first evaluate --no-conf and --conf-path options.
       Option op;
@@ -188,8 +186,8 @@ error_code::Value option_processing(Option& op, bool standalone,
         oparser->parse(op, options);
       }
       else {
-        oparser->parseArg(cmdstream, uris, argc, argv);
-        oparser->parse(op, cmdstream);
+        cmdline = oparser->parseArg(uris, argc, argv);
+        oparser->parse(op, cmdline);
       }
       noConf = op.getAsBool(PREF_NO_CONF);
       ucfname = op.get(PREF_CONF_PATH);
@@ -226,16 +224,15 @@ error_code::Value option_processing(Option& op, bool standalone,
                           : ucfname;
 
       if (File(cfname).isFile()) {
-        // shortcut: OptionParser::parse() takes std::istream&.
-        std::stringstream ss;
+        std::string conf;
         {
           BufferedFile fp(cfname.c_str(), BufferedFile::READ);
           if (fp) {
-            fp.transfer(ss);
+            conf = fp.readAll();
           }
         }
         try {
-          oparser->parse(*confOption, ss);
+          oparser->parse(*confOption, conf);
         }
         catch (OptionHandlerException& e) {
           global::cerr()->printf(_("Parse error in %s"), cfname.c_str());
@@ -274,12 +271,9 @@ error_code::Value option_processing(Option& op, bool standalone,
       confOption->put(PREF_QUIET, A2_V_TRUE);
     }
 
-    // we must clear eof bit and seek to the beginning of the buffer.
-    cmdstream.clear();
-    cmdstream.seekg(0, std::ios::beg);
     // finally let's parse and store command-line options.
     op.setParent(confOption);
-    oparser->parse(op, cmdstream);
+    oparser->parse(op, cmdline);
     oparser->parse(op, options);
   }
   catch (OptionHandlerException& e) {

@@ -345,8 +345,10 @@ void UtilTest2::testConvertBitfield()
   // which corresponds to the index [1,2] in destBitfield
   util::convertBitfield(&destBitfield, &srcBitfield);
 
-  CPPUNIT_ASSERT_EQUAL(std::string("9fffffffffffffffffffffffffffffff80"),
-                       util::toHex(std::as_bytes(std::span{destBitfield.getBitfield(), destBitfield.getBitfieldLength()})));
+  CPPUNIT_ASSERT_EQUAL(
+      std::string("9fffffffffffffffffffffffffffffff80"),
+      util::toHex(std::as_bytes(std::span{destBitfield.getBitfield(),
+                                          destBitfield.getBitfieldLength()})));
 }
 
 void UtilTest2::testParseIntSegments()
@@ -553,8 +555,7 @@ void UtilTest2::testPercentEncode()
   CPPUNIT_ASSERT_EQUAL(
       std::string("%3A%2F%3F%23%5B%5D%40%21%25%26%27%28%29%2A%2B%2C%3B%3D"),
       util::percentEncode(std::as_bytes(
-          std::span{":/?#[]@!%&'()*+,;=",
-                    sizeof(":/?#[]@!%&'()*+,;=") - 1})));
+          std::span{":/?#[]@!%&'()*+,;=", sizeof(":/?#[]@!%&'()*+,;=") - 1})));
 
   std::string unreserved = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                            "abcdefghijklmnopqrstuvwxyz"
@@ -639,8 +640,8 @@ void UtilTest2::testParseIndexPath()
 
 void UtilTest2::testCreateIndexPaths()
 {
-  std::stringstream in("1=/tmp/myfile\n"
-                       "100=/myhome/mypicture.png\n");
+  std::string in = "1=/tmp/myfile\n"
+                   "100=/myhome/mypicture.png\n";
   std::vector<std::pair<size_t, std::string>> m = util::createIndexPaths(in);
   CPPUNIT_ASSERT_EQUAL((size_t)2, m.size());
   CPPUNIT_ASSERT_EQUAL((size_t)1, m[0].first);
@@ -656,11 +657,13 @@ void UtilTest2::testGenerateRandomData()
   // Simple sanity check
   unsigned char data1[25];
   memset(data1, 0, sizeof(data1));
-  util::generateRandomData(std::as_writable_bytes(std::span{data1, sizeof(data1)}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{data1, sizeof(data1)}));
 
   unsigned char data2[25];
   memset(data2, 0, sizeof(data2));
-  util::generateRandomData(std::as_writable_bytes(std::span{data2, sizeof(data2)}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{data2, sizeof(data2)}));
 
   CPPUNIT_ASSERT(memcmp(data1, data2, sizeof(data1)) != 0);
 
@@ -668,7 +671,8 @@ void UtilTest2::testGenerateRandomData()
   map<uint8_t, size_t> counts;
   uint8_t bytes[1 << 20];
   for (auto i = 0; i < 10; ++i) {
-    util::generateRandomData(std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
+    util::generateRandomData(
+        std::as_writable_bytes(std::span{bytes, sizeof(bytes)}));
     for (auto b : bytes) {
       counts[b]++;
     }

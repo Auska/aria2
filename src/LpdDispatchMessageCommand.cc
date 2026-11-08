@@ -62,7 +62,7 @@ bool LpdDispatchMessageCommand::execute()
   if (dispatcher_->isAnnounceReady()) {
     try {
       A2_LOG_INFO(fmt("Dispatching LPD message for infohash={}",
-                      util::toHex(dispatcher_->getInfoHash()).c_str()));
+                      util::toHex(dispatcher_->getInfoHash())));
       if (dispatcher_->sendMessage()) {
         A2_LOG_INFO("Sending LPD message is complete.");
         dispatcher_->resetAnnounceTimer();

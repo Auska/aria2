@@ -89,29 +89,27 @@ bool ServerStatMan::save(const std::string& filename) const
   {
     BufferedFile fp(tempfile.c_str(), BufferedFile::WRITE);
     if (!fp) {
-      A2_LOG_ERROR(
-          fmt(MSG_OPENING_WRITABLE_SERVER_STAT_FILE_FAILED, filename.c_str()));
+      A2_LOG_ERROR(fmt(MSG_OPENING_WRITABLE_SERVER_STAT_FILE_FAILED, filename));
       return false;
     }
     for (auto& e : serverStats_) {
       std::string l = e->toString();
       l += "\n";
       if (fp.write(std::as_bytes(std::span{l})) != l.size()) {
-        A2_LOG_ERROR(
-            fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename.c_str()));
+        A2_LOG_ERROR(fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename));
       }
     }
     if (fp.close() == EOF) {
-      A2_LOG_ERROR(fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename.c_str()));
+      A2_LOG_ERROR(fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename));
       return false;
     }
   }
   if (File(tempfile).renameTo(filename)) {
-    A2_LOG_NOTICE(fmt(MSG_SERVER_STAT_SAVED, filename.c_str()));
+    A2_LOG_NOTICE(fmt(MSG_SERVER_STAT_SAVED, filename));
     return true;
   }
   else {
-    A2_LOG_ERROR(fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename.c_str()));
+    A2_LOG_ERROR(fmt(MSG_WRITING_SERVER_STAT_FILE_FAILED, filename));
     return false;
   }
 }
@@ -153,8 +151,7 @@ bool ServerStatMan::load(const std::string& filename)
 {
   BufferedFile fp(filename.c_str(), BufferedFile::READ);
   if (!fp) {
-    A2_LOG_ERROR(
-        fmt(MSG_OPENING_READABLE_SERVER_STAT_FILE_FAILED, filename.c_str()));
+    A2_LOG_ERROR(fmt(MSG_OPENING_READABLE_SERVER_STAT_FILE_FAILED, filename));
     return false;
   }
   while (1) {
@@ -164,8 +161,7 @@ bool ServerStatMan::load(const std::string& filename)
         break;
       }
       else if (!fp) {
-        A2_LOG_ERROR(
-            fmt(MSG_READING_SERVER_STAT_FILE_FAILED, filename.c_str()));
+        A2_LOG_ERROR(fmt(MSG_READING_SERVER_STAT_FILE_FAILED, filename));
         return false;
       }
       else {
@@ -188,46 +184,54 @@ bool ServerStatMan::load(const std::string& filename)
         m[id].assign(p.second.first, p.second.second);
       }
     }
-    if (m[static_cast<size_t>(Field::HOSTNAME)].empty() || m[static_cast<size_t>(Field::PROTOCOL)].empty()) {
+    if (m[static_cast<size_t>(Field::HOSTNAME)].empty() ||
+        m[static_cast<size_t>(Field::PROTOCOL)].empty()) {
       continue;
     }
-    auto sstat = std::make_shared<ServerStat>(m[static_cast<size_t>(Field::HOSTNAME)], m[static_cast<size_t>(Field::PROTOCOL)]);
+    auto sstat =
+        std::make_shared<ServerStat>(m[static_cast<size_t>(Field::HOSTNAME)],
+                                     m[static_cast<size_t>(Field::PROTOCOL)]);
 
     uint32_t uintval;
-    if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::DL_SPEED)])) {
+    if (!util::parseUIntNoThrow(uintval,
+                                m[static_cast<size_t>(Field::DL_SPEED)])) {
       continue;
     }
     sstat->setDownloadSpeed(uintval);
     // Old serverstat file doesn't contains SC_AVG_SPEED
     if (!m[static_cast<size_t>(Field::SC_AVG_SPEED)].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::SC_AVG_SPEED)])) {
+      if (!util::parseUIntNoThrow(
+              uintval, m[static_cast<size_t>(Field::SC_AVG_SPEED)])) {
         continue;
       }
       sstat->setSingleConnectionAvgSpeed(uintval);
     }
     // Old serverstat file doesn't contains MC_AVG_SPEED
     if (!m[static_cast<size_t>(Field::MC_AVG_SPEED)].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::MC_AVG_SPEED)])) {
+      if (!util::parseUIntNoThrow(
+              uintval, m[static_cast<size_t>(Field::MC_AVG_SPEED)])) {
         continue;
       }
       sstat->setMultiConnectionAvgSpeed(uintval);
     }
     // Old serverstat file doesn't contains COUNTER_SPEED
     if (!m[static_cast<size_t>(Field::COUNTER)].empty()) {
-      if (!util::parseUIntNoThrow(uintval, m[static_cast<size_t>(Field::COUNTER)])) {
+      if (!util::parseUIntNoThrow(uintval,
+                                  m[static_cast<size_t>(Field::COUNTER)])) {
         continue;
       }
       sstat->setCounter(uintval);
     }
     int32_t intval;
-    if (!util::parseIntNoThrow(intval, m[static_cast<size_t>(Field::LAST_UPDATED)])) {
+    if (!util::parseIntNoThrow(intval,
+                               m[static_cast<size_t>(Field::LAST_UPDATED)])) {
       continue;
     }
     sstat->setLastUpdated(Time(intval));
     sstat->setStatus(m[static_cast<size_t>(Field::STATUS)]);
     add(sstat);
   }
-  A2_LOG_NOTICE(fmt(MSG_SERVER_STAT_LOADED, filename.c_str()));
+  A2_LOG_NOTICE(fmt(MSG_SERVER_STAT_LOADED, filename));
   return true;
 }
 

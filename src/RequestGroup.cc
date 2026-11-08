@@ -245,8 +245,8 @@ std::unique_ptr<CheckIntegrityEntry> RequestGroup::createCheckIntegrityEntry()
         return std::move(tempEntry);
       }
       downloadContext_->setChecksumVerified(true);
-      A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED, gid_->toHex().c_str(),
-                        downloadContext_->getBasePath().c_str()));
+      A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED, gid_->toHex(),
+                        downloadContext_->getBasePath()));
       return nullptr;
     }
     return make_unique<StreamCheckIntegrityEntry>(this);
@@ -287,7 +287,7 @@ void RequestGroup::createInitialCommand(
       // URI, then go without BT.
       throw DOWNLOAD_FAILURE_EXCEPTION2(
           fmt("InfoHash {} is already registered.",
-              bittorrent::getInfoHashString(downloadContext_).c_str()),
+              bittorrent::getInfoHashString(downloadContext_)),
           error_code::DUPLICATE_INFO_HASH);
     }
     if (metadataGetMode) {
@@ -296,8 +296,7 @@ void RequestGroup::createInitialCommand(
     }
     else if (e->getRequestGroupMan()->isSameFileBeingDownloaded(this)) {
       throw DOWNLOAD_FAILURE_EXCEPTION2(
-          fmt(EX_DUPLICATE_FILE_DOWNLOAD,
-              downloadContext_->getBasePath().c_str()),
+          fmt(EX_DUPLICATE_FILE_DOWNLOAD, downloadContext_->getBasePath()),
           error_code::DUPLICATE_DOWNLOAD);
     }
     else {
@@ -431,8 +430,7 @@ void RequestGroup::createInitialCommand(
           !option_->getAsBool(PREF_BT_SEED_UNVERIFIED)) {
         // TODO we need this->haltRequested = true?
         throw DOWNLOAD_FAILURE_EXCEPTION2(
-            fmt(MSG_FILE_ALREADY_EXISTS,
-                downloadContext_->getBasePath().c_str()),
+            fmt(MSG_FILE_ALREADY_EXISTS, downloadContext_->getBasePath()),
             error_code::FILE_ALREADY_EXISTS);
       }
       pieceStorage_->getDiskAdaptor()->openFile();
@@ -489,8 +487,7 @@ void RequestGroup::createInitialCommand(
   // DownloadContext.
   if (e->getRequestGroupMan()->isSameFileBeingDownloaded(this)) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt(EX_DUPLICATE_FILE_DOWNLOAD,
-            downloadContext_->getBasePath().c_str()),
+        fmt(EX_DUPLICATE_FILE_DOWNLOAD, downloadContext_->getBasePath()),
         error_code::DUPLICATE_DOWNLOAD);
   }
   initPieceStorage();
@@ -510,7 +507,7 @@ void RequestGroup::createInitialCommand(
     if (!isCheckIntegrityReady() && !option_->getAsBool(PREF_ALLOW_OVERWRITE)) {
       // TODO we need this->haltRequested = true?
       throw DOWNLOAD_FAILURE_EXCEPTION2(
-          fmt(MSG_FILE_ALREADY_EXISTS, downloadContext_->getBasePath().c_str()),
+          fmt(MSG_FILE_ALREADY_EXISTS, downloadContext_->getBasePath()),
           error_code::FILE_ALREADY_EXISTS);
     }
     pieceStorage_->getDiskAdaptor()->openFile();
@@ -653,7 +650,7 @@ void RequestGroup::adjustFilename(
     if (requestGroupMan_->isSameFileBeingDownloaded(this)) {
       // The file name must be renamed
       tryAutoFileRenaming();
-      A2_LOG_NOTICE(fmt(MSG_FILE_RENAMED, getFirstFilePath().c_str()));
+      A2_LOG_NOTICE(fmt(MSG_FILE_RENAMED, getFirstFilePath()));
       return;
     }
   }
@@ -662,7 +659,7 @@ void RequestGroup::adjustFilename(
     infoFile->removeFile();
     A2_LOG_NOTICE(fmt(_("Removed control file for {} because it is requested by"
                         " user."),
-                      infoFile->getFilename().c_str()));
+                      infoFile->getFilename()));
   }
 
   if (infoFile->exists()) {
@@ -691,8 +688,8 @@ void RequestGroup::removeDefunctControlFile(
       !pieceStorage_->getDiskAdaptor()->fileExists()) {
     progressInfoFile->removeFile();
     A2_LOG_NOTICE(fmt(MSG_REMOVED_DEFUNCT_CONTROL_FILE,
-                      progressInfoFile->getFilename().c_str(),
-                      downloadContext_->getBasePath().c_str()));
+                      progressInfoFile->getFilename(),
+                      downloadContext_->getBasePath()));
   }
 }
 
@@ -742,21 +739,21 @@ void RequestGroup::shouldCancelDownloadForSafety()
   }
 
   tryAutoFileRenaming();
-  A2_LOG_NOTICE(fmt(MSG_FILE_RENAMED, getFirstFilePath().c_str()));
+  A2_LOG_NOTICE(fmt(MSG_FILE_RENAMED, getFirstFilePath()));
 }
 
 void RequestGroup::tryAutoFileRenaming()
 {
   if (!option_->getAsBool(PREF_AUTO_FILE_RENAMING)) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt(MSG_FILE_ALREADY_EXISTS, getFirstFilePath().c_str()),
+        fmt(MSG_FILE_ALREADY_EXISTS, getFirstFilePath()),
         error_code::FILE_ALREADY_EXISTS);
   }
 
   std::string filepath = getFirstFilePath();
   if (filepath.empty()) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
-        fmt("File renaming failed: {}", getFirstFilePath().c_str()),
+        fmt("File renaming failed: {}", getFirstFilePath()),
         error_code::FILE_RENAMING_FAILED);
   }
   auto fn = filepath;
@@ -779,7 +776,7 @@ void RequestGroup::tryAutoFileRenaming()
     fn = fn.substr(0, idx);
   }
   for (int i = 1; i < 10000; ++i) {
-    auto newfilename = fmt("{}.{}{}", fn.c_str(), i, ext.c_str());
+    auto newfilename = fmt("{}.{}{}", fn, i, ext);
     File newfile(newfilename);
     File ctrlfile(newfile.getPath() + DefaultBtProgressInfoFile::getSuffix());
     if (!newfile.exists() || (newfile.exists() && ctrlfile.exists())) {
@@ -788,7 +785,7 @@ void RequestGroup::tryAutoFileRenaming()
     }
   }
   throw DOWNLOAD_FAILURE_EXCEPTION2(
-      fmt("File renaming failed: {}", getFirstFilePath().c_str()),
+      fmt("File renaming failed: {}", getFirstFilePath()),
       error_code::FILE_RENAMING_FAILED);
 }
 
@@ -894,8 +891,8 @@ void RequestGroup::validateFilename(const std::string& expectedFilename,
   }
 
   if (expectedFilename != actualFilename) {
-    throw DL_ABORT_EX(fmt(EX_FILENAME_MISMATCH, expectedFilename.c_str(),
-                          actualFilename.c_str()));
+    throw DL_ABORT_EX(
+        fmt(EX_FILENAME_MISMATCH, expectedFilename, actualFilename));
   }
 }
 
@@ -948,7 +945,7 @@ void RequestGroup::decreaseNumCommand()
 {
   --numCommand_;
   if (!numCommand_ && requestGroupMan_) {
-    A2_LOG_DEBUG(fmt("GID#{} - Request queue check", gid_->toHex().c_str()));
+    A2_LOG_DEBUG(fmt("GID#{} - Request queue check", gid_->toHex()));
     requestGroupMan_->requestQueueCheck();
   }
 }
@@ -1010,8 +1007,8 @@ void RequestGroup::releaseRuntimeResource(DownloadEngine* e)
 
 void RequestGroup::preDownloadProcessing()
 {
-  A2_LOG_DEBUG(fmt("Finding PreDownloadHandler for path {}.",
-                   getFirstFilePath().c_str()));
+  A2_LOG_DEBUG(
+      fmt("Finding PreDownloadHandler for path {}.", getFirstFilePath()));
   try {
     for (const auto& pdh : preDownloadHandlers_) {
       if (pdh->canHandle(this)) {
@@ -1032,8 +1029,8 @@ void RequestGroup::preDownloadProcessing()
 void RequestGroup::postDownloadProcessing(
     std::vector<std::shared_ptr<RequestGroup>>& groups)
 {
-  A2_LOG_DEBUG(fmt("Finding PostDownloadHandler for path {}.",
-                   getFirstFilePath().c_str()));
+  A2_LOG_DEBUG(
+      fmt("Finding PostDownloadHandler for path {}.", getFirstFilePath()));
   try {
     for (const auto& pdh : postDownloadHandlers_) {
       if (pdh->canHandle(this)) {
@@ -1125,7 +1122,7 @@ bool RequestGroup::needsFileAllocation() const
 
 std::shared_ptr<DownloadResult> RequestGroup::createDownloadResult() const
 {
-  A2_LOG_DEBUG(fmt("GID#{} - Creating DownloadResult.", gid_->toHex().c_str()));
+  A2_LOG_DEBUG(fmt("GID#{} - Creating DownloadResult.", gid_->toHex()));
   TransferStat st = calculateStat();
   auto res = std::make_shared<DownloadResult>();
   res->gid = gid_;
@@ -1167,9 +1164,8 @@ std::shared_ptr<DownloadResult> RequestGroup::createDownloadResult() const
 void RequestGroup::reportDownloadFinished()
 {
   A2_LOG_NOTICE(fmt(MSG_FILE_DOWNLOAD_COMPLETED,
-                    inMemoryDownload()
-                        ? getFirstFilePath().c_str()
-                        : downloadContext_->getBasePath().c_str()));
+                    inMemoryDownload() ? getFirstFilePath().c_str()
+                                       : downloadContext_->getBasePath()));
   uriSelector_->resetCounters();
 #ifdef ENABLE_BITTORRENT
   if (downloadContext_->hasAttribute(ContextAttributeType::BT)) {
@@ -1181,8 +1177,8 @@ void RequestGroup::reportDownloadFinished()
     auto attrs = bittorrent::getTorrentAttrs(downloadContext_);
     if (!attrs->metadata.empty()) {
       A2_LOG_NOTICE(fmt(MSG_SHARE_RATIO_REPORT, shareRatio,
-                        util::abbrevSize(stat.allTimeUploadLength).c_str(),
-                        util::abbrevSize(completedLength).c_str()));
+                        util::abbrevSize(stat.allTimeUploadLength),
+                        util::abbrevSize(completedLength)));
     }
   }
 #endif // ENABLE_BITTORRENT
@@ -1198,8 +1194,8 @@ void RequestGroup::applyLastModifiedTimeToLocalFiles()
   if (!pieceStorage_ || !lastModifiedTime_.good()) {
     return;
   }
-  A2_LOG_INFO(fmt("Applying Last-Modified time: {}",
-                  lastModifiedTime_.toHTTPDate().c_str()));
+  A2_LOG_INFO(
+      fmt("Applying Last-Modified time: {}", lastModifiedTime_.toHTTPDate()));
   size_t n = pieceStorage_->getDiskAdaptor()->utime(Time(), lastModifiedTime_);
   A2_LOG_INFO(fmt("Last-Modified attrs of {} files were updated.",
                   static_cast<unsigned long>(n)));

@@ -77,12 +77,11 @@ void IteratableChunkChecksumValidator::validateChunk()
         bitfield_->setBit(currentIndex_);
       }
       else {
-        A2_LOG_INFO(
-            fmt(EX_INVALID_CHUNK_CHECKSUM,
-                static_cast<unsigned long>(currentIndex_),
-                static_cast<int64_t>(getCurrentOffset()),
-                util::toHex(dctx_->getPieceHashes()[currentIndex_]).c_str(),
-                util::toHex(actualChecksum).c_str()));
+        A2_LOG_INFO(fmt(EX_INVALID_CHUNK_CHECKSUM,
+                        static_cast<unsigned long>(currentIndex_),
+                        static_cast<int64_t>(getCurrentOffset()),
+                        util::toHex(dctx_->getPieceHashes()[currentIndex_]),
+                        util::toHex(actualChecksum)));
         bitfield_->unsetBit(currentIndex_);
       }
     }
@@ -132,13 +131,12 @@ std::string IteratableChunkChecksumValidator::digest(int64_t offset,
   int64_t max = offset + length;
   while (offset < max) {
     size_t r = pieceStorage_->getDiskAdaptor()->readDataDropCache(
-        std::span{buf}.first(
-            static_cast<size_t>(std::min(static_cast<int64_t>(buf.size()),
-                                         max - offset))),
+        std::span{buf}.first(static_cast<size_t>(
+            std::min(static_cast<int64_t>(buf.size()), max - offset))),
         offset);
     if (r == 0) {
       throw DL_ABORT_EX(
-          fmt(EX_FILE_READ, dctx_->getBasePath().c_str(), "data is too short"));
+          fmt(EX_FILE_READ, dctx_->getBasePath(), "data is too short"));
     }
     ctx_->update(std::as_bytes(std::span{buf.data(), static_cast<size_t>(r)}));
     offset += r;

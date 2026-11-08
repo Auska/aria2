@@ -189,7 +189,9 @@ void flipBit(std::span<unsigned char> data, size_t bitIndex);
 
 ## 分步计划
 
-1. [ ] **阶段 1：C++23 语言基线** — 改 `m4/ax_cxx_compile_stdcxx.m4`（3 处）+ `configure.ac:111`；干净 worktree 门禁；提交 `PLAN-007 阶段1: 升级语言基线到 C++23`。
+1. [x] **阶段 1：C++23 语言基线** — 改 `m4/ax_cxx_compile_stdcxx.m4`（3 处）+ `configure.ac:111`；干净 worktree 门禁；提交 `PLAN-007 阶段1: 升级语言基线到 C++23`。
+
+   **实测（2026-11-08）**：`m4/ax_cxx_compile_stdcxx.m4` 加 `[$1],[23],[ax_cxx_compile_alternatives="23 2b"]`、`_AX_CXX_COMPILE_STDCXX_testbody_23`（引用 new_in_11/14/17/20/23）、`_AX_CXX_COMPILE_STDCXX_testbody_new_in_23`（只断言 `__cplusplus < 202302L`，不测库特性）；`configure.ac:111` → `AX_CXX_COMPILE_STDCXX([23], [noext], [mandatory])`。干净 worktree `/tmp/aria2-m7-p1`（base `0bfa7120`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`CXX = g++ -std=c++23`、`config.log` 中 `std=c++20` 0 命中、`make -j24 check` rc=0、`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、`grep -c 'error:'` = 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。提交 `5e032fc7`。
 2. [ ] **阶段 2：`.c_str()` 清理 + `std::string_view` 链路** — 333 处机械替换 + `OptionParser::parse`/`parseArg`/`util::createIndexPaths` 三个签名 + `IOFile::readAll()`；干净 worktree 门禁；提交 `PLAN-007 阶段2: 清理 fmt 冗余 .c_str() 并移除 istream 链路`。
 3. [ ] **阶段 3：`bitfield.h` span 化** — `countSetBit`/`flipBit` 两个函数 + 16 个调用点；干净 worktree 门禁；提交 `PLAN-007 阶段3: bitfield 算法族 span 化`。
 4. [ ] **阶段 4：`bool`+出参 → `std::optional`** — 9 个声明 + 12 个 override + 调用点 + 测试；干净 worktree 门禁；提交 `PLAN-007 阶段4: 输出参数改为 std::optional 返回值`。

@@ -37,7 +37,6 @@
 #include <span>
 
 #include <algorithm>
-#include <sstream>
 
 #include "RequestGroup.h"
 #include "Option.h"
@@ -112,13 +111,11 @@ std::shared_ptr<GroupId> getGID(const std::shared_ptr<Option>& option)
     a2_gid_t n;
     if (GroupId::toNumericId(n, option->get(PREF_GID).c_str()) !=
         GroupId::Err::OK) {
-      throw DL_ABORT_EX(
-          fmt("{} is invalid for GID.", option->get(PREF_GID).c_str()));
+      throw DL_ABORT_EX(fmt("{} is invalid for GID.", option->get(PREF_GID)));
     }
     gid = GroupId::import(n);
     if (!gid) {
-      throw DL_ABORT_EX(
-          fmt("GID {} is not unique.", option->get(PREF_GID).c_str()));
+      throw DL_ABORT_EX(fmt("GID {} is not unique.", option->get(PREF_GID)));
     }
   }
   else {
@@ -214,9 +211,8 @@ createBtRequestGroup(const std::string& metaInfoUri,
   auto sgl = util::parseIntSegments(option->get(PREF_SELECT_FILE));
   sgl.normalize();
   dctx->setFileFilter(std::move(sgl));
-  // shortcut: util::createIndexPaths() takes std::istream&.
-  std::istringstream indexOutIn(option->get(PREF_INDEX_OUT));
-  auto indexPaths = util::createIndexPaths(indexOutIn);
+  auto indexPaths =
+      util::createIndexPaths(std::string_view{option->get(PREF_INDEX_OUT)});
   for (const auto& i : indexPaths) {
     dctx->setFilePathWithIndex(i.first,
                                util::applyDir(option->get(PREF_DIR), i.second));
@@ -261,15 +257,15 @@ createBtMagnetRequestGroup(const std::string& magnetLink,
           bittorrent::getTorrentAttrs(rg->getDownloadContext())->infoHash;
 
       if (torrentAttrs->infoHash == actualInfoHash) {
-        A2_LOG_NOTICE(fmt("BitTorrent metadata was loaded from {}",
-                          torrentFilename.c_str()));
+        A2_LOG_NOTICE(
+            fmt("BitTorrent metadata was loaded from {}", torrentFilename));
         rg->setMetadataInfo(createMetadataInfo(rg->getGroupId(), magnetLink));
         return rg;
       }
 
       A2_LOG_WARN(
           fmt("BitTorrent metadata loaded from {} has unexpected infohash {}\n",
-              torrentFilename.c_str(), util::toHex(actualInfoHash).c_str()));
+              torrentFilename, util::toHex(actualInfoHash)));
     }
   }
 
@@ -315,8 +311,7 @@ void createRequestGroupForBitTorrent(
   }
   else {
     ssize_t error;
-    torrent = parser.parseFinal(std::as_bytes(std::span{torrentData}),
-                                 error);
+    torrent = parser.parseFinal(std::as_bytes(std::span{torrentData}), error);
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Bencode decoding failed",
@@ -412,10 +407,10 @@ public:
 #endif // ENABLE_BITTORRENT
     else {
       if (throwOnError_) {
-        throw DL_ABORT_EX(fmt(MSG_UNRECOGNIZED_URI, uri.c_str()));
+        throw DL_ABORT_EX(fmt(MSG_UNRECOGNIZED_URI, uri));
       }
       else {
-        A2_LOG_ERROR(fmt(MSG_UNRECOGNIZED_URI, uri.c_str()));
+        A2_LOG_ERROR(fmt(MSG_UNRECOGNIZED_URI, uri));
       }
     }
   }
@@ -523,8 +518,8 @@ std::shared_ptr<UriListParser> openUriListParser(const std::string& filename)
 
   auto f = File(filename);
   if (!f.exists() || f.isDir()) {
-    throw DL_ABORT_EX(fmt(EX_FILE_OPEN, filename.c_str(),
-                          "File not found or it is a directory"));
+    throw DL_ABORT_EX(
+        fmt(EX_FILE_OPEN, filename, "File not found or it is a directory"));
   }
   listPath = filename;
 

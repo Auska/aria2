@@ -79,11 +79,10 @@ void SaveSessionCommand::process()
 
     if (sessionSerializer.save(filename)) {
       A2_LOG_NOTICE(
-          fmt(_("Serialized session to '{}' successfully."), filename.c_str()));
+          fmt(_("Serialized session to '{}' successfully."), filename));
     }
     else {
-      A2_LOG_ERROR(
-          fmt(_("Failed to serialize session to '{}'."), filename.c_str()));
+      A2_LOG_ERROR(fmt(_("Failed to serialize session to '{}'."), filename));
     }
   }
 }

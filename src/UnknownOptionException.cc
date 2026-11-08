@@ -43,7 +43,7 @@ constexpr auto MESSAGE = _("Unknown option '{}'");
 
 UnknownOptionException::UnknownOptionException(const char* file, int line,
                                                const std::string& unknownOption)
-    : RecoverableException(file, line, fmt(MESSAGE, unknownOption.c_str()),
+    : RecoverableException(file, line, fmt(MESSAGE, unknownOption),
                            error_code::OPTION_ERROR),
       unknownOption_(unknownOption)
 {
@@ -52,7 +52,7 @@ UnknownOptionException::UnknownOptionException(const char* file, int line,
 UnknownOptionException::UnknownOptionException(const char* file, int line,
                                                const std::string& unknownOption,
                                                const Exception& cause)
-    : RecoverableException(file, line, fmt(MESSAGE, unknownOption.c_str()),
+    : RecoverableException(file, line, fmt(MESSAGE, unknownOption),
                            error_code::OPTION_ERROR, cause),
       unknownOption_(unknownOption)
 {

@@ -224,8 +224,8 @@ size_t RequestGroupMan::changeReservedGroupPosition(a2_gid_t gid, int pos,
 {
   ssize_t dest = reservedGroups_.move(gid, pos, how);
   if (dest == -1) {
-    throw DL_ABORT_EX(fmt("GID#{} not found in the waiting queue.",
-                          GroupId::toHex(gid).c_str()));
+    throw DL_ABORT_EX(
+        fmt("GID#{} not found in the waiting queue.", GroupId::toHex(gid)));
   }
   else {
     return dest;
@@ -300,10 +300,10 @@ private:
       // ".sig".
       std::string signatureFile = group->getFirstFilePath() + ".sig";
       if (sig->save(signatureFile)) {
-        A2_LOG_NOTICE(fmt(MSG_SIGNATURE_SAVED, signatureFile.c_str()));
+        A2_LOG_NOTICE(fmt(MSG_SIGNATURE_SAVED, signatureFile));
       }
       else {
-        A2_LOG_NOTICE(fmt(MSG_SIGNATURE_NOT_SAVED, signatureFile.c_str()));
+        A2_LOG_NOTICE(fmt(MSG_SIGNATURE_NOT_SAVED, signatureFile));
       }
     }
   }
@@ -372,7 +372,7 @@ public:
         if (group->isPauseRequested()) {
           if (!group->isRestartRequested()) {
             A2_LOG_NOTICE(fmt(_("Download GID#{} paused"),
-                              GroupId::toHex(group->getGID()).c_str()));
+                              GroupId::toHex(group->getGID())));
           }
           group->saveControlFile();
         }
@@ -401,19 +401,19 @@ public:
           // FileEntry::getPath() does not return actual file path, so
           // we don't remove it.
           if (group->getOption()->getAsBool(PREF_BT_REMOVE_UNSELECTED_FILE) &&
-              !group->inMemoryDownload() && dctx->hasAttribute(ContextAttributeType::BT)) {
+              !group->inMemoryDownload() &&
+              dctx->hasAttribute(ContextAttributeType::BT)) {
             A2_LOG_INFO(fmt(MSG_REMOVING_UNSELECTED_FILE,
-                            GroupId::toHex(group->getGID()).c_str()));
+                            GroupId::toHex(group->getGID())));
             const std::vector<std::shared_ptr<FileEntry>>& files =
                 dctx->getFileEntries();
             for (auto& file : files) {
               if (!file->isRequested()) {
                 if (File(file->getPath()).remove()) {
-                  A2_LOG_INFO(fmt(MSG_FILE_REMOVED, file->getPath().c_str()));
+                  A2_LOG_INFO(fmt(MSG_FILE_REMOVED, file->getPath()));
                 }
                 else {
-                  A2_LOG_INFO(
-                      fmt(MSG_FILE_COULD_NOT_REMOVED, file->getPath().c_str()));
+                  A2_LOG_INFO(fmt(MSG_FILE_COULD_NOT_REMOVED, file->getPath()));
                 }
               }
             }
@@ -421,10 +421,9 @@ public:
 #endif // ENABLE_BITTORRENT
         }
         else {
-          A2_LOG_NOTICE(
-              fmt(_("Download GID#{} not complete: {}"),
-                  GroupId::toHex(group->getGID()).c_str(),
-                  group->getDownloadContext()->getBasePath().c_str()));
+          A2_LOG_NOTICE(fmt(_("Download GID#{} not complete: {}"),
+                            GroupId::toHex(group->getGID()),
+                            group->getDownloadContext()->getBasePath()));
           group->saveControlFile();
         }
       }
@@ -647,12 +646,7 @@ RequestGroupMan::DownloadStat RequestGroupMan::getDownloadStat() const
   return DownloadStat(error, inprogress, reservedGroups_.size(), lastError);
 }
 
-enum class DownloadResultStatus {
-  OK,
-  INPR,
-  RM,
-  ERR
-};
+enum class DownloadResultStatus { OK, INPR, RM, ERR };
 
 namespace {
 const char* getStatusStr(DownloadResultStatus status, bool useColor)
@@ -1104,12 +1098,11 @@ int RequestGroupMan::optimizeConcurrentDownloads()
   maxConcurrentDownloads =
       std::min(std::max(1, maxConcurrentDownloads), maxConcurrentDownloads_);
 
-  A2_LOG_DEBUG(
-      fmt("Max concurrent downloads optimized at {} ({} currently active) "
-          "[optimization speed {}B/s, current speed {}B/s]",
-          maxConcurrentDownloads, static_cast<unsigned long>(numActive_),
-          util::abbrevSize(optimizationSpeed_).c_str(),
-          util::abbrevSize(currentSpeed).c_str()));
+  A2_LOG_DEBUG(fmt(
+      "Max concurrent downloads optimized at {} ({} currently active) "
+      "[optimization speed {}B/s, current speed {}B/s]",
+      maxConcurrentDownloads, static_cast<unsigned long>(numActive_),
+      util::abbrevSize(optimizationSpeed_), util::abbrevSize(currentSpeed)));
 
   return maxConcurrentDownloads;
 }

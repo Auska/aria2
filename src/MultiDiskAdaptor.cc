@@ -157,7 +157,7 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
       else if (fileEntry->getOffset() < lastOffset) {
         // The files which shares last piece are not needed to be
         // allocated. They just require DiskWriter
-        A2_LOG_DEBUG(fmt("{} needs DiskWriter", fileEntry->getPath().c_str()));
+        A2_LOG_DEBUG(fmt("{} needs DiskWriter", fileEntry->getPath()));
         dwent->needsDiskWriter(true);
       }
     }
@@ -174,8 +174,7 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
         // We needs last part of the file, so file allocation is
         // required, especially for file system which does not support
         // sparse files.
-        A2_LOG_DEBUG(
-            fmt("{} needs file allocation", fileEntry->getPath().c_str()));
+        A2_LOG_DEBUG(fmt("{} needs file allocation", fileEntry->getPath()));
         (*i)->needsFileAllocation(true);
       }
     }
@@ -184,8 +183,8 @@ void MultiDiskAdaptor::resetDiskWriterEntries()
   for (auto& dwent : diskWriterEntries_) {
     if (dwent->needsFileAllocation() || dwent->needsDiskWriter() ||
         dwent->fileExists()) {
-      A2_LOG_DEBUG(fmt("Creating DiskWriter for filename={}",
-                       dwent->getFilePath().c_str()));
+      A2_LOG_DEBUG(
+          fmt("Creating DiskWriter for filename={}", dwent->getFilePath()));
       dwent->setDiskWriter(dwFactory.newDiskWriter(dwent->getFilePath()));
       if (readOnly_) {
         dwent->getDiskWriter()->enableReadOnly();
@@ -217,7 +216,7 @@ void MultiDiskAdaptor::openIfNot(DiskWriterEntry* entry,
 {
   if (!entry->isOpen()) {
     // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache MISS. offset={}",
-    //        util::itos(entry->getFileEntry()->getOffset()).c_str()));
+    //        util::itos(entry->getFileEntry()->getOffset())));
     auto& openedFileCounter = getOpenedFileCounter();
     if (openedFileCounter) {
       openedFileCounter->ensureMaxOpenFileLimit(1);
@@ -227,7 +226,7 @@ void MultiDiskAdaptor::openIfNot(DiskWriterEntry* entry,
   }
   else {
     // A2_LOG_NOTICE(fmt("DiskWriterEntry: Cache HIT. offset={}",
-    //        util::itos(entry->getFileEntry()->getOffset()).c_str()));
+    //        util::itos(entry->getFileEntry()->getOffset())));
   }
 }
 
@@ -330,9 +329,8 @@ findFirstDiskWriterEntry(const DiskWriterEntries& diskWriterEntries,
 namespace {
 void throwOnDiskWriterNotOpened(DiskWriterEntry* e, int64_t offset)
 {
-  throw DL_ABORT_EX(
-      fmt("DiskWriter for offset={}, filename={} is not opened.",
-          static_cast<int64_t>(offset), e->getFilePath().c_str()));
+  throw DL_ABORT_EX(fmt("DiskWriter for offset={}, filename={} is not opened.",
+                        static_cast<int64_t>(offset), e->getFilePath()));
 }
 } // namespace
 
@@ -388,8 +386,7 @@ ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
 
     while (readLength > 0) {
       auto nread = (*i)->getDiskWriter()->readData(
-          data.subspan(len - rem, static_cast<size_t>(readLength)),
-          fileOffset);
+          data.subspan(len - rem, static_cast<size_t>(readLength)), fileOffset);
 
       if (nread == 0) {
         return totalReadLength;
@@ -437,8 +434,7 @@ void MultiDiskAdaptor::flushOSBuffers()
 
 bool MultiDiskAdaptor::fileExists()
 {
-  return std::ranges::any_of(getFileEntries(),
-                             std::mem_fn(&FileEntry::exists));
+  return std::ranges::any_of(getFileEntries(), std::mem_fn(&FileEntry::exists));
 }
 
 int64_t MultiDiskAdaptor::size()

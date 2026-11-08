@@ -70,8 +70,7 @@ bool LpdMessageDispatcher::init(const std::string& localAddr, unsigned char ttl,
   try {
     socket_ = std::make_shared<SocketCore>(SOCK_DGRAM);
     socket_->create(AF_INET);
-    A2_LOG_DEBUG(
-        fmt("Setting multicast outgoing interface={}", localAddr.c_str()));
+    A2_LOG_DEBUG(fmt("Setting multicast outgoing interface={}", localAddr));
     socket_->setMulticastInterface(localAddr);
     A2_LOG_DEBUG(
         fmt("Setting multicast ttl={}", static_cast<unsigned int>(ttl)));
@@ -115,8 +114,7 @@ std::string createLpdRequest(const std::string& multicastAddress,
              "Port: {}\r\n"
              "Infohash: {}\r\n"
              "\r\n\r\n",
-             multicastAddress.c_str(), multicastPort, port,
-             util::toHex(infoHash).c_str());
+             multicastAddress, multicastPort, port, util::toHex(infoHash));
 }
 
 } // namespace bittorrent

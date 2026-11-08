@@ -78,7 +78,7 @@ bool LpdReceiveMessageCommand::execute()
     auto& dctx = reg->getDownloadContext(m->infoHash);
     if (!dctx) {
       A2_LOG_DEBUG(fmt("Download Context is null for infohash={}.",
-                       util::toHex(m->infoHash).c_str()));
+                       util::toHex(m->infoHash)));
       continue;
     }
     if (bittorrent::getTorrentAttrs(dctx)->privateTorrent) {
@@ -93,13 +93,12 @@ bool LpdReceiveMessageCommand::execute()
     assert(peerStorage);
     auto& peer = m->peer;
     if (peerStorage->addPeer(peer)) {
-      A2_LOG_DEBUG(fmt("LPD peer {}:{} local={} added.",
-                       peer->getIPAddress().c_str(), peer->getPort(),
-                       peer->isLocalPeer() ? 1 : 0));
+      A2_LOG_DEBUG(fmt("LPD peer {}:{} local={} added.", peer->getIPAddress(),
+                       peer->getPort(), peer->isLocalPeer() ? 1 : 0));
     }
     else {
       A2_LOG_DEBUG(fmt("LPD peer {}:{} local={} not added.",
-                       peer->getIPAddress().c_str(), peer->getPort(),
+                       peer->getIPAddress(), peer->getPort(),
                        peer->isLocalPeer() ? 1 : 0));
     }
   }

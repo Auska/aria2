@@ -77,7 +77,7 @@ void SelectEventPoll::CommandEvent::processEvents(EventPoll::EventType events)
 SelectEventPoll::SocketEntry::SocketEntry(sock_t socket) : socket_(socket) {}
 
 void SelectEventPoll::SocketEntry::addCommandEvent(Command* command,
-                                                  EventPoll::EventType events)
+                                                   EventPoll::EventType events)
 {
   CommandEvent cev(command, events);
   auto i = std::ranges::find(commandEvents_, cev);
@@ -88,8 +88,8 @@ void SelectEventPoll::SocketEntry::addCommandEvent(Command* command,
     (*i).addEvents(events);
   }
 }
-void SelectEventPoll::SocketEntry::removeCommandEvent(Command* command,
-                                                      EventPoll::EventType events)
+void SelectEventPoll::SocketEntry::removeCommandEvent(
+    Command* command, EventPoll::EventType events)
 {
   CommandEvent cev(command, events);
   auto i = std::ranges::find(commandEvents_, cev);
@@ -196,8 +196,8 @@ void SelectEventPoll::poll(const struct timeval& tv)
   }
   else if (retval == -1) {
     int errNum = errno;
-    A2_LOG_INFO(fmt("select error: {}, fdmax: {}",
-                    util::safeStrerror(errNum).c_str(), fdmax_));
+    A2_LOG_INFO(
+        fmt("select error: {}, fdmax: {}", util::safeStrerror(errNum), fdmax_));
   }
 #ifdef ENABLE_ASYNC_DNS
 

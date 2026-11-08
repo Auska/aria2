@@ -66,10 +66,10 @@ public:
   // Parses options in argv and writes option name and value to out in
   // NAME=VALUE format. Non-option strings are stored in nonopts.
   // Throws Exception when an unrecognized option is found.
-  void parseArg(std::ostream& out, std::vector<std::string>& nonopts, int argc,
-                char* argv[]) const;
+  std::string parseArg(std::vector<std::string>& nonopts, int argc,
+                       char* argv[]) const;
 
-  void parse(Option& option, std::istream& ios) const;
+  void parse(Option& option, std::string_view text) const;
 
   void parse(Option& option, const KeyVals& options) const;
 
