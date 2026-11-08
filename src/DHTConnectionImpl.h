@@ -38,6 +38,7 @@
 #include "DHTConnection.h"
 
 #include <memory>
+#include <optional>
 
 #include "SegList.h"
 
@@ -58,32 +59,27 @@ public:
 
   /**
    * Binds port. All number in sgl are tried. All numbers in sgl must
-   * be in range [1, 65535], inclusive. If successful, the bound port
-   * is assigned to port and returns true.  Otherwise return false and
-   * port is undefined in this case.  If non-empty string addr is
+   * be in range [1, 65535], inclusive. Returns the bound port on
+   * success, std::nullopt otherwise.  If non-empty string addr is
    * given, the socket is associated to the address.
    */
-  bool bind(uint16_t& port, const std::string& addr, SegList<int>& sgl);
+  std::optional<uint16_t> bind(const std::string& addr, SegList<int>& sgl);
 
   /**
-   * Binds port. The port number specified by port is used to bind.
-   * If successful, the bound port is assigned to port and returns
-   * true.  Otherwise return false and port is undefined in this case.
-   * If non-empty string addr is given, the socket is associated to
-   * the address.
+   * Binds port. Returns the bound port on success, std::nullopt
+   * otherwise.  If non-empty string addr is given, the socket is
+   * associated to the address.
    *
-   * If you want to bind arbitrary port, give 0 as port and if successful,
-   * the bound port is assigned to port.
+   * If you want to bind an arbitrary port, pass 0 as port; the bound
+   * port is returned.
    */
-  bool bind(uint16_t& port, const std::string& addr);
+  std::optional<uint16_t> bind(uint16_t port, const std::string& addr);
 
   virtual ssize_t receiveMessage(unsigned char* data, size_t len,
-                                 std::string& host,
-                                 uint16_t& port) override;
+                                 std::string& host, uint16_t& port) override;
 
   virtual ssize_t sendMessage(const unsigned char* data, size_t len,
-                              const std::string& host,
-                              uint16_t port) override;
+                              const std::string& host, uint16_t port) override;
 
   const std::shared_ptr<SocketCore>& getSocket() const { return socket_; }
 };

@@ -37,6 +37,8 @@
 
 #include "PieceSelector.h"
 
+#include <optional>
+
 #include <vector>
 #include <memory>
 
@@ -51,8 +53,8 @@ private:
 public:
   PriorityPieceSelector(const std::shared_ptr<PieceSelector>& selector);
 
-  virtual bool select(size_t& index, const unsigned char* bitfield,
-                      size_t nbits) const override;
+  virtual std::optional<size_t> select(const unsigned char* bitfield,
+                                       size_t nbits) const override;
 
   template <typename InputIterator>
   void setPriorityPiece(InputIterator first, InputIterator last)

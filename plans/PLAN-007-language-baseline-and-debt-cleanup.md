@@ -199,8 +199,35 @@ void flipBit(std::span<unsigned char> data, size_t bitIndex);
    干净 worktree `/tmp/aria2-m7-p2`（base `5e032fc7`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`CXX = g++ -std=c++23`、`make -j24 check` rc=0、`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、`grep -c 'error:'` = 0、ABI 哈希不变。提交 `135b6392`（69 文件，+607/−663）。
 
    **可解释残余**：`stringstream` 从 16 处降到 **10 处 / 6 文件**（`src/ByteArrayDiskWriter.h` 2、`src/ConsoleStatCalc.cc` 1、`src/LibsslTLSContext.cc` 1、`src/RequestGroupMan.cc` 3、`src/RpcResponse.cc` 2、`src/json.cc` 1）—— 全部喂 `std::ostream`/`std::istream` 以外的流语义（`buf_.seekp/seekg/gcount`、`std::setw`/`std::setfill` 格式化、`GZipEncoder` 共享 `operator<<`），换 `std::format` 要改内部函数签名且收益为零，按 `shortcut:` 保留。
-3. [ ] **阶段 3：`bitfield.h` span 化** — `countSetBit`/`flipBit` 两个函数 + 16 个调用点；干净 worktree 门禁；提交 `PLAN-007 阶段3: bitfield 算法族 span 化`。
-4. [ ] **阶段 4：`bool`+出参 → `std::optional`** — 9 个声明 + 12 个 override + 调用点 + 测试；干净 worktree 门禁；提交 `PLAN-007 阶段4: 输出参数改为 std::optional 返回值`。
+3. [x] **阶段 3：`bitfield.h` span 化** — `countSetBit`/`flipBit` 两个函数 + 16 个调用点；干净 worktree 门禁；提交 `PLAN-007 阶段3: bitfield 算法族 span 化`。
+
+   **实测（2026-11-08）**：`src/bitfield.h:100` `countSetBit(const unsigned char*, size_t)` → `countSetBit(std::span<const unsigned char> bitfield, size_t nbits)`（`nbits` 保留，位数量不等于 `size()*8`）；`src/bitfield.h:145` / `src/bitfield.cc:41` `flipBit(unsigned char* data, size_t length, size_t) ` → `flipBit(std::span<unsigned char> data, size_t bitIndex)`，删掉 `length`（等价 `data.size()`），`assert(byteIndex <= length)` → `assert(byteIndex < data.size())`（更严格）；`src/bitfield.h` 加 `#include <span>`。调用点：`src/BitfieldMan.cc:490,495,502,732` 改传成员 vector（隐式转 `span<const unsigned char>`）、`:780` 的 `computeCompletedLength(bitfield_, this, &bitfield::countSetBit)`（`Array` 模板形参接住 `std::vector`）；`src/DHTBucket.cc:181,184` `flipBit(rMax, prefixLength_)` / `flipBit(min_, prefixLength_)`（`DHTID` 是 `std::array`）；`src/DefaultPieceStorage.cc:241` `flipBit(std::span{misbitfield.get(), blocks}, index)`；测试 `test/BitfieldManTest.cc:674,680,693,711,720,737,747` 与 `:869`、`test/bitfieldTest.cc:46,49,52,55,58` 加显式 `std::span{...}`。
+   
+   干净 worktree `/tmp/aria2-m7-p3`（base `135b6392`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`make -j24 check` rc=0、`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`grep -c 'error:'` = 0、ABI 哈希不变。提交 `a4f9a059`（8 文件，+144/−114）。
+   
+   **明确未改**：`src/BitfieldMan.h:215 getBitfield()`、`:286 getFilterBitfield()` 及 `getBitfield()` 家族 11 处声明（见上文「明确不改」）。`countSetBitSlow` / `getFirstSetBitIndex` / `getFirstNSetBitIndex` / `test` 四个模板函数本来就接受任意容器，零改动。
+4. [x] **阶段 4：`bool`+出参 → `std::optional`** — 9 个声明 + 12 个 override + 调用点 + 测试；干净 worktree 门禁；提交 `PLAN-007 阶段4: 输出参数改为 std::optional 返回值`。
+
+   **实测（2026-11-08）**：9 个出参函数全部改成返回值，签名收敛为：
+   `std::optional<UriStruct> uri::parse(const std::string&)`；
+   `std::optional<size_t> Piece::getMissingUnusedBlockIndex() const`；
+   `std::optional<size_t> Piece::getFirstMissingBlockIndexWithoutLock() const`；
+   `std::optional<size_t> PieceSelector::select(const unsigned char*, size_t) const`（+3 实现 +2 test fake）；
+   `std::optional<size_t> StreamPieceSelector::select(size_t, const unsigned char*, size_t)`（+4 实现）；
+   `std::optional<uint16_t> DHTConnectionImpl::bind(const std::string&, SegList<int>&)`；
+   `std::optional<uint16_t> DHTConnectionImpl::bind(uint16_t port, const std::string&)`；
+   `std::optional<uint16_t> PeerListenCommand::bindPort(SegList<int>&)`；
+   `std::optional<std::string> File::existsError()`（改名，返回错误消息或 `nullopt`）。
+   几个实现顺带简化：4 个 Stream selector 变成直接 `return bitfieldMan_->getXxxMissingUnusedIndex(...)`；`Piece::getFirstMissingBlockIndexWithoutLock` 直传 `bitfield_->getFirstMissingIndex()`。
+
+   **偏离原计划的一处**：`File::exists(std::string& err)` 没有改成 `std::optional<std::string> exists()` —— `std::optional` 的真值语义会反转（文件存在时返回 `nullopt` 即「假」），调用点写成 `if (!f.exists())` 会误判。改用 `existsError()` 命名，返回值存在即错误，语义自明。无参 `File::exists()` 保持不变。
+
+   测试同步：`test/UriTest.cc` 全量迁移（45 处 `parse(us, ...)` → `auto us = parse(...)` + `us->field` + `construct(*us)`，含 `testConstruct` 的 11 个独立作用域与 `testSwap` 的 `us1->swap(*us2)`）；`test/DefaultBtMessageDispatcherTest.cc` 3 处、`test/GeomStreamPieceSelectorTest.cc` 4 处、`test/PriorityPieceSelectorTest.cc` 2 处、`test/LongestSequencePieceSelectorTest.cc` 2 处、`test/RarestPieceSelectorTest.cc` 2 处、`test/MockPieceSelector.h`、`test/InorderPieceSelector.h`、`test/DHTConnectionImplTest.cc`。
+
+   **踩坑**：①`src/uri.cc:365,370` 的 `joinUri()` 内部还有两次 `parse(us, ...)`（自查时漏列，编译时才暴露）；②`test/DHTConnectionImplTest.cc` 调的是 `bind(port, addr)` 形态，改签名后要写 `bind(0, A2STR::NIL)`；③干净 worktree 里 `make -j24 check` 两次撞上 `mv: cannot stat '.deps/XXX.Tpo': No such file or directory`（automake 依赖文件竞态，非代码问题），降 `-j8` 后一次通过。
+
+   干净 worktree `/tmp/aria2-m7-p4`（base `a4f9a059`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`CXX = g++ -std=c++23`、`make -j8 check` rc=0、`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、`grep -c 'error:'` = 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+
 5. [ ] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-007: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
 
 ## 预计修改的文件

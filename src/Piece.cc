@@ -127,15 +127,14 @@ bool Piece::hasBlock(size_t blockIndex) const
   return bitfield_->isBitSet(blockIndex);
 }
 
-bool Piece::getMissingUnusedBlockIndex(size_t& index) const
+std::optional<size_t> Piece::getMissingUnusedBlockIndex() const
 {
   auto indexOpt = bitfield_->getFirstMissingUnusedIndex();
   if (!indexOpt) {
-    return false;
+    return std::nullopt;
   }
-  index = *indexOpt;
-  bitfield_->setUseBit(index);
-  return true;
+  bitfield_->setUseBit(*indexOpt);
+  return indexOpt;
 }
 
 size_t Piece::getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
@@ -152,14 +151,9 @@ size_t Piece::getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
   return num;
 }
 
-bool Piece::getFirstMissingBlockIndexWithoutLock(size_t& index) const
+std::optional<size_t> Piece::getFirstMissingBlockIndexWithoutLock() const
 {
-  auto indexOpt = bitfield_->getFirstMissingIndex();
-  if (!indexOpt) {
-    return false;
-  }
-  index = *indexOpt;
-  return true;
+  return bitfield_->getFirstMissingIndex();
 }
 
 bool Piece::getAllMissingBlockIndexes(unsigned char* misbitfield,
@@ -170,8 +164,8 @@ bool Piece::getAllMissingBlockIndexes(unsigned char* misbitfield,
 
 std::string Piece::toString() const
 {
-  return fmt("piece: index={}, length={}",
-             static_cast<unsigned long>(index_), length_);
+  return fmt("piece: index={}, length={}", static_cast<unsigned long>(index_),
+             length_);
 }
 
 void Piece::reconfigure(int64_t length)
@@ -267,7 +261,8 @@ Piece::getDigestWithWrCache(size_t pieceLength,
       if (goff < d->goff) {
         updateHashWithRead(mdctx.get(), adaptor, goff, d->goff - goff);
       }
-      mdctx->update(std::as_bytes(std::span{d->data.get() + d->offset, d->len}));
+      mdctx->update(
+          std::as_bytes(std::span{d->data.get() + d->offset, d->len}));
       goff = d->goff + d->len;
     }
     updateHashWithRead(mdctx.get(), adaptor, goff, start + length_ - goff);
@@ -296,10 +291,7 @@ void Piece::addUser(cuid_t cuid)
   }
 }
 
-void Piece::removeUser(cuid_t cuid)
-{
-  std::erase(users_, cuid);
-}
+void Piece::removeUser(cuid_t cuid) { std::erase(users_, cuid); }
 
 void Piece::initWrCache(WrDiskCache* diskCache,
                         const std::shared_ptr<DiskAdaptor>& diskAdaptor)

@@ -79,14 +79,13 @@ bool File::exists()
   return fillStat(fstat) == 0;
 }
 
-bool File::exists(std::string& err)
+std::optional<std::string> File::existsError()
 {
   a2_struct_stat fstat;
   if (fillStat(fstat) != 0) {
-    err = fmt("Could not get file status: {}", strerror(errno));
-    return false;
+    return fmt("Could not get file status: {}", strerror(errno));
   }
-  return true;
+  return std::nullopt;
 }
 
 bool File::isFile()

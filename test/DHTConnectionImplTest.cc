@@ -29,17 +29,17 @@ void DHTConnectionImplTest::testWriteAndReadData()
 {
   try {
     DHTConnectionImpl con1(AF_INET);
-    uint16_t con1port = 0;
-    CPPUNIT_ASSERT(con1.bind(con1port, A2STR::NIL));
+    auto con1port = con1.bind(0, A2STR::NIL);
+    CPPUNIT_ASSERT(con1port);
 
     DHTConnectionImpl con2(AF_INET);
-    uint16_t con2port = 0;
-    CPPUNIT_ASSERT(con2.bind(con2port, A2STR::NIL));
+    auto con2port = con2.bind(0, A2STR::NIL);
+    CPPUNIT_ASSERT(con2port);
 
     std::string message1 = "hello world.";
     // hostname should be "localhost", not 127.0.0.1. Test failed on Mac OSX10.5
     con1.sendMessage(reinterpret_cast<const unsigned char*>(message1.c_str()),
-                     message1.size(), "localhost", con2port);
+                     message1.size(), "localhost", *con2port);
 
     unsigned char readbuffer[100];
     std::string remoteHost;

@@ -37,6 +37,8 @@
 
 #include "Command.h"
 
+#include <optional>
+
 #include <memory>
 
 #include "SegList.h"
@@ -60,10 +62,10 @@ public:
   virtual bool execute() override;
 
   /**
-   * Binds port. If successful, the bound port number is assigned to port and
-   * returns true, otherwise port is undefined and returns false.
+   * Binds port. Returns the bound port number on success, std::nullopt
+   * otherwise.
    */
-  bool bindPort(uint16_t& port, SegList<int>& seq);
+  std::optional<uint16_t> bindPort(SegList<int>& seq);
 
   // Returns bound port
   uint16_t getPort() const;

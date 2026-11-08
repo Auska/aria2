@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include <cstdlib>
+#include <optional>
 
 namespace aria2 {
 
@@ -45,8 +46,8 @@ class PieceSelector {
 public:
   virtual ~PieceSelector() = default;
 
-  virtual bool select(size_t& index, const unsigned char* bitfield,
-                      size_t nbits) const = 0;
+  virtual std::optional<size_t> select(const unsigned char* bitfield,
+                                       size_t nbits) const = 0;
 };
 
 } // namespace aria2

@@ -94,8 +94,8 @@ public:
       }
     }
 
-    virtual void onCancelSendingPieceEvent(
-        const BtCancelSendingPieceEvent& event) override
+    virtual void
+    onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event) override
     {
       if (evcheck) {
         evcheck->doCancelActionCalled = true;
@@ -106,8 +106,7 @@ public:
   class MockBtMessageFactory2 : public MockBtMessageFactory {
   public:
     virtual std::unique_ptr<BtCancelMessage>
-    createCancelMessage(size_t index, int32_t begin,
-                        int32_t length) override
+    createCancelMessage(size_t index, int32_t begin, int32_t length) override
     {
       return make_unique<BtCancelMessage>(index, begin, length);
     }
@@ -209,9 +208,9 @@ int MY_PIECE_LENGTH = 16_k;
 void DefaultBtMessageDispatcherTest::testCheckRequestSlotAndDoNecessaryThing()
 {
   auto piece = std::make_shared<Piece>(0, MY_PIECE_LENGTH);
-  size_t index;
-  CPPUNIT_ASSERT(piece->getMissingUnusedBlockIndex(index));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  auto index = piece->getMissingUnusedBlockIndex();
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
 
   btMessageDispatcher->setRequestTimeout(1_min);
   btMessageDispatcher->addOutstandingRequest(
@@ -229,9 +228,9 @@ void DefaultBtMessageDispatcherTest::
     testCheckRequestSlotAndDoNecessaryThing_timeout()
 {
   auto piece = std::make_shared<Piece>(0, MY_PIECE_LENGTH);
-  size_t index;
-  CPPUNIT_ASSERT(piece->getMissingUnusedBlockIndex(index));
-  CPPUNIT_ASSERT_EQUAL((size_t)0, index);
+  auto index = piece->getMissingUnusedBlockIndex();
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)0, *index);
 
   btMessageDispatcher->setRequestTimeout(1_min);
   auto slot = make_unique<RequestSlot>(0, 0, MY_PIECE_LENGTH, 0, piece);
@@ -301,25 +300,25 @@ void DefaultBtMessageDispatcherTest::testGetOutstandingRequest()
 void DefaultBtMessageDispatcherTest::testRemoveOutstandingRequest()
 {
   auto piece = std::make_shared<Piece>(1, 1_m);
-  size_t blockIndex = 0;
-  CPPUNIT_ASSERT(piece->getMissingUnusedBlockIndex(blockIndex));
-  uint32_t begin = blockIndex * piece->getBlockLength();
-  size_t length = piece->getBlockLength(blockIndex);
+  auto blockIndex = piece->getMissingUnusedBlockIndex();
+  CPPUNIT_ASSERT(blockIndex);
+  uint32_t begin = *blockIndex * piece->getBlockLength();
+  size_t length = piece->getBlockLength(*blockIndex);
   RequestSlot slot;
   btMessageDispatcher->addOutstandingRequest(make_unique<RequestSlot>(
-      piece->getIndex(), begin, length, blockIndex, piece));
+      piece->getIndex(), begin, length, *blockIndex, piece));
 
   auto s2 = btMessageDispatcher->getOutstandingRequest(piece->getIndex(), begin,
                                                        length);
   CPPUNIT_ASSERT(s2);
-  CPPUNIT_ASSERT(piece->isBlockUsed(blockIndex));
+  CPPUNIT_ASSERT(piece->isBlockUsed(*blockIndex));
 
   btMessageDispatcher->removeOutstandingRequest(s2);
 
   auto s3 = btMessageDispatcher->getOutstandingRequest(piece->getIndex(), begin,
                                                        length);
   CPPUNIT_ASSERT(!s3);
-  CPPUNIT_ASSERT(!piece->isBlockUsed(blockIndex));
+  CPPUNIT_ASSERT(!piece->isBlockUsed(*blockIndex));
 }
 
 } // namespace aria2

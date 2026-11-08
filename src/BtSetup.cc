@@ -94,7 +94,8 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
                     RequestGroup* requestGroup, DownloadEngine* e,
                     const Option* option)
 {
-  if (!requestGroup->getDownloadContext()->hasAttribute(ContextAttributeType::BT)) {
+  if (!requestGroup->getDownloadContext()->hasAttribute(
+          ContextAttributeType::BT)) {
     return;
   }
   auto torrentAttrs =
@@ -188,22 +189,21 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
     for (size_t i = 0; i < familiesLength; ++i) {
       auto command =
           make_unique<PeerListenCommand>(e->newCUID(), e, families[i]);
-      bool ret;
-      uint16_t port;
+      std::optional<uint16_t> port;
       if (btReg->getTcpPort()) {
         SegList<int> sgl;
         int usedPort = btReg->getTcpPort();
         sgl.add(usedPort, usedPort + 1);
-        ret = command->bindPort(port, sgl);
+        port = command->bindPort(sgl);
       }
       else {
         auto sgl =
             util::parseIntSegments(e->getOption()->get(PREF_LISTEN_PORT));
         sgl.normalize();
-        ret = command->bindPort(port, sgl);
+        port = command->bindPort(sgl);
       }
-      if (ret) {
-        btReg->setTcpPort(port);
+      if (port) {
+        btReg->setTcpPort(*port);
         // Add command to DownloadEngine directly.
         e->addCommand(std::move(command));
       }
@@ -259,8 +259,8 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
           bittorrent::getInfoHash(requestGroup->getDownloadContext());
       A2_LOG_INFO("Initializing LpdMessageDispatcher.");
       auto dispatcher = std::make_shared<LpdMessageDispatcher>(
-          std::string(infoHash.begin(), infoHash.end()),
-          btReg->getTcpPort(), LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT);
+          std::string(infoHash.begin(), infoHash.end()), btReg->getTcpPort(),
+          LPD_MULTICAST_ADDR, LPD_MULTICAST_PORT);
       if (dispatcher->init(btReg->getLpdMessageReceiver()->getLocalAddress(),
                            /*ttl*/ 1, /*loop*/ 1)) {
         A2_LOG_INFO("LpdMessageDispatcher initialized.");

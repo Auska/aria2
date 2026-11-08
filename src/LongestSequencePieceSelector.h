@@ -37,6 +37,8 @@
 
 #include "PieceSelector.h"
 
+#include <optional>
+
 namespace aria2 {
 
 class LongestSequencePieceSelector : public PieceSelector {
@@ -45,8 +47,8 @@ public:
   // For example, if indexes of set bits in bitfield are
   // { 1,2,3,4,7,10,11,12,13,14,15,100,112,113,114 }, then
   // returns 15 because { 10, 11, 12, 13, 14, 15 } is the longest sequence.
-  virtual bool select(size_t& index, const unsigned char* bitfield,
-                      size_t nbits) const override;
+  virtual std::optional<size_t> select(const unsigned char* bitfield,
+                                       size_t nbits) const override;
 };
 
 } // namespace aria2

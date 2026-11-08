@@ -149,9 +149,9 @@ bool Request::redirectUri(const std::string& uri)
 bool Request::parseUri(const std::string& srcUri)
 {
   currentUri_ = removeFragment(srcUri);
-  uri::UriStruct us;
-  if (uri::parse(us, currentUri_)) {
-    us_.swap(us);
+  auto us = uri::parse(currentUri_);
+  if (us) {
+    us_.swap(*us);
     return true;
   }
   else {

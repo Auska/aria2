@@ -74,333 +74,314 @@ CPPUNIT_TEST_SUITE_REGISTRATION(UriTest);
 
 void UriTest::testSetUri1()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/");
+  auto us = parse("http://aria.rednoah.com/");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.username);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.password);
-  CPPUNIT_ASSERT(!us.ipv6LiteralAddress);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->username);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->password);
+  CPPUNIT_ASSERT(!us->ipv6LiteralAddress);
 }
 
 void UriTest::testSetUri2()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com:8080/index.html");
+  auto us = parse("http://aria.rednoah.com:8080/index.html");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)8080, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)8080, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri3()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/aria2/index.html");
+  auto us = parse("http://aria.rednoah.com/aria2/index.html");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri4()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/aria2/aria3/index.html");
+  auto us = parse("http://aria.rednoah.com/aria2/aria3/index.html");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/aria3/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/aria3/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri5()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/aria2/aria3/");
+  auto us = parse("http://aria.rednoah.com/aria2/aria3/");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/aria3/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/aria3/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri6()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/aria2/aria3");
+  auto us = parse("http://aria.rednoah.com/aria2/aria3");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria3"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)80, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria.rednoah.com"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/aria2/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria3"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri7()
 {
-  UriStruct us;
-  bool v = parse(us, "http://");
+  auto us = parse("http://");
 
-  CPPUNIT_ASSERT(!v);
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri8()
 {
-  UriStruct us;
-  bool v = parse(us, "http:/aria.rednoah.com");
+  auto us = parse("http:/aria.rednoah.com");
 
-  CPPUNIT_ASSERT(!v);
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri9()
 {
-  UriStruct us;
-  bool v = parse(us, "h");
+  auto us = parse("h");
 
-  CPPUNIT_ASSERT(!v);
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri10()
 {
-  UriStruct us;
-  bool v = parse(us, "");
+  auto us = parse("");
 
-  CPPUNIT_ASSERT(!v);
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri11()
 {
-  UriStruct us;
-  bool v = parse(us, "http://host?query/");
+  auto us = parse("http://host?query/");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("?query/"), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("?query/"), us->query);
 }
 
 void UriTest::testSetUri12()
 {
-  UriStruct us;
-  bool v = parse(us, "http://host?query");
+  auto us = parse("http://host?query");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us->query);
 }
 
 void UriTest::testSetUri13()
 {
-  UriStruct us;
-  bool v = parse(us, "http://host/?query");
+  auto us = parse("http://host/?query");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us->query);
 }
 
 void UriTest::testSetUri14()
 {
-  UriStruct us;
-  bool v = parse(us, "http://host:8080/abc?query");
+  auto us = parse("http://host:8080/abc?query");
 
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)8080, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("abc"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us.query);
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)8080, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("abc"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("?query"), us->query);
 }
 
 void UriTest::testSetUri15()
 {
-  UriStruct us;
   // 2 slashes after host name and dir
-  bool v = parse(us, "http://host//dir1/dir2//file");
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("//dir1/dir2//"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("file"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  auto us = parse("http://host//dir1/dir2//file");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("//dir1/dir2//"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("file"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri16()
 {
-  UriStruct us;
   // 2 slashes before file
-  bool v = parse(us, "http://host//file");
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("http"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL(std::string("host"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("//"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("file"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  auto us = parse("http://host//file");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("http"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL(std::string("host"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("//"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("file"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testSetUri18()
 {
-  UriStruct us;
-  bool v = parse(us, "http://1/");
+  auto us = parse("http://1/");
 
-  CPPUNIT_ASSERT(v);
+  CPPUNIT_ASSERT(us);
 }
 
 void UriTest::testSetUri19()
 {
-  UriStruct us;
   // No host
-  bool v = parse(us, "http://user@");
+  auto us = parse("http://user@");
 
-  CPPUNIT_ASSERT(!v);
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri20()
 {
-  UriStruct us;
-  bool v;
   // Invalid port
-  v = parse(us, "http://localhost:65536");
-  CPPUNIT_ASSERT(!v);
-  v = parse(us, "http://localhost:65535");
-  CPPUNIT_ASSERT(v);
-  v = parse(us, "http://localhost:-80");
-  CPPUNIT_ASSERT(!v);
+  auto us = parse("http://localhost:65536");
+  CPPUNIT_ASSERT(!us);
+  us = parse("http://localhost:65535");
+  CPPUNIT_ASSERT(us);
+  us = parse("http://localhost:-80");
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri_zeroUsername()
 {
-  UriStruct us;
-  CPPUNIT_ASSERT(!parse(us, "ftp://@localhost/download/aria2-1.0.0.tar.bz2"));
+  auto us = parse("ftp://@localhost/download/aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(!us);
 
-  CPPUNIT_ASSERT(!parse(us, "ftp://:@localhost/download/aria2-1.0.0.tar.bz2"));
+  us = parse("ftp://:@localhost/download/aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(!us);
 
-  CPPUNIT_ASSERT(
-      !parse(us, "ftp://:pass@localhost/download/aria2-1.0.0.tar.bz2"));
+  us = parse("ftp://:pass@localhost/download/aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(!us);
 }
 
 void UriTest::testSetUri_username()
 {
-  UriStruct us;
-  CPPUNIT_ASSERT(
-      parse(us, "ftp://aria2@user@localhost/download/aria2-1.0.0.tar.bz2"));
-  CPPUNIT_ASSERT_EQUAL(std::string("ftp"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)21, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("localhost"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/download/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria2-1.0.0.tar.bz2"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria2@user"), us.username);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.password);
+  auto us = parse("ftp://aria2@user@localhost/download/aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("ftp"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)21, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("localhost"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/download/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria2-1.0.0.tar.bz2"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria2@user"), us->username);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->password);
 }
 
 void UriTest::testSetUri_usernamePassword()
 {
-  UriStruct us;
-  CPPUNIT_ASSERT(parse(us,
-                       "ftp://aria2@user%40:aria2@pass%40@localhost/download/"
-                       "aria2-1.0.0.tar.bz2"));
-  CPPUNIT_ASSERT_EQUAL(std::string("ftp"), us.protocol);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)21, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("pass%40@localhost"), us.host);
-  CPPUNIT_ASSERT_EQUAL(std::string("/download/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria2-1.0.0.tar.bz2"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria2@user@"), us.username);
-  CPPUNIT_ASSERT_EQUAL(std::string("aria2"), us.password);
+  auto us = parse("ftp://aria2@user%40:aria2@pass%40@localhost/download/"
+                  "aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("ftp"), us->protocol);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)21, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("pass%40@localhost"), us->host);
+  CPPUNIT_ASSERT_EQUAL(std::string("/download/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria2-1.0.0.tar.bz2"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria2@user@"), us->username);
+  CPPUNIT_ASSERT_EQUAL(std::string("aria2"), us->password);
 
   // make sure that after new uri is set, username and password are updated.
-  CPPUNIT_ASSERT(parse(us, "ftp://localhost/download/aria2-1.0.0.tar.bz2"));
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.username);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.password);
+  us = parse("ftp://localhost/download/aria2-1.0.0.tar.bz2");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->username);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->password);
 }
 
 void UriTest::testSetUri_ipv6()
 {
-  UriStruct us;
-  CPPUNIT_ASSERT(!parse(us, "http://[::1"));
-  CPPUNIT_ASSERT(parse(us, "http://[::1]"));
-  CPPUNIT_ASSERT_EQUAL(std::string("::1"), us.host);
+  auto us = parse("http://[::1");
+  CPPUNIT_ASSERT(!us);
+  us = parse("http://[::1]");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("::1"), us->host);
 
-  CPPUNIT_ASSERT(parse(us, "http://[::1]:8000/dir/file"));
-  CPPUNIT_ASSERT_EQUAL(std::string("::1"), us.host);
-  CPPUNIT_ASSERT_EQUAL((uint16_t)8000, us.port);
-  CPPUNIT_ASSERT_EQUAL(std::string("/dir/"), us.dir);
-  CPPUNIT_ASSERT_EQUAL(std::string("file"), us.file);
-  CPPUNIT_ASSERT(us.ipv6LiteralAddress);
+  us = parse("http://[::1]:8000/dir/file");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("::1"), us->host);
+  CPPUNIT_ASSERT_EQUAL((uint16_t)8000, us->port);
+  CPPUNIT_ASSERT_EQUAL(std::string("/dir/"), us->dir);
+  CPPUNIT_ASSERT_EQUAL(std::string("file"), us->file);
+  CPPUNIT_ASSERT(us->ipv6LiteralAddress);
 }
 
 void UriTest::testInnerLink()
 {
-  UriStruct us;
-  bool v = parse(us, "http://aria.rednoah.com/index.html#download");
-  CPPUNIT_ASSERT(v);
-  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us.file);
-  CPPUNIT_ASSERT_EQUAL(std::string(""), us.query);
+  auto us = parse("http://aria.rednoah.com/index.html#download");
+  CPPUNIT_ASSERT(us);
+  CPPUNIT_ASSERT_EQUAL(std::string("index.html"), us->file);
+  CPPUNIT_ASSERT_EQUAL(std::string(""), us->query);
 }
 
 void UriTest::testConstruct()
 {
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host/dir/file?q=abc#foo"));
+    auto us = parse("http://host/dir/file?q=abc#foo");
+    CPPUNIT_ASSERT(us);
     CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir/file?q=abc"),
-                         construct(us));
+                         construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host/dir/file"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir/file"), construct(us));
+    auto us = parse("http://host/dir/file");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir/file"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host/dir/"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir/"), construct(us));
+    auto us = parse("http://host/dir/");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir/"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host/dir"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir"), construct(us));
+    auto us = parse("http://host/dir");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/dir"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host/"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(us));
+    auto us = parse("http://host/");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(us));
+    auto us = parse("http://host");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(*us));
   }
   {
     UriStruct us;
@@ -410,52 +391,52 @@ void UriTest::testConstruct()
     CPPUNIT_ASSERT_EQUAL(std::string("http://host/foo.xml"), construct(us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host:80"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(us));
+    auto us = parse("http://host:80");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host/"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://host:8080"));
-    CPPUNIT_ASSERT_EQUAL(std::string("http://host:8080/"), construct(us));
+    auto us = parse("http://host:8080");
+    CPPUNIT_ASSERT(us);
+    CPPUNIT_ASSERT_EQUAL(std::string("http://host:8080/"), construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "http://[::1]:8000/dir/file"));
+    auto us = parse("http://[::1]:8000/dir/file");
+    CPPUNIT_ASSERT(us);
     CPPUNIT_ASSERT_EQUAL(std::string("http://[::1]:8000/dir/file"),
-                         construct(us));
+                         construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "ftp://user%40@host/dir/file"));
+    auto us = parse("ftp://user%40@host/dir/file");
+    CPPUNIT_ASSERT(us);
     CPPUNIT_ASSERT_EQUAL(std::string("ftp://user%40@host/dir/file"),
-                         construct(us));
+                         construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "ftp://user:@host/dir/file"));
+    auto us = parse("ftp://user:@host/dir/file");
+    CPPUNIT_ASSERT(us);
     CPPUNIT_ASSERT_EQUAL(std::string("ftp://user:@host/dir/file"),
-                         construct(us));
+                         construct(*us));
   }
   {
-    UriStruct us;
-    CPPUNIT_ASSERT(parse(us, "ftp://user:passwd%40@host/dir/file"));
+    auto us = parse("ftp://user:passwd%40@host/dir/file");
+    CPPUNIT_ASSERT(us);
     CPPUNIT_ASSERT_EQUAL(std::string("ftp://user:passwd%40@host/dir/file"),
-                         construct(us));
+                         construct(*us));
   }
 }
 
 void UriTest::testSwap()
 {
-  UriStruct us1;
-  CPPUNIT_ASSERT(parse(us1, "http://u1:p1@[::1]/dir1/file1?k1=v1"));
-  UriStruct us2;
-  CPPUNIT_ASSERT(parse(us2, "ftp://host2/dir2/file2?k2=v2"));
-  us1.swap(us2);
+  auto us1 = parse("http://u1:p1@[::1]/dir1/file1?k1=v1");
+  CPPUNIT_ASSERT(us1);
+  auto us2 = parse("ftp://host2/dir2/file2?k2=v2");
+  CPPUNIT_ASSERT(us2);
+  us1->swap(*us2);
   CPPUNIT_ASSERT_EQUAL(std::string("ftp://host2/dir2/file2?k2=v2"),
-                       construct(us1));
+                       construct(*us1));
   CPPUNIT_ASSERT_EQUAL(std::string("http://u1:p1@[::1]/dir1/file1?k1=v1"),
-                       construct(us2));
+                       construct(*us2));
 }
 
 void UriTest::testJoinUri()

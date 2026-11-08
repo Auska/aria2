@@ -85,23 +85,24 @@ void UriStruct::swap(UriStruct& other)
 
 void swap(UriStruct& lhs, UriStruct& rhs) { lhs.swap(rhs); }
 
-bool parse(UriStruct& result, const std::string& uri)
+std::optional<UriStruct> parse(const std::string& uri)
 {
   uri_split_result res;
   int rv;
   const char* p = uri.c_str();
   rv = uri_split(&res, p);
   if (rv != 0) {
-    return false;
+    return std::nullopt;
   }
 
+  UriStruct result;
   result.protocol.assign(p + res.fields[USR_SCHEME].off,
                          res.fields[USR_SCHEME].len);
   result.host.assign(p + res.fields[USR_HOST].off, res.fields[USR_HOST].len);
   if (res.port == 0) {
     uint16_t defPort;
     if ((defPort = getDefaultPort(result.protocol)) == 0) {
-      return false;
+      return std::nullopt;
     }
     result.port = defPort;
   }
@@ -159,7 +160,7 @@ bool parse(UriStruct& result, const std::string& uri)
   }
 
   result.ipv6LiteralAddress = res.flags & USF_IPV6ADDR;
-  return true;
+  return result;
 }
 
 std::string getFieldString(const uri_split_result& res, int field,
@@ -360,15 +361,15 @@ std::string joinPath(const std::string& basePath, const std::string& newPath)
 
 std::string joinUri(const std::string& baseUri, const std::string& uri)
 {
-  UriStruct us;
-  if (parse(us, uri)) {
+  if (parse(uri)) {
     return uri;
   }
 
-  UriStruct bus;
-  if (!parse(bus, baseUri)) {
+  auto busOpt = parse(baseUri);
+  if (!busOpt) {
     return uri;
   }
+  UriStruct& bus = *busOpt;
 
   std::string::const_iterator qend;
   for (qend = uri.begin(); qend != uri.end(); ++qend) {

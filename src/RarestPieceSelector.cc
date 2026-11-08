@@ -48,8 +48,8 @@ RarestPieceSelector::RarestPieceSelector(
 {
 }
 
-bool RarestPieceSelector::select(size_t& index, const unsigned char* bitfield,
-                                 size_t nbits) const
+std::optional<size_t> RarestPieceSelector::select(const unsigned char* bitfield,
+                                                  size_t nbits) const
 {
   const std::vector<size_t>& order = pieceStatMan_->getOrder();
   const std::vector<int>& counts = pieceStatMan_->getCounts();
@@ -63,11 +63,10 @@ bool RarestPieceSelector::select(size_t& index, const unsigned char* bitfield,
     }
   }
   if (bestIdx == nbits) {
-    return false;
+    return std::nullopt;
   }
   else {
-    index = bestIdx;
-    return true;
+    return bestIdx;
   }
 }
 

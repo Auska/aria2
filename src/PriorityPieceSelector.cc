@@ -43,16 +43,15 @@ PriorityPieceSelector::PriorityPieceSelector(
 {
 }
 
-bool PriorityPieceSelector::select(size_t& index, const unsigned char* bitfield,
-                                   size_t nbits) const
+std::optional<size_t>
+PriorityPieceSelector::select(const unsigned char* bitfield, size_t nbits) const
 {
   for (auto& p : prioritizedPieces_) {
     if (bitfield::test(bitfield, nbits, p)) {
-      index = p;
-      return true;
+      return p;
     }
   }
-  return selector_->select(index, bitfield, nbits);
+  return selector_->select(bitfield, nbits);
 }
 
 } // namespace aria2

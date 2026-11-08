@@ -59,7 +59,7 @@ PeerListenCommand::PeerListenCommand(cuid_t cuid, DownloadEngine* e, int family)
 
 PeerListenCommand::~PeerListenCommand() = default;
 
-bool PeerListenCommand::bindPort(uint16_t& port, SegList<int>& sgl)
+std::optional<uint16_t> PeerListenCommand::bindPort(SegList<int>& sgl)
 {
   socket_ = std::make_shared<SocketCore>();
   std::vector<uint16_t> ports;
@@ -68,16 +68,13 @@ bool PeerListenCommand::bindPort(uint16_t& port, SegList<int>& sgl)
   }
   std::shuffle(ports.begin(), ports.end(), *SimpleRandomizer::getInstance());
   const int ipv = (family_ == AF_INET) ? 4 : 6;
-  for (std::vector<uint16_t>::const_iterator i = ports.begin(),
-                                             eoi = ports.end();
-       i != eoi; ++i) {
-    port = *i;
+  for (auto port : ports) {
     try {
       socket_->bind(nullptr, port, family_);
       socket_->beginListen();
       A2_LOG_NOTICE(
           fmt(_("IPv{} BitTorrent: listening on TCP port {}"), ipv, port));
-      return true;
+      return port;
     }
     catch (RecoverableException& ex) {
       A2_LOG_ERROR_EX(
@@ -85,7 +82,7 @@ bool PeerListenCommand::bindPort(uint16_t& port, SegList<int>& sgl)
       socket_->closeConnection();
     }
   }
-  return false;
+  return std::nullopt;
 }
 
 uint16_t PeerListenCommand::getPort() const

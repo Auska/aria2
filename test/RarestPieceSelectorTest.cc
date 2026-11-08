@@ -34,17 +34,18 @@ void RarestPieceSelectorTest::testSelect()
   RarestPieceSelector selector(pieceStatMan);
   BitfieldMan bf(1_k, 10_k);
   bf.setBitRange(0, 2);
-  size_t index;
 
   pieceStatMan->addPieceStats(0);
 
-  CPPUNIT_ASSERT(selector.select(index, bf.getBitfield(), bf.countBlock()));
-  CPPUNIT_ASSERT_EQUAL((size_t)1, index);
+  auto index = selector.select(bf.getBitfield(), bf.countBlock());
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)1, *index);
 
   pieceStatMan->addPieceStats(1);
 
-  CPPUNIT_ASSERT(selector.select(index, bf.getBitfield(), bf.countBlock()));
-  CPPUNIT_ASSERT_EQUAL((size_t)2, index);
+  index = selector.select(bf.getBitfield(), bf.countBlock());
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)2, *index);
 }
 
 } // namespace aria2

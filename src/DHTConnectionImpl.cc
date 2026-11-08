@@ -54,8 +54,8 @@ DHTConnectionImpl::DHTConnectionImpl(int family)
 
 DHTConnectionImpl::~DHTConnectionImpl() = default;
 
-bool DHTConnectionImpl::bind(uint16_t& port, const std::string& addr,
-                             SegList<int>& sgl)
+std::optional<uint16_t> DHTConnectionImpl::bind(const std::string& addr,
+                                                SegList<int>& sgl)
 {
   std::vector<uint16_t> ports;
   while (sgl.hasNext()) {
@@ -63,38 +63,38 @@ bool DHTConnectionImpl::bind(uint16_t& port, const std::string& addr,
   }
   std::shuffle(ports.begin(), ports.end(), *SimpleRandomizer::getInstance());
   for (const auto& p : ports) {
-    port = p;
-    if (bind(port, addr)) {
-      return true;
+    auto bound = bind(p, addr);
+    if (bound) {
+      return bound;
     }
   }
-  return false;
+  return std::nullopt;
 }
 
-bool DHTConnectionImpl::bind(uint16_t& port, const std::string& addr)
+std::optional<uint16_t> DHTConnectionImpl::bind(uint16_t port,
+                                                const std::string& addr)
 {
   const int ipv = (family_ == AF_INET) ? 4 : 6;
   try {
     socket_->bind(addr.c_str(), port, family_);
     socket_->setNonBlockingMode();
     auto endpoint = socket_->getAddrInfo();
-    port = endpoint.port;
-    A2_LOG_NOTICE(fmt(_("IPv{} DHT: listening on UDP port {}"), ipv, port));
-    return true;
+    A2_LOG_NOTICE(
+        fmt(_("IPv{} DHT: listening on UDP port {}"), ipv, endpoint.port));
+    return endpoint.port;
   }
   catch (RecoverableException& e) {
     A2_LOG_ERROR_EX(fmt("IPv{} DHT: failed to bind UDP port {}", ipv, port), e);
   }
-  return false;
+  return std::nullopt;
 }
 
 ssize_t DHTConnectionImpl::receiveMessage(unsigned char* data, size_t len,
                                           std::string& host, uint16_t& port)
 {
   Endpoint remoteEndpoint;
-  ssize_t length = socket_->readDataFrom(std::as_writable_bytes(
-                                              std::span{data, len}),
-                                          remoteEndpoint);
+  ssize_t length = socket_->readDataFrom(
+      std::as_writable_bytes(std::span{data, len}), remoteEndpoint);
   if (length == 0) {
     return length;
   }

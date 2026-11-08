@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include <cstdlib>
+#include <optional>
 
 namespace aria2 {
 
@@ -58,8 +59,9 @@ public:
   // shortcut: ignoreBitfield stays a raw pointer because BitfieldMan's
   // getMissingUnusedIndex family (src/bitfield.h) is raw-pointer based;
   // switch to std::span once that family is converted.
-  virtual bool select(size_t& index, size_t minSplitSize,
-                      const unsigned char* ignoreBitfield, size_t length) = 0;
+  virtual std::optional<size_t> select(size_t minSplitSize,
+                                       const unsigned char* ignoreBitfield,
+                                       size_t length) = 0;
 
   // Called when initial bitfield was fixed. Optimize
   // StreamPieceSelector to take advantages of the initial bitfield.

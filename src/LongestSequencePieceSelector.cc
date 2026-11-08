@@ -62,9 +62,9 @@ size_t getEndIndex(size_t from, const unsigned char* bitfield, size_t nbits)
 }
 } // namespace
 
-bool LongestSequencePieceSelector::select(size_t& index,
-                                          const unsigned char* bitfield,
-                                          size_t nbits) const
+std::optional<size_t>
+LongestSequencePieceSelector::select(const unsigned char* bitfield,
+                                     size_t nbits) const
 {
   size_t mstartindex = 0;
   size_t mendindex = 0;
@@ -82,11 +82,10 @@ bool LongestSequencePieceSelector::select(size_t& index,
     nextIndex = endindex;
   }
   if (mendindex - mstartindex > 0) {
-    index = mendindex - 1;
-    return true;
+    return mendindex - 1;
   }
   else {
-    return false;
+    return std::nullopt;
   }
 }
 

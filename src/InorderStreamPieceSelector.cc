@@ -44,17 +44,11 @@ InorderStreamPieceSelector::InorderStreamPieceSelector(BitfieldMan* bitfieldMan)
 
 InorderStreamPieceSelector::~InorderStreamPieceSelector() = default;
 
-bool InorderStreamPieceSelector::select(size_t& index, size_t minSplitSize,
-                                        const unsigned char* ignoreBitfield,
-                                        size_t length)
+std::optional<size_t> InorderStreamPieceSelector::select(
+    size_t minSplitSize, const unsigned char* ignoreBitfield, size_t length)
 {
-  auto rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
-                                                       ignoreBitfield, length);
-  if (!rv) {
-    return false;
-  }
-  index = *rv;
-  return true;
+  return bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
+                                                    ignoreBitfield, length);
 }
 
 void InorderStreamPieceSelector::onBitfieldInit() {}

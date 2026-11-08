@@ -37,6 +37,7 @@
 
 #include "common.h"
 
+#include <optional>
 #include <string>
 
 #include "a2io.h"
@@ -71,11 +72,11 @@ public:
   bool exists();
 
   /**
-   * Tests whether the file or directory denoted by name exists.  If
-   * file does not exist, or file status could not be retrieved, this
-   * function stores error message to |err|.
+   * Tests whether the file or directory denoted by name exists.  Returns
+   * std::nullopt when it exists, or the error message when the file status
+   * could not be retrieved.
    */
-  bool exists(std::string& err);
+  std::optional<std::string> existsError();
 
   /**
    * Tests whether the file denoted by name is a regular file.

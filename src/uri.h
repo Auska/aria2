@@ -37,6 +37,7 @@
 
 #include "common.h"
 
+#include <optional>
 #include <string>
 
 #include "uri_split.h"
@@ -67,10 +68,9 @@ struct UriStruct {
 
 void swap(UriStruct& lhs, UriStruct& rhs);
 
-// Splits URI uri into components and stores them into result.  On
-// success returns true. Otherwise returns false and result is
-// undefined.
-bool parse(UriStruct& result, const std::string& uri);
+// Splits URI uri into components and returns them. Returns std::nullopt
+// when uri cannot be parsed or its default port is unknown.
+std::optional<UriStruct> parse(const std::string& uri);
 
 // Returns string specified by field in res. The base pointer in res
 // is given as base. If the given field is not stored in res, returns

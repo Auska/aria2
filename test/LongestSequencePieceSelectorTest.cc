@@ -33,18 +33,19 @@ void LongestSequencePieceSelectorTest::testSelect()
   }
 
   LongestSequencePieceSelector selector;
-  size_t index;
 
-  CPPUNIT_ASSERT(selector.select(index, bf.getBitfield(), bf.countBlock()));
-  CPPUNIT_ASSERT_EQUAL((size_t)15, index);
+  auto index = selector.select(bf.getBitfield(), bf.countBlock());
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)15, *index);
 
   bf.clearAllBit();
-  CPPUNIT_ASSERT(!selector.select(index, bf.getBitfield(), bf.countBlock()));
+  CPPUNIT_ASSERT(!selector.select(bf.getBitfield(), bf.countBlock()));
 
   // See it works in just one range
   bf.setBitRange(1, 4);
-  CPPUNIT_ASSERT(selector.select(index, bf.getBitfield(), bf.countBlock()));
-  CPPUNIT_ASSERT_EQUAL((size_t)4, index);
+  index = selector.select(bf.getBitfield(), bf.countBlock());
+  CPPUNIT_ASSERT(index);
+  CPPUNIT_ASSERT_EQUAL((size_t)4, *index);
 }
 
 } // namespace aria2

@@ -37,6 +37,8 @@
 
 #include "StreamPieceSelector.h"
 
+#include <optional>
+
 namespace aria2 {
 
 class BitfieldMan;
@@ -46,9 +48,9 @@ public:
   InorderStreamPieceSelector(BitfieldMan* bitfieldMan);
   virtual ~InorderStreamPieceSelector();
 
-  virtual bool select(size_t& index, size_t minSplitSize,
-                      const unsigned char* ignoreBitfield,
-                      size_t length) override;
+  virtual std::optional<size_t> select(size_t minSplitSize,
+                                       const unsigned char* ignoreBitfield,
+                                       size_t length) override;
 
   virtual void onBitfieldInit() override;
 

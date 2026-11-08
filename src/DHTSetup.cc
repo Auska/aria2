@@ -122,23 +122,24 @@ DHTSetup::setup(DownloadEngine* e, int family)
       // number. Normally IPv4 port is available, then IPv6 port is
       // (especially for port >= 1024). We don't loose much by doing
       // this. We did the same thing in TCP socket. See BtSetup.cc.
-      bool rv;
+      std::optional<uint16_t> boundPort;
       if (port == 0) {
         auto sgl =
             util::parseIntSegments(e->getOption()->get(PREF_DHT_LISTEN_PORT));
         sgl.normalize();
-        rv = connection->bind(port, addr, sgl);
+        boundPort = connection->bind(addr, sgl);
       }
       else {
-        rv = connection->bind(port, addr);
+        boundPort = connection->bind(port, addr);
       }
-      if (!rv) {
+      if (!boundPort) {
         throw DL_ABORT_EX("Error occurred while binding UDP port for DHT");
       }
-      localNode->setPort(port);
+      localNode->setPort(*boundPort);
     }
-    A2_LOG_DEBUG(fmt("Initialized local node ID={}",
-                     util::toHex(std::as_bytes(std::span{localNode->getID()}))));
+    A2_LOG_DEBUG(
+        fmt("Initialized local node ID={}",
+            util::toHex(std::as_bytes(std::span{localNode->getID()}))));
     auto tracker = std::make_shared<DHTMessageTracker>();
     auto routingTable = make_unique<DHTRoutingTable>(localNode);
     auto factory = make_unique<DHTMessageFactoryImpl>(family);

@@ -45,9 +45,8 @@ RandomStreamPieceSelector::RandomStreamPieceSelector(BitfieldMan* bitfieldMan)
 
 RandomStreamPieceSelector::~RandomStreamPieceSelector() = default;
 
-bool RandomStreamPieceSelector::select(size_t& index, size_t minSplitSize,
-                                       const unsigned char* ignoreBitfield,
-                                       size_t length)
+std::optional<size_t> RandomStreamPieceSelector::select(
+    size_t minSplitSize, const unsigned char* ignoreBitfield, size_t length)
 {
   size_t start = SimpleRandomizer::getInstance()->getRandomNumber(
       bitfieldMan_->countBlock());
@@ -61,14 +60,10 @@ bool RandomStreamPieceSelector::select(size_t& index, size_t minSplitSize,
   if (!rv) {
     // Fall back to inorder search because randomized search may fail
     // because of |minSplitSize| constraint.
-    rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize, ignoreBitfield,
-                                                    length);
+    rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
+                                                    ignoreBitfield, length);
   }
-  if (!rv) {
-    return false;
-  }
-  index = *rv;
-  return true;
+  return rv;
 }
 
 void RandomStreamPieceSelector::onBitfieldInit() {}

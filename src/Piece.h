@@ -43,6 +43,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <optional>
 
 #include "Command.h"
 #include "a2functional.h"
@@ -86,7 +87,7 @@ public:
   bool operator<(const Piece& piece) const { return index_ < piece.index_; }
 
   // TODO This function only used by unit tests
-  bool getMissingUnusedBlockIndex(size_t& index) const;
+  std::optional<size_t> getMissingUnusedBlockIndex() const;
 
   // Appends at most n missing unused block index to indexes. For all
   // i in retrieved indexes, call bitfield->setUseBit(i). This
@@ -95,7 +96,7 @@ public:
   size_t getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
                                     size_t n) const;
 
-  bool getFirstMissingBlockIndexWithoutLock(size_t& index) const;
+  std::optional<size_t> getFirstMissingBlockIndexWithoutLock() const;
   bool getAllMissingBlockIndexes(unsigned char* misbitfield,
                                  size_t mislen) const;
   void completeBlock(size_t blockIndex);

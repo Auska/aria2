@@ -620,10 +620,11 @@ namespace {
 std::string makeProxyUri(PrefPtr proxyPref, PrefPtr proxyUser,
                          PrefPtr proxyPasswd, const Option* option)
 {
-  uri::UriStruct us;
-  if (!uri::parse(us, option->get(proxyPref))) {
+  auto usOpt = uri::parse(option->get(proxyPref));
+  if (!usOpt) {
     return "";
   }
+  auto& us = *usOpt;
   if (option->defined(proxyUser)) {
     us.username = option->get(proxyUser);
   }
