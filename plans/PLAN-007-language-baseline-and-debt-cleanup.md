@@ -1,6 +1,6 @@
 # 任务：语言基线升级到 C++23 + 三类剩余债清理
 
-> 状态：⏳ 待执行（计划已确认，等待「开始执行」）
+> 状态：✅ 已完成（2026-11-08）
 
 ## 目标
 
@@ -228,7 +228,7 @@ void flipBit(std::span<unsigned char> data, size_t bitIndex);
 
    干净 worktree `/tmp/aria2-m7-p4`（base `a4f9a059`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`CXX = g++ -std=c++23`、`make -j8 check` rc=0、`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、`grep -c 'error:'` = 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 
-5. [ ] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-007: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
+5. [x] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-007: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
 
 ## 预计修改的文件
 
@@ -326,6 +326,37 @@ nohup make -j24 check > /tmp/m7-p<N>.log 2>&1 &   # make check 单次 > 60s，�
 1. **引用真实**：上表所有 `文件:行` 均已用 `grep -n`/`sed -n` 逐条核对（`src/bitfield.h:100,145`、`src/bitfield.cc:41`、`src/BitfieldMan.cc:490,491,495,502,732,777,781`、`src/DHTBucket.cc:181,184`、`src/DefaultPieceStorage.cc:239,241,391`、`src/uri.h:73`、`src/Piece.h:89,98`、`src/PieceSelector.h:48`、`src/StreamPieceSelector.h:61`、`src/DHTConnectionImpl.h:66,78`、`src/PeerListenCommand.h:66`、`src/File.h:71,78`、`src/File.cc:82`、`src/OptionParser.h:69,72`、`src/util.h:475`、`src/IOFile.h:82`、`m4/ax_cxx_compile_stdcxx.m4:52-56,182-189,995-1016`、`configure.ac:111`；`getBitfield()` 家族 11 处声明（`src/BtBitfieldMessage.h:62`、`src/Peer.h:203`、`src/PeerSessionResource.h:136`、`src/Piece.h:130`、`src/PieceStorage.h:209`、`src/DefaultPieceStorage.h:218`、`src/UnknownLengthPieceStorage.h:198`、`src/BitfieldMan.h:215`、`test/MockPieceStorage.h:187`）逐个确认存在且不改）。「预计修改的文件」全部 `git ls-files` 确认存在。
 2. **阶段可编译、测试不假绿**：9 个出参函数的全部调用点（含 `test/`）已 grep 列出并在阶段内闭环；每阶段跑干净 worktree 全量重编译（原地增量会假绿，PLAN-004 阶段 4 已实测踩到）；阶段 2 的脚本规则基于括号深度而非单行正则，避免上一轮「167 vs 333」的计数误差重演。
 3. **覆盖所有分支与消费点**：`getBitfield()` 家族 34 个消费点确认**不改**（用户决策）；`bitfield.h` 4 个模板函数确认**已接受容器**（`test/bitfieldTest.cc:47` 就在用 `countSetBitSlow(array)`）；`A2_ERROR` 与 `Logger::LEVEL` 的重名在 PLAN-006 已解决，本计划不涉及；7 个 `src/*.c` shim 与 `src/includes/aria2/aria2.h` 确认不在范围。
+
+## 实测门禁结果
+
+| 阶段 | 提交 | 干净 worktree | 结果 | 用例数 | ABI 哈希 |
+|---|---|---|---|---|---|
+| 1 语言基线 C++23 | `5e032fc7` | `/tmp/aria2-m7-p1`（base `0bfa7120`） | `# TOTAL: 1` / `# PASS: 1` | `OK (914)` | `2216641161…` |
+| 2 `.c_str()` + `string_view` | `135b6392` | `/tmp/aria2-m7-p2`（base `5e032fc7`） | `# TOTAL: 1` / `# PASS: 1` | `OK (914)` | `2216641161…` |
+| 3 bitfield span 化 | `a4f9a059` | `/tmp/aria2-m7-p3`（base `135b6392`） | `# TOTAL: 1` / `# PASS: 1` | `OK (914)` | `2216641161…` |
+| 4 optional 出参 | `b9d4de6e` | `/tmp/aria2-m7-p4`（base `a4f9a059`） | `# TOTAL: 1` / `# PASS: 1` | `OK (914)` | `2216641161…` |
+
+四个阶段全部 `make check` rc=0、`grep -c 'error:'` = 0、无 `Failures !!!`；`Makefile` 的 `CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`。
+
+## 债务前后对比
+
+| 指标 | 阶段 0 | 完成后 | 说明 |
+|---|---|---|---|
+| `fmt(...)` 内 `.c_str()` | 333 处 / 58 文件 | **0** | 括号深度规则，C API 实参一处未动 |
+| `std::istream&` 签名 | 5 处 | **0** | `OptionParser::parse` / `parseArg` / `util::createIndexPaths` / `os` 出参 |
+| `bitfield::countSetBit`/`flipBit` 裸指针形参 | 2 个 | **0** | `getBitfield()` 家族 11 处声明未动 |
+| `bool` + 引用出参（真·出参） | 9 处 | **0** | 17 处可写引用保持 |
+| `std::stringstream` | 16 处 / 10 文件 | **9 处 / 6 文件**（全仓） | 剩的都是 `std::ostream`/`istream` 流语义（`seekp/seekg/gcount`、`setw/setfill`、`GZipEncoder` 共享 `operator<<`） |
+| `sprintf`/`sscanf` | — | `sscanf` 5 处保留 | 4 处 `src/FtpConnection.cc`（FTP 被动模式 `(h1,h2,h3,h4,p1,p2)` 与 IPv4 解析，逗号/空格混排，`from_chars` 要手写跳过分隔符）+ 1 处 `src/OptionHandlerFactory.cc:1815`（build 时 `PACKAGE_VERSION`）。已加 `shortcut:` 注释 |
+
+## 实际偏差
+
+1. **`File::exists(std::string&)` 改名为 `existsError()`** 而不是同名返回 `std::optional<std::string>`：`optional` 的真值语义会反转（成功时是 `nullopt`），同名会让调用点误判。已在阶段 4 实测小节记录。
+2. **`src/uri.cc:365,370` 的 `joinUri()` 内部两次 `parse` 调用**在计划自查时漏列，编译时才暴露并修复。
+3. **`test/UriTest.cc` 全量重写**（45 处 `parse(us, ...)`）：计划里只写「调用点同步」，实际需要脚本化迁移 + 手工修 4 处（重复 `auto`、`construct(us)` → `construct(*us)`、`has_value()` 断言、`testConstruct` 的 11 个独立作用域）。
+4. **干净 worktree 的 `make -j24 check` 有 automake 依赖文件竞态**（`mv: cannot stat '.deps/XXX.Tpo'`，两次），不是代码问题；降 `-j8` 后一次通过。后续门禁建议直接用 `-j8`。
+5. **`sscanf` 5 处未改**（计划里没列，属可选）：FTP 响应与 `PACKAGE_VERSION` 解析，格式含 `%*s`/`%14s`/括号逗号，改 `from_chars` 反而更长更易错，保留并加 `shortcut:`。
+6. **C++23 只本地验证 g++14.2 + libstdc++**：CI 的 clang-18 路径无本地工具链，`testbody_23` 只断言语言标准不断言库特性，若有问题回退 `configure.ac:111` 到 `[20]`（阶段 2~4 除 `IOFile::readAll()` 外不依赖 C++23 新库特性）。
 
 ## 备注
 
