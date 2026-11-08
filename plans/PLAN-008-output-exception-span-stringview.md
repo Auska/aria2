@@ -1,6 +1,6 @@
 # 任务：输出层去 C 可变参数、异常层用 `std::source_location`、残余 ptr+len 转 span、只读字符串形参转 `string_view`
 
-> 状态：⏳ 待执行（计划已确认，等待「开始执行」）
+> 状态：⚠️ 部分完成（2026-11-08）—— 阶段 1~3 完整落地；阶段 4 按用户决策收窄为「能干净闭环的子集」（60/672 处），其余记入「实际偏差」
 
 ## 目标
 
@@ -136,8 +136,8 @@ public:
 1. [x] **阶段 1：输出层去 `vprintf`/`printf`** — `src/OutputFile.h`、`src/IOFile.{h,cc}`、`src/NullOutputFile.h`、`src/BufferedFile.*`、`src/GZipFile.*`、`src/SHA1IOFile.*`（4 个 `onVprintf` 实现）+ 12 个调用文件 + 3 处 `stringstream`；干净 worktree 门禁；提交 `PLAN-008 阶段1: 输出层移除 C 可变参数接口`。
 2. [x] **阶段 2：异常层改用 `std::source_location`** — `src/Exception.{h,cc}`、`src/RecoverableException.{h,cc}`、6 个异常子类头、`src/LogFactory.{h,cc}`/`src/Logger.{h,cc}`；干净 worktree 门禁；提交 `PLAN-008 阶段2: 异常与日志改用 std::source_location`。
 3. [x] **阶段 3：残余 ptr+len → `std::span`** — `src/BitfieldMan.{h,cc}` 8 个函数 + `src/DefaultPieceStorage.*`、`src/PieceStatMan.*`、`src/StreamPieceSelector.h` + 4 实现、`src/UnknownLengthPieceStorage.*`、`src/bittorrent_helper.*`、`src/ValueBase.*`、测试；干净 worktree 门禁；提交 `PLAN-008 阶段3: 残余指针加长度参数改用 std::span`。
-4. [ ] **阶段 4：只读形参 → `std::string_view`** — 159 个头文件的 672 处 `const std::string&`（`src/includes/aria2/aria2.h` 除外）+ 对应实现与调用点；干净 worktree 门禁；提交 `PLAN-008 阶段4: 只读字符串形参改用 std::string_view`。
-5. [ ] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-008: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
+4. [x] **阶段 4：只读形参 → `std::string_view`**（范围收窄，见下）— 从 159 头文件的 672 处里筛出能干净闭环的 32 文件 / 60 处 + 对应实现与调用点；干净 worktree 门禁；提交 `5d905cca PLAN-008 阶段4: 部分只读字符串形参改用 std::string_view`。
+5. [x] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-008: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
 
 ### 阶段 1 实测（2026-11-08）
 
@@ -163,6 +163,24 @@ public:
 - 明确不改（记入「实际偏差」）：`src/ValueBase.{h,cc}` 的 `String(const char*, size_t)` / `String::g(...)`（`String::g` 调用点 86 处，超阈值 40）；`src/IOFile.h` 的 `gets`/`getsn`（fgets 语义）；`src/DHTConnection.h`、`src/PeerConnection.h`、`src/GZipEncoder.h`、`src/HttpHeaderProcessor.cc`、`src/DHTMessageFactoryImpl.h`、`src/DHTRoutingTableDeserializer.cc`、`src/InternalARC4Encryptor.cc`、`src/LibsslARC4Encryptor.cc`、`src/message_digest_helper.{h,cc}` 的 ptr+len 形参（含 MS 握手 / DHT / ARC4 等协议层与外部契约，调用点跨层）；`src/bittorrent_helper.cc` 的 `getLLIntParam/getIntParam/getShortIntParam(const unsigned char* msg, size_t pos)` 是「基址 + 偏移」语义而非指针+长度，span 化不减少任何东西。
 - 门禁（干净 worktree `/tmp/aria2-m8-p3`，base `c06e974c`，clean 构建）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 - 过程教训：①本地增量 `make -C test` 会因未跟踪头文件依赖而假绿（改 `test/MockPieceStorage.h` 后只有重新触发编译的文件才看到错误），必须 `touch test/*.cc` 或干净 worktree 才能暴露；②干净 worktree 每轮只暴一批新错误，`git apply` 全部重编是唯一可靠判据。
+
+### 阶段 4 实测（2026-11-08）
+
+- 改动 **58 文件 +192/−152**（含 1 个测试 mock）。转换只读形参 **60 处 / 32 头文件**（`git show 5d905cca` 中头文件新增 `std::string_view` 形参计数）；`const std::string&` 净减少 112 处。
+- **范围从 672 处收窄到 60 处的实测依据**（三项独立验证，结论一致）：
+  1. 脚本全量转换（159 头 + 348 个 `.cc` 函数定义）后 `make -k -j24 -C src` 出 **约 150 个错误 / 45 个 `.cc`**，典型：`has no member named 'c_str'` 44、`no matching function for call to X` 28、`invalid initialization of reference of type 'const std::string&' from 'std::string_view'` 16、`no declaration matches X` 9；
+  2. 逐头文件单目标验证（`make -C src <base>.o` 通过才保留）：**OK 41 文件 / 143 形参，SKIP 102 文件 / 397 形参**；但 41 文件在整仓链接期仍因 **58 个 undefined reference** 失败 —— 根因是 `.cc` 里**自由函数**（`util::strip`、`util::parseUIntNoThrow`、`cookie::parse`、`uri::parse`、`bencode2::decode`、`magnet::parse`、`rpc::getMethod` 等）没有 `Class::` 前缀，脚本的 `Xxx::yyy(` 匹配不到，头改了定义没改 → 同 TU 编译过、链接期符号对不上；
+  3. 再补「头文件函数名 → `.cc` 自由函数定义」的转换后仍有大量失败：`std::string_view::const_iterator`（实为 `const char*`）赋给 `std::string::const_iterator`（`src/util.cc:245,537`、`src/json.cc:52,120`、`src/cookie_helper.cc:228`）、`could not convert 'target' from 'std::string_view' to 'std::string'`（`src/util.cc:149,330,339`）、`map<std::string,...>::find(string_view)` 不收（`src/prefs.cc:78`、`src/RpcMethodFactory.cc:258`）、`File::File(string_view)` 不收（`src/util.cc:1714,1849`）、`ostream << string_view` 与 `ColorizedStream::operator<<` 重载歧义（`src/ConsoleStatCalc.cc` 13 处）。
+- 因此按用户决策（「只做能干净闭环的一小部分」）落地：只保留整仓 `make -C src` + `make -C test` 全绿且干净 worktree 门禁通过的子集，**放弃 612 处**并逐类说明：
+  - 函数体用了 `c_str()`（需先 `std::string{sv}` 拷贝，等于没省拷贝，反而多一次）；
+  - 函数体把形参当 `std::string::const_iterator` 的容器用（`splitIter` 族、`cookie_helper`、`json`），要整段重写成 `string_view` 迭代器语义；
+  - 实参是 `std::map<std::string, ...>` 键（`find`/`erase` 不收异构键，除非 `std::less<>` 透明比较器，改动面远超本阶段）；
+  - 需要 null-terminated 传给 C API（`uri_split(us, s.c_str())`、`getaddrinfo`、`stat`）；
+  - 虚函数链（`OptionHandler::parse` 30+ 子类、`ColorizedStream::operator<<`）—— 少改一圈就 `marked 'override', but does not override` 或 `-Werror=overloaded-virtual`。
+- 排除清单中**明确不动**（与计划原则一致）：`src/includes/aria2/aria2.h`（公开 ABI 7 处）、返回值 `const std::string&`、`std::string&` 可写出参、构造函数存成员的 `const std::string&`。
+- 编译修复 3 处：①`src/bittorrent_helper.cc:284` 的 `std::function<std::string(const std::string&)>(static_cast<std::string (*)(const std::string&)>(util::percentEncode))` → 两层都改 `std::string_view`；②`test/MockBtAnnounce.h:25` 的 `createUDPTrackerRequest(const std::string&, ...)` 必须跟着 `src/BtAnnounce.h:74` 改 `std::string_view`（否则 `marked 'override', but does not override`）；③`src/ColorizedStream.h`、`src/OptionHandler.h`、`src/OptionHandlerImpl.h`、`src/AbstractOptionHandler.h` 整族回滚（歧义 + 虚函数链）。
+- 门禁（干净 worktree `/tmp/aria2-m8-p4`，base `90d0c289`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+- 过程教训：干净 worktree 里 `test/MockBtAnnounce.h` 已改对，但 `test/BtRegistryTest.o` 仍是 patch 应用前的旧对象 → 复现 `marked 'override', but does not override` 假错误。`make -C test BtRegistryTest.o` 单独重编即可；根因是 `rm -rf` 后 `git worktree add` 复用 `/tmp` 目录时 `.deps` 残留。
 
 ## 预计修改的文件
 
@@ -215,7 +233,7 @@ make -j8 check > /tmp/p8-p<N>.log 2>&1; echo rc=$?
 1. `src/OutputFile.h` 只有 `write(std::string_view)`/`flush`/`supportsColor` 三个虚函数，无 `printf`/`vprintf`/`va_list`。
 2. `git grep -nE '__FILE__|__LINE__' -- src` = 0；异常对象仍能打印正确的 `file:line`（手工冒烟）。
 3. `src/BitfieldMan.h` 不含 `const unsigned char*, size_t` 形态的 `ignoreBitfield` 参数；`getBitfield()`/`getFilterBitfield()` 返回值不变。
-4. 头文件里 `const std::string&` 只读形参 = 0（`src/includes/aria2/aria2.h` 保持 7 处原样）。
+4. 头文件里 `const std::string&` 只读形参：原定清零，**实测 672→575 处（净减 97）**（阶段 4 按用户决策只做 60 处），残余逐类在「实际偏差」说明。
 5. `git hash-object src/includes/aria2/aria2.h` = `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 6. 4 次代码提交 + 1 次文档收尾，每次都有干净 worktree 门禁记录。
 7. `configure.ac`、`src/Makefile.am`、`test/Makefile.am`、`.github/workflows/build.yml`、7 个 `src/*.c` shim、`README.rst` 不动。
@@ -247,3 +265,36 @@ make -j8 check > /tmp/p8-p<N>.log 2>&1; echo rc=$?
 - 第 1 题未勾 `string_view`、第 2 题选了「只改头文件公共形参」——按后者执行，范围已写明；若用户只想做前三项，删除阶段 4 即可，其余不受影响。
 - 上一轮盘点里的 `memcpy`(71)/`memset`(37)/`hton*`(37)/`errno`(43)/`sscanf`(5) **不在本计划**：前四者是正确的 C 语义（字节序、摘要算法、系统错误码），`sscanf` 5 处已在 PLAN-007 记为可解释残余。
 - `src/*.c` 7 个 shim、`src/uri_split.h` 的 3 个 C typedef、`src/error_code.h` 与 `src/uri.cc` 的 2 个 enum 按既有决定保持不动。
+
+## 实测门禁结果（2026-11-08）
+
+| 阶段 | 提交 | 干净 worktree | 构建与测试 | ABI 哈希 |
+|---|---|---|---|---|
+| 1 输出层 | `6434ec32` | `/tmp/aria2-m8-p1`（base `d191e03a`） | `# TOTAL: 1`/`# PASS: 1`、`OK (914)`、`error:` 0 | `2216641161b15acb3c3ddf2600dc19e3decd59d5` |
+| 2 异常层 | `c06e974c` | `/tmp/aria2-m8-p2`（base `6434ec32`） | 同上 | 同上 |
+| 3 ptr+len→span | `90d0c289` | `/tmp/aria2-m8-p3`（base `c06e974c`） | 同上 | 同上 |
+| 4 string_view（收窄） | `5d905cca` | `/tmp/aria2-m8-p4`（base `90d0c289`） | 同上 | 同上 |
+| 5 收尾 | 本文档提交 | — | — | — |
+
+四轮门禁均为干净 worktree `autoreconf -i` + `./configure --enable-werror`（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）+ `make -j8 check`，rc 均为 0。
+
+## 债务前后对比
+
+| 指标 | 阶段前 | 阶段后 | 说明 |
+|---|---|---|---|
+| `OutputFile::vprintf` 及 `onVprintf` 实现 | 1 接口 + 4 实现 | **0** | 输出层只剩 `write(std::string_view)` |
+| `printf` 调用点（`OutputFile` 接口） | 89 | **0** | 余 1 处 `test/UtilSecurityTest.cc:439` 是 stdio 自身 |
+| `__FILE__` / `__LINE__` | 16（7 头文件） | **0** | 改 `std::source_location`，16 个宏名与 402 处调用点零改动 |
+| ptr+len 形参（`git grep -nE '(unsigned char|char)\s*\*\s*\w+\s*,\s*(size_t|int)\s+\w+' -- src \| grep -v Exception`） | 162 | **58** | `BitfieldMan` 8 函数、`PieceStorage` 族、`Peer`/`Piece`/`PieceStatMan`、`bittorrent_helper::createPeerMessageString`、`StreamPieceSelector` 全族已转 span |
+| 头文件 `const std::string&` 只读形参 | 672 | **575** | 阶段 4 只做可干净闭环的 60 处（净减 97 处） |
+| 剩余 `std::stringstream` | 10 处 / 6 文件 | 10 处 / 6 文件 | 计划外，PLAN-007 已登记为可解释残余 |
+
+## 实际偏差
+
+1. **阶段 4 范围从 672 处收窄到 60 处（32 头文件）**。全量转换实测 397 处在编译期失败、143 处触达 `src/util.*` 等共享层后链接失败（58 个 undefined reference）。根因：`.cc` 自由函数无 `Class::` 前缀不被脚本覆盖；`string_view::const_iterator`（`const char*`）与 `std::string::const_iterator` 不可互换；`std::map<std::string,...>::find` 不收异构键；多处需 null-terminated 传 C API；`ColorizedStream::operator<<` 与 `OptionHandler::parse` 虚函数族整改成本远超收益。经用户选择「只做能干净闭环的一小部分」，保留整仓全绿子集，612 处逐类说明见「阶段 4 实测」。
+2. **阶段 3 的 `getBitfield()`/`getFilterBitfield()` 未改返回类型**（11 处声明），仍是 `const unsigned char*`：它们是 `PieceStorage`/`Peer`/`Piece`/`BitfieldMan`/`MockPieceStorage` 的契约，改 `std::span` 要连带 34 个消费点，且 span 不持有所有权易踩悬垂。调用点改用 `{ptr, len}` 聚合初始化。
+3. **阶段 3 未改 `String::g` 族**（`src/ValueBase.{h,cc}`，调用点 86 处 > 阈值 40）与 `IOFile::gets/getsn`（fgets 语义），按计划预设的阈值规则保持。
+4. **`src/ColorizedStream.h` / `src/OptionHandler.h` / `src/OptionHandlerImpl.h` / `src/AbstractOptionHandler.h` 整族回滚**：`operator<<(ColorizedStream&, std::string_view)` 让 `ConsoleStatCalc.cc` 13 处 `o << "x"` 变歧义；`OptionHandler::parse` 是 30+ 子类的虚函数链，需整族同改（含 `DeprecatedOptionHandler`、`test/` 下的 handler mock），超出本阶段预算。
+5. **门禁必须用 `-j8`**：`-j24` 会撞 automake 依赖竞态 `mv: cannot stat '.deps/XXX.Tpo'`（PLAN-007 阶段 4 实测两次，本计划沿用 `-j8`）。
+6. **干净 worktree 复用目录会残留旧 `.o`**：`/tmp/aria2-m8-p4` 第二次 `git worktree add` 后 `test/BtRegistryTest.o` 仍是旧对象，编译报已修好的 `marked 'override', but does not override` 假错误；`make -C test <Target>.o` 单独重编即可。稳妥做法是 `rm -rf` 目标目录后再 `git worktree add`。
+7. **clang-18 仍未本地验证**：本机无 `clang++`，C++23 + `std::source_location` + `std::span` + `std::string_view` 只经 g++ 14.2 验证；CI（`.github/workflows/build.yml` 用 `clang-18`）首跑若失败，最小回退是阶段 2 保留 `__FILE__` 宏。
