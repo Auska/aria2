@@ -34,6 +34,7 @@
 /* copyright --> */
 #include "DHTRoutingTableDeserializer.h"
 
+#include <array>
 #include <cstring>
 #include <cassert>
 #include <cstdio>
@@ -47,7 +48,6 @@
 #include "a2netcompat.h"
 #include "fmt.h"
 #include "util.h"
-#include "array_fun.h"
 #include "LogFactory.h"
 #include "BufferedFile.h"
 
@@ -112,14 +112,14 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
 
   // If you change the code to read more than the size of buf, then
   // expand the buf size here.
-  array_wrapper<unsigned char, 255> buf;
+  std::array<unsigned char, 255> buf;
 
   // header
-  readBytes(fp, buf, buf.size(), 8);
-  if (memcmp(header, buf, 8) == 0) {
+  readBytes(fp, buf.data(), buf.size(), 8);
+  if (memcmp(header, buf.data(), 8) == 0) {
     version = 3;
   }
-  else if (memcmp(headerCompat, buf, 8) == 0) {
+  else if (memcmp(headerCompat, buf.data(), 8) == 0) {
     version = 2;
   }
   else {
@@ -134,7 +134,7 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
     READ_CHECK(fp, &temp32, sizeof(temp32));
     serializedTime_.setTimeFromEpoch(ntohl(temp32));
     // 4bytes reserved
-    readBytes(fp, buf, buf.size(), 4);
+    readBytes(fp, buf.data(), buf.size(), 4);
   }
   else {
     READ_CHECK(fp, &temp64, sizeof(temp64));
@@ -143,18 +143,18 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
 
   // localnode
   // 8bytes reserved
-  readBytes(fp, buf, buf.size(), 8);
+  readBytes(fp, buf.data(), buf.size(), 8);
   // localnode ID
-  readBytes(fp, buf, buf.size(), DHT_ID_LENGTH);
-  auto localNode = std::make_shared<DHTNode>(toDHTID(buf));
+  readBytes(fp, buf.data(), buf.size(), DHT_ID_LENGTH);
+  auto localNode = std::make_shared<DHTNode>(toDHTID(buf.data()));
   // 4bytes reserved
-  readBytes(fp, buf, buf.size(), 4);
+  readBytes(fp, buf.data(), buf.size(), 4);
 
   // number of nodes
   READ_CHECK(fp, &temp32, sizeof(temp32));
   uint32_t numNodes = ntohl(temp32);
   // 4bytes reserved
-  readBytes(fp, buf, buf.size(), 4);
+  readBytes(fp, buf.data(), buf.size(), 4);
 
   std::vector<std::shared_ptr<DHTNode>> nodes;
   // nodes
@@ -165,35 +165,35 @@ void DHTRoutingTableDeserializer::deserialize(const std::string& filename)
     READ_CHECK(fp, &peerInfoLen, sizeof(peerInfoLen));
     if (peerInfoLen != compactlen) {
       // skip this entry
-      readBytes(fp, buf, buf.size(), 7 + 48);
+      readBytes(fp, buf.data(), buf.size(), 7 + 48);
       continue;
     }
     // 7bytes reserved
-    readBytes(fp, buf, buf.size(), 7);
+    readBytes(fp, buf.data(), buf.size(), 7);
     // compactlen bytes compact peer info
-    readBytes(fp, buf, buf.size(), compactlen);
-    if (memcmp(zero, buf, compactlen) == 0) {
+    readBytes(fp, buf.data(), buf.size(), compactlen);
+    if (memcmp(zero, buf.data(), compactlen) == 0) {
       // skip this entry
-      readBytes(fp, buf, buf.size(), 48 - compactlen);
+      readBytes(fp, buf.data(), buf.size(), 48 - compactlen);
       continue;
     }
     std::pair<std::string, uint16_t> peer =
-        bittorrent::unpackcompact(buf, family_);
+        bittorrent::unpackcompact(buf.data(), family_);
     if (peer.first.empty()) {
       // skip this entry
-      readBytes(fp, buf, buf.size(), 48 - compactlen);
+      readBytes(fp, buf.data(), buf.size(), 48 - compactlen);
       continue;
     }
     // 24-compactlen bytes reserved
-    readBytes(fp, buf, buf.size(), 24 - compactlen);
+    readBytes(fp, buf.data(), buf.size(), 24 - compactlen);
     // node ID
-    readBytes(fp, buf, buf.size(), DHT_ID_LENGTH);
+    readBytes(fp, buf.data(), buf.size(), DHT_ID_LENGTH);
 
-    auto node = std::make_shared<DHTNode>(toDHTID(buf));
+    auto node = std::make_shared<DHTNode>(toDHTID(buf.data()));
     node->setIPAddress(peer.first);
     node->setPort(peer.second);
     // 4bytes reserved
-    readBytes(fp, buf, buf.size(), 4);
+    readBytes(fp, buf.data(), buf.size(), 4);
 
     nodes.push_back(node);
   }

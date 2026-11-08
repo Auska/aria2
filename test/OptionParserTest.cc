@@ -5,11 +5,12 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <iterator>
+
 #include "OptionHandlerImpl.h"
 #include "Exception.h"
 #include "util.h"
 #include "Option.h"
-#include "array_fun.h"
 #include "prefs.h"
 #include "help_tags.h"
 
@@ -172,7 +173,7 @@ void OptionParserTest::testParseArg()
 
   char* argv[] = {prog,   optionTimeout, argTimeout, optionDir,
                   argDir, nonopt1,       nonopt2};
-  int argc = arraySize(argv);
+  int argc = std::size(argv);
 
   std::vector<std::string> nonopts;
 

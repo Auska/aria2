@@ -36,7 +36,6 @@
 
 #include <sstream>
 
-#include "array_fun.h"
 #include "a2functional.h"
 #include "util.h"
 #include "base64.h"

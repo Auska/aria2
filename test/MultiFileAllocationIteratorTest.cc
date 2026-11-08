@@ -9,7 +9,6 @@
 #include "MultiDiskAdaptor.h"
 #include "FileEntry.h"
 #include "Exception.h"
-#include "array_fun.h"
 #include "TestUtil.h"
 #include "DiskWriter.h"
 

@@ -37,7 +37,6 @@
 #include <ostream>
 #include <algorithm>
 
-#include "array_fun.h"
 #include "Logger.h"
 #include "LogFactory.h"
 #include "fmt.h"

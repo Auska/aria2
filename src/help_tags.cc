@@ -36,7 +36,6 @@
 
 #include <cstring>
 
-#include "array_fun.h"
 
 namespace aria2 {
 

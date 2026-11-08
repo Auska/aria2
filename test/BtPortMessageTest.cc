@@ -6,9 +6,10 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <iterator>
+
 #include "bittorrent_helper.h"
 #include "util.h"
-#include "array_fun.h"
 #include "Peer.h"
 #include "DHTNode.h"
 #include "DHTRoutingTable.h"
@@ -114,14 +115,14 @@ void BtPortMessageTest::testDoReceivedAction()
 
   // 9 nodes to create at least 2 buckets.
   std::shared_ptr<DHTNode> nodes[9];
-  for (size_t i = 0; i < arraySize(nodes); ++i) {
+  for (size_t i = 0; i < std::size(nodes); ++i) {
     nodeID.fill(0);
     nodeID[DHT_ID_LENGTH - 1] = i + 1;
     nodes[i].reset(new DHTNode(nodeID));
   }
 
   DHTRoutingTable routingTable(localNode);
-  for (size_t i = 0; i < arraySize(nodes); ++i) {
+  for (size_t i = 0; i < std::size(nodes); ++i) {
     routingTable.addNode(nodes[i]);
   }
 

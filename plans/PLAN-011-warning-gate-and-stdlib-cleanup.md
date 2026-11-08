@@ -197,7 +197,19 @@ void visit(const String&) override;
 - 另外 `test/IndexedListTest.cc` 的 12 条 `-Wdeprecated-copy` 在 `-Werror` 下变成错误（原计划以为能留到阶段 5），所以在 `src/IndexedList.h:107` 补了一行 `IndexedListIterator& operator=(const IndexedListIterator&) = default;`（该类阶段 5 会被删除，这行随之消失）。
 - 干净 worktree `/tmp/aria2-m11-p3`（base `deec0c38`）全量重建（`-Werror` 生效）：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (915)`、`error:` 0、C++ `warning:` 0（唯一一条 `warning:` 是 `deps/wslay` 的 libtool `-version-info` 提示）、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
 
-4. [ ] 阶段 4：移除 `array_fun.h` 表达式模板 + 62 个死 include → 提交 `PLAN-011 阶段4: 移除 array_fun 表达式模板`
+4. [x] 阶段 4：移除 `array_fun.h` 表达式模板 + 62 个死 include → 提交 `PLAN-011 阶段4: 移除 array_fun 表达式模板`
+
+### 阶段 4 实测（2026-11-08）
+
+- 删除 `src/array_fun.h`（134 行）与 `test/array_funTest.cc`（102 行 / 4 个用例），两者的 `src/Makefile.am`、`test/Makefile.am` 条目一并删。
+- `src/BitfieldMan.cc` 的 18 个 `expr::array` 站点（39 处 `array()` 调用）换成 3 个匿名 namespace 辅助函数：`makeMissingMask(length, bf, use, peer, filter)`（nullptr 表示该输入不参与）、`makeIgnoreMask(length, ignore, bf, use, filter)`、`makeAndMask(length, bf, filter)`。逐字节循环写出 `std::vector<unsigned char>`，消费者（`bitfield::test`/`getFirstSetBitIndex`/`getFirstNSetBitIndex`/`countSetBitSlow`/`countCompletedLength`）本来就接任意可索引容器，无需改动。`copyBitfield(unsigned char* dst, const Array& src, size_t)` → `copyBitfield(unsigned char* dst, std::span<const unsigned char> src, size_t)`。
+- `src/DHTRoutingTableDeserializer.cc` 的 `array_wrapper<unsigned char, 255> buf` → `std::array<unsigned char, 255> buf`（`buf` 作指针处补 `.data()`）。
+- `arraySize(arr)` → `std::size(arr)` 共 7 处，分布在 `test/BitfieldManTest.cc`、`test/BtPortMessageTest.cc`（2）、`test/DHTTaskExecutorTest.cc`、`test/LongestSequencePieceSelectorTest.cc`、`test/OptionParserTest.cc`。
+- 死 include 删 **62 个**（`#include "array_fun.h"` 原 70 文件，实际用符号的只 8 个）。
+- 用例数 **915 → 911**（`array_funTest` 那 4 个用例），`OK (911)` 为新的稳定值。
+- 干净 worktree `/tmp/aria2-m11-p4`（base `e8796b3e`）全量重建：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (911)`、`error:` 0、C++ `warning:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
+- 教训：**不要对仅改了一行 include 的文件跑 `clang-format`**——仓库并非整体 clang-format-clean，会顺带重排 `test/UtilTest1.cc`（769 行）、`src/Makefile.am`（877 行）等无关内容；且 `clang-format` 会把 `*.am` 当 C++ 处理。只对实质修改的文件格式化。
+
 5. [ ] 阶段 5：`IndexedList` → `IndexedDeque`（或 `std::deque`）→ 提交 `PLAN-011 阶段5: 用标准容器替换自研 IndexedList`
 6. [ ] 阶段 6：头文件 `const char*` 形参 → `std::string_view` → 提交 `PLAN-011 阶段6: 头文件 const char* 形参改 string_view`
 7. [ ] 阶段 7：收尾（勾选、状态行、实测表、偏差）→ 提交 `PLAN-011: 勾选全部阶段、标记计划完成并记录实测门禁结果`

@@ -46,7 +46,6 @@
 #include "BtMessage.h"
 #include "a2functional.h"
 #include "SimpleRandomizer.h"
-#include "array_fun.h"
 #include "fmt.h"
 #include "BtRequestMessage.h"
 

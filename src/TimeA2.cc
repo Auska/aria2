@@ -38,7 +38,6 @@
 #include <cstring>
 
 #include "util.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

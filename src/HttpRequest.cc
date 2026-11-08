@@ -49,7 +49,6 @@
 #include "AuthConfig.h"
 #include "a2functional.h"
 #include "TimeA2.h"
-#include "array_fun.h"
 #include "Request.h"
 #include "MessageDigest.h"
 

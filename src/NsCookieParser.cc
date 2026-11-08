@@ -45,7 +45,6 @@
 #include "Cookie.h"
 #include "cookie_helper.h"
 #include "BufferedFile.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

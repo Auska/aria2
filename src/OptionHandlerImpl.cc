@@ -59,7 +59,6 @@
 #include "LogFactory.h"
 #include "uri.h"
 #include "SegList.h"
-#include "array_fun.h"
 #include "help_tags.h"
 #include "MessageDigest.h"
 

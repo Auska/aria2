@@ -12,7 +12,6 @@
 #include "DownloadContext.h"
 #include "Piece.h"
 #include "FileEntry.h"
-#include "array_fun.h"
 #ifdef ENABLE_BITTORRENT
 #  include "MockPeerStorage.h"
 #  include "BtRuntime.h"

@@ -11,7 +11,6 @@
 #include "Range.h"
 #include "Request.h"
 #include "Option.h"
-#include "array_fun.h"
 #include "CookieStorage.h"
 #include "util.h"
 #include "AuthConfig.h"

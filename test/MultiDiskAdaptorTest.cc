@@ -12,7 +12,6 @@
 #include "FileEntry.h"
 #include "Exception.h"
 #include "a2io.h"
-#include "array_fun.h"
 #include "TestUtil.h"
 #include "DiskWriter.h"
 #include "WrDiskCacheEntry.h"

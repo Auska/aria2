@@ -40,7 +40,6 @@
 #include "OptionParser.h"
 #include "OptionHandler.h"
 #include "Option.h"
-#include "array_fun.h"
 #include "download_helper.h"
 #include "RpcRequest.h"
 #include "RpcResponse.h"

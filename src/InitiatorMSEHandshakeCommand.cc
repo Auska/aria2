@@ -55,7 +55,6 @@
 #include "bittorrent_helper.h"
 #include "util.h"
 #include "fmt.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

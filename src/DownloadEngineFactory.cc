@@ -57,7 +57,6 @@
 #include "ServerStatMan.h"
 #include "a2io.h"
 #include "DownloadContext.h"
-#include "array_fun.h"
 #include "EvictSocketPoolCommand.h"
 #ifdef HAVE_LIBUV
 #  include "LibuvEventPoll.h"

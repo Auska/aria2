@@ -53,7 +53,6 @@
 #include "LogFactory.h"
 #include "File.h"
 #include "util.h"
-#include "array_fun.h"
 #include "OptionHandler.h"
 #include "ByteArrayDiskWriter.h"
 #include "a2functional.h"

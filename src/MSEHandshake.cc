@@ -60,7 +60,6 @@
 #include "Option.h"
 #include "fmt.h"
 #include "bittorrent_helper.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

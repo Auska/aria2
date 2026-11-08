@@ -56,7 +56,6 @@
 #include "fmt.h"
 #include "DownloadContext.h"
 #include "PeerStorage.h"
-#include "array_fun.h"
 #include "WrDiskCache.h"
 #include "WrDiskCacheEntry.h"
 #include "DownloadFailureException.h"

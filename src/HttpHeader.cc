@@ -38,7 +38,6 @@
 #include "util.h"
 #include "A2STR.h"
 #include "DownloadFailureException.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

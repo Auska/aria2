@@ -2,7 +2,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "array_fun.h"
 #include "BitfieldMan.h"
 #include "MockPieceSelector.h"
 #include "a2functional.h"

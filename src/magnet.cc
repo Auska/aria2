@@ -34,7 +34,6 @@
 /* copyright --> */
 #include "magnet.h"
 #include "util.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

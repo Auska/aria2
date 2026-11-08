@@ -15,7 +15,6 @@
 #include "ByteArrayDiskWriter.h"
 #include "FileEntry.h"
 #include "File.h"
-#include "array_fun.h"
 #include "BufferedFile.h"
 #include "TestUtil.h"
 #include "SocketCore.h"

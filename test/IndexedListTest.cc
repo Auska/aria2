@@ -7,7 +7,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "TestUtil.h"
-#include "array_fun.h"
 #include "TimerA2.h"
 
 namespace aria2 {

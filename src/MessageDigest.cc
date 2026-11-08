@@ -41,7 +41,6 @@
 #include "util.h"
 #include <ranges>
 
-#include "array_fun.h"
 
 namespace aria2 {
 

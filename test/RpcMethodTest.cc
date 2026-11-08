@@ -17,7 +17,6 @@
 #include "DownloadContext.h"
 #include "FeatureConfig.h"
 #include "util.h"
-#include "array_fun.h"
 #include "download_helper.h"
 #include "FileEntry.h"
 #include "RpcMethodFactory.h"

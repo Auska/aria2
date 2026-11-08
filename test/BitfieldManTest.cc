@@ -5,8 +5,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <iterator>
+
 #include "bitfield.h"
-#include "array_fun.h"
 
 namespace aria2 {
 
@@ -246,7 +247,7 @@ void BitfieldManTest::testFilter()
   auto out = btman.getFirstNMissingUnusedIndex(32);
   CPPUNIT_ASSERT_EQUAL((size_t)6, out.size());
   const size_t ans[] = {2, 3, 4, 5, 6, 7};
-  for (size_t i = 0; i < arraySize(ans); ++i) {
+  for (size_t i = 0; i < std::size(ans); ++i) {
     CPPUNIT_ASSERT_EQUAL(ans[i], out[i]);
   }
   CPPUNIT_ASSERT_EQUAL((int64_t)12ULL, btman.getFilteredTotalLength());

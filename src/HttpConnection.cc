@@ -57,7 +57,6 @@
 #include "a2functional.h"
 #include "fmt.h"
 #include "SocketRecvBuffer.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

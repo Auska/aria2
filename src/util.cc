@@ -67,7 +67,6 @@
 #include "FatalException.h"
 #include "FileEntry.h"
 #include "A2STR.h"
-#include "array_fun.h"
 #include "bitfield.h"
 #include "DownloadHandlerConstants.h"
 #include "RequestGroup.h"

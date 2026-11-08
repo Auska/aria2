@@ -17,7 +17,6 @@
 #include "prefs.h"
 #include "DownloadContext.h"
 #include "bittorrent_helper.h"
-#include "array_fun.h"
 #include "UDPTrackerRequest.h"
 #include "SocketCore.h"
 

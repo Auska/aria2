@@ -4,7 +4,6 @@
 
 #include "RecoverableException.h"
 #include "util.h"
-#include "array_fun.h"
 #include "base64.h"
 
 namespace aria2 {

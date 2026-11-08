@@ -50,7 +50,6 @@
 #include "FileEntry.h"
 #include "prefs.h"
 #include "util.h"
-#include "array_fun.h"
 #include "BufferedFile.h"
 #include "OptionParser.h"
 #include "OptionHandler.h"

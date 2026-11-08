@@ -11,7 +11,6 @@
 #include "Option.h"
 #include "DownloadContext.h"
 #include "FileEntry.h"
-#include "array_fun.h"
 #include "bittorrent_helper.h"
 
 namespace aria2 {

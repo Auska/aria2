@@ -9,7 +9,6 @@
 #include "Peer.h"
 #include "Option.h"
 #include "BtRuntime.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

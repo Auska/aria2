@@ -50,7 +50,6 @@
 #include "fmt.h"
 #include "SocketRecvBuffer.h"
 #include "TimeA2.h"
-#include "array_fun.h"
 #include "JsonDiskWriter.h"
 
 namespace aria2 {

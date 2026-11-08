@@ -21,7 +21,6 @@ SRCS =  \
 	AdaptiveFileAllocationIterator.cc AdaptiveFileAllocationIterator.h\
 	AdaptiveURISelector.cc AdaptiveURISelector.h\
 	AnonDiskWriterFactory.h\
-	array_fun.h\
 	AuthConfig.cc AuthConfig.h\
 	AuthConfigFactory.cc AuthConfigFactory.h\
 	AuthResolver.h\

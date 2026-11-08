@@ -13,7 +13,6 @@
 #include "AnnounceTier.h"
 #include "FixedNumberRandomizer.h"
 #include "FileEntry.h"
-#include "array_fun.h"
 #include "a2netcompat.h"
 #include "bencode2.h"
 #include "TestUtil.h"

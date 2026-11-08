@@ -53,7 +53,6 @@
 #include "a2io.h"
 #include "DownloadFailureException.h"
 #include "fmt.h"
-#include "array_fun.h"
 #include "DownloadContext.h"
 #include "BufferedFile.h"
 #include "SHA1IOFile.h"

@@ -35,7 +35,6 @@
 #include "OptionHandlerFactory.h"
 #include "prefs.h"
 #include "OptionHandlerImpl.h"
-#include "array_fun.h"
 #include "usage_text.h"
 #include "A2STR.h"
 #include "util.h"

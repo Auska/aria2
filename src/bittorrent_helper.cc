@@ -61,7 +61,6 @@
 #include "prefs.h"
 #include "FileEntry.h"
 #include "error_code.h"
-#include "array_fun.h"
 #include "DownloadFailureException.h"
 #include "ValueBaseBencodeParser.h"
 

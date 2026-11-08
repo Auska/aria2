@@ -47,7 +47,6 @@
 #include "Option.h"
 #include "A2STR.h"
 #include "a2functional.h"
-#include "array_fun.h"
 #include "OptionHandlerFactory.h"
 #include "DlAbortEx.h"
 #include "error_code.h"

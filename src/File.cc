@@ -47,7 +47,6 @@
 
 #include "util.h"
 #include "A2STR.h"
-#include "array_fun.h"
 #include "Logger.h"
 #include "LogFactory.h"
 #include "fmt.h"

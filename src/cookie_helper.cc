@@ -39,7 +39,6 @@
 #include <limits>
 
 #include "util.h"
-#include "array_fun.h"
 #include "Cookie.h"
 #include "a2functional.h"
 

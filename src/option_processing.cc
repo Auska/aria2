@@ -57,7 +57,6 @@
 #include "bittorrent_helper.h"
 #include "BufferedFile.h"
 #include "console.h"
-#include "array_fun.h"
 #include "LogFactory.h"
 #ifndef HAVE_DAEMON
 #  include "daemon.h"

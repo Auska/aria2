@@ -58,7 +58,6 @@
 #include "prefs.h"
 #include "message.h"
 #include "FeatureConfig.h"
-#include "array_fun.h"
 #include "RpcMethodFactory.h"
 #include "RpcResponse.h"
 #include "SegmentMan.h"

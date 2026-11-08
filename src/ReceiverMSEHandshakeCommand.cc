@@ -49,7 +49,6 @@
 #include "RequestGroupMan.h"
 #include "BtRegistry.h"
 #include "DownloadContext.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

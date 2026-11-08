@@ -5,7 +5,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "RecoverableException.h"
-#include "array_fun.h"
 #include "ValueBase.h"
 
 namespace aria2 {

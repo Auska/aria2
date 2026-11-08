@@ -5,7 +5,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "a2functional.h"
-#include "array_fun.h"
 #include "util.h"
 
 namespace aria2 {

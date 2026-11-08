@@ -81,7 +81,6 @@
 #include "message.h"
 #include "SocketCore.h"
 #include "DlAbortEx.h"
-#include "array_fun.h"
 #include "DownloadContext.h"
 #include "PieceStorage.h"
 #include "PeerStorage.h"

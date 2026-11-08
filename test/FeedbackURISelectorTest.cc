@@ -4,7 +4,6 @@
 
 #include "Exception.h"
 #include "util.h"
-#include "array_fun.h"
 #include "ServerStatMan.h"
 #include "ServerStat.h"
 #include "FileEntry.h"

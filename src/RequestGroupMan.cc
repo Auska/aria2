@@ -81,7 +81,6 @@
 #include "PieceStorage.h"
 #include "DiskAdaptor.h"
 #include "SimpleRandomizer.h"
-#include "array_fun.h"
 #include "OpenedFileCounter.h"
 #include "wallclock.h"
 #include "RpcMethodImpl.h"

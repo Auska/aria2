@@ -9,7 +9,6 @@
 #include "RequestGroup.h"
 #include "DownloadContext.h"
 #include "Option.h"
-#include "array_fun.h"
 #include "prefs.h"
 #include "Exception.h"
 #include "util.h"

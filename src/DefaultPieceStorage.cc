@@ -61,7 +61,6 @@
 #include "InorderStreamPieceSelector.h"
 #include "RandomStreamPieceSelector.h"
 #include "GeomStreamPieceSelector.h"
-#include "array_fun.h"
 #include "PieceStatMan.h"
 #include "wallclock.h"
 #include "bitfield.h"

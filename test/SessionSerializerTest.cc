@@ -7,7 +7,6 @@
 
 #include "TestUtil.h"
 #include "RequestGroupMan.h"
-#include "array_fun.h"
 #include "download_helper.h"
 #include "prefs.h"
 #include "Option.h"

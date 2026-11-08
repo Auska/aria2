@@ -2,7 +2,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "array_fun.h"
+#include <iterator>
+
 #include "BitfieldMan.h"
 #include "a2functional.h"
 
@@ -28,7 +29,7 @@ void LongestSequencePieceSelectorTest::testSelect()
 {
   size_t A[] = {1, 2, 3, 4, 7, 10, 11, 12, 13, 14, 15, 100, 112, 113, 114};
   BitfieldMan bf(1_k, 256_k);
-  for (size_t i = 0; i < arraySize(A); ++i) {
+  for (size_t i = 0; i < std::size(A); ++i) {
     bf.setBit(A[i]);
   }
 

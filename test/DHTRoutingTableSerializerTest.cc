@@ -9,7 +9,6 @@
 #include "Exception.h"
 #include "util.h"
 #include "DHTNode.h"
-#include "array_fun.h"
 #include "DHTConstants.h"
 #include "bittorrent_helper.h"
 #include "a2netcompat.h"

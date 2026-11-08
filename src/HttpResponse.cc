@@ -57,7 +57,6 @@
 #include "Checksum.h"
 #include "uri.h"
 #include "base64.h"
-#include "array_fun.h"
 #include "MessageDigest.h"
 #ifdef HAVE_ZLIB
 #  include "GZipDecodingStreamFilter.h"

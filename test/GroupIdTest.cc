@@ -3,7 +3,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "TestUtil.h"
-#include "array_fun.h"
 
 namespace aria2 {
 

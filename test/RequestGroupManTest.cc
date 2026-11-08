@@ -14,7 +14,6 @@
 #include "ServerStatMan.h"
 #include "ServerStat.h"
 #include "File.h"
-#include "array_fun.h"
 #include "RecoverableException.h"
 #include "util.h"
 #include "DownloadEngine.h"
