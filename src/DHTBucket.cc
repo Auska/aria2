@@ -178,10 +178,10 @@ std::unique_ptr<DHTBucket> DHTBucket::split()
   assert(splitAllowed());
 
   DHTID rMax = max_;
-  bitfield::flipBit(rMax.data(), rMax.size(), prefixLength_);
+  bitfield::flipBit(rMax, prefixLength_);
   DHTID rMin = min_;
 
-  bitfield::flipBit(min_.data(), min_.size(), prefixLength_);
+  bitfield::flipBit(min_, prefixLength_);
 
   ++prefixLength_;
   auto rBucket = make_unique<DHTBucket>(prefixLength_, rMax, rMin, localNode_);
@@ -199,10 +199,8 @@ std::unique_ptr<DHTBucket> DHTBucket::split()
   // TODO create toString() and use it.
   A2_LOG_DEBUG(fmt("New bucket. prefixLength={}, Range:{}-{}",
                    static_cast<unsigned int>(rBucket->getPrefixLength()),
-                   util::toHex(std::as_bytes(std::span{rBucket->getMinID()}))
-                       ,
-                   util::toHex(std::as_bytes(std::span{rBucket->getMaxID()}))
-                       ));
+                   util::toHex(std::as_bytes(std::span{rBucket->getMinID()})),
+                   util::toHex(std::as_bytes(std::span{rBucket->getMaxID()}))));
   A2_LOG_DEBUG(fmt("Existing bucket. prefixLength={}, Range:{}-{}",
                    static_cast<unsigned int>(prefixLength_),
                    util::toHex(std::as_bytes(std::span{getMinID()})),

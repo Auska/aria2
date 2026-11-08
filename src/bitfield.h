@@ -38,6 +38,7 @@
 #include "common.h"
 
 #include <optional>
+#include <span>
 
 #include <cassert>
 #include <cstdlib>
@@ -96,8 +97,10 @@ inline size_t countBit32(uint32_t n)
          cntbits[(n >> 16) & 0xffu] + cntbits[(n >> 24) & 0xffu];
 }
 
-// Counts set bit in bitfield.
-inline size_t countSetBit(const unsigned char* bitfield, size_t nbits)
+// Counts set bit in bitfield. |nbits| is the number of significant bits,
+// which need not be a multiple of 8: bits past |nbits| in the last byte are
+// ignored.
+inline size_t countSetBit(std::span<const unsigned char> bitfield, size_t nbits)
 {
   if (nbits == 0) {
     return 0;
@@ -142,7 +145,7 @@ size_t countSetBitSlow(const Array& bitfield, size_t nbits)
   return count;
 }
 
-void flipBit(unsigned char* data, size_t length, size_t bitIndex);
+void flipBit(std::span<unsigned char> data, size_t bitIndex);
 
 // Returns index of the first set bit of bitfield.  bitfield contains
 // nbits. Returns nullopt if no set bit is found.

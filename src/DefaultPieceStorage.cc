@@ -238,7 +238,7 @@ void DefaultPieceStorage::getMissingPiece(
       size_t index;
       if (pieceSelector_->select(index, misbitfield.get(), blocks)) {
         pieces.push_back(checkOutPiece(index, cuid));
-        bitfield::flipBit(misbitfield.get(), blocks, index);
+        bitfield::flipBit(std::span{misbitfield.get(), blocks}, index);
         misBlock += pieces.back()->countMissingBlock();
       }
       else {
