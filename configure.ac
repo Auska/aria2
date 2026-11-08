@@ -344,57 +344,18 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_MEMCMP
 AC_FUNC_MKTIME
 AC_FUNC_STAT
-AC_FUNC_STRFTIME
-AC_FUNC_VPRINTF
 AC_FUNC_FORK
 AC_FUNC_STRTOD
 # Don't use AC_FUNC_MMAP because it fails on some platforms (e.g.,
 # OpenWRT) which have mmap and it works in the way we use in aria2.
 # Instead use mmap in AC_CHECK_FUNCS list.
-AC_CHECK_FUNCS([__argz_count \
-                __argz_next \
-                __argz_stringify \
-                atexit \
-                ftruncate \
-                getcwd \
-                getentropy \
-                gethostbyaddr \
-                gethostbyname \
-                getifaddrs \
-                getpagesize \
-                memchr \
-                memmove \
-                mempcpy \
-                memset \
-                mkdir \
+AC_CHECK_FUNCS([getifaddrs \
                 mmap \
-                munmap \
-                nl_langinfo \
                 posix_fadvise \
                 posix_memalign \
-                pow \
-                putenv \
-                rmdir \
-                setlocale \
                 sigaction \
                 sleep \
-                socket \
-                stpcpy \
-                strcasecmp \
-                strchr \
-                strcspn \
-                strdup \
-                strerror \
-                strncasecmp \
-                strstr \
-                strtol \
-                strtoul \
-                strtoull \
-                tzset \
-                unsetenv \
-                usleep \
-                utime \
-                utimes])
+                usleep])
 
 dnl Put jemalloc check after the posix_memalign check.
 dnl jemalloc may implement posix_memalign while the usual CRT may not.
