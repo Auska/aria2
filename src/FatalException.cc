@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "FatalException.h"
+#include <string_view>
 
 namespace aria2 {
 
@@ -41,13 +42,13 @@ std::shared_ptr<Exception> FatalException::copy() const
   return std::make_shared<FatalException>(*this);
 }
 
-FatalException::FatalException(const std::string& msg,
+FatalException::FatalException(std::string_view msg,
                                std::source_location location)
     : Exception(msg, location)
 {
 }
 
-FatalException::FatalException(const std::string& msg, const Exception& cause,
+FatalException::FatalException(std::string_view msg, const Exception& cause,
                                std::source_location location)
     : Exception(msg, cause, location)
 {

@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "DHTNode.h"
+#include <string_view>
 
 #include <cstring>
 
@@ -58,10 +59,7 @@ DHTNode::~DHTNode() = default;
 
 void DHTNode::generateID() { util::generateRandomKey(id_.data()); }
 
-bool DHTNode::operator==(const DHTNode& node) const
-{
-  return id_ == node.id_;
-}
+bool DHTNode::operator==(const DHTNode& node) const { return id_ == node.id_; }
 
 bool DHTNode::operator!=(const DHTNode& node) const { return !(*this == node); }
 
@@ -101,13 +99,12 @@ void DHTNode::timeout() { ++condition_; }
 std::string DHTNode::toString() const
 {
   return fmt("DHTNode ID={}, Host={}({}), Condition={}, RTT={}",
-             util::toHex(std::as_bytes(std::span{id_})),
-             ipaddr_, port_, condition_,
-             static_cast<long int>(rtt_.count()));
+             util::toHex(std::as_bytes(std::span{id_})), ipaddr_, port_,
+             condition_, static_cast<long int>(rtt_.count()));
 }
 
 void DHTNode::setID(const DHTID& id) { id_ = id; }
 
-void DHTNode::setIPAddress(const std::string& ipaddr) { ipaddr_ = ipaddr; }
+void DHTNode::setIPAddress(std::string_view ipaddr) { ipaddr_ = ipaddr; }
 
 } // namespace aria2

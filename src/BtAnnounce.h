@@ -36,6 +36,7 @@
 #define D_BT_ANNOUNCE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -70,7 +71,7 @@ public:
   virtual std::string getAnnounceUrl() = 0;
 
   virtual std::shared_ptr<UDPTrackerRequest>
-  createUDPTrackerRequest(const std::string& remoteAddr, uint16_t remotePort,
+  createUDPTrackerRequest(std::string_view remoteAddr, uint16_t remotePort,
                           uint16_t localPort) = 0;
 
   /**

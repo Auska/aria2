@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "Option.h"
+#include <string_view>
 
 #include <charconv>
 
@@ -73,7 +74,7 @@ template <typename V> void unsetBit(V& b, PrefPtr pref)
 
 } // namespace
 
-void Option::put(PrefPtr pref, const std::string& value)
+void Option::put(PrefPtr pref, std::string_view value)
 {
   setBit(use_, pref);
   table_[pref->i] = value;

@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "DHTUnknownMessage.h"
+#include <string_view>
 
 #include <cstring>
 #include <cstdlib>
@@ -49,7 +50,7 @@ const std::string DHTUnknownMessage::UNKNOWN("unknown");
 
 DHTUnknownMessage::DHTUnknownMessage(const std::shared_ptr<DHTNode>& localNode,
                                      std::span<const unsigned char> data,
-                                     const std::string& ipaddr, uint16_t port)
+                                     std::string_view ipaddr, uint16_t port)
     : DHTMessage(localNode, std::shared_ptr<DHTNode>()),
       data_(data.begin(), data.end()),
       ipaddr_(ipaddr),

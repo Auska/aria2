@@ -36,6 +36,7 @@
 #define D_HTTP_HEADER_PROCESSOR_H
 
 #include "common.h"
+#include <string_view>
 #include "HttpHeader.h"
 
 #include <cstddef>
@@ -60,7 +61,7 @@ public:
    * reached.
    */
   bool parse(std::span<const std::byte> data);
-  bool parse(const std::string& data);
+  bool parse(std::string_view data);
 
   /**
    * Returns the number of bytes processed in the last invocation of

@@ -55,7 +55,7 @@
 
 namespace aria2 {
 
-uint16_t getDefaultPort(const std::string& protocol)
+uint16_t getDefaultPort(std::string_view protocol)
 {
   if (protocol == "http") {
     return 80;

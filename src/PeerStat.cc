@@ -33,11 +33,12 @@
  */
 /* copyright --> */
 #include "PeerStat.h"
+#include <string_view>
 #include "wallclock.h"
 
 namespace aria2 {
 
-PeerStat::PeerStat(cuid_t cuid, const std::string& hostname,
+PeerStat::PeerStat(cuid_t cuid, std::string_view hostname,
                    const ::std::string& protocol)
     : cuid_(cuid), hostname_(hostname), protocol_(protocol)
 {

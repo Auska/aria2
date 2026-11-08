@@ -35,6 +35,7 @@
 #ifndef D_FATAL_EXCEPTION_H
 #define D_FATAL_EXCEPTION_H
 #include "Exception.h"
+#include <string_view>
 
 #include <source_location>
 
@@ -45,11 +46,11 @@ protected:
   virtual std::shared_ptr<Exception> copy() const override;
 
 public:
-  FatalException(const std::string& msg, std::source_location location =
-                                             std::source_location::current());
+  FatalException(std::string_view msg, std::source_location location =
+                                           std::source_location::current());
 
   FatalException(
-      const std::string& msg, const Exception& cause,
+      std::string_view msg, const Exception& cause,
       std::source_location location = std::source_location::current());
 };
 

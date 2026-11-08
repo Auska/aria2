@@ -36,6 +36,7 @@
 #define D_UT_METADATA_DATA_EXTENSION_MESSAGE_H
 
 #include "UTMetadataExtensionMessage.h"
+#include <string_view>
 
 #include <memory>
 
@@ -70,7 +71,7 @@ public:
 
   size_t getTotalSize() const;
 
-  void setData(const std::string& data);
+  void setData(std::string_view data);
 
   template <typename InputIterator>
   void setData(InputIterator first, InputIterator last)

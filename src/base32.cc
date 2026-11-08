@@ -45,7 +45,7 @@ const char B32TABLE[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
                          'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7'};
 } // namespace
 
-std::string encode(const std::string& src)
+std::string encode(std::string_view src)
 {
   std::string ret;
   size_t count = 0;

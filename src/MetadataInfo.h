@@ -36,6 +36,7 @@
 #define D_METADATA_INFO_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -50,7 +51,7 @@ private:
   std::string uri_;
 
 public:
-  MetadataInfo(const std::shared_ptr<GroupId>& gid, const std::string& uri);
+  MetadataInfo(const std::shared_ptr<GroupId>& gid, std::string_view uri);
 
   MetadataInfo();
 

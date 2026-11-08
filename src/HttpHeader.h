@@ -36,6 +36,7 @@
 #define D_HTTP_HEADER_H
 
 #include "common.h"
+#include <string_view>
 
 #include <map>
 #include <optional>
@@ -105,7 +106,7 @@ public:
   ~HttpHeader();
 
   // For all methods, use lowercased header field name.
-  void put(InterestingHeader hdKey, const std::string& value);
+  void put(InterestingHeader hdKey, std::string_view value);
   bool defined(InterestingHeader hdKey) const;
   const std::string& find(InterestingHeader hdKey) const;
   std::vector<std::string> findAll(InterestingHeader hdKey) const;
@@ -122,11 +123,11 @@ public:
 
   const std::string& getReasonPhrase() const;
 
-  void setReasonPhrase(const std::string& reasonPhrase);
+  void setReasonPhrase(std::string_view reasonPhrase);
 
   const std::string& getVersion() const;
 
-  void setVersion(const std::string& version);
+  void setVersion(std::string_view version);
 
   template <typename InputIterator>
   void setVersion(InputIterator first, InputIterator last)
@@ -136,7 +137,7 @@ public:
 
   const std::string& getMethod() const;
 
-  void setMethod(const std::string& method);
+  void setMethod(std::string_view method);
 
   template <typename InputIterator>
   void setMethod(InputIterator first, InputIterator last)
@@ -146,7 +147,7 @@ public:
 
   const std::string& getRequestPath() const;
 
-  void setRequestPath(const std::string& requestPath);
+  void setRequestPath(std::string_view requestPath);
 
   template <typename InputIterator>
   void setRequestPath(InputIterator first, InputIterator last)
@@ -166,8 +167,8 @@ public:
   bool isKeepAlive() const;
 };
 
-std::optional<HttpHeader::InterestingHeader> idInterestingHeader(
-    const char* hdName);
+std::optional<HttpHeader::InterestingHeader>
+idInterestingHeader(const char* hdName);
 
 } // namespace aria2
 

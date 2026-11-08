@@ -107,7 +107,7 @@ GZipEncoder& GZipEncoder::operator<<(const char* s)
   return *this;
 }
 
-GZipEncoder& GZipEncoder::operator<<(const std::string& s)
+GZipEncoder& GZipEncoder::operator<<(std::string_view s)
 {
   internalBuf_ += encode(std::as_bytes(std::span{s}));
   return *this;

@@ -36,6 +36,7 @@
 #define D_URI_RESULT_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
@@ -51,7 +52,7 @@ private:
   error_code::Value result_;
 
 public:
-  URIResult(const std::string& uri, error_code::Value result);
+  URIResult(std::string_view uri, error_code::Value result);
 
   ~URIResult();
 

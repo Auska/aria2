@@ -36,6 +36,7 @@
 #define D_BASE32_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
@@ -45,7 +46,7 @@ namespace aria2 {
 
 namespace base32 {
 
-std::string encode(const std::string& src);
+std::string encode(std::string_view src);
 
 template <typename InputIterator>
 std::string decode(InputIterator first, InputIterator last)

@@ -36,6 +36,7 @@
 #define D_PIECE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <stdint.h>
 #include <cstddef>
@@ -144,7 +145,7 @@ public:
   // Calculates completed length
   int64_t getCompletedLength();
 
-  void setHashType(const std::string& hashType);
+  void setHashType(std::string_view hashType);
 
   // Updates hash value. This function compares begin and private variable
   // nextBegin_ and only when they are equal, hash is updated eating data and

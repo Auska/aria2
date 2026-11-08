@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "ChunkChecksum.h"
+#include <string_view>
 #include "A2STR.h"
 
 namespace aria2 {
@@ -48,7 +49,7 @@ ChunkChecksum::ChunkChecksum(std::string hashType,
 {
 }
 
-bool ChunkChecksum::validateChunk(const std::string& actualDigest,
+bool ChunkChecksum::validateChunk(std::string_view actualDigest,
                                   size_t index) const
 {
   const std::string& digest = getPieceHash(index);

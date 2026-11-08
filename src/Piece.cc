@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "Piece.h"
+#include <string_view>
 
 #include <array>
 #include <cassert>
@@ -188,7 +189,7 @@ void Piece::setBitfield(std::span<const unsigned char> bitfield)
 
 int64_t Piece::getCompletedLength() { return bitfield_->getCompletedLength(); }
 
-void Piece::setHashType(const std::string& hashType) { hashType_ = hashType; }
+void Piece::setHashType(std::string_view hashType) { hashType_ = hashType; }
 
 bool Piece::updateHash(int64_t begin, std::span<const std::byte> data)
 {

@@ -34,6 +34,7 @@
 /* copyright --> */
 
 #include "LpdMessage.h"
+#include <string_view>
 #include "Peer.h"
 
 namespace aria2 {
@@ -41,7 +42,7 @@ namespace aria2 {
 LpdMessage::LpdMessage() {}
 
 LpdMessage::LpdMessage(const std::shared_ptr<Peer>& peer,
-                       const std::string& infoHash)
+                       std::string_view infoHash)
     : peer(peer), infoHash(infoHash)
 {
 }

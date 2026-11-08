@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "BackupIPv4ConnectCommand.h"
+#include <string_view>
 #include "RequestGroup.h"
 #include "DownloadEngine.h"
 #include "SocketCore.h"
@@ -48,7 +49,7 @@ namespace aria2 {
 BackupConnectInfo::BackupConnectInfo() : cancel(false) {}
 
 BackupIPv4ConnectCommand::BackupIPv4ConnectCommand(
-    cuid_t cuid, const std::string& ipaddr, uint16_t port,
+    cuid_t cuid, std::string_view ipaddr, uint16_t port,
     const std::shared_ptr<BackupConnectInfo>& info, Command* mainCommand,
     RequestGroup* requestGroup, DownloadEngine* e)
     : Command(cuid),

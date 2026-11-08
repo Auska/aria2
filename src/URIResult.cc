@@ -33,10 +33,11 @@
  */
 /* copyright --> */
 #include "URIResult.h"
+#include <string_view>
 
 namespace aria2 {
 
-URIResult::URIResult(const std::string& uri, error_code::Value result)
+URIResult::URIResult(std::string_view uri, error_code::Value result)
     : uri_(uri), result_(result)
 {
 }

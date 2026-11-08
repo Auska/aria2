@@ -36,6 +36,7 @@
 #define D_FMT_H
 
 #include "common.h"
+#include <string_view>
 
 #include <format>
 #include <string>
@@ -54,7 +55,7 @@ std::string fmt(std::format_string<Args...> f, Args&&... args)
 // Runtime counterpart of fmt(), for the few places where the format
 // string is assembled while the program runs.
 template <typename... Args>
-std::string fmtRuntime(const std::string& f, Args&&... args)
+std::string fmtRuntime(std::string_view f, Args&&... args)
 {
   return std::vformat(f, std::make_format_args(args...));
 }

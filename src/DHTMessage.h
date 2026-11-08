@@ -36,6 +36,7 @@
 #define D_DHT_MESSAGE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -61,7 +62,7 @@ private:
 public:
   DHTMessage(const std::shared_ptr<DHTNode>& localNode,
              const std::shared_ptr<DHTNode>& remoteNode,
-             const std::string& transactionID = A2STR::NIL);
+             std::string_view transactionID = A2STR::NIL);
 
   virtual ~DHTMessage();
 
@@ -85,7 +86,7 @@ public:
 
   const std::string& getVersion() const { return version_; }
 
-  void setVersion(const std::string& version) { version_ = version; }
+  void setVersion(std::string_view version) { version_ = version; }
 
   static const std::string Y;
 

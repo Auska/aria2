@@ -36,6 +36,7 @@
 #define BACKUP_IPV4_CONNECT_COMMAND_H
 
 #include "Command.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -64,8 +65,7 @@ struct BackupConnectInfo {
 // "Happy Eyeballs" implementation.
 class BackupIPv4ConnectCommand : public Command {
 public:
-  BackupIPv4ConnectCommand(cuid_t cuid, const std::string& ipaddr,
-                           uint16_t port,
+  BackupIPv4ConnectCommand(cuid_t cuid, std::string_view ipaddr, uint16_t port,
                            const std::shared_ptr<BackupConnectInfo>& info,
                            Command* mainCommand, RequestGroup* requestGroup,
                            DownloadEngine* e);

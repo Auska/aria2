@@ -36,6 +36,7 @@
 #define D_DHT_PEER_ADDR_ENTRY_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
@@ -52,7 +53,7 @@ private:
   Timer lastUpdated_;
 
 public:
-  PeerAddrEntry(const std::string& ipaddr, uint16_t port,
+  PeerAddrEntry(std::string_view ipaddr, uint16_t port,
                 Timer updated = Timer());
   PeerAddrEntry(const PeerAddrEntry& c);
   ~PeerAddrEntry();

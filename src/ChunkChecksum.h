@@ -36,6 +36,7 @@
 #define D_CHUNK_CHECKSUM_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <vector>
@@ -54,7 +55,7 @@ public:
   ChunkChecksum(std::string hashType, std::vector<std::string> pieceHashes,
                 int32_t pieceLength);
 
-  bool validateChunk(const std::string& actualDigest, size_t index) const;
+  bool validateChunk(std::string_view actualDigest, size_t index) const;
 
   int64_t getEstimatedDataLength() const;
 

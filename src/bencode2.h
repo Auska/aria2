@@ -36,6 +36,7 @@
 #define D_BENCODE2_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <cstddef>
@@ -50,14 +51,13 @@ namespace bencode2 {
 // Decode the data whose length is len.
 std::unique_ptr<ValueBase> decode(std::span<const std::byte> data);
 
-std::unique_ptr<ValueBase> decode(const std::string& data);
+std::unique_ptr<ValueBase> decode(std::string_view data);
 
 // Decode the data whose length is len. After decode is done
 // successfully, return the bencoded string length in end.
-std::unique_ptr<ValueBase> decode(std::span<const std::byte> data,
-                                  size_t& end);
+std::unique_ptr<ValueBase> decode(std::span<const std::byte> data, size_t& end);
 
-std::unique_ptr<ValueBase> decodeFromFile(const std::string& filename);
+std::unique_ptr<ValueBase> decodeFromFile(std::string_view filename);
 
 std::string encode(const ValueBase* vlb);
 

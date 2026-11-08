@@ -35,6 +35,7 @@
 #ifndef D_GZIP_ENCODER_H
 #define D_GZIP_ENCODER_H
 #include "common.h"
+#include <string_view>
 
 #include <cstddef>
 #include <span>
@@ -70,7 +71,7 @@ public:
 
   // Feeds binary data in s to deflater.  The deflated result is kept
   // in this class.
-  GZipEncoder& operator<<(const std::string& s);
+  GZipEncoder& operator<<(std::string_view s);
 
   // Feeds binary data in s with size length to deflater.  The
   // deflated result is kept in this class.

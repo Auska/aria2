@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "HttpHeader.h"
+#include <string_view>
 #include "Range.h"
 #include "util.h"
 #include "A2STR.h"
@@ -45,7 +46,7 @@ HttpHeader::HttpHeader() : statusCode_(0) {}
 
 HttpHeader::~HttpHeader() = default;
 
-void HttpHeader::put(InterestingHeader hdKey, const std::string& value)
+void HttpHeader::put(InterestingHeader hdKey, std::string_view value)
 {
   table_.emplace(hdKey, value);
 }
@@ -166,11 +167,11 @@ Range HttpHeader::getRange() const
   return Range(startByte, endByte, entityLength);
 }
 
-void HttpHeader::setVersion(const std::string& version) { version_ = version; }
+void HttpHeader::setVersion(std::string_view version) { version_ = version; }
 
-void HttpHeader::setMethod(const std::string& method) { method_ = method; }
+void HttpHeader::setMethod(std::string_view method) { method_ = method; }
 
-void HttpHeader::setRequestPath(const std::string& requestPath)
+void HttpHeader::setRequestPath(std::string_view requestPath)
 {
   requestPath_ = requestPath;
 }
@@ -189,7 +190,7 @@ const std::string& HttpHeader::getRequestPath() const { return requestPath_; }
 
 const std::string& HttpHeader::getReasonPhrase() const { return reasonPhrase_; }
 
-void HttpHeader::setReasonPhrase(const std::string& reasonPhrase)
+void HttpHeader::setReasonPhrase(std::string_view reasonPhrase)
 {
   reasonPhrase_ = reasonPhrase;
 }
@@ -247,8 +248,8 @@ constexpr const char* INTERESTING_HEADER_NAMES[] = {
 };
 } // namespace
 
-std::optional<HttpHeader::InterestingHeader> idInterestingHeader(
-    const char* hdName)
+std::optional<HttpHeader::InterestingHeader>
+idInterestingHeader(const char* hdName)
 {
   auto i = std::lower_bound(std::begin(INTERESTING_HEADER_NAMES),
                             std::end(INTERESTING_HEADER_NAMES), hdName,

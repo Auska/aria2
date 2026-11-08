@@ -35,6 +35,7 @@
 #ifndef D_UNKNOWN_OPTION_EXCEPTION_H
 #define D_UNKNOWN_OPTION_EXCEPTION_H
 #include "RecoverableException.h"
+#include <string_view>
 
 #include <source_location>
 
@@ -49,11 +50,11 @@ protected:
 
 public:
   UnknownOptionException(
-      const std::string& unknownOption,
+      std::string_view unknownOption,
       std::source_location location = std::source_location::current());
 
   UnknownOptionException(
-      const std::string& unknownOption, const Exception& cause,
+      std::string_view unknownOption, const Exception& cause,
       std::source_location location = std::source_location::current());
 
   virtual ~UnknownOptionException() noexcept;

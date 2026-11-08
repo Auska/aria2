@@ -36,6 +36,7 @@
 #define D_LOG_FACTORY_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -68,7 +69,7 @@ public:
    * Set a filename to write log. If name is "-", log is written to
    * stdout. If name is "", log is not written to file.
    */
-  static void setLogFile(const std::string& name);
+  static void setLogFile(std::string_view name);
 
   /**
    * Set flag whether the log is printed in console.
@@ -85,7 +86,7 @@ public:
    * Set log level to output to file by string representation of log
    * level.  Possible values are: debug, info, notice, warn, error
    */
-  static void setLogLevel(const std::string& level);
+  static void setLogLevel(std::string_view level);
 
   /**
    * Set log level to output to console.
@@ -96,7 +97,7 @@ public:
    * Set log level to output to console by string representation of log
    * level.  Possible values are: debug, info, notice, warn, error
    */
-  static void setConsoleLogLevel(const std::string& level);
+  static void setConsoleLogLevel(std::string_view level);
 
   /**
    * Enable color output if |enabled| is true. By default, color

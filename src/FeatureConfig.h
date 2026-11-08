@@ -36,13 +36,14 @@
 #define D_FEATURE_CONFIG_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
 namespace aria2 {
 
 // Returns default port for the given |protocol|.
-uint16_t getDefaultPort(const std::string& protocol);
+uint16_t getDefaultPort(std::string_view protocol);
 
 enum class FeatureType {
   ASYNC_DNS,

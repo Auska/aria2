@@ -36,6 +36,7 @@
 #define D_DHT_NODE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
@@ -73,7 +74,7 @@ public:
 
   const std::string& getIPAddress() const { return ipaddr_; }
 
-  void setIPAddress(const std::string& ipaddr);
+  void setIPAddress(std::string_view ipaddr);
 
   void setID(const DHTID& id);
 

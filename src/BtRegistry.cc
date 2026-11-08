@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "BtRegistry.h"
+#include <string_view>
 #include "DlAbortEx.h"
 #include "DownloadContext.h"
 #include "PeerStorage.h"
@@ -62,7 +63,7 @@ BtRegistry::getDownloadContext(a2_gid_t gid) const
 }
 
 const std::shared_ptr<DownloadContext>&
-BtRegistry::getDownloadContext(const std::string& infoHash) const
+BtRegistry::getDownloadContext(std::string_view infoHash) const
 {
   for (auto& kv : pool_) {
     if (bittorrent::getTorrentAttrs(kv.second->downloadContext)->infoHash ==

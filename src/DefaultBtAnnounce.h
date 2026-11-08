@@ -36,6 +36,7 @@
 #define D_DEFAULT_BT_ANNOUNCE_H
 
 #include "BtAnnounce.h"
+#include <string_view>
 #include "TimerA2.h"
 #include "AnnounceList.h"
 
@@ -103,7 +104,7 @@ public:
   virtual std::string getAnnounceUrl() override;
 
   virtual std::shared_ptr<UDPTrackerRequest>
-  createUDPTrackerRequest(const std::string& remoteAddr, uint16_t remotePort,
+  createUDPTrackerRequest(std::string_view remoteAddr, uint16_t remotePort,
                           uint16_t localPort) override;
 
   virtual void announceStart() override;
@@ -126,8 +127,7 @@ public:
 
   virtual void shuffleAnnounce() override;
 
-  virtual void
-  overrideMinInterval(std::chrono::seconds interval) override;
+  virtual void overrideMinInterval(std::chrono::seconds interval) override;
 
   virtual void setTcpPort(uint16_t port) override { tcpPort_ = port; }
 

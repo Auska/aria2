@@ -36,6 +36,7 @@
 #define D_REQUEST_GROUP_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <algorithm>
@@ -191,8 +192,8 @@ private:
 
   bool seedOnly_;
 
-  void validateFilename(const std::string& expectedFilename,
-                        const std::string& actualFilename) const;
+  void validateFilename(std::string_view expectedFilename,
+                        std::string_view actualFilename) const;
 
   void initializePreDownloadHandler();
 
@@ -262,7 +263,7 @@ public:
    * The expected filename refers to FileEntry::getBasename() of the first
    * element of DownloadContext::getFileEntries()
    */
-  void validateFilename(const std::string& actualFilename) const;
+  void validateFilename(std::string_view actualFilename) const;
 
   void validateTotalLength(int64_t expectedTotalLength,
                            int64_t actualTotalLength) const;
@@ -340,11 +341,9 @@ public:
 
   bool isPreLocalFileCheckEnabled() const { return preLocalFileCheckEnabled_; }
 
-  void setHaltRequested(bool f,
-                        HaltReason = HaltReason::SHUTDOWN_SIGNAL);
+  void setHaltRequested(bool f, HaltReason = HaltReason::SHUTDOWN_SIGNAL);
 
-  void setForceHaltRequested(
-      bool f, HaltReason = HaltReason::SHUTDOWN_SIGNAL);
+  void setForceHaltRequested(bool f, HaltReason = HaltReason::SHUTDOWN_SIGNAL);
 
   bool isHaltRequested() const { return haltRequested_; }
 

@@ -36,6 +36,7 @@
 #define D_DNS_CACHE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <set>
@@ -52,7 +53,7 @@ private:
     std::string addr_;
     bool good_;
 
-    AddrEntry(const std::string& addr);
+    AddrEntry(std::string_view addr);
     AddrEntry(const AddrEntry& c);
     ~AddrEntry();
 
@@ -64,19 +65,19 @@ private:
     uint16_t port_;
     std::vector<AddrEntry> addrEntries_;
 
-    CacheEntry(const std::string& hostname, uint16_t port);
+    CacheEntry(std::string_view hostname, uint16_t port);
     CacheEntry(const CacheEntry& c);
     ~CacheEntry();
 
     CacheEntry& operator=(const CacheEntry& c);
 
-    bool add(const std::string& addr);
+    bool add(std::string_view addr);
 
-    std::vector<AddrEntry>::iterator find(const std::string& addr);
+    std::vector<AddrEntry>::iterator find(std::string_view addr);
 
-    std::vector<AddrEntry>::const_iterator find(const std::string& addr) const;
+    std::vector<AddrEntry>::const_iterator find(std::string_view addr) const;
 
-    bool contains(const std::string& addr) const;
+    bool contains(std::string_view addr) const;
 
     const std::string& getGoodAddr() const;
 
@@ -90,16 +91,15 @@ private:
       }
     }
 
-    void markBad(const std::string& addr);
+    void markBad(std::string_view addr);
 
     bool operator<(const CacheEntry& e) const;
 
     bool operator==(const CacheEntry& e) const;
   };
 
-  using CacheEntrySet =
-      std::set<std::shared_ptr<CacheEntry>,
-               DerefLess<std::shared_ptr<CacheEntry>>>;
+  using CacheEntrySet = std::set<std::shared_ptr<CacheEntry>,
+                                 DerefLess<std::shared_ptr<CacheEntry>>>;
   CacheEntrySet entries_;
 
 public:
@@ -109,10 +109,10 @@ public:
 
   DNSCache& operator=(const DNSCache& c);
 
-  const std::string& find(const std::string& hostname, uint16_t port) const;
+  const std::string& find(std::string_view hostname, uint16_t port) const;
 
   template <typename OutputIterator>
-  void findAll(OutputIterator out, const std::string& hostname,
+  void findAll(OutputIterator out, std::string_view hostname,
                uint16_t port) const
   {
     auto target = std::make_shared<CacheEntry>(hostname, port);
@@ -122,13 +122,12 @@ public:
     }
   }
 
-  void put(const std::string& hostname, const std::string& ipaddr,
-           uint16_t port);
+  void put(std::string_view hostname, std::string_view ipaddr, uint16_t port);
 
-  void markBad(const std::string& hostname, const std::string& ipaddr,
+  void markBad(std::string_view hostname, std::string_view ipaddr,
                uint16_t port);
 
-  void remove(const std::string& hostname, uint16_t port);
+  void remove(std::string_view hostname, uint16_t port);
 };
 
 } // namespace aria2

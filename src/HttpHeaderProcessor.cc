@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "HttpHeaderProcessor.h"
+#include <string_view>
 
 #include <vector>
 
@@ -437,7 +438,7 @@ fin:
   return true;
 }
 
-bool HttpHeaderProcessor::parse(const std::string& data)
+bool HttpHeaderProcessor::parse(std::string_view data)
 {
   return parse(std::as_bytes(std::span{data}));
 }
@@ -449,7 +450,8 @@ size_t HttpHeaderProcessor::getLastBytesProcessed() const
 
 void HttpHeaderProcessor::clear()
 {
-  state_ = (mode_ == ParserMode::CLIENT_PARSER ? ParseState::PREV_RES_VERSION : ParseState::PREV_METHOD);
+  state_ = (mode_ == ParserMode::CLIENT_PARSER ? ParseState::PREV_RES_VERSION
+                                               : ParseState::PREV_METHOD);
   lastBytesProcessed_ = 0;
   buf_.clear();
   lastFieldName_.clear();

@@ -33,11 +33,12 @@
  */
 /* copyright --> */
 #include "PeerAddrEntry.h"
+#include <string_view>
 #include "wallclock.h"
 
 namespace aria2 {
 
-PeerAddrEntry::PeerAddrEntry(const std::string& ipaddr, uint16_t port,
+PeerAddrEntry::PeerAddrEntry(std::string_view ipaddr, uint16_t port,
                              Timer updated)
     : ipaddr_(ipaddr), port_(port), lastUpdated_(updated)
 {

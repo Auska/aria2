@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "UnknownOptionException.h"
+#include <string_view>
 #include "fmt.h"
 
 namespace aria2 {
@@ -41,7 +42,7 @@ namespace {
 constexpr auto MESSAGE = _("Unknown option '{}'");
 } // namespace
 
-UnknownOptionException::UnknownOptionException(const std::string& unknownOption,
+UnknownOptionException::UnknownOptionException(std::string_view unknownOption,
                                                std::source_location location)
     : RecoverableException(fmt(MESSAGE, unknownOption),
                            error_code::OPTION_ERROR, location),
@@ -49,7 +50,7 @@ UnknownOptionException::UnknownOptionException(const std::string& unknownOption,
 {
 }
 
-UnknownOptionException::UnknownOptionException(const std::string& unknownOption,
+UnknownOptionException::UnknownOptionException(std::string_view unknownOption,
                                                const Exception& cause,
                                                std::source_location location)
     : RecoverableException(fmt(MESSAGE, unknownOption),

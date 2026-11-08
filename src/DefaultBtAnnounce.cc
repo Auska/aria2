@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "DefaultBtAnnounce.h"
+#include <string_view>
 #include "LogFactory.h"
 #include "Logger.h"
 #include "util.h"
@@ -136,7 +137,8 @@ bool DefaultBtAnnounce::adjustAnnounceList()
     // sending "completed" event.
     if (pieceStorage_->allDownloadFinished() &&
         announceList_.getEvent() == AnnounceTier::AnnounceEvent::STARTED) {
-      announceList_.setEvent(AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
+      announceList_.setEvent(
+          AnnounceTier::AnnounceEvent::STARTED_AFTER_COMPLETION);
     }
   }
   else {
@@ -176,9 +178,7 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
           util::percentEncode(std::as_bytes(std::span{infoHash})),
           util::percentEncode(std::as_bytes(std::span{peerId})),
           stat.getSessionUploadLength(), stat.getSessionDownloadLength(), left,
-          util::percentEncode(
-              std::as_bytes(std::span{peerId}.last(keyLen)))
-              ,
+          util::percentEncode(std::as_bytes(std::span{peerId}.last(keyLen))),
           numWant);
   if (tcpPort_) {
     uri += fmt("&port={}", tcpPort_);
@@ -207,7 +207,7 @@ std::string DefaultBtAnnounce::getAnnounceUrl()
 }
 
 std::shared_ptr<UDPTrackerRequest> DefaultBtAnnounce::createUDPTrackerRequest(
-    const std::string& remoteAddr, uint16_t remotePort, uint16_t localPort)
+    std::string_view remoteAddr, uint16_t remotePort, uint16_t localPort)
 {
   if (!adjustAnnounceList()) {
     return nullptr;

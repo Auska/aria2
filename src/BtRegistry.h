@@ -36,6 +36,7 @@
 #define D_BT_REGISTRY_H
 
 #include "common.h"
+#include <string_view>
 
 #include <map>
 #include <memory>
@@ -88,7 +89,7 @@ public:
   getDownloadContext(a2_gid_t gid) const;
 
   const std::shared_ptr<DownloadContext>&
-  getDownloadContext(const std::string& infoHash) const;
+  getDownloadContext(std::string_view infoHash) const;
 
   void put(a2_gid_t gid, std::unique_ptr<BtObject> obj);
 

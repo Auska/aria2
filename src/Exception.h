@@ -36,6 +36,7 @@
 #define D_EXCEPTION_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -63,23 +64,23 @@ protected:
   virtual std::shared_ptr<Exception> copy() const = 0;
 
 public:
-  Exception(const std::string& msg,
+  Exception(std::string_view msg,
             std::source_location location = std::source_location::current());
 
-  Exception(const std::string& msg, error_code::Value errorCode,
+  Exception(std::string_view msg, error_code::Value errorCode,
             const Exception& cause,
             std::source_location location = std::source_location::current());
   // errorCode_ is initializedwith cause.errorCode_.
-  Exception(const std::string& msg, const Exception& cause,
+  Exception(std::string_view msg, const Exception& cause,
             std::source_location location = std::source_location::current());
 
-  Exception(const std::string& msg, error_code::Value errorCode,
+  Exception(std::string_view msg, error_code::Value errorCode,
             std::source_location location = std::source_location::current());
 
-  Exception(int errNum, const std::string& msg,
+  Exception(int errNum, std::string_view msg,
             std::source_location location = std::source_location::current());
 
-  Exception(int errNum, const std::string& msg, error_code::Value errorCode,
+  Exception(int errNum, std::string_view msg, error_code::Value errorCode,
             std::source_location location = std::source_location::current());
 
   virtual ~Exception() noexcept;

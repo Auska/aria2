@@ -3,6 +3,8 @@
 
 #include "BtAnnounce.h"
 
+#include <string_view>
+
 namespace aria2 {
 
 class MockBtAnnounce : public BtAnnounce {
@@ -22,7 +24,7 @@ public:
   virtual std::string getAnnounceUrl() override { return announceUrl; }
 
   virtual std::shared_ptr<UDPTrackerRequest>
-  createUDPTrackerRequest(const std::string& remoteAddr, uint16_t remotePort,
+  createUDPTrackerRequest(std::string_view remoteAddr, uint16_t remotePort,
                           uint16_t localPort) override
   {
     return nullptr;
@@ -54,9 +56,7 @@ public:
 
   virtual void shuffleAnnounce() override {}
 
-  virtual void overrideMinInterval(std::chrono::seconds interval) override
-  {
-  }
+  virtual void overrideMinInterval(std::chrono::seconds interval) override {}
 
   virtual void setTcpPort(uint16_t port) override {}
 

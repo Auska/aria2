@@ -36,6 +36,7 @@
 #define D_HANDSHAKE_EXTENSION_MESSAGE_H
 
 #include "ExtensionMessage.h"
+#include <string_view>
 
 #include <cstddef>
 #include <span>
@@ -82,10 +83,7 @@ public:
 
   virtual void doReceivedAction() override;
 
-  void setClientVersion(const std::string& version)
-  {
-    clientVersion_ = version;
-  }
+  void setClientVersion(std::string_view version) { clientVersion_ = version; }
 
   const std::string& getClientVersion() const { return clientVersion_; }
 

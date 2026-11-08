@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "RequestGroup.h"
+#include <string_view>
 
 #include <cassert>
 #include <algorithm>
@@ -883,8 +884,8 @@ int64_t RequestGroup::getCompletedLength() const
   return pieceStorage_->getCompletedLength();
 }
 
-void RequestGroup::validateFilename(const std::string& expectedFilename,
-                                    const std::string& actualFilename) const
+void RequestGroup::validateFilename(std::string_view expectedFilename,
+                                    std::string_view actualFilename) const
 {
   if (expectedFilename.empty()) {
     return;
@@ -909,7 +910,7 @@ void RequestGroup::validateTotalLength(int64_t expectedTotalLength,
   }
 }
 
-void RequestGroup::validateFilename(const std::string& actualFilename) const
+void RequestGroup::validateFilename(std::string_view actualFilename) const
 {
   validateFilename(downloadContext_->getFileEntries().front()->getBasename(),
                    actualFilename);

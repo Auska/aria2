@@ -36,6 +36,7 @@
 #define D_PEER_STAT_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 
@@ -46,7 +47,7 @@ namespace aria2 {
 
 class PeerStat {
 public:
-  PeerStat(cuid_t cuid, const std::string& hostname,
+  PeerStat(cuid_t cuid, std::string_view hostname,
            const ::std::string& protocol);
 
   PeerStat(cuid_t cuid = 0);

@@ -33,13 +33,14 @@
  */
 /* copyright --> */
 #include "MetadataInfo.h"
+#include <string_view>
 
 #include <cassert>
 
 namespace aria2 {
 
 MetadataInfo::MetadataInfo(const std::shared_ptr<GroupId>& gid,
-                           const std::string& uri)
+                           std::string_view uri)
     : gid_(gid), uri_(uri)
 {
 }

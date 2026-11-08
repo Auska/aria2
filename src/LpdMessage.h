@@ -37,6 +37,7 @@
 #define D_LPD_MESSAGE_H
 
 #include "common.h"
+#include <string_view>
 
 #include <string>
 #include <memory>
@@ -49,7 +50,7 @@ struct LpdMessage {
   std::shared_ptr<Peer> peer;
   std::string infoHash;
   LpdMessage();
-  LpdMessage(const std::shared_ptr<Peer>& peer, const std::string& infoHash);
+  LpdMessage(const std::shared_ptr<Peer>& peer, std::string_view infoHash);
   ~LpdMessage();
 };
 

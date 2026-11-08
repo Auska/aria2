@@ -54,7 +54,7 @@ std::unique_ptr<ValueBase> decode(std::span<const std::byte> data)
   return decode(data, end);
 }
 
-std::unique_ptr<ValueBase> decode(const std::string& data)
+std::unique_ptr<ValueBase> decode(std::string_view data)
 {
   size_t end;
   return decode(std::as_bytes(std::span{data.data(), data.size()}), end);

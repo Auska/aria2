@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "LogFactory.h"
+#include <string_view>
 #include "a2io.h"
 #include "prefs.h"
 #include "RecoverableException.h"
@@ -83,7 +84,7 @@ const std::shared_ptr<Logger>& LogFactory::getInstance()
   return logger_;
 }
 
-void LogFactory::setLogFile(const std::string& name)
+void LogFactory::setLogFile(std::string_view name)
 {
   if (name == "-") {
     filename_ = DEV_STDOUT;
@@ -97,7 +98,7 @@ void LogFactory::setLogFile(const std::string& name)
 }
 
 namespace {
-Logger::LEVEL toLogLevel(const std::string& level)
+Logger::LEVEL toLogLevel(std::string_view level)
 {
   if (level == V_DEBUG) {
     return Logger::LEVEL::A2_DEBUG;
@@ -122,7 +123,7 @@ Logger::LEVEL toLogLevel(const std::string& level)
 
 void LogFactory::setLogLevel(Logger::LEVEL level) { logLevel_ = level; }
 
-void LogFactory::setLogLevel(const std::string& level)
+void LogFactory::setLogLevel(std::string_view level)
 {
   logLevel_ = toLogLevel(level);
 }
@@ -132,7 +133,7 @@ void LogFactory::setConsoleLogLevel(Logger::LEVEL level)
   consoleLogLevel_ = level;
 }
 
-void LogFactory::setConsoleLogLevel(const std::string& level)
+void LogFactory::setConsoleLogLevel(std::string_view level)
 {
   consoleLogLevel_ = toLogLevel(level);
 }

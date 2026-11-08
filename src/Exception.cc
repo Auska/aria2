@@ -33,12 +33,13 @@
  */
 /* copyright --> */
 #include "Exception.h"
+#include <string_view>
 
 #include <string>
 
 namespace aria2 {
 
-Exception::Exception(const std::string& msg, std::source_location location)
+Exception::Exception(std::string_view msg, std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),
       errNum_(0),
@@ -47,7 +48,7 @@ Exception::Exception(const std::string& msg, std::source_location location)
 {
 }
 
-Exception::Exception(const std::string& msg, error_code::Value errorCode,
+Exception::Exception(std::string_view msg, error_code::Value errorCode,
                      const Exception& cause, std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),
@@ -58,7 +59,7 @@ Exception::Exception(const std::string& msg, error_code::Value errorCode,
 {
 }
 
-Exception::Exception(const std::string& msg, const Exception& cause,
+Exception::Exception(std::string_view msg, const Exception& cause,
                      std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),
@@ -69,7 +70,7 @@ Exception::Exception(const std::string& msg, const Exception& cause,
 {
 }
 
-Exception::Exception(const std::string& msg, error_code::Value errorCode,
+Exception::Exception(std::string_view msg, error_code::Value errorCode,
                      std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),
@@ -79,7 +80,7 @@ Exception::Exception(const std::string& msg, error_code::Value errorCode,
 {
 }
 
-Exception::Exception(int errNum, const std::string& msg,
+Exception::Exception(int errNum, std::string_view msg,
                      std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),
@@ -89,7 +90,7 @@ Exception::Exception(int errNum, const std::string& msg,
 {
 }
 
-Exception::Exception(int errNum, const std::string& msg,
+Exception::Exception(int errNum, std::string_view msg,
                      error_code::Value errorCode, std::source_location location)
     : file_(location.file_name()),
       line_(static_cast<int>(location.line())),

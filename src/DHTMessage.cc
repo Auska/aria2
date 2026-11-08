@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "DHTMessage.h"
+#include <string_view>
 #include "DHTNode.h"
 #include "util.h"
 
@@ -48,7 +49,7 @@ const std::string DHTMessage::ID("id");
 
 DHTMessage::DHTMessage(const std::shared_ptr<DHTNode>& localNode,
                        const std::shared_ptr<DHTNode>& remoteNode,
-                       const std::string& transactionID)
+                       std::string_view transactionID)
     : localNode_{localNode},
       remoteNode_{remoteNode},
       transactionID_{transactionID}
@@ -63,7 +64,9 @@ DHTMessage::~DHTMessage() = default;
 void DHTMessage::generateTransactionID()
 {
   transactionID_.resize(DHT_TRANSACTION_ID_LENGTH);
-  util::generateRandomData(std::as_writable_bytes(std::span{reinterpret_cast<unsigned char*>(&transactionID_[0]), transactionID_.size()}));
+  util::generateRandomData(std::as_writable_bytes(
+      std::span{reinterpret_cast<unsigned char*>(&transactionID_[0]),
+                transactionID_.size()}));
 }
 
 } // namespace aria2

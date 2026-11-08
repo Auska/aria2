@@ -36,6 +36,7 @@
 #define D_DHT_UNKNOWN_MESSAGE_H
 
 #include "DHTMessage.h"
+#include <string_view>
 
 #include <span>
 #include <vector>
@@ -52,7 +53,7 @@ public:
   // _remoteNode is always null
   DHTUnknownMessage(const std::shared_ptr<DHTNode>& localNode,
                     std::span<const unsigned char> data,
-                    const std::string& ipaddr, uint16_t port);
+                    std::string_view ipaddr, uint16_t port);
 
   virtual ~DHTUnknownMessage();
 
