@@ -528,6 +528,30 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
 10. **`Logger::LEVEL` 未加 `: uint8_t`**：实际引用只有 4 个文件的 37 处，
     `level >= logLevel_` 在 `enum class` 下照常成立，加底层类型无收益。
 
+## 额外验证：libuv 事件循环
+
+默认构建 `HAVE_LIBUV` 未定义，`src/LibuvEventPoll.*` 与 `src/DownloadEngineFactory.cc:83-95`
+的 libuv 分支在三个阶段的门禁里都没被编译过。补做一次：
+
+```sh
+git worktree add --detach /tmp/aria2-uv f495cea5
+./configure --enable-werror --with-libuv   # libuv 1.50.0，HAVE_LIBUV=1
+make -j24 check
+```
+
+- 编译：`src/LibuvEventPoll.o` 生成，`nm src/aria2c | grep -c 'aria2::LibuvEventPoll'` = 77，
+  `-Werror` 下 0 条 `warning:`（仅 libtool 的 `-version-info` 提示）。
+- `make check`：`# TOTAL: 1` / `# PASS: 1` / `FAIL 0` / `ERROR 0`、`test/aria2c.log`
+  `OK (914)`。注意 914 例里没有覆盖 `LibuvEventPoll` 的用例（`git grep LibuvEventPoll -- test`
+  为空），单测只证明接口编译与默认路径不受影响。
+- 运行时冒烟（`--event-poll=libuv`，本地 Range 服务器）：单文件 2 MB / 60 MB、
+  `-x16 -s16 -k1M` 分片、`-j8` 并发 8 个、`--max-download-limit=5M --summary-interval=1`
+  （走 `uv_timer_t` 路径，按秒输出进度）、RPC `addUri`/`pause`/`unpause`/`tellStatus`/
+  `shutdown`、`SIGTERM` 退出，全部 `cmp` 一致或状态正确。
+- 结论：`LibuvEventPoll` 分支可用；此前「未启用分支只做人工 diff」的风险对 libuv 已消除。
+  `ENABLE_LIBARIA2`、`USE_INTERNAL_BIGNUM`、`USE_INTERNAL_ARC4`、`USE_INTERNAL_MD`
+  仍未验证。
+
 ## 预计修改的文件
 
 **P1（33 文件全量，改动集中在 7 个）**：`src/OptionHandlerFactory.cc`（1655 行改动）、
