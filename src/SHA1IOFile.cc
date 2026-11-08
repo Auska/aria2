@@ -61,12 +61,6 @@ char* SHA1IOFile::onGets(char* s, int size)
   return nullptr;
 }
 
-int SHA1IOFile::onVprintf(const char* format, va_list va)
-{
-  assert(0);
-  return -1;
-}
-
 int SHA1IOFile::onFlush() { return 0; }
 
 int SHA1IOFile::onClose() { return 0; }

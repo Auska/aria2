@@ -55,7 +55,6 @@ protected:
   virtual size_t onWrite(std::span<const std::byte> data) override;
   // wrapper for fgets
   virtual char* onGets(char* s, int size) override;
-  virtual int onVprintf(const char* format, va_list va) override;
   // wrapper for fflush
   virtual int onFlush() override;
   // wrapper for fclose

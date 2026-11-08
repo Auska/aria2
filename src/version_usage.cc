@@ -84,12 +84,12 @@ void showVersion()
 void showUsage(const std::string& keyword,
                const std::shared_ptr<OptionParser>& oparser, const Console& out)
 {
-  out->printf(_("Usage: aria2c [OPTIONS] [URI | MAGNET | TORRENT_FILE]..."));
-  out->printf("\n");
+  out->write(_("Usage: aria2c [OPTIONS] [URI | MAGNET | TORRENT_FILE]..."));
+  out->write("\n");
   if (keyword.empty()) {
     // Very short version of usage.
-    out->printf(_("See 'aria2c -h'."));
-    out->printf("\n");
+    out->write(_("See 'aria2c -h'."));
+    out->write("\n");
     return;
   }
   else if (keyword[0] == '#') {
@@ -97,77 +97,77 @@ void showUsage(const std::string& keyword,
         keyword == STR_TAG_ALL ? oparser->findAll()
                                : oparser->findByTag(idHelpTag(keyword.c_str()));
     if (keyword == STR_TAG_ALL) {
-      out->printf(_("Printing all options."));
+      out->write(_("Printing all options."));
     }
     else {
-      out->printf(_("Printing options tagged with '%s'."), keyword.c_str());
-      out->printf("\n");
-      out->printf(_("See 'aria2c -h#help' to know all available tags."));
+      out->write(fmtRuntime(_("Printing options tagged with '{}'."), keyword));
+      out->write("\n");
+      out->write(_("See 'aria2c -h#help' to know all available tags."));
     }
-    out->printf("\n");
-    out->printf(_("Options:"));
-    out->printf("\n");
+    out->write("\n");
+    out->write(_("Options:"));
+    out->write("\n");
     for (std::vector<const OptionHandler*>::const_iterator i = handlers.begin(),
                                                            eoi = handlers.end();
          i != eoi; ++i) {
       write(out, *(*i));
-      out->printf("\n");
+      out->write("\n");
     }
   }
   else {
     std::vector<const OptionHandler*> handlers =
         oparser->findByNameSubstring(keyword);
     if (!handlers.empty()) {
-      out->printf(_("Printing options whose name includes '%s'."),
-                  keyword.c_str());
-      out->printf("\n");
-      out->printf(_("Options:"));
-      out->printf("\n");
+      out->write(
+          fmtRuntime(_("Printing options whose name includes '{}'."), keyword));
+      out->write("\n");
+      out->write(_("Options:"));
+      out->write("\n");
       for (std::vector<const OptionHandler*>::const_iterator
                i = handlers.begin(),
                eoi = handlers.end();
            i != eoi; ++i) {
         write(out, *(*i));
-        out->printf("\n");
+        out->write("\n");
       }
     }
     else {
-      out->printf(_("No option matching with '%s'."), keyword.c_str());
-      out->printf("\n");
+      out->write(fmtRuntime(_("No option matching with '{}'."), keyword));
+      out->write("\n");
       write(out, *oparser->find(PREF_HELP));
     }
   }
   if (keyword == strHelpTag(HelpTag::TAG_BASIC)) {
-    out->printf("URI, MAGNET, TORRENT_FILE:\n");
-    out->printf(
+    out->write("URI, MAGNET, TORRENT_FILE:\n");
+    out->write(
         _(" You can specify multiple HTTP(S)/FTP URIs. Unless you specify -Z "
           "option, all\n"
           " URIs must point to the same file or downloading will fail."));
-    out->printf("\n");
-    out->printf(_(" You can also specify arbitrary number of BitTorrent Magnet "
-                  "URIs and torrent\n"
-                  " files stored in a local drive. Please note that "
-                  "they are always\n"
-                  " treated as a separate download."));
-    out->printf("\n\n");
-    out->printf(_(" You can specify both torrent file with -T option and URIs. "
-                  "By doing this,\n"
-                  " download a file from both torrent swarm and HTTP/FTP "
-                  "server at the same time,\n"
-                  " while the data from HTTP/FTP are uploaded to the torrent "
-                  "swarm. For single file\n"
-                  " torrents, URI can be a complete URI pointing to the "
-                  "resource or if URI ends\n"
-                  " with '/', 'name' in torrent file is added. For multi-file "
-                  "torrents, 'name' and\n"
-                  " 'path' in torrent are added to form a URI for each file."));
-    out->printf("\n\n");
-    out->printf(_(" Make sure that URI is quoted with single(\') or double(\") "
-                  "quotation if it\n"
-                  " contains \"&\" or any characters that have special meaning "
-                  "in shell."));
-    out->printf("\n\n");
-    out->printf(
+    out->write("\n");
+    out->write(_(" You can also specify arbitrary number of BitTorrent Magnet "
+                 "URIs and torrent\n"
+                 " files stored in a local drive. Please note that "
+                 "they are always\n"
+                 " treated as a separate download."));
+    out->write("\n\n");
+    out->write(_(" You can specify both torrent file with -T option and URIs. "
+                 "By doing this,\n"
+                 " download a file from both torrent swarm and HTTP/FTP "
+                 "server at the same time,\n"
+                 " while the data from HTTP/FTP are uploaded to the torrent "
+                 "swarm. For single file\n"
+                 " torrents, URI can be a complete URI pointing to the "
+                 "resource or if URI ends\n"
+                 " with '/', 'name' in torrent file is added. For multi-file "
+                 "torrents, 'name' and\n"
+                 " 'path' in torrent are added to form a URI for each file."));
+    out->write("\n\n");
+    out->write(_(" Make sure that URI is quoted with single(\') or double(\") "
+                 "quotation if it\n"
+                 " contains \"&\" or any characters that have special meaning "
+                 "in shell."));
+    out->write("\n\n");
+    out->write(
         _("About the number of connections\n"
           " Since 1.10.0 release, aria2 uses 1 connection per host by default "
           "and has 20MiB\n"
@@ -177,8 +177,8 @@ void showUsage(const std::string& keyword,
           " --max-connection-per-server=4 --min-split-size=1M.\n"
           "\n"));
   }
-  out->printf(_("Refer to man page for more information."));
-  out->printf("\n");
+  out->write(_("Refer to man page for more information."));
+  out->write("\n");
 }
 
 } // namespace aria2

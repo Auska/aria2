@@ -40,6 +40,7 @@
 #include <cstddef>
 #include <span>
 #include <string>
+#include <string_view>
 #include <iosfwd>
 
 namespace aria2 {
@@ -61,7 +62,7 @@ public:
   size_t read(std::span<std::byte> data);
   // wrapper for fwrite. Using 1 for 2nd argument of fwrite.
   size_t write(std::span<const std::byte> data);
-  virtual size_t write(const char* str) override;
+  virtual size_t write(std::string_view str) override;
   // wrapper for fgets
   char* gets(char* s, int size);
   // wrapper for fgets, but trailing '\n' is replaced with '\0'.
@@ -82,7 +83,6 @@ public:
   size_t transfer(std::ostream& out);
   // Convenient method. Reads the rest of the file into a string.
   std::string readAll();
-  int vprintf(const char* format, va_list va) override;
   // Mode for reading
   static const char READ[];
   // Mode for writing
@@ -94,7 +94,6 @@ protected:
   virtual size_t onRead(std::span<std::byte> data) = 0;
   virtual size_t onWrite(std::span<const std::byte> data) = 0;
   virtual char* onGets(char* s, int size) = 0;
-  virtual int onVprintf(const char* format, va_list va) = 0;
   virtual int onFlush() = 0;
   virtual int onClose() = 0;
   virtual bool onSupportsColor() = 0;

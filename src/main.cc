@@ -38,6 +38,7 @@
 
 #include <aria2/aria2.h>
 #include "Context.h"
+#include "fmt.h"
 #include "MultiUrlRequestInfo.h"
 #include "message.h"
 #include "Platform.h"
@@ -69,8 +70,8 @@ int main(int argc, char** argv)
     r = aria2::main(argc, argv);
   }
   catch (aria2::Exception& ex) {
-    aria2::global::cerr()->printf("%s\n%s\n", EX_EXCEPTION_CAUGHT,
-                                  ex.stackTrace().c_str());
+    aria2::global::cerr()->write(
+        aria2::fmt("{}\n{}\n", EX_EXCEPTION_CAUGHT, ex.stackTrace()));
     r = ex.getErrorCode();
   }
   return r;

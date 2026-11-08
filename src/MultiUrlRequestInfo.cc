@@ -152,11 +152,11 @@ MultiUrlRequestInfo::~MultiUrlRequestInfo() = default;
 void MultiUrlRequestInfo::printMessageForContinue()
 {
   if (!option_->getAsBool(PREF_QUIET)) {
-    global::cout()->printf(
-        "\n%s\n%s\n",
+    global::cout()->write(fmt(
+        "\n{}\n{}\n",
         _("aria2 will resume download if the transfer is restarted."),
         _("If there are any errors, then see the log file. See '-l' option in "
-          "help/man page for details."));
+          "help/man page for details.")));
   }
 }
 

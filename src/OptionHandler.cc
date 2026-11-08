@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "OptionHandler.h"
+#include "fmt.h"
 #include <ostream>
 
 #define DEFAULT_MSG _("                              Default: ")
@@ -66,15 +67,15 @@ std::ostream& operator<<(std::ostream& o, const OptionHandler& optionHandler)
 
 void write(const Console& out, const OptionHandler& optionHandler)
 {
-  out->printf("%s\n\n", optionHandler.getDescription());
+  out->write(fmt("{}\n\n", optionHandler.getDescription()));
   std::string possibleValues = optionHandler.createPossibleValuesString();
   if (!possibleValues.empty()) {
-    out->printf("%s%s\n", POSSIBLE_MSG, possibleValues.c_str());
+    out->write(fmt("{}{}\n", POSSIBLE_MSG, possibleValues));
   }
   if (!optionHandler.getDefaultValue().empty()) {
-    out->printf("%s%s\n", DEFAULT_MSG, optionHandler.getDefaultValue().c_str());
+    out->write(fmt("{}{}\n", DEFAULT_MSG, optionHandler.getDefaultValue()));
   }
-  out->printf("%s%s\n", TAGS_MSG, optionHandler.toTagString().c_str());
+  out->write(fmt("{}{}\n", TAGS_MSG, optionHandler.toTagString()));
 }
 
 } // namespace aria2

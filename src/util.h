@@ -356,20 +356,21 @@ std::string abbrevSize(int64_t size);
 template <typename InputIterator, typename Output>
 void toStream(InputIterator first, InputIterator last, Output& os)
 {
-  os.printf("%s\n"
-            "idx|path/length\n"
-            "===+=============================================================="
-            "=============\n",
-            _("Files:"));
+  os.write(
+      fmt("{}\n"
+          "idx|path/length\n"
+          "===+=============================================================="
+          "=============\n",
+          _("Files:")));
   int32_t count = 1;
   for (; first != last; ++first, ++count) {
-    os.printf("%3d|%s\n"
-              "   |%sB (%s)\n"
-              "---+------------------------------------------------------------"
-              "---------------\n",
-              count, (*first)->getPath().c_str(),
-              util::abbrevSize((*first)->getLength()).c_str(),
-              util::uitos((*first)->getLength(), true).c_str());
+    os.write(
+        fmt("{:3}|{}\n"
+            "   |{}B ({})\n"
+            "---+------------------------------------------------------------"
+            "---------------\n",
+            count, (*first)->getPath(), util::abbrevSize((*first)->getLength()),
+            util::uitos((*first)->getLength(), true)));
   }
 }
 

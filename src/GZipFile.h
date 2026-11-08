@@ -51,7 +51,6 @@ protected:
   virtual size_t onRead(std::span<std::byte> data) override;
   virtual size_t onWrite(std::span<const std::byte> data) override;
   virtual char* onGets(char* s, int size) override;
-  virtual int onVprintf(const char* format, va_list va) override;
   virtual int onFlush() override;
   virtual int onClose() override;
   virtual bool onSupportsColor() override;
@@ -65,8 +64,6 @@ private:
   GZipFile& operator=(const GZipFile&);
 
   gzFile fp_;
-  size_t buflen_;
-  char* buf_;
 };
 
 } // namespace aria2

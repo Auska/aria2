@@ -36,7 +36,6 @@
 
 #include <array>
 #include <cstring>
-#include <cstdarg>
 #include <ostream>
 
 #include "a2io.h"
@@ -58,9 +57,9 @@ size_t IOFile::read(std::span<std::byte> data) { return onRead(data); }
 
 size_t IOFile::write(std::span<const std::byte> data) { return onWrite(data); }
 
-size_t IOFile::write(const char* str)
+size_t IOFile::write(std::string_view str)
 {
-  return write(std::as_bytes(std::span{str, strlen(str)}));
+  return write(std::as_bytes(std::span{str}));
 }
 
 char* IOFile::gets(char* s, int size) { return onGets(s, size); }
@@ -131,11 +130,6 @@ std::string IOFile::readAll()
     }
   }
   return out;
-}
-
-int IOFile::vprintf(const char* format, va_list va)
-{
-  return onVprintf(format, va);
 }
 
 int IOFile::flush() { return onFlush(); }

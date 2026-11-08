@@ -693,9 +693,9 @@ void RequestGroupMan::showDownloadResults(OutputFile& o, bool full) const
   // Download Results:
   // idx|stat|path/length
   // ===+====+=======================================================================
-  o.printf("\n%s"
-           "\ngid   |stat|avg speed  |",
-           _("Download Results:"));
+  o.write(fmt("\n{}"
+              "\ngid   |stat|avg speed  |",
+              _("Download Results:")));
   if (full) {
     o.write("  %|path/URI"
             "\n======+====+===========+===+");
@@ -706,7 +706,7 @@ void RequestGroupMan::showDownloadResults(OutputFile& o, bool full) const
             "\n======+====+===========+");
   }
   std::string line(pathRowSize, '=');
-  o.printf("%s\n", line.c_str());
+  o.write(fmt("{}\n", line));
   bool useColor = o.supportsColor() && option_->getAsBool(PREF_ENABLE_COLOR);
   int ok = 0;
   int err = 0;
@@ -744,7 +744,7 @@ void RequestGroupMan::showDownloadResults(OutputFile& o, bool full) const
     }
   }
   if (ok > 0 || err > 0 || inpr > 0 || rm > 0) {
-    o.printf("\n%s\n", _("Status Legend:"));
+    o.write(fmt("\n{}\n", _("Status Legend:")));
     if (ok > 0) {
       o.write(_("(OK):download completed."));
     }

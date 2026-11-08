@@ -133,8 +133,8 @@ void writeHeader(Output& fp, Logger::LEVEL level, const char* sourceFile,
   size_t dateLength =
       strftime(datestr, sizeof(datestr), "%Y-%m-%d %H:%M:%S", &tm);
   assert(dateLength <= (size_t)20);
-  fp.printf("%s.%06ld [%s] [%s:%d] ", datestr, (unsigned long)tv.tv_usec,
-            levelToString(level), sourceFile, lineNum);
+  fp.write(fmt("{}.{:06} [{}] [{}:{}] ", datestr, (unsigned long)tv.tv_usec,
+               levelToString(level), sourceFile, lineNum));
 }
 } // namespace
 
@@ -172,11 +172,11 @@ void writeHeaderConsole(Output& fp, Logger::LEVEL level, bool useColor)
   size_t dateLength = strftime(datestr, sizeof(datestr), "%m/%d %H:%M:%S", &tm);
   assert(dateLength <= (size_t)15);
   if (useColor) {
-    fp.printf("%s [%s%s\033[0m] ", datestr, levelColor(level),
-              levelToString(level));
+    fp.write(fmt("{} [{}{}\033[0m] ", datestr, levelColor(level),
+                 levelToString(level)));
   }
   else {
-    fp.printf("%s [%s] ", datestr, levelToString(level));
+    fp.write(fmt("{} [{}] ", datestr, levelToString(level)));
   }
 }
 } // namespace
@@ -194,14 +194,14 @@ void Logger::writeLog(Logger::LEVEL level, const char* sourceFile, int lineNum,
 {
   if (fileLogEnabled(level)) {
     writeHeader(*fpp_, level, sourceFile, lineNum);
-    fpp_->printf("%s\n", msg);
+    fpp_->write(fmt("{}\n", msg));
     writeStackTrace(*fpp_, trace);
     fpp_->flush();
   }
   if (consoleLogEnabled(level)) {
-    global::cout()->printf("\n");
+    global::cout()->write("\n");
     writeHeaderConsole(*global::cout(), level, colorOutput_);
-    global::cout()->printf("%s\n", msg);
+    global::cout()->write(fmt("{}\n", msg));
     writeStackTrace(*global::cout(), trace);
     global::cout()->flush();
   }

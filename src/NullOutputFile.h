@@ -42,12 +42,8 @@ namespace aria2 {
 class NullOutputFile : public OutputFile {
 public:
   virtual ~NullOutputFile() = default;
-  virtual size_t write(const char* str) override { return 0; }
+  virtual size_t write(std::string_view str) override { return 0; }
   virtual int flush() override { return 0; }
-  virtual int vprintf(const char* format, va_list va) override
-  {
-    return 0;
-  }
   virtual bool supportsColor() override { return false; }
 };
 

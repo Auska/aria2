@@ -81,10 +81,9 @@ void overrideWithEnv(Option& op,
       optionParser->find(pref)->parse(op, value);
     }
     catch (Exception& e) {
-      global::cerr()->printf(
-          _("Caught Error while parsing environment variable '%s'"),
-          envName.c_str());
-      global::cerr()->printf("\n%s\n", e.stackTrace().c_str());
+      global::cerr()->write(fmtRuntime(
+          _("Caught Error while parsing environment variable '{}'"), envName));
+      global::cerr()->write(fmt("\n{}\n", e.stackTrace()));
     }
   }
 }
@@ -159,12 +158,12 @@ void showCandidates(const std::string& unknownOption,
   if (threshold > 12) {
     return;
   }
-  global::cerr()->printf("\n");
-  global::cerr()->printf(_("Did you mean:"));
-  global::cerr()->printf("\n");
+  global::cerr()->write("\n");
+  global::cerr()->write(_("Did you mean:"));
+  global::cerr()->write("\n");
   for (auto i = cands.begin(), eoi = cands.end();
        i != eoi && (*i).first <= threshold; ++i) {
-    global::cerr()->printf("\t--%s\n", (*i).second->k);
+    global::cerr()->write(fmt("\t--{}\n", (*i).second->k));
   }
 }
 
@@ -235,25 +234,25 @@ error_code::Value option_processing(Option& op, bool standalone,
           oparser->parse(*confOption, conf);
         }
         catch (OptionHandlerException& e) {
-          global::cerr()->printf(_("Parse error in %s"), cfname.c_str());
-          global::cerr()->printf("\n%s", e.stackTrace().c_str());
+          global::cerr()->write(fmtRuntime(_("Parse error in {}"), cfname));
+          global::cerr()->write(fmt("\n{}", e.stackTrace()));
           const OptionHandler* h = oparser->find(e.getPref());
           if (h) {
-            global::cerr()->printf(_("Usage:"));
-            global::cerr()->printf("\n%s\n", h->getDescription());
+            global::cerr()->write(_("Usage:"));
+            global::cerr()->write(fmt("\n{}\n", h->getDescription()));
           }
           return e.getErrorCode();
         }
         catch (Exception& e) {
-          global::cerr()->printf(_("Parse error in %s"), cfname.c_str());
-          global::cerr()->printf("\n%s", e.stackTrace().c_str());
+          global::cerr()->write(fmtRuntime(_("Parse error in {}"), cfname));
+          global::cerr()->write(fmt("\n{}", e.stackTrace()));
           return e.getErrorCode();
         }
       }
       else if (!ucfname.empty()) {
-        global::cerr()->printf(_("Configuration file %s is not found."),
-                               cfname.c_str());
-        global::cerr()->printf("\n");
+        global::cerr()->write(
+            fmtRuntime(_("Configuration file {} is not found."), cfname));
+        global::cerr()->write("\n");
         showUsage(strHelpTag(HelpTag::TAG_HELP), oparser, global::cerr());
         return error_code::UNKNOWN_ERROR;
       }
@@ -277,11 +276,11 @@ error_code::Value option_processing(Option& op, bool standalone,
     oparser->parse(op, options);
   }
   catch (OptionHandlerException& e) {
-    global::cerr()->printf("%s", e.stackTrace().c_str());
+    global::cerr()->write(fmt("{}", e.stackTrace()));
     const OptionHandler* h = oparser->find(e.getPref());
     if (h) {
-      global::cerr()->printf(_("Usage:"));
-      global::cerr()->printf("\n");
+      global::cerr()->write(_("Usage:"));
+      global::cerr()->write("\n");
       write(global::cerr(), *h);
     }
     return e.getErrorCode();
@@ -292,7 +291,7 @@ error_code::Value option_processing(Option& op, bool standalone,
     return e.getErrorCode();
   }
   catch (Exception& e) {
-    global::cerr()->printf("%s", e.stackTrace().c_str());
+    global::cerr()->write(fmt("{}", e.stackTrace()));
     showUsage("", oparser, global::cerr());
     return e.getErrorCode();
   }
@@ -305,8 +304,8 @@ error_code::Value option_processing(Option& op, bool standalone,
 #endif // ENABLE_BITTORRENT
       op.blank(PREF_INPUT_FILE)) {
     if (uris.empty()) {
-      global::cerr()->printf("%s", MSG_URI_REQUIRED);
-      global::cerr()->printf("\n");
+      global::cerr()->write(fmt("{}", MSG_URI_REQUIRED));
+      global::cerr()->write("\n");
       showUsage("", oparser, global::cerr());
       return error_code::UNKNOWN_ERROR;
     }

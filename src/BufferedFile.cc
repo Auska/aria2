@@ -35,7 +35,6 @@
 #include "BufferedFile.h"
 
 #include <cstring>
-#include <cstdarg>
 #include <ostream>
 
 #include "a2io.h"
@@ -44,8 +43,7 @@
 namespace aria2 {
 
 BufferedFile::BufferedFile(const char* filename, const char* mode)
-    : fp_(strcmp(DEV_STDIN, filename) == 0 ? stdin
-                                           : a2fopen(filename, mode)),
+    : fp_(strcmp(DEV_STDIN, filename) == 0 ? stdin : a2fopen(filename, mode)),
       supportsColor_(fp_ ? isatty(fileno(fp_)) : false)
 {
 }
@@ -81,11 +79,6 @@ int BufferedFile::onClose()
     fp_ = nullptr;
   }
   return rv;
-}
-
-int BufferedFile::onVprintf(const char* format, va_list va)
-{
-  return vfprintf(fp_, format, va);
 }
 
 int BufferedFile::onFlush() { return fflush(fp_); }

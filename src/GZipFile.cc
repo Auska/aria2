@@ -43,11 +43,9 @@
 
 namespace aria2 {
 
-GZipFile::GZipFile(const char* filename, const char* mode)
-    : fp_(nullptr), buflen_(1_k), buf_(reinterpret_cast<char*>(malloc(buflen_)))
+GZipFile::GZipFile(const char* filename, const char* mode) : fp_(nullptr)
 {
-  auto fp =
-      strcmp(DEV_STDIN, filename) == 0 ? stdin : a2fopen(filename, mode);
+  auto fp = strcmp(DEV_STDIN, filename) == 0 ? stdin : a2fopen(filename, mode);
   if (fp) {
     int fd = dup(fileno(fp));
     if (fd != -1) {
@@ -69,11 +67,7 @@ GZipFile::GZipFile(const char* filename, const char* mode)
   }
 }
 
-GZipFile::~GZipFile()
-{
-  close();
-  free(buf_);
-}
+GZipFile::~GZipFile() { close(); }
 
 int GZipFile::onClose()
 {
@@ -104,7 +98,8 @@ size_t GZipFile::onRead(std::span<std::byte> buf)
   size_t count = buf.size();
   size_t read = 0;
   while (count) {
-    size_t len = std::min(count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
+    size_t len = std::min(
+        count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
     int rv = gzread(fp_, data, len);
     if (rv <= 0) {
       break;
@@ -122,7 +117,8 @@ size_t GZipFile::onWrite(std::span<const std::byte> buf)
   size_t count = buf.size();
   size_t written = 0;
   while (count) {
-    size_t len = std::min(count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
+    size_t len = std::min(
+        count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
     int rv = gzwrite(fp_, data, len);
     if (rv <= 0) {
       break;
@@ -137,32 +133,5 @@ size_t GZipFile::onWrite(std::span<const std::byte> buf)
 char* GZipFile::onGets(char* s, int size) { return gzgets(fp_, s, size); }
 
 int GZipFile::onFlush() { return gzflush(fp_, 0); }
-
-int GZipFile::onVprintf(const char* format, va_list va)
-{
-  ssize_t len;
-
-  for (;;) {
-    len = vsnprintf(buf_, buflen_, format, va);
-    // len does not include terminating null
-    if (len >= static_cast<ssize_t>(buflen_)) {
-      // Include terminate null
-      ++len;
-      // truncated; reallocate buf and try again
-      while (static_cast<ssize_t>(buflen_) < len) {
-        buflen_ *= 2;
-      }
-      buf_ = reinterpret_cast<char*>(realloc(buf_, buflen_));
-    }
-    else if (len < 0) {
-      return len;
-    }
-    else {
-      break;
-    }
-  }
-
-  return gzwrite(fp_, buf_, len);
-}
 
 } // namespace aria2

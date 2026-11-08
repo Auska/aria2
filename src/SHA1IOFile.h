@@ -56,7 +56,6 @@ protected:
   virtual size_t onWrite(std::span<const std::byte> data) override;
   // Not implemented
   virtual char* onGets(char* s, int size) override;
-  virtual int onVprintf(const char* format, va_list va) override;
   virtual int onFlush() override;
   virtual int onClose() override;
   virtual bool onSupportsColor() override;

@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "ConsoleStatCalc.h"
+#include "fmt.h"
 
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>
@@ -305,7 +306,7 @@ void ConsoleStatCalc::calculateStat(const DownloadEngine* e)
     }
 #endif // HAVE_TERMIOS_H
     std::string line(cols, ' ');
-    global::cout()->printf("\r%s\r", line.c_str());
+    global::cout()->write(fmt("\r{}\r", line));
   }
   ColorizedStream o;
   if (e->getRequestGroupMan()->countRequestGroup() > 0) {

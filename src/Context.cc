@@ -99,9 +99,9 @@ void showFiles(const std::vector<std::string>& uris,
 {
   ProtocolDetector dt;
   for (const auto& uri : uris) {
-    printf(">>> ");
-    printf("%s", fmt(MSG_SHOW_FILES, uri).c_str());
-    printf("\n");
+    global::cout()->write(">>> ");
+    global::cout()->write(fmt(MSG_SHOW_FILES, uri));
+    global::cout()->write("\n");
     try {
 #  ifdef ENABLE_BITTORRENT
       if (dt.guessTorrentFile(uri)) {
@@ -110,11 +110,12 @@ void showFiles(const std::vector<std::string>& uris,
       else
 #  endif // ENABLE_BITTORRENT
       {
-        printf("%s\n\n", MSG_NOT_TORRENT);
+        global::cout()->write(fmt(MSG_NOT_TORRENT));
+        global::cout()->write("\n\n");
       }
     }
     catch (RecoverableException& e) {
-      global::cout()->printf("%s\n", e.stackTrace().c_str());
+      global::cout()->write(fmt("{}\n", e.stackTrace()));
     }
   }
 }
@@ -267,7 +268,7 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
 
   if (standalone && !op->getAsBool(PREF_ENABLE_RPC) && requestGroups.empty() &&
       !uriListParser) {
-    global::cout()->printf("%s\n", MSG_NO_FILES_TO_DOWNLOAD);
+    global::cout()->write(fmt("{}\n", MSG_NO_FILES_TO_DOWNLOAD));
   }
   else {
     if (!requestGroups.empty()) {
