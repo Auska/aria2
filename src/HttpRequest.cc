@@ -70,7 +70,7 @@ HttpRequest::HttpRequest()
 {
 }
 
-HttpRequest::~HttpRequest() = default;
+HttpRequest::~HttpRequest() noexcept = default;
 
 void HttpRequest::setSegment(std::shared_ptr<Segment> segment)
 {

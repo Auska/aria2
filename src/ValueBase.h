@@ -52,7 +52,7 @@ class ValueBaseVisitor;
 
 class ValueBase {
 public:
-  virtual ~ValueBase() = default;
+  virtual ~ValueBase() noexcept = default;
 
   virtual void accept(ValueBaseVisitor& visitor) const = 0;
 };
@@ -66,7 +66,7 @@ class Dict;
 
 class ValueBaseVisitor {
 public:
-  virtual ~ValueBaseVisitor() = default;
+  virtual ~ValueBaseVisitor() noexcept = default;
   virtual void visit(const String& string) = 0;
   virtual void visit(const Integer& integer) = 0;
   virtual void visit(const Bool& boolValue) = 0;

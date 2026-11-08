@@ -61,7 +61,7 @@ class Option;
 
 class OptionHandler {
 public:
-  virtual ~OptionHandler() = default;
+  virtual ~OptionHandler() noexcept = default;
 
   virtual void parse(Option& option, const std::string& arg) const = 0;
 

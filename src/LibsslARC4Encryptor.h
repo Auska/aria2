@@ -62,7 +62,7 @@ private:
 public:
   ARC4Encryptor();
 
-  ~ARC4Encryptor();
+  ~ARC4Encryptor() noexcept;
 
   void init(const unsigned char* key, size_t keyLength);
 

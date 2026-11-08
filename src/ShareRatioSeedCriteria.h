@@ -56,7 +56,7 @@ public:
   ShareRatioSeedCriteria(
       double ratio, const std::shared_ptr<DownloadContext>& downloadContext);
 
-  virtual ~ShareRatioSeedCriteria();
+  virtual ~ShareRatioSeedCriteria() noexcept;
 
   virtual void reset() override;
 

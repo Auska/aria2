@@ -88,7 +88,7 @@ FileEntry::FileEntry()
 {
 }
 
-FileEntry::~FileEntry() = default;
+FileEntry::~FileEntry() noexcept = default;
 
 bool FileEntry::operator<(const FileEntry& fileEntry) const
 {

@@ -51,7 +51,7 @@ private:
 
 public:
   BtNotInterestedMessage();
-  virtual ~BtNotInterestedMessage();
+  virtual ~BtNotInterestedMessage() noexcept;
 
   static const uint8_t ID = 3;
 

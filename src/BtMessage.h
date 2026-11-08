@@ -54,7 +54,7 @@ private:
 public:
   BtMessage(uint8_t id) : id_(id) {}
 
-  virtual ~BtMessage() = default;
+  virtual ~BtMessage() noexcept = default;
 
   virtual bool isInvalidate() = 0;
 

@@ -51,7 +51,7 @@ namespace aria2 {
 class OpenSSLTLSSession : public TLSSession {
 public:
   OpenSSLTLSSession(OpenSSLTLSContext* tlsContext);
-  virtual ~OpenSSLTLSSession();
+  virtual ~OpenSSLTLSSession() noexcept;
   TLSErrorCode init(sock_t sockfd) override;
   TLSErrorCode setSNIHostname(const std::string& hostname) override;
   TLSErrorCode closeConnection() override;

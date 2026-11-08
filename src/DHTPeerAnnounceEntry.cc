@@ -47,7 +47,7 @@ DHTPeerAnnounceEntry::DHTPeerAnnounceEntry(const DHTID& infoHash)
   infoHash_ = infoHash;
 }
 
-DHTPeerAnnounceEntry::~DHTPeerAnnounceEntry() = default;
+DHTPeerAnnounceEntry::~DHTPeerAnnounceEntry() noexcept = default;
 
 void DHTPeerAnnounceEntry::addPeerAddrEntry(const PeerAddrEntry& entry)
 {

@@ -48,7 +48,7 @@ template <class ValueBaseParser> class ValueBaseDiskWriter : public DiskWriter {
 public:
   ValueBaseDiskWriter() : parser_(&psm_) {}
 
-  virtual ~ValueBaseDiskWriter() = default;
+  virtual ~ValueBaseDiskWriter() noexcept = default;
 
   virtual void initAndOpenFile(int64_t totalLength = 0) override
   {
@@ -81,10 +81,7 @@ public:
     return 0;
   }
 
-  int finalize()
-  {
-    return parser_.parseFinal(std::span<const std::byte>{});
-  }
+  int finalize() { return parser_.parseFinal(std::span<const std::byte>{}); }
 
   std::unique_ptr<ValueBase> getResult() { return psm_.getResult(); }
 

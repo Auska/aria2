@@ -62,7 +62,7 @@ LpdMessageDispatcher::LpdMessageDispatcher(const std::string& infoHash,
 {
 }
 
-LpdMessageDispatcher::~LpdMessageDispatcher() = default;
+LpdMessageDispatcher::~LpdMessageDispatcher() noexcept = default;
 
 bool LpdMessageDispatcher::init(const std::string& localAddr, unsigned char ttl,
                                 unsigned char loop)

@@ -60,7 +60,8 @@ AbstractProxyResponseCommand::AbstractProxyResponseCommand(
 {
 }
 
-AbstractProxyResponseCommand::~AbstractProxyResponseCommand() = default;
+AbstractProxyResponseCommand::~AbstractProxyResponseCommand() noexcept =
+    default;
 
 bool AbstractProxyResponseCommand::executeInternal()
 {

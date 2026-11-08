@@ -51,7 +51,7 @@ BtCheckIntegrityEntry::BtCheckIntegrityEntry(RequestGroup* requestGroup)
 {
 }
 
-BtCheckIntegrityEntry::~BtCheckIntegrityEntry() = default;
+BtCheckIntegrityEntry::~BtCheckIntegrityEntry() noexcept = default;
 
 void BtCheckIntegrityEntry::onDownloadIncomplete(
     std::vector<std::unique_ptr<Command>>& commands, DownloadEngine* e)

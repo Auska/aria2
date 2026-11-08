@@ -47,7 +47,7 @@ class BitfieldMan;
 class GeomStreamPieceSelector : public StreamPieceSelector {
 public:
   GeomStreamPieceSelector(BitfieldMan* bitfieldMan, double base);
-  virtual ~GeomStreamPieceSelector();
+  virtual ~GeomStreamPieceSelector() noexcept;
 
   virtual std::optional<size_t>
   select(size_t minSplitSize,

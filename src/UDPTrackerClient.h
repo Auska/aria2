@@ -72,7 +72,7 @@ struct UDPTrackerConnection {
 class UDPTrackerClient {
 public:
   UDPTrackerClient();
-  ~UDPTrackerClient();
+  ~UDPTrackerClient() noexcept;
 
   int receiveReply(std::shared_ptr<UDPTrackerRequest>& req,
                    std::span<const std::byte> data,

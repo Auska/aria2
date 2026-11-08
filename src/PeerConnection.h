@@ -101,7 +101,7 @@ public:
   PeerConnection(cuid_t cuid, const std::shared_ptr<Peer>& peer,
                  const std::shared_ptr<SocketCore>& socket);
 
-  ~PeerConnection();
+  ~PeerConnection() noexcept;
 
   // Pushes data into send buffer. After this call, this object gets
   // ownership of data, so caller must not delete or alter it.

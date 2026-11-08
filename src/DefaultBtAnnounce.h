@@ -73,7 +73,7 @@ private:
 public:
   DefaultBtAnnounce(DownloadContext* downloadContext, const Option* option);
 
-  virtual ~DefaultBtAnnounce();
+  virtual ~DefaultBtAnnounce() noexcept;
 
   void setBtRuntime(const std::shared_ptr<BtRuntime>& btRuntime);
 

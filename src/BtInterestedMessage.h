@@ -51,13 +51,14 @@ private:
 
 public:
   BtInterestedMessage();
-  virtual ~BtInterestedMessage();
+  virtual ~BtInterestedMessage() noexcept;
 
   static const uint8_t ID = 2;
 
   static const char NAME[];
 
-  static std::unique_ptr<BtInterestedMessage> create(std::span<const std::byte> data);
+  static std::unique_ptr<BtInterestedMessage>
+  create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

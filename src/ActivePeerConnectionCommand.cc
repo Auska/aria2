@@ -68,7 +68,7 @@ ActivePeerConnectionCommand::ActivePeerConnectionCommand(
   requestGroup_->increaseNumCommand();
 }
 
-ActivePeerConnectionCommand::~ActivePeerConnectionCommand()
+ActivePeerConnectionCommand::~ActivePeerConnectionCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
 }

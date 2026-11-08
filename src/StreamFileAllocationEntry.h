@@ -45,7 +45,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~StreamFileAllocationEntry();
+  virtual ~StreamFileAllocationEntry() noexcept;
 
   virtual void
   prepareForNextAction(std::vector<std::unique_ptr<Command>>& commands,

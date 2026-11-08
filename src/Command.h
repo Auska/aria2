@@ -43,13 +43,7 @@ using cuid_t = int64_t;
 
 class Command {
 public:
-  enum class Status {
-    ALL,
-    INACTIVE,
-    ACTIVE,
-    REALTIME,
-    ONESHOT_REALTIME
-  };
+  enum class Status { ALL, INACTIVE, ACTIVE, REALTIME, ONESHOT_REALTIME };
 
 private:
   cuid_t cuid_;
@@ -73,7 +67,7 @@ protected:
 public:
   Command(cuid_t cuid);
 
-  virtual ~Command() = default;
+  virtual ~Command() noexcept = default;
 
   virtual bool execute() = 0;
 

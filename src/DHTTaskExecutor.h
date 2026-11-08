@@ -54,7 +54,7 @@ private:
 public:
   DHTTaskExecutor(int numConcurrent);
 
-  ~DHTTaskExecutor();
+  ~DHTTaskExecutor() noexcept;
 
   void update();
 

@@ -57,7 +57,7 @@ DHTNode::DHTNode(const DHTID& id)
 {
 }
 
-DHTNode::~DHTNode() = default;
+DHTNode::~DHTNode() noexcept = default;
 
 void DHTNode::generateID() { util::generateRandomKey(id_.data()); }
 

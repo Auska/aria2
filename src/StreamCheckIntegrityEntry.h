@@ -45,7 +45,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~StreamCheckIntegrityEntry();
+  virtual ~StreamCheckIntegrityEntry() noexcept;
 
   virtual void
   onDownloadFinished(std::vector<std::unique_ptr<Command>>& commands,

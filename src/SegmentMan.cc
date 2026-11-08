@@ -63,7 +63,7 @@ SegmentEntry::SegmentEntry(cuid_t cuid, const std::shared_ptr<Segment>& segment)
 {
 }
 
-SegmentEntry::~SegmentEntry() = default;
+SegmentEntry::~SegmentEntry() noexcept = default;
 
 SegmentMan::SegmentMan(const std::shared_ptr<DownloadContext>& downloadContext,
                        const std::shared_ptr<PieceStorage>& pieceStorage)
@@ -75,7 +75,7 @@ SegmentMan::SegmentMan(const std::shared_ptr<DownloadContext>& downloadContext,
   ignoreBitfield_.enableFilter();
 }
 
-SegmentMan::~SegmentMan() = default;
+SegmentMan::~SegmentMan() noexcept = default;
 
 bool SegmentMan::downloadFinished() const
 {

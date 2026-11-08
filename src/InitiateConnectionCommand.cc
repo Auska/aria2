@@ -69,7 +69,7 @@ InitiateConnectionCommand::InitiateConnectionCommand(
   disableWriteCheckSocket();
 }
 
-InitiateConnectionCommand::~InitiateConnectionCommand() = default;
+InitiateConnectionCommand::~InitiateConnectionCommand() noexcept = default;
 
 bool InitiateConnectionCommand::executeInternal()
 {

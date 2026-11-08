@@ -48,7 +48,7 @@ class DHTMessage;
 
 class DHTMessageDispatcher {
 public:
-  virtual ~DHTMessageDispatcher() = default;
+  virtual ~DHTMessageDispatcher() noexcept = default;
 
   virtual void addMessageToQueue(std::unique_ptr<DHTMessage> message,
                                  std::chrono::seconds timeout,

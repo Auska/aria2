@@ -50,11 +50,12 @@ struct Pref;
 
 class BooleanOptionHandler : public AbstractOptionHandler {
 public:
-  BooleanOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
-                       const std::string& defaultValue = NO_DEFAULT_VALUE,
-                       OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
-                       char shortName = 0);
-  virtual ~BooleanOptionHandler();
+  BooleanOptionHandler(
+      PrefPtr pref, const char* description = NO_DESCRIPTION,
+      const std::string& defaultValue = NO_DEFAULT_VALUE,
+      OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
+      char shortName = 0);
+  virtual ~BooleanOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -69,7 +70,7 @@ public:
   IntegerRangeOptionHandler(PrefPtr pref, const char* description,
                             const std::string& defaultValue, int32_t min,
                             int32_t max, char shortName = 0);
-  virtual ~IntegerRangeOptionHandler();
+  virtual ~IntegerRangeOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -84,7 +85,7 @@ public:
   NumberOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
                       const std::string& defaultValue = NO_DEFAULT_VALUE,
                       int64_t min = -1, int64_t max = -1, char shortName = 0);
-  virtual ~NumberOptionHandler();
+  virtual ~NumberOptionHandler() noexcept;
 
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
@@ -99,7 +100,7 @@ public:
                           const std::string& defaultValue = NO_DEFAULT_VALUE,
                           int64_t min = -1, int64_t max = -1,
                           char shortName = 0);
-  virtual ~UnitNumberOptionHandler();
+  virtual ~UnitNumberOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
 };
@@ -115,7 +116,7 @@ public:
                            const std::string& defaultValue = NO_DEFAULT_VALUE,
                            double min = -1, double max = -1,
                            char shortName = 0);
-  virtual ~FloatNumberOptionHandler();
+  virtual ~FloatNumberOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -127,12 +128,13 @@ private:
   bool allowEmpty_;
 
 public:
-  DefaultOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
-                       const std::string& defaultValue = NO_DEFAULT_VALUE,
-                       const std::string& possibleValuesString = A2STR::NIL,
-                       OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
-                       char shortName = 0);
-  virtual ~DefaultOptionHandler();
+  DefaultOptionHandler(
+      PrefPtr pref, const char* description = NO_DESCRIPTION,
+      const std::string& defaultValue = NO_DEFAULT_VALUE,
+      const std::string& possibleValuesString = A2STR::NIL,
+      OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
+      char shortName = 0);
+  virtual ~DefaultOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -151,7 +153,7 @@ public:
       const std::string& possibleValuesString = A2STR::NIL,
       OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
       char shortName = 0);
-  virtual ~CumulativeOptionHandler();
+  virtual ~CumulativeOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -161,7 +163,7 @@ class IndexOutOptionHandler : public AbstractOptionHandler {
 public:
   IndexOutOptionHandler(PrefPtr pref, const char* description,
                         char shortName = 0);
-  virtual ~IndexOutOptionHandler();
+  virtual ~IndexOutOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -174,7 +176,7 @@ public:
   ChecksumOptionHandler(PrefPtr pref, const char* description,
                         std::vector<std::string> acceptableTypes,
                         char shortName = 0);
-  virtual ~ChecksumOptionHandler();
+  virtual ~ChecksumOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -194,7 +196,7 @@ public:
                          const std::string& defaultValue,
                          std::vector<std::string> validParamValues,
                          char shortName = 0);
-  virtual ~ParameterOptionHandler();
+  virtual ~ParameterOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -209,7 +211,7 @@ public:
   HostPortOptionHandler(PrefPtr pref, const char* description,
                         const std::string& defaultValue, PrefPtr hostOptionName,
                         PrefPtr portOptionName, char shortName = 0);
-  virtual ~HostPortOptionHandler();
+  virtual ~HostPortOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   void setHostAndPort(Option& option, const std::string& hostname,
@@ -225,7 +227,7 @@ private:
 public:
   HttpProxyOptionHandler(PrefPtr pref, const char* description,
                          const std::string& defaultValue, char shortName = 0);
-  virtual ~HttpProxyOptionHandler();
+  virtual ~HttpProxyOptionHandler() noexcept;
   virtual void parseArg(Option& option,
                         const std::string& optarg) const override;
   virtual std::string createPossibleValuesString() const override;
@@ -287,9 +289,8 @@ public:
                           const OptionHandler* repOptHandler = nullptr,
                           bool stillWork = false,
                           std::string additionalMessage = "");
-  virtual ~DeprecatedOptionHandler() = default;
-  virtual void parse(Option& option,
-                     const std::string& arg) const override;
+  virtual ~DeprecatedOptionHandler() noexcept = default;
+  virtual void parse(Option& option, const std::string& arg) const override;
   virtual std::string createPossibleValuesString() const override;
   virtual bool hasTag(HelpTag tag) const override;
   virtual void addTag(HelpTag tag) override;

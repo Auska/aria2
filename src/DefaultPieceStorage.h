@@ -125,7 +125,7 @@ public:
   DefaultPieceStorage(const std::shared_ptr<DownloadContext>& downloadContext,
                       const Option* option);
 
-  virtual ~DefaultPieceStorage();
+  virtual ~DefaultPieceStorage() noexcept;
 
 #ifdef ENABLE_BITTORRENT
 

@@ -54,7 +54,7 @@ public:
   LpdReceiveMessageCommand(cuid_t cuid,
                            const std::shared_ptr<LpdMessageReceiver>& receiver,
                            DownloadEngine* e);
-  virtual ~LpdReceiveMessageCommand();
+  virtual ~LpdReceiveMessageCommand() noexcept;
 
   virtual bool execute() override;
 

@@ -47,7 +47,7 @@ namespace aria2 {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 ARC4Encryptor::ARC4Encryptor() : ctx_{nullptr} {}
 
-ARC4Encryptor::~ARC4Encryptor()
+ARC4Encryptor::~ARC4Encryptor() noexcept
 {
   if (ctx_) {
     EVP_CIPHER_CTX_free(ctx_);
@@ -56,7 +56,7 @@ ARC4Encryptor::~ARC4Encryptor()
 #else  // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
 ARC4Encryptor::ARC4Encryptor() {}
 
-ARC4Encryptor::~ARC4Encryptor() = default;
+ARC4Encryptor::~ARC4Encryptor() noexcept = default;
 #endif // !(OPENSSL_VERSION_NUMBER >= 0x30000000L)
 
 void ARC4Encryptor::init(const unsigned char* key, size_t keyLength)

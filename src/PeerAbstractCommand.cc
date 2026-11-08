@@ -69,7 +69,7 @@ PeerAbstractCommand::PeerAbstractCommand(cuid_t cuid,
   }
 }
 
-PeerAbstractCommand::~PeerAbstractCommand()
+PeerAbstractCommand::~PeerAbstractCommand() noexcept
 {
   disableReadCheckSocket();
   disableWriteCheckSocket();

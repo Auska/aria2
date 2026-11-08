@@ -61,7 +61,7 @@ OptionParser::OptionParser() : handlers_(option::countOption()), shortOpts_(256)
 {
 }
 
-OptionParser::~OptionParser() = default;
+OptionParser::~OptionParser() noexcept = default;
 
 namespace {
 template <typename InputIterator>

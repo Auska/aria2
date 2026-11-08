@@ -74,7 +74,7 @@ BencodeParser::BencodeParser(StructParserStateMachine* psm)
   stateStack_.push(BENCODE_FINISH);
 }
 
-BencodeParser::~BencodeParser() = default;
+BencodeParser::~BencodeParser() noexcept = default;
 
 ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
 {
@@ -133,7 +133,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
         }
         else {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::UNEXPECTED_CHAR_BEFORE_VAL);
+          return lastError_ =
+                     static_cast<int>(BencodeError::UNEXPECTED_CHAR_BEFORE_VAL);
         }
       }
       break;
@@ -157,7 +158,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       for (j = i; j < size && in(d[j], '0', '9'); ++j) {
         if ((INT64_MAX - (d[j] - '0')) / 10 < strLength_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::STRING_LENGTH_OUT_OF_RANGE);
+          return lastError_ =
+                     static_cast<int>(BencodeError::STRING_LENGTH_OUT_OF_RANGE);
         }
         strLength_ *= 10;
         strLength_ += d[j] - '0';
@@ -166,7 +168,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       if (j != size) {
         if (d[j] != ':' || numConsumed_ == 0) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::INVALID_STRING_LENGTH);
+          return lastError_ =
+                     static_cast<int>(BencodeError::INVALID_STRING_LENGTH);
         }
         i = j;
         currentState_ = BENCODE_STRING;
@@ -214,7 +217,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
       for (j = i; j < size && in(d[j], '0', '9'); ++j) {
         if ((INT64_MAX - (d[j] - '0')) / 10 < number_) {
           currentState_ = BENCODE_ERROR;
-          return lastError_ = static_cast<int>(BencodeError::NUMBER_OUT_OF_RANGE);
+          return lastError_ =
+                     static_cast<int>(BencodeError::NUMBER_OUT_OF_RANGE);
         }
         number_ *= 10;
         number_ += d[j] - '0';
@@ -262,7 +266,8 @@ ssize_t BencodeParser::parseUpdate(std::span<const std::byte> data)
 
       if (c != 'e') {
         currentState_ = BENCODE_ERROR;
-        return lastError_ = static_cast<int>(BencodeError::INVALID_FLOAT_NUMBER);
+        return lastError_ =
+                   static_cast<int>(BencodeError::INVALID_FLOAT_NUMBER);
       }
 
       onNumberEnd();

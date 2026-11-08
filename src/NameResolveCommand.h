@@ -72,7 +72,7 @@ public:
   NameResolveCommand(cuid_t cuid, DownloadEngine* e,
                      const std::shared_ptr<UDPTrackerRequest>& req);
 
-  virtual ~NameResolveCommand();
+  virtual ~NameResolveCommand() noexcept;
 
   virtual bool execute() override;
 };

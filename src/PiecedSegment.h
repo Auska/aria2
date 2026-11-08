@@ -52,7 +52,7 @@ private:
 public:
   PiecedSegment(int32_t pieceLength, const std::shared_ptr<Piece>& piece);
 
-  virtual ~PiecedSegment();
+  virtual ~PiecedSegment() noexcept;
 
   virtual bool complete() const override;
 
@@ -64,15 +64,9 @@ public:
 
   virtual int64_t getLength() const override;
 
-  virtual int64_t getSegmentLength() const override
-  {
-    return pieceLength_;
-  }
+  virtual int64_t getSegmentLength() const override { return pieceLength_; }
 
-  virtual int64_t getWrittenLength() const override
-  {
-    return writtenLength_;
-  }
+  virtual int64_t getWrittenLength() const override { return writtenLength_; }
 
   virtual void updateWrittenLength(int64_t bytes) override;
 

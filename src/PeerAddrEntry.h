@@ -56,7 +56,7 @@ public:
   PeerAddrEntry(std::string_view ipaddr, uint16_t port,
                 Timer updated = Timer());
   PeerAddrEntry(const PeerAddrEntry& c);
-  ~PeerAddrEntry();
+  ~PeerAddrEntry() noexcept;
 
   PeerAddrEntry& operator=(const PeerAddrEntry& c);
 

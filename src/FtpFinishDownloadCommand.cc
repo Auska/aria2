@@ -64,7 +64,7 @@ FtpFinishDownloadCommand::FtpFinishDownloadCommand(
 {
 }
 
-FtpFinishDownloadCommand::~FtpFinishDownloadCommand() = default;
+FtpFinishDownloadCommand::~FtpFinishDownloadCommand() noexcept = default;
 
 // overrides AbstractCommand::execute().
 // AbstractCommand::_segments is empty.
@@ -89,8 +89,8 @@ bool FtpFinishDownloadCommand::execute()
         }
       }
       else {
-        A2_LOG_INFO(fmt("CUID#{} - Bad status for transfer complete.",
-                        getCuid()));
+        A2_LOG_INFO(
+            fmt("CUID#{} - Bad status for transfer complete.", getCuid()));
       }
     }
     else if (getCheckPoint().difference(global::wallclock()) >= getTimeout()) {

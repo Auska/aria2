@@ -57,7 +57,7 @@ UnknownLengthPieceStorage::UnknownLengthPieceStorage(
 {
 }
 
-UnknownLengthPieceStorage::~UnknownLengthPieceStorage() = default;
+UnknownLengthPieceStorage::~UnknownLengthPieceStorage() noexcept = default;
 
 void UnknownLengthPieceStorage::initStorage()
 {

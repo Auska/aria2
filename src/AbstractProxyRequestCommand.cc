@@ -64,7 +64,7 @@ AbstractProxyRequestCommand::AbstractProxyRequestCommand(
   setWriteCheckSocket(getSocket());
 }
 
-AbstractProxyRequestCommand::~AbstractProxyRequestCommand() = default;
+AbstractProxyRequestCommand::~AbstractProxyRequestCommand() noexcept = default;
 
 bool AbstractProxyRequestCommand::executeInternal()
 {

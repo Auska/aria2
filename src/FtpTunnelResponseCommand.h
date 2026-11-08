@@ -48,7 +48,7 @@ public:
       const std::shared_ptr<FileEntry>& fileEntry, RequestGroup* requestGroup,
       const std::shared_ptr<HttpConnection>& httpConnection, DownloadEngine* e,
       const std::shared_ptr<SocketCore>& s);
-  virtual ~FtpTunnelResponseCommand();
+  virtual ~FtpTunnelResponseCommand() noexcept;
 
   virtual std::unique_ptr<Command> getNextCommand() override;
 };

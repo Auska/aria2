@@ -51,7 +51,7 @@ private:
 
 public:
   TimeSeedCriteria(std::chrono::seconds duration);
-  virtual ~TimeSeedCriteria();
+  virtual ~TimeSeedCriteria() noexcept;
 
   virtual void reset() override;
 

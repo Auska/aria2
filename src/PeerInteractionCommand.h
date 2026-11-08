@@ -87,7 +87,7 @@ public:
       const std::shared_ptr<SocketCore>& s, Seq sequence,
       std::unique_ptr<PeerConnection> peerConnection = nullptr);
 
-  virtual ~PeerInteractionCommand();
+  virtual ~PeerInteractionCommand() noexcept;
 };
 
 } // namespace aria2

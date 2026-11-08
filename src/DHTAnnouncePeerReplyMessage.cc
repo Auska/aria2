@@ -48,14 +48,15 @@ DHTAnnouncePeerReplyMessage::DHTAnnouncePeerReplyMessage(
 {
 }
 
-DHTAnnouncePeerReplyMessage::~DHTAnnouncePeerReplyMessage() = default;
+DHTAnnouncePeerReplyMessage::~DHTAnnouncePeerReplyMessage() noexcept = default;
 
 void DHTAnnouncePeerReplyMessage::doReceivedAction() {}
 
 std::unique_ptr<Dict> DHTAnnouncePeerReplyMessage::getResponse()
 {
   auto rDict = Dict::g();
-  rDict->put(DHTMessage::ID, String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
+  rDict->put(DHTMessage::ID,
+             String::g(getLocalNode()->getID().data(), DHT_ID_LENGTH));
   return rDict;
 }
 

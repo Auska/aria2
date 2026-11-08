@@ -52,7 +52,7 @@ private:
 public:
   FillRequestGroupCommand(cuid_t cuid, DownloadEngine* e);
 
-  virtual ~FillRequestGroupCommand();
+  virtual ~FillRequestGroupCommand() noexcept;
 
   virtual bool execute() override;
 };

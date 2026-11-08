@@ -58,7 +58,7 @@ File::File(const std::string& name) : name_(name) {}
 
 File::File(const File& c) = default;
 
-File::~File() = default;
+File::~File() noexcept = default;
 
 File& File::operator=(const File& c)
 {

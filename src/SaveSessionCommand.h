@@ -44,7 +44,7 @@ public:
   SaveSessionCommand(cuid_t cuid, DownloadEngine* e,
                      std::chrono::seconds interval);
 
-  virtual ~SaveSessionCommand();
+  virtual ~SaveSessionCommand() noexcept;
 
   virtual void preProcess() override;
 

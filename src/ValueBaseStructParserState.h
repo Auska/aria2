@@ -45,7 +45,7 @@ class ValueBaseStructParserStateMachine;
 
 class ValueBaseStructParserState {
 public:
-  virtual ~ValueBaseStructParserState() = default;
+  virtual ~ValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) = 0;

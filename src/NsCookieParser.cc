@@ -51,7 +51,7 @@ namespace aria2 {
 
 NsCookieParser::NsCookieParser() = default;
 
-NsCookieParser::~NsCookieParser() = default;
+NsCookieParser::~NsCookieParser() noexcept = default;
 
 namespace {
 std::unique_ptr<Cookie> parseNsCookie(const std::string& cookieStr,

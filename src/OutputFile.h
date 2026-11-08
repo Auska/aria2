@@ -44,7 +44,7 @@ namespace aria2 {
 
 class OutputFile {
 public:
-  virtual ~OutputFile() = default;
+  virtual ~OutputFile() noexcept = default;
   virtual size_t write(std::string_view str) = 0;
   virtual int flush() = 0;
   // Returns true if the output medium supports ANSI color codes.

@@ -83,7 +83,7 @@ private:
 public:
   DefaultPeerStorage();
 
-  virtual ~DefaultPeerStorage();
+  virtual ~DefaultPeerStorage() noexcept;
 
   // TODO We need addAndCheckoutPeer for incoming peers
   virtual bool addPeer(const std::shared_ptr<Peer>& peer) override;

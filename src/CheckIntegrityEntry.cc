@@ -50,7 +50,7 @@ CheckIntegrityEntry::CheckIntegrityEntry(RequestGroup* requestGroup,
 {
 }
 
-CheckIntegrityEntry::~CheckIntegrityEntry() = default;
+CheckIntegrityEntry::~CheckIntegrityEntry() noexcept = default;
 
 void CheckIntegrityEntry::validateChunk() { validator_->validateChunk(); }
 

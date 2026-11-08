@@ -54,7 +54,7 @@ private:
 
 public:
   Option();
-  ~Option();
+  ~Option() noexcept;
   Option(const Option& option);
   Option& operator=(const Option& option);
 

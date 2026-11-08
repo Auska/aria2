@@ -52,7 +52,7 @@ private:
 public:
   Signature();
 
-  ~Signature();
+  ~Signature() noexcept;
 
   void setType(std::string type);
 

@@ -50,7 +50,7 @@ DHTQueryMessage::DHTQueryMessage(const std::shared_ptr<DHTNode>& localNode,
 {
 }
 
-DHTQueryMessage::~DHTQueryMessage() = default;
+DHTQueryMessage::~DHTQueryMessage() noexcept = default;
 
 const std::string& DHTQueryMessage::getType() const { return Q; }
 
@@ -66,11 +66,9 @@ std::string DHTQueryMessage::toString() const
 {
   return fmt("dht query {} TransactionID={} Remote:{}({}), id={}, v={}, {}",
              getMessageType(), util::toHex(getTransactionID()),
-             getRemoteNode()->getIPAddress(),
-             getRemoteNode()->getPort(),
+             getRemoteNode()->getIPAddress(), getRemoteNode()->getPort(),
              util::toHex(std::as_bytes(std::span{getRemoteNode()->getID()})),
-             util::torrentPercentEncode(getVersion()),
-             toStringOptional());
+             util::torrentPercentEncode(getVersion()), toStringOptional());
 }
 
 } // namespace aria2

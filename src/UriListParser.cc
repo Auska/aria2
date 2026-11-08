@@ -59,7 +59,7 @@ UriListParser::UriListParser(const std::string& filename)
 {
 }
 
-UriListParser::~UriListParser() = default;
+UriListParser::~UriListParser() noexcept = default;
 
 void UriListParser::parseNext(std::vector<std::string>& uris, Option& op)
 {

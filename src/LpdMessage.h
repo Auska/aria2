@@ -51,7 +51,7 @@ struct LpdMessage {
   std::string infoHash;
   LpdMessage();
   LpdMessage(const std::shared_ptr<Peer>& peer, std::string_view infoHash);
-  ~LpdMessage();
+  ~LpdMessage() noexcept;
 };
 
 } // namespace aria2

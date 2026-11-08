@@ -44,7 +44,7 @@ namespace aria2 {
 
 struct HttpProxyRequestConnectChain : public ControlChain<ConnectCommand*> {
   HttpProxyRequestConnectChain() {}
-  virtual ~HttpProxyRequestConnectChain() {}
+  virtual ~HttpProxyRequestConnectChain() noexcept {}
   virtual int run(ConnectCommand* t, DownloadEngine* e) override
   {
     auto c = make_unique<HttpProxyRequestCommand>(

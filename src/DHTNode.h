@@ -64,7 +64,7 @@ public:
 
   explicit DHTNode(const DHTID& id);
 
-  ~DHTNode();
+  ~DHTNode() noexcept;
 
   void generateID();
 

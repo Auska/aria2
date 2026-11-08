@@ -82,7 +82,7 @@ public:
                             const std::shared_ptr<FileEntry>& fileEntry,
                             RequestGroup* requestGroup, DownloadEngine* e);
 
-  virtual ~InitiateConnectionCommand();
+  virtual ~InitiateConnectionCommand() noexcept;
 };
 
 } // namespace aria2

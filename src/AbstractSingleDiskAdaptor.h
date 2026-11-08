@@ -51,7 +51,7 @@ private:
 public:
   AbstractSingleDiskAdaptor();
 
-  virtual ~AbstractSingleDiskAdaptor();
+  virtual ~AbstractSingleDiskAdaptor() noexcept;
 
   virtual void initAndOpenFile() override;
 

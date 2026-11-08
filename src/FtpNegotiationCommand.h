@@ -165,7 +165,7 @@ public:
                         const std::shared_ptr<SocketCore>& s,
                         Seq seq = Seq::SEQ_RECV_GREETING,
                         const std::string& baseWorkingDir = "/");
-  virtual ~FtpNegotiationCommand();
+  virtual ~FtpNegotiationCommand() noexcept;
 };
 
 } // namespace aria2

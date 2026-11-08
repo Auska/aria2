@@ -54,7 +54,7 @@ public:
 
   HttpHeaderProcessor(ParserMode mode);
 
-  ~HttpHeaderProcessor();
+  ~HttpHeaderProcessor() noexcept;
   /**
    * Parses incoming data. Returns true if end of header is reached.
    * This function stops processing data when end of header is

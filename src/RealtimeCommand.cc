@@ -48,7 +48,10 @@ RealtimeCommand::RealtimeCommand(cuid_t cuid, RequestGroup* requestGroup,
   requestGroup_->increaseNumCommand();
 }
 
-RealtimeCommand::~RealtimeCommand() { requestGroup_->decreaseNumCommand(); }
+RealtimeCommand::~RealtimeCommand() noexcept
+{
+  requestGroup_->decreaseNumCommand();
+}
 
 bool RealtimeCommand::execute()
 {

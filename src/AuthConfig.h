@@ -52,7 +52,7 @@ private:
 public:
   AuthConfig();
   AuthConfig(std::string user, std::string password);
-  ~AuthConfig();
+  ~AuthConfig() noexcept;
 
   // Don't allow copying
   AuthConfig(const AuthConfig&);

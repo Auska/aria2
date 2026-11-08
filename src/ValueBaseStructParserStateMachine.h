@@ -71,7 +71,7 @@ public:
   };
 
   ValueBaseStructParserStateMachine();
-  virtual ~ValueBaseStructParserStateMachine();
+  virtual ~ValueBaseStructParserStateMachine() noexcept;
 
   virtual void beginElement(StructElementType elementType) override;
   virtual void endElement(StructElementType elementType) override;

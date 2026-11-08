@@ -58,7 +58,7 @@ AbstractOptionHandler::AbstractOptionHandler(PrefPtr pref,
 {
 }
 
-AbstractOptionHandler::~AbstractOptionHandler() = default;
+AbstractOptionHandler::~AbstractOptionHandler() noexcept = default;
 
 void AbstractOptionHandler::parse(Option& option, const std::string& arg) const
 {
@@ -108,7 +108,10 @@ void AbstractOptionHandler::updateFlags(Flag flag, bool val)
   }
 }
 
-bool AbstractOptionHandler::isHidden() const { return (flags_ & static_cast<uint8_t>(Flag::HIDDEN)) != 0; }
+bool AbstractOptionHandler::isHidden() const
+{
+  return (flags_ & static_cast<uint8_t>(Flag::HIDDEN)) != 0;
+}
 
 void AbstractOptionHandler::hide() { updateFlags(Flag::HIDDEN, true); }
 

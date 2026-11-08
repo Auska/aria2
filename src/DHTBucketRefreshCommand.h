@@ -57,7 +57,7 @@ public:
   DHTBucketRefreshCommand(cuid_t cuid, DownloadEngine* e,
                           std::chrono::seconds interval);
 
-  virtual ~DHTBucketRefreshCommand();
+  virtual ~DHTBucketRefreshCommand() noexcept;
 
   virtual void preProcess() override;
 

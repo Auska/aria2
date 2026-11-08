@@ -52,7 +52,7 @@ private:
 
 public:
   ByteArrayDiskWriter(size_t maxLength = 15_m);
-  virtual ~ByteArrayDiskWriter();
+  virtual ~ByteArrayDiskWriter() noexcept;
 
   virtual void initAndOpenFile(int64_t totalLength = 0) override;
 

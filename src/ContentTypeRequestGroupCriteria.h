@@ -50,7 +50,7 @@ public:
   ContentTypeRequestGroupCriteria(const char* const* contentTypes,
                                   const char* const* extensions);
 
-  virtual ~ContentTypeRequestGroupCriteria();
+  virtual ~ContentTypeRequestGroupCriteria() noexcept;
 
   virtual bool match(const RequestGroup* requestGroup) const override;
 };

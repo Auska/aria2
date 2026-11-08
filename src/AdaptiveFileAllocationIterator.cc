@@ -51,7 +51,8 @@ AdaptiveFileAllocationIterator::AdaptiveFileAllocationIterator(
 {
 }
 
-AdaptiveFileAllocationIterator::~AdaptiveFileAllocationIterator() = default;
+AdaptiveFileAllocationIterator::~AdaptiveFileAllocationIterator() noexcept =
+    default;
 
 void AdaptiveFileAllocationIterator::allocateChunk()
 {

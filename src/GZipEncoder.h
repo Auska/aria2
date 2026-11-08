@@ -60,7 +60,7 @@ private:
 public:
   GZipEncoder();
 
-  ~GZipEncoder();
+  ~GZipEncoder() noexcept;
 
   // Initializes deflater.
   void init();

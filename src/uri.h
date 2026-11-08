@@ -60,7 +60,7 @@ struct UriStruct {
 
   UriStruct();
   UriStruct(const UriStruct& c);
-  ~UriStruct();
+  ~UriStruct() noexcept;
 
   UriStruct& operator=(const UriStruct& c);
   void swap(UriStruct& other);

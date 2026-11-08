@@ -47,7 +47,7 @@ template <hash::Algorithms algo>
 class MessageDigestBase : public MessageDigestImpl {
 public:
   MessageDigestBase() : ctx_{hash::create(algo)} {}
-  virtual ~MessageDigestBase() = default;
+  virtual ~MessageDigestBase() noexcept = default;
 
   static size_t length()
   {
@@ -55,10 +55,7 @@ public:
     return ctx->length();
   }
 
-  virtual size_t getDigestLength() const override
-  {
-    return ctx_->length();
-  }
+  virtual size_t getDigestLength() const override { return ctx_->length(); }
 
   virtual void reset() override { ctx_->reset(); }
 

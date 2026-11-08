@@ -53,7 +53,7 @@ BufferedFile::BufferedFile(FILE* fp)
 {
 }
 
-BufferedFile::~BufferedFile() { close(); }
+BufferedFile::~BufferedFile() noexcept { close(); }
 
 size_t BufferedFile::onRead(std::span<std::byte> data)
 {

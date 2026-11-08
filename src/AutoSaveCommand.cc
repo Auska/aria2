@@ -44,7 +44,7 @@ AutoSaveCommand::AutoSaveCommand(cuid_t cuid, DownloadEngine* e,
 {
 }
 
-AutoSaveCommand::~AutoSaveCommand() = default;
+AutoSaveCommand::~AutoSaveCommand() noexcept = default;
 
 void AutoSaveCommand::preProcess()
 {

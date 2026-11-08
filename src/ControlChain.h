@@ -41,7 +41,7 @@ namespace aria2 {
 // T. The main application is embed to the Command classes and get
 // next Command from the previous Command.
 template <typename T> struct ControlChain {
-  virtual ~ControlChain() {}
+  virtual ~ControlChain() noexcept {}
   // Currently, the implementation must returns 0.
   virtual int run(T t, DownloadEngine* e) = 0;
 };

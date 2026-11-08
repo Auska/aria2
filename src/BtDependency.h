@@ -53,7 +53,7 @@ public:
   BtDependency(RequestGroup* dependant,
                const std::shared_ptr<RequestGroup>& dependee);
 
-  virtual ~BtDependency();
+  virtual ~BtDependency() noexcept;
 
   virtual bool resolve() override;
 };

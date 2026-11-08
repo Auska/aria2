@@ -91,7 +91,7 @@ public:
 public:
   BitfieldMan(int32_t blockLength, int64_t totalLength);
   BitfieldMan(const BitfieldMan& bitfieldMan);
-  ~BitfieldMan();
+  ~BitfieldMan() noexcept;
 
   BitfieldMan& operator=(const BitfieldMan& bitfieldMan);
 

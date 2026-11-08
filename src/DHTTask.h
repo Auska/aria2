@@ -41,7 +41,7 @@ namespace aria2 {
 
 class DHTTask {
 public:
-  virtual ~DHTTask() = default;
+  virtual ~DHTTask() noexcept = default;
 
   virtual void startup() = 0;
 

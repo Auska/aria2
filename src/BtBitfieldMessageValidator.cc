@@ -44,13 +44,13 @@ BtBitfieldMessageValidator::BtBitfieldMessageValidator(
 {
 }
 
-BtBitfieldMessageValidator::~BtBitfieldMessageValidator() = default;
+BtBitfieldMessageValidator::~BtBitfieldMessageValidator() noexcept = default;
 
 void BtBitfieldMessageValidator::validate()
 {
   bittorrent::checkBitfield(
-      std::as_bytes(std::span{message_->getBitfield(),
-                              message_->getBitfieldLength()}),
+      std::as_bytes(
+          std::span{message_->getBitfield(), message_->getBitfieldLength()}),
       numPiece_);
 }
 

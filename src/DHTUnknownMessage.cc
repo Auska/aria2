@@ -58,7 +58,7 @@ DHTUnknownMessage::DHTUnknownMessage(const std::shared_ptr<DHTNode>& localNode,
 {
 }
 
-DHTUnknownMessage::~DHTUnknownMessage() = default;
+DHTUnknownMessage::~DHTUnknownMessage() noexcept = default;
 
 void DHTUnknownMessage::doReceivedAction() {}
 

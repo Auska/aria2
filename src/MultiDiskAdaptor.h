@@ -113,7 +113,7 @@ private:
 
 public:
   MultiDiskAdaptor();
-  ~MultiDiskAdaptor();
+  ~MultiDiskAdaptor() noexcept;
 
   virtual void initAndOpenFile() override;
 

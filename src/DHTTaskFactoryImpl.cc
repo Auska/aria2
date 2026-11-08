@@ -59,7 +59,7 @@ DHTTaskFactoryImpl::DHTTaskFactoryImpl()
 {
 }
 
-DHTTaskFactoryImpl::~DHTTaskFactoryImpl() = default;
+DHTTaskFactoryImpl::~DHTTaskFactoryImpl() noexcept = default;
 
 std::shared_ptr<DHTTask>
 DHTTaskFactoryImpl::createPingTask(const std::shared_ptr<DHTNode>& remoteNode,

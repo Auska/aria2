@@ -47,7 +47,7 @@ PiecedSegment::PiecedSegment(int32_t pieceLength,
   writtenLength_ = *index * piece_->getBlockLength();
 }
 
-PiecedSegment::~PiecedSegment() = default;
+PiecedSegment::~PiecedSegment() noexcept = default;
 
 bool PiecedSegment::complete() const { return piece_->pieceComplete(); }
 

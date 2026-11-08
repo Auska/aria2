@@ -314,7 +314,7 @@ protected:
 public:
   MD5() { reset(); }
 
-  virtual ~MD5() { reset(); }
+  virtual ~MD5() noexcept { reset(); }
 
   // Since this is LE, and I am lazy, copy-paste overwriting with BE -> LE.
   virtual std::string finalize()
@@ -521,7 +521,7 @@ protected:
 public:
   SHA1() { reset(); }
 
-  virtual ~SHA1() { reset(); }
+  virtual ~SHA1() noexcept { reset(); }
 
   virtual void reset()
   {
@@ -717,7 +717,7 @@ protected:
 public:
   SHA256() { reset(); }
 
-  virtual ~SHA256() { reset(); }
+  virtual ~SHA256() noexcept { reset(); }
 
   virtual void reset()
   {
@@ -747,7 +747,7 @@ protected:
 public:
   SHA224() { reset(); }
 
-  virtual ~SHA224() { reset(); }
+  virtual ~SHA224() noexcept { reset(); }
 
   virtual void reset()
   {
@@ -980,7 +980,7 @@ protected:
 public:
   SHA512() { reset(); }
 
-  virtual ~SHA512() { reset(); }
+  virtual ~SHA512() noexcept { reset(); }
 
   virtual void reset()
   {
@@ -1012,7 +1012,7 @@ protected:
 public:
   SHA384() { reset(); }
 
-  virtual ~SHA384() { reset(); }
+  virtual ~SHA384() noexcept { reset(); }
 
   virtual void reset()
   {
@@ -1038,10 +1038,12 @@ static const std::set<std::string> names{
 
 // For fast name |lookup|
 static const std::unordered_map<std::string, Algorithms> mapped{
-    {"md5", Algorithms::MD5},        {"sha", Algorithms::SHA1},       {"sha1", Algorithms::SHA1},
-    {"sha-1", Algorithms::SHA1},     {"sha224", Algorithms::SHA224},  {"sha-224", Algorithms::SHA224},
-    {"sha256", Algorithms::SHA256},  {"sha-256", Algorithms::SHA256}, {"sha384", Algorithms::SHA384},
-    {"sha-384", Algorithms::SHA384}, {"sha512", Algorithms::SHA512},  {"sha-512", Algorithms::SHA512},
+    {"md5", Algorithms::MD5},       {"sha", Algorithms::SHA1},
+    {"sha1", Algorithms::SHA1},     {"sha-1", Algorithms::SHA1},
+    {"sha224", Algorithms::SHA224}, {"sha-224", Algorithms::SHA224},
+    {"sha256", Algorithms::SHA256}, {"sha-256", Algorithms::SHA256},
+    {"sha384", Algorithms::SHA384}, {"sha-384", Algorithms::SHA384},
+    {"sha512", Algorithms::SHA512}, {"sha-512", Algorithms::SHA512},
 };
 static const auto mapped_end = mapped.end();
 } // namespace

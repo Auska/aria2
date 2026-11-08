@@ -66,7 +66,8 @@ HttpInitiateConnectionCommand::HttpInitiateConnectionCommand(
 {
 }
 
-HttpInitiateConnectionCommand::~HttpInitiateConnectionCommand() = default;
+HttpInitiateConnectionCommand::~HttpInitiateConnectionCommand() noexcept =
+    default;
 
 std::unique_ptr<Command> HttpInitiateConnectionCommand::createNextCommand(
     const std::string& hostname, const std::string& addr, uint16_t port,

@@ -75,8 +75,8 @@ public:
 
 class AuthConfigFactory {
 public:
-  using BasicCredSet =
-      std::set<std::unique_ptr<BasicCred>, DerefLess<std::unique_ptr<BasicCred>>>;
+  using BasicCredSet = std::set<std::unique_ptr<BasicCred>,
+                                DerefLess<std::unique_ptr<BasicCred>>>;
 
 private:
   std::unique_ptr<Netrc> netrc_;
@@ -90,7 +90,7 @@ private:
 public:
   AuthConfigFactory();
 
-  ~AuthConfigFactory();
+  ~AuthConfigFactory() noexcept;
 
   // Creates AuthConfig object for request. Following option values
   // are used in this method: PREF_HTTP_USER, PREF_HTTP_PASSWD,

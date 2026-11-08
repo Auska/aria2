@@ -57,7 +57,7 @@ public:
       cuid_t cuid, const std::shared_ptr<LpdMessageDispatcher>& dispatcher,
       DownloadEngine* e);
 
-  ~LpdDispatchMessageCommand();
+  ~LpdDispatchMessageCommand() noexcept;
 
   virtual bool execute() override;
 

@@ -43,7 +43,8 @@ ApiCallbackDownloadEventListener::ApiCallbackDownloadEventListener(
 {
 }
 
-ApiCallbackDownloadEventListener::~ApiCallbackDownloadEventListener() = default;
+ApiCallbackDownloadEventListener::~ApiCallbackDownloadEventListener() noexcept =
+    default;
 
 void ApiCallbackDownloadEventListener::onEvent(DownloadEvent event,
                                                const RequestGroup* group)

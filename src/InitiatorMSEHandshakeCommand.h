@@ -87,7 +87,7 @@ public:
                                const std::shared_ptr<BtRuntime>& btRuntime,
                                const std::shared_ptr<SocketCore>& s);
 
-  virtual ~InitiatorMSEHandshakeCommand();
+  virtual ~InitiatorMSEHandshakeCommand() noexcept;
 
   void setPeerStorage(const std::shared_ptr<PeerStorage>& peerStorage);
 

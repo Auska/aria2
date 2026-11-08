@@ -67,7 +67,7 @@ class Piece;
 
 class BtMessageFactory {
 public:
-  virtual ~BtMessageFactory() = default;
+  virtual ~BtMessageFactory() noexcept = default;
 
   virtual std::unique_ptr<BtMessage>
   createBtMessage(std::span<const std::byte> msg) = 0;

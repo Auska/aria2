@@ -60,7 +60,7 @@ Peer::Peer(std::string ipaddr, uint16_t port, bool incoming)
   memset(peerId_, 0, PEER_ID_LENGTH);
 }
 
-Peer::~Peer() { releaseSessionResource(); }
+Peer::~Peer() noexcept { releaseSessionResource(); }
 
 void Peer::usedBy(cuid_t cuid) { cuid_ = cuid; }
 

@@ -61,7 +61,7 @@ public:
   static std::string toHex(a2_gid_t n);
   static std::string toAbbrevHex(a2_gid_t n);
 
-  ~GroupId();
+  ~GroupId() noexcept;
   a2_gid_t getNumericId() const { return gid_; }
   std::string toHex() const;
   std::string toAbbrevHex() const;

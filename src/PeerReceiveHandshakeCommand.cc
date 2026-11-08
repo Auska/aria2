@@ -79,7 +79,7 @@ PeerReceiveHandshakeCommand::PeerReceiveHandshakeCommand(
   }
 }
 
-PeerReceiveHandshakeCommand::~PeerReceiveHandshakeCommand() = default;
+PeerReceiveHandshakeCommand::~PeerReceiveHandshakeCommand() noexcept = default;
 
 bool PeerReceiveHandshakeCommand::exitBeforeExecute()
 {

@@ -61,7 +61,7 @@ FtpDownloadCommand::FtpDownloadCommand(
 {
 }
 
-FtpDownloadCommand::~FtpDownloadCommand() = default;
+FtpDownloadCommand::~FtpDownloadCommand() noexcept = default;
 
 bool FtpDownloadCommand::prepareForNextSegment()
 {

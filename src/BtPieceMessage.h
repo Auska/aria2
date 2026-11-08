@@ -66,7 +66,7 @@ private:
 public:
   BtPieceMessage(size_t index = 0, int32_t begin = 0, int32_t blockLength = 0);
 
-  virtual ~BtPieceMessage();
+  virtual ~BtPieceMessage() noexcept;
 
   static const uint8_t ID = 7;
 
@@ -94,7 +94,8 @@ public:
 
   void setPeerStorage(PeerStorage* peerStorage);
 
-  static std::unique_ptr<BtPieceMessage> create(std::span<const std::byte> data);
+  static std::unique_ptr<BtPieceMessage>
+  create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 
@@ -108,8 +109,8 @@ public:
 
   virtual void onChokingEvent(const BtChokingEvent& event) override;
 
-  virtual void onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event)
-      override;
+  virtual void
+  onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event) override;
 };
 
 } // namespace aria2

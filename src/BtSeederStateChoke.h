@@ -64,7 +64,7 @@ private:
   public:
     PeerEntry(const std::shared_ptr<Peer>& peer);
     PeerEntry(const PeerEntry& c);
-    ~PeerEntry();
+    ~PeerEntry() noexcept;
 
     void swap(PeerEntry& c);
 
@@ -84,7 +84,7 @@ private:
 public:
   BtSeederStateChoke();
 
-  ~BtSeederStateChoke();
+  ~BtSeederStateChoke() noexcept;
 
   void executeChoke(const PeerSet& peerSet);
 

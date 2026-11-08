@@ -64,7 +64,7 @@ public:
 
   ExtensionMessageRegistry();
 
-  ~ExtensionMessageRegistry();
+  ~ExtensionMessageRegistry() noexcept;
 
   const Extensions& getExtensions() const { return extensions_; }
 

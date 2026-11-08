@@ -44,7 +44,7 @@ RandomStreamPieceSelector::RandomStreamPieceSelector(BitfieldMan* bitfieldMan)
 {
 }
 
-RandomStreamPieceSelector::~RandomStreamPieceSelector() = default;
+RandomStreamPieceSelector::~RandomStreamPieceSelector() noexcept = default;
 
 std::optional<size_t>
 RandomStreamPieceSelector::select(size_t minSplitSize,

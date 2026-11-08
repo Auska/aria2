@@ -166,7 +166,7 @@ private:
 public:
   SelectEventPoll();
 
-  virtual ~SelectEventPoll();
+  virtual ~SelectEventPoll() noexcept;
 
   virtual void poll(const struct timeval& tv) override;
 

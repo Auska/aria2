@@ -73,7 +73,7 @@ Session::Session(const KeyVals& options)
 {
 }
 
-Session::~Session() = default;
+Session::~Session() noexcept = default;
 
 SessionConfig::SessionConfig()
     : keepRunning(false),
@@ -333,7 +333,8 @@ int removeDownload(Session* session, A2Gid gid, bool force)
   if (group) {
     if (group->getState() == RequestGroup::State::ACTIVE) {
       if (force) {
-        group->setForceHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
+        group->setForceHaltRequested(true,
+                                     RequestGroup::HaltReason::USER_REQUEST);
       }
       else {
         group->setHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
@@ -620,7 +621,7 @@ struct RequestGroupDH : public DownloadHandle {
       : group(group), ts(group->calculateStat())
   {
   }
-  virtual ~RequestGroupDH() = default;
+  virtual ~RequestGroupDH() noexcept = default;
   virtual DownloadStatus getStatus() override
   {
     if (group->getState() == RequestGroup::State::ACTIVE) {
@@ -635,18 +636,12 @@ struct RequestGroupDH : public DownloadHandle {
       }
     }
   }
-  virtual int64_t getTotalLength() override
-  {
-    return group->getTotalLength();
-  }
+  virtual int64_t getTotalLength() override { return group->getTotalLength(); }
   virtual int64_t getCompletedLength() override
   {
     return group->getCompletedLength();
   }
-  virtual int64_t getUploadLength() override
-  {
-    return ts.allTimeUploadLength;
-  }
+  virtual int64_t getUploadLength() override { return ts.allTimeUploadLength; }
   virtual std::string getBitfield() override
   {
     const std::shared_ptr<PieceStorage>& ps = group->getPieceStorage();
@@ -678,14 +673,8 @@ struct RequestGroupDH : public DownloadHandle {
   {
     return group->getDownloadContext()->getNumPieces();
   }
-  virtual int getConnections() override
-  {
-    return group->getNumConnection();
-  }
-  virtual int getErrorCode() override
-  {
-    return group->getLastErrorCode();
-  }
+  virtual int getConnections() override { return group->getNumConnection(); }
+  virtual int getErrorCode() override { return group->getLastErrorCode(); }
   virtual const std::vector<A2Gid>& getFollowedBy() override
   {
     return group->followedBy();
@@ -759,7 +748,7 @@ struct RequestGroupDH : public DownloadHandle {
 namespace {
 struct DownloadResultDH : public DownloadHandle {
   DownloadResultDH(std::shared_ptr<DownloadResult> dr) : dr(std::move(dr)) {}
-  virtual ~DownloadResultDH() = default;
+  virtual ~DownloadResultDH() noexcept = default;
   virtual DownloadStatus getStatus() override
   {
     switch (dr->result) {
@@ -772,18 +761,12 @@ struct DownloadResultDH : public DownloadHandle {
     }
   }
   virtual int64_t getTotalLength() override { return dr->totalLength; }
-  virtual int64_t getCompletedLength() override
-  {
-    return dr->completedLength;
-  }
+  virtual int64_t getCompletedLength() override { return dr->completedLength; }
   virtual int64_t getUploadLength() override { return dr->uploadLength; }
   virtual std::string getBitfield() override { return dr->bitfield; }
   virtual int getDownloadSpeed() override { return 0; }
   virtual int getUploadSpeed() override { return 0; }
-  virtual const std::string& getInfoHash() override
-  {
-    return dr->infoHash;
-  }
+  virtual const std::string& getInfoHash() override { return dr->infoHash; }
   virtual size_t getPieceLength() override { return dr->pieceLength; }
   virtual int getNumPieces() override { return dr->numPieces; }
   virtual int getConnections() override { return 0; }
@@ -811,10 +794,7 @@ struct DownloadResultDH : public DownloadHandle {
                    dr->bitfield.size());
     return createFileData(dr->fileEntries[index - 1], index, &bf);
   }
-  virtual BtMetaInfoData getBtMetaInfo() override
-  {
-    return BtMetaInfoData();
-  }
+  virtual BtMetaInfoData getBtMetaInfo() override { return BtMetaInfoData(); }
   virtual const std::string& getOption(const std::string& name) override
   {
     return getRequestOption(dr->option, name);

@@ -56,7 +56,7 @@ DHTReplaceNodeTask::DHTReplaceNodeTask(const std::shared_ptr<DHTBucket>& bucket,
 {
 }
 
-DHTReplaceNodeTask::~DHTReplaceNodeTask() = default;
+DHTReplaceNodeTask::~DHTReplaceNodeTask() noexcept = default;
 
 void DHTReplaceNodeTask::startup() { sendMessage(); }
 
@@ -89,8 +89,7 @@ void DHTReplaceNodeTask::onTimeout(const std::shared_ptr<DHTNode>& node)
   ++numRetry_;
   if (numRetry_ >= MAX_RETRY) {
     A2_LOG_INFO(fmt("ReplaceNode: Ping failed {} times. Replace {} with {}.",
-                    numRetry_, node->toString(),
-                    newNode_->toString()));
+                    numRetry_, node->toString(), newNode_->toString()));
     node->markBad();
     bucket_->addNode(newNode_);
     setFinished(true);

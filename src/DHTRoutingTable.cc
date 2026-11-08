@@ -59,7 +59,7 @@ DHTRoutingTable::DHTRoutingTable(const std::shared_ptr<DHTNode>& localNode)
 {
 }
 
-DHTRoutingTable::~DHTRoutingTable() = default;
+DHTRoutingTable::~DHTRoutingTable() noexcept = default;
 
 bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node)
 {
@@ -86,9 +86,10 @@ bool DHTRoutingTable::addNode(const std::shared_ptr<DHTNode>& node, bool good)
       return true;
     }
     else if (bucket->splitAllowed()) {
-      A2_LOG_DEBUG(fmt("Splitting bucket. Range:{}-{}",
-                       util::toHex(std::as_bytes(std::span{bucket->getMinID()})),
-                       util::toHex(std::as_bytes(std::span{bucket->getMaxID()}))));
+      A2_LOG_DEBUG(
+          fmt("Splitting bucket. Range:{}-{}",
+              util::toHex(std::as_bytes(std::span{bucket->getMinID()})),
+              util::toHex(std::as_bytes(std::span{bucket->getMaxID()}))));
       treeNode->split();
       ++numBucket_;
       if (treeNode->getLeft()->isInRange(node->getID())) {

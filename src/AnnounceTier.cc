@@ -41,7 +41,7 @@ AnnounceTier::AnnounceTier(std::deque<std::string> urls)
 {
 }
 
-AnnounceTier::~AnnounceTier() = default;
+AnnounceTier::~AnnounceTier() noexcept = default;
 
 void AnnounceTier::nextEvent()
 {

@@ -46,7 +46,7 @@ class DiskWriter;
 
 class DiskWriterFactory {
 public:
-  virtual ~DiskWriterFactory() = default;
+  virtual ~DiskWriterFactory() noexcept = default;
 
   virtual std::unique_ptr<DiskWriter>
   newDiskWriter(const std::string& filename) = 0;

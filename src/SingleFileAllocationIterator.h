@@ -61,7 +61,7 @@ public:
   SingleFileAllocationIterator(BinaryStream* stream, int64_t offset,
                                int64_t totalLength);
 
-  virtual ~SingleFileAllocationIterator();
+  virtual ~SingleFileAllocationIterator() noexcept;
 
   virtual void allocateChunk() override;
 

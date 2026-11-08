@@ -54,7 +54,7 @@ namespace aria2 {
 
 ProtocolDetector::ProtocolDetector() = default;
 
-ProtocolDetector::~ProtocolDetector() = default;
+ProtocolDetector::~ProtocolDetector() noexcept = default;
 
 bool ProtocolDetector::isStreamProtocol(const std::string& uri) const
 {

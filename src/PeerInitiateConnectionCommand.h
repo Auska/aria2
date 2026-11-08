@@ -69,7 +69,7 @@ public:
                                 const std::shared_ptr<BtRuntime>& btRuntime,
                                 bool mseHandshakeEnabled = true);
 
-  virtual ~PeerInitiateConnectionCommand();
+  virtual ~PeerInitiateConnectionCommand() noexcept;
 
   void setPeerStorage(const std::shared_ptr<PeerStorage>& peerStorage);
 

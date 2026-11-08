@@ -50,7 +50,7 @@ public:
                             DownloadEngine* e,
                             const std::shared_ptr<SocketCore>& socket);
 
-  virtual ~HttpServerResponseCommand();
+  virtual ~HttpServerResponseCommand() noexcept;
 };
 
 } // namespace aria2

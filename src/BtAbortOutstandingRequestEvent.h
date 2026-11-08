@@ -49,7 +49,7 @@ private:
 
 public:
   BtAbortOutstandingRequestEvent(const std::shared_ptr<Piece>& piece);
-  ~BtAbortOutstandingRequestEvent();
+  ~BtAbortOutstandingRequestEvent() noexcept;
 
   const std::shared_ptr<Piece>& getPiece() const { return piece_; }
 };

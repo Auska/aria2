@@ -51,7 +51,7 @@ public:
   DHTPeerAnnounceCommand(cuid_t cuid, DownloadEngine* e,
                          std::chrono::seconds interval);
 
-  virtual ~DHTPeerAnnounceCommand();
+  virtual ~DHTPeerAnnounceCommand() noexcept;
 
   virtual void preProcess() override;
 

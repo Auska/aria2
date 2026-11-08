@@ -60,7 +60,7 @@ FileAllocationCommand::FileAllocationCommand(
 {
 }
 
-FileAllocationCommand::~FileAllocationCommand()
+FileAllocationCommand::~FileAllocationCommand() noexcept
 {
   getDownloadEngine()->getFileAllocationMan()->dropPickedEntry();
 }

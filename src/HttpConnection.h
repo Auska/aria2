@@ -76,8 +76,7 @@ public:
   const std::unique_ptr<HttpHeaderProcessor>& getHttpHeaderProcessor() const;
 };
 
-using HttpRequestEntries =
-    std::deque<std::unique_ptr<HttpRequestEntry>>;
+using HttpRequestEntries = std::deque<std::unique_ptr<HttpRequestEntry>>;
 
 class HttpConnection {
 private:
@@ -95,7 +94,7 @@ private:
 public:
   HttpConnection(cuid_t cuid, const std::shared_ptr<SocketCore>& socket,
                  const std::shared_ptr<SocketRecvBuffer>& socketRecvBuffer);
-  ~HttpConnection();
+  ~HttpConnection() noexcept;
 
   /**
    * Sends Http request.

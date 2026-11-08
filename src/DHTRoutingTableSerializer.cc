@@ -57,7 +57,7 @@ DHTRoutingTableSerializer::DHTRoutingTableSerializer(int family)
 {
 }
 
-DHTRoutingTableSerializer::~DHTRoutingTableSerializer() = default;
+DHTRoutingTableSerializer::~DHTRoutingTableSerializer() noexcept = default;
 
 void DHTRoutingTableSerializer::setLocalNode(
     const std::shared_ptr<DHTNode>& localNode)
@@ -75,7 +75,7 @@ void DHTRoutingTableSerializer::setNodes(
   if (fp.write(std::span{reinterpret_cast<const std::byte*>(ptr),              \
                          static_cast<size_t>(count)}) != (count)) {            \
     throw DL_ABORT_EX(                                                         \
-        fmt("Failed to save DHT routing table to {}.", filename));     \
+        fmt("Failed to save DHT routing table to {}.", filename));             \
   }
 
 void DHTRoutingTableSerializer::serialize(const std::string& filename)
@@ -85,8 +85,7 @@ void DHTRoutingTableSerializer::serialize(const std::string& filename)
   filenameTemp += "__temp";
   BufferedFile fp(filenameTemp.c_str(), BufferedFile::WRITE);
   if (!fp) {
-    throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename));
+    throw DL_ABORT_EX(fmt("Failed to save DHT routing table to {}.", filename));
   }
   char header[8];
   memset(header, 0, sizeof(header));
@@ -149,12 +148,10 @@ void DHTRoutingTableSerializer::serialize(const std::string& filename)
     WRITE_CHECK(fp, zero, 4);
   }
   if (fp.close() == EOF) {
-    throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename));
+    throw DL_ABORT_EX(fmt("Failed to save DHT routing table to {}.", filename));
   }
   if (!File(filenameTemp).renameTo(filename)) {
-    throw DL_ABORT_EX(
-        fmt("Failed to save DHT routing table to {}.", filename));
+    throw DL_ABORT_EX(fmt("Failed to save DHT routing table to {}.", filename));
   }
   A2_LOG_INFO("DHT routing table was saved successfully");
 }

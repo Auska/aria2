@@ -82,7 +82,7 @@ PollEventPoll::PollEventPoll()
 {
 }
 
-PollEventPoll::~PollEventPoll() = default;
+PollEventPoll::~PollEventPoll() noexcept = default;
 
 void PollEventPoll::poll(const struct timeval& tv)
 {

@@ -52,7 +52,7 @@ public:
                      const std::shared_ptr<DHTNode>& remoteNode,
                      const std::string& transactionID);
 
-  virtual ~DHTResponseMessage();
+  virtual ~DHTResponseMessage() noexcept;
 
   virtual const std::string& getType() const override;
 

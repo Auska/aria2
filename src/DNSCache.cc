@@ -44,7 +44,7 @@ DNSCache::AddrEntry::AddrEntry(std::string_view addr) : addr_(addr), good_(true)
 
 DNSCache::AddrEntry::AddrEntry(const AddrEntry& c) = default;
 
-DNSCache::AddrEntry::~AddrEntry() = default;
+DNSCache::AddrEntry::~AddrEntry() noexcept = default;
 
 DNSCache::AddrEntry& DNSCache::AddrEntry::operator=(const AddrEntry& c)
 {
@@ -62,7 +62,7 @@ DNSCache::CacheEntry::CacheEntry(std::string_view hostname, uint16_t port)
 
 DNSCache::CacheEntry::CacheEntry(const CacheEntry& c) = default;
 
-DNSCache::CacheEntry::~CacheEntry() = default;
+DNSCache::CacheEntry::~CacheEntry() noexcept = default;
 
 DNSCache::CacheEntry& DNSCache::CacheEntry::operator=(const CacheEntry& c)
 {
@@ -150,7 +150,7 @@ DNSCache::DNSCache() {}
 
 DNSCache::DNSCache(const DNSCache& c) = default;
 
-DNSCache::~DNSCache() = default;
+DNSCache::~DNSCache() noexcept = default;
 
 DNSCache& DNSCache::operator=(const DNSCache& c)
 {

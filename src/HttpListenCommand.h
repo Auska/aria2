@@ -54,7 +54,7 @@ private:
 public:
   HttpListenCommand(cuid_t cuid, DownloadEngine* e, int family, bool secure);
 
-  virtual ~HttpListenCommand();
+  virtual ~HttpListenCommand() noexcept;
 
   virtual bool execute() override;
 

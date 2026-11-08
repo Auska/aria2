@@ -40,7 +40,7 @@
 namespace aria2 {
 
 struct ContextAttribute {
-  virtual ~ContextAttribute() = default;
+  virtual ~ContextAttribute() noexcept = default;
 };
 
 enum class ContextAttributeType {

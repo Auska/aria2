@@ -47,7 +47,8 @@ ContentTypeRequestGroupCriteria::ContentTypeRequestGroupCriteria(
 {
 }
 
-ContentTypeRequestGroupCriteria::~ContentTypeRequestGroupCriteria() = default;
+ContentTypeRequestGroupCriteria::~ContentTypeRequestGroupCriteria() noexcept =
+    default;
 
 bool ContentTypeRequestGroupCriteria::match(
     const RequestGroup* requestGroup) const

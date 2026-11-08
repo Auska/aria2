@@ -64,7 +64,7 @@ public:
       const std::shared_ptr<DownloadContext>& dctx,
       const std::shared_ptr<PieceStorage>& pieceStorage);
 
-  virtual ~IteratableChunkChecksumValidator();
+  virtual ~IteratableChunkChecksumValidator() noexcept;
 
   virtual void init() override;
 

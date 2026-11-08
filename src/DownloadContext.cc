@@ -70,7 +70,7 @@ DownloadContext::DownloadContext(int32_t pieceLength, int64_t totalLength,
       std::make_shared<FileEntry>(std::move(path), totalLength, 0));
 }
 
-DownloadContext::~DownloadContext() = default;
+DownloadContext::~DownloadContext() noexcept = default;
 
 void DownloadContext::resetDownloadStartTime()
 {
@@ -153,14 +153,16 @@ void DownloadContext::setFileFilter(SegList<int> sgl)
 void DownloadContext::setAttribute(ContextAttributeType key,
                                    std::shared_ptr<ContextAttribute> value)
 {
-  assert(static_cast<size_t>(key) < static_cast<size_t>(ContextAttributeType::MAX));
+  assert(static_cast<size_t>(key) <
+         static_cast<size_t>(ContextAttributeType::MAX));
   attrs_[static_cast<size_t>(key)] = std::move(value);
 }
 
 const std::shared_ptr<ContextAttribute>&
 DownloadContext::getAttribute(ContextAttributeType key)
 {
-  assert(static_cast<size_t>(key) < static_cast<size_t>(ContextAttributeType::MAX));
+  assert(static_cast<size_t>(key) <
+         static_cast<size_t>(ContextAttributeType::MAX));
   const auto& attr = attrs_[static_cast<size_t>(key)];
   if (!attr) {
     throw DL_ABORT_EX(
@@ -172,7 +174,8 @@ DownloadContext::getAttribute(ContextAttributeType key)
 
 bool DownloadContext::hasAttribute(ContextAttributeType key) const
 {
-  assert(static_cast<size_t>(key) < static_cast<size_t>(ContextAttributeType::MAX));
+  assert(static_cast<size_t>(key) <
+         static_cast<size_t>(ContextAttributeType::MAX));
   return attrs_[static_cast<size_t>(key)].get();
 }
 

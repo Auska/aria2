@@ -78,7 +78,7 @@ private:
 
 public:
   Request();
-  ~Request();
+  ~Request() noexcept;
   // Sets uri to uri_ and parses URI.  Returns true if parsing goes
   // successful, otherwise returns false.
   bool setUri(const std::string& uri);

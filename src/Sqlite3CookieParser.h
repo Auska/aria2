@@ -51,7 +51,7 @@ class Sqlite3CookieParser {
 public:
   Sqlite3CookieParser(const std::string& filename);
 
-  virtual ~Sqlite3CookieParser();
+  virtual ~Sqlite3CookieParser() noexcept;
 
   // Loads cookies from sqlite3 database and stores them in cookies.
   // When loading is successful, cookies stored in cookies initially

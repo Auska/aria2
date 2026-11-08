@@ -102,7 +102,7 @@ private:
 
 public:
   HttpRequest();
-  ~HttpRequest();
+  ~HttpRequest() noexcept;
 
   const std::shared_ptr<Segment>& getSegment() const { return segment_; }
 

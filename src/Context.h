@@ -52,7 +52,7 @@ struct Context {
   // The |options| is the additional option values and is considered
   // as a part of command-line arguments.
   Context(bool standalone, int argc, char** argv, const KeyVals& options);
-  ~Context();
+  ~Context() noexcept;
   std::shared_ptr<MultiUrlRequestInfo> reqinfo;
 };
 

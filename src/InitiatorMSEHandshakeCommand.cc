@@ -78,7 +78,7 @@ InitiatorMSEHandshakeCommand::InitiatorMSEHandshakeCommand(
   requestGroup_->increaseNumCommand();
 }
 
-InitiatorMSEHandshakeCommand::~InitiatorMSEHandshakeCommand()
+InitiatorMSEHandshakeCommand::~InitiatorMSEHandshakeCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
   btRuntime_->decreaseConnections();
@@ -233,8 +233,8 @@ bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
   }
   else {
     // try legacy BitTorrent handshake
-    A2_LOG_INFO(fmt("CUID#{} - Retry using legacy BitTorrent handshake.",
-                    getCuid()));
+    A2_LOG_INFO(
+        fmt("CUID#{} - Retry using legacy BitTorrent handshake.", getCuid()));
     auto command = make_unique<PeerInitiateConnectionCommand>(
         getCuid(), requestGroup_, getPeer(), getDownloadEngine(), btRuntime_,
         false);

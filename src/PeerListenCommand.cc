@@ -57,7 +57,7 @@ PeerListenCommand::PeerListenCommand(cuid_t cuid, DownloadEngine* e, int family)
 {
 }
 
-PeerListenCommand::~PeerListenCommand() = default;
+PeerListenCommand::~PeerListenCommand() noexcept = default;
 
 std::optional<uint16_t> PeerListenCommand::bindPort(SegList<int>& sgl)
 {

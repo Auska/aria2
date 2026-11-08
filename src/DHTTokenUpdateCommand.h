@@ -51,7 +51,7 @@ public:
   DHTTokenUpdateCommand(cuid_t cuid, DownloadEngine* e,
                         std::chrono::seconds interval);
 
-  virtual ~DHTTokenUpdateCommand();
+  virtual ~DHTTokenUpdateCommand() noexcept;
 
   virtual void preProcess() override;
 

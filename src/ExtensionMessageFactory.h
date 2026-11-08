@@ -47,7 +47,7 @@ class ExtensionMessage;
 
 class ExtensionMessageFactory {
 public:
-  virtual ~ExtensionMessageFactory() = default;
+  virtual ~ExtensionMessageFactory() noexcept = default;
 
   virtual std::unique_ptr<ExtensionMessage>
   createMessage(std::span<const std::byte> data) = 0;

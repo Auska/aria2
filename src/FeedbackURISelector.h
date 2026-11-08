@@ -57,13 +57,12 @@ private:
 public:
   FeedbackURISelector(const std::shared_ptr<ServerStatMan>& serverStatMan);
 
-  virtual ~FeedbackURISelector();
+  virtual ~FeedbackURISelector() noexcept;
 
   // This function expects ignoreHosts are ordered in ascending order.
   virtual std::string
   select(FileEntry* fileEntry,
-         const std::vector<std::pair<size_t, std::string>>& usedHosts)
-      override;
+         const std::vector<std::pair<size_t, std::string>>& usedHosts) override;
 };
 
 } // namespace aria2

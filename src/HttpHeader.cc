@@ -44,7 +44,7 @@ namespace aria2 {
 
 HttpHeader::HttpHeader() : statusCode_(0) {}
 
-HttpHeader::~HttpHeader() = default;
+HttpHeader::~HttpHeader() noexcept = default;
 
 void HttpHeader::put(InterestingHeader hdKey, std::string_view value)
 {

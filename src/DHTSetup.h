@@ -49,7 +49,7 @@ class DHTSetup {
 public:
   DHTSetup();
 
-  ~DHTSetup();
+  ~DHTSetup() noexcept;
 
   // Returns two vector of Commands.  First one contains regular
   // commands.  Second one contains so called routine commands, which

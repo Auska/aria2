@@ -50,7 +50,7 @@ TimedHaltCommand::TimedHaltCommand(cuid_t cuid, DownloadEngine* e,
 {
 }
 
-TimedHaltCommand::~TimedHaltCommand() = default;
+TimedHaltCommand::~TimedHaltCommand() noexcept = default;
 
 void TimedHaltCommand::preProcess()
 {

@@ -47,7 +47,7 @@ class BitfieldMan;
 class RandomStreamPieceSelector : public StreamPieceSelector {
 public:
   RandomStreamPieceSelector(BitfieldMan* bitfieldMan);
-  virtual ~RandomStreamPieceSelector();
+  virtual ~RandomStreamPieceSelector() noexcept;
 
   virtual std::optional<size_t>
   select(size_t minSplitSize,

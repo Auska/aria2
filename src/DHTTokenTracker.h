@@ -50,15 +50,14 @@ private:
   unsigned char secret_[2][SECRET_SIZE];
 
   std::string generateToken(const DHTID& infoHash, const std::string& ipaddr,
-                            uint16_t port,
-                            const unsigned char* secret) const;
+                            uint16_t port, const unsigned char* secret) const;
 
 public:
   DHTTokenTracker();
 
   DHTTokenTracker(const unsigned char* initialSecret);
 
-  ~DHTTokenTracker();
+  ~DHTTokenTracker() noexcept;
 
   // TODO handle exception thrown by this function.
   std::string generateToken(const DHTID& infoHash, const std::string& ipaddr,

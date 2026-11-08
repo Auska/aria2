@@ -30,7 +30,7 @@ class Algorithm {
 public:
   Algorithm() = default;
 
-  virtual ~Algorithm() = default;
+  virtual ~Algorithm() noexcept = default;
 
   virtual void update(std::span<const std::byte> data) = 0;
 

@@ -43,7 +43,7 @@ class DefaultDiskWriter : public AbstractDiskWriter {
 public:
   DefaultDiskWriter(const std::string& filename);
 
-  virtual ~DefaultDiskWriter();
+  virtual ~DefaultDiskWriter() noexcept;
 
   virtual void initAndOpenFile(int64_t totalLength = 0) override;
 };

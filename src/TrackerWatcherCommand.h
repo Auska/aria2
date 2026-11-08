@@ -54,7 +54,7 @@ class UDPTrackerClient;
 
 class AnnRequest {
 public:
-  virtual ~AnnRequest() = default;
+  virtual ~AnnRequest() noexcept = default;
   // Returns true if tracker request is finished, regardless of the
   // outcome.
   virtual bool stopped() const = 0;
@@ -72,7 +72,7 @@ public:
 class HTTPAnnRequest : public AnnRequest {
 public:
   HTTPAnnRequest(std::unique_ptr<RequestGroup> rg);
-  virtual ~HTTPAnnRequest();
+  virtual ~HTTPAnnRequest() noexcept;
   virtual bool stopped() const override;
   virtual bool success() const override;
   virtual bool issue(DownloadEngine* e) override;
@@ -87,7 +87,7 @@ private:
 class UDPAnnRequest : public AnnRequest {
 public:
   UDPAnnRequest(const std::shared_ptr<UDPTrackerRequest>& req);
-  virtual ~UDPAnnRequest();
+  virtual ~UDPAnnRequest() noexcept;
   virtual bool stopped() const override;
   virtual bool success() const override;
   virtual bool issue(DownloadEngine* e) override;
@@ -135,7 +135,7 @@ public:
   TrackerWatcherCommand(cuid_t cuid, RequestGroup* requestGroup,
                         DownloadEngine* e);
 
-  virtual ~TrackerWatcherCommand();
+  virtual ~TrackerWatcherCommand() noexcept;
 
   std::unique_ptr<AnnRequest> createAnnounce(DownloadEngine* e);
 

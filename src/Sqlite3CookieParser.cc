@@ -66,7 +66,7 @@ Sqlite3CookieParser::Sqlite3CookieParser(const std::string& filename)
   }
 }
 
-Sqlite3CookieParser::~Sqlite3CookieParser() { sqlite3_close(db_); }
+Sqlite3CookieParser::~Sqlite3CookieParser() noexcept { sqlite3_close(db_); }
 
 namespace {
 std::string toString(const char* str)

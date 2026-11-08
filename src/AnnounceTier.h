@@ -59,7 +59,7 @@ public:
 
   AnnounceTier(std::deque<std::string> urls);
 
-  ~AnnounceTier();
+  ~AnnounceTier() noexcept;
 
   // Don't allow copying
   AnnounceTier(const AnnounceTier&) = delete;

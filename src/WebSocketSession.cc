@@ -235,7 +235,10 @@ WebSocketSession::WebSocketSession(const std::shared_ptr<SocketCore>& socket,
   wslay_event_config_set_no_buffering(wsctx_, 1);
 }
 
-WebSocketSession::~WebSocketSession() { wslay_event_context_free(wsctx_); }
+WebSocketSession::~WebSocketSession() noexcept
+{
+  wslay_event_context_free(wsctx_);
+}
 
 bool WebSocketSession::wantRead() { return wslay_event_want_read(wsctx_); }
 

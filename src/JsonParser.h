@@ -63,7 +63,7 @@ enum class JsonError {
 class JsonParser {
 public:
   JsonParser(StructParserStateMachine* psm);
-  ~JsonParser();
+  ~JsonParser() noexcept;
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned.

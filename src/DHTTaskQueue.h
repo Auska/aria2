@@ -45,7 +45,7 @@ class DHTTask;
 
 class DHTTaskQueue {
 public:
-  virtual ~DHTTaskQueue() = default;
+  virtual ~DHTTaskQueue() noexcept = default;
 
   virtual void executeTask() = 0;
 

@@ -286,7 +286,7 @@ void extractPeer(const ValueBase* peerData, int family, OutputIterator dest)
     {
     }
 
-    virtual ~PeerListValueBaseVisitor() = default;
+    virtual ~PeerListValueBaseVisitor() noexcept = default;
 
     virtual void visit(const String& peerData) override
     {

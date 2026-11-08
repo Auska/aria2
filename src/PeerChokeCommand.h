@@ -56,7 +56,7 @@ private:
 public:
   PeerChokeCommand(cuid_t cuid, DownloadEngine* e);
 
-  virtual ~PeerChokeCommand();
+  virtual ~PeerChokeCommand() noexcept;
 
   virtual bool execute() override;
 

@@ -47,7 +47,7 @@ private:
 public:
   GrowSegment(const std::shared_ptr<Piece>& piece);
 
-  virtual ~GrowSegment();
+  virtual ~GrowSegment() noexcept;
 
   virtual bool complete() const override { return false; }
 
@@ -55,19 +55,13 @@ public:
 
   virtual int64_t getPosition() const override { return 0; }
 
-  virtual int64_t getPositionToWrite() const override
-  {
-    return writtenLength_;
-  }
+  virtual int64_t getPositionToWrite() const override { return writtenLength_; }
 
   virtual int64_t getLength() const override { return 0; }
 
   virtual int64_t getSegmentLength() const override { return 0; }
 
-  virtual int64_t getWrittenLength() const override
-  {
-    return writtenLength_;
-  }
+  virtual int64_t getWrittenLength() const override { return writtenLength_; }
 
   virtual void updateWrittenLength(int64_t bytes) override;
 

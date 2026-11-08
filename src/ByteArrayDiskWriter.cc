@@ -44,7 +44,7 @@ ByteArrayDiskWriter::ByteArrayDiskWriter(size_t maxLength)
 {
 }
 
-ByteArrayDiskWriter::~ByteArrayDiskWriter() = default;
+ByteArrayDiskWriter::~ByteArrayDiskWriter() noexcept = default;
 
 void ByteArrayDiskWriter::clear() { buf_.str(A2STR::NIL); }
 
@@ -76,8 +76,7 @@ void ByteArrayDiskWriter::writeData(std::span<const std::byte> data,
   buf_.write(reinterpret_cast<const char*>(data.data()), data.size());
 }
 
-ssize_t ByteArrayDiskWriter::readData(std::span<std::byte> data,
-                                      int64_t offset)
+ssize_t ByteArrayDiskWriter::readData(std::span<std::byte> data, int64_t offset)
 {
   buf_.seekg(offset, std::ios::beg);
   buf_.read(reinterpret_cast<char*>(data.data()), data.size());

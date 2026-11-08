@@ -283,7 +283,7 @@ PeerInteractionCommand::PeerInteractionCommand(
   requestGroup_->increaseNumCommand();
 }
 
-PeerInteractionCommand::~PeerInteractionCommand()
+PeerInteractionCommand::~PeerInteractionCommand() noexcept
 {
   if (getPeer()->getCompletedLength() > 0) {
     pieceStorage_->subtractPieceStats(

@@ -68,7 +68,7 @@ private:
   MessageDigestImpl& operator=(const MessageDigestImpl&) = delete;
 
 public:
-  virtual ~MessageDigestImpl() = default;
+  virtual ~MessageDigestImpl() noexcept = default;
   static std::unique_ptr<MessageDigestImpl> sha1();
 
   inline static std::unique_ptr<MessageDigestImpl>

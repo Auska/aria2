@@ -56,7 +56,7 @@ HttpListenCommand::HttpListenCommand(cuid_t cuid, DownloadEngine* e, int family,
 {
 }
 
-HttpListenCommand::~HttpListenCommand()
+HttpListenCommand::~HttpListenCommand() noexcept
 {
   if (serverSocket_) {
     e_->deleteSocketForReadCheck(serverSocket_, this);
@@ -74,8 +74,8 @@ bool HttpListenCommand::execute()
       socket->setTcpNodelay(true);
       auto endpoint = socket->getPeerInfo();
 
-      A2_LOG_INFO(fmt("RPC: Accepted the connection from {}:{}.",
-                      endpoint.addr, endpoint.port));
+      A2_LOG_INFO(fmt("RPC: Accepted the connection from {}:{}.", endpoint.addr,
+                      endpoint.port));
 
       e_->setNoWait(true);
       e_->addCommand(

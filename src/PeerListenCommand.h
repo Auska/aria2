@@ -57,7 +57,7 @@ private:
 public:
   PeerListenCommand(cuid_t cuid, DownloadEngine* e, int family);
 
-  virtual ~PeerListenCommand();
+  virtual ~PeerListenCommand() noexcept;
 
   virtual bool execute() override;
 

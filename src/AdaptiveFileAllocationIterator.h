@@ -57,7 +57,7 @@ public:
   AdaptiveFileAllocationIterator(BinaryStream* stream, int64_t offset,
                                  int64_t totalLength);
 
-  virtual ~AdaptiveFileAllocationIterator();
+  virtual ~AdaptiveFileAllocationIterator() noexcept;
 
   virtual void allocateChunk() override;
 

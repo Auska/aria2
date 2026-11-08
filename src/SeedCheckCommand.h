@@ -60,7 +60,7 @@ public:
   SeedCheckCommand(cuid_t cuid, RequestGroup* requestGroup, DownloadEngine* e,
                    std::unique_ptr<SeedCriteria> seedCriteria);
 
-  virtual ~SeedCheckCommand();
+  virtual ~SeedCheckCommand() noexcept;
 
   virtual bool execute() override;
 

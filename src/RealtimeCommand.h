@@ -56,7 +56,7 @@ protected:
 public:
   RealtimeCommand(cuid_t cuid, RequestGroup* requestGroup, DownloadEngine* e);
 
-  virtual ~RealtimeCommand();
+  virtual ~RealtimeCommand() noexcept;
 
   virtual bool execute() override;
 

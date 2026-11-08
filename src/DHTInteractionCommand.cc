@@ -70,7 +70,7 @@ DHTInteractionCommand::DHTInteractionCommand(cuid_t cuid, DownloadEngine* e)
   setStatusRealtime();
 }
 
-DHTInteractionCommand::~DHTInteractionCommand()
+DHTInteractionCommand::~DHTInteractionCommand() noexcept
 {
   disableReadCheckSocket(readCheckSocket_);
 }
@@ -123,14 +123,15 @@ bool DHTInteractionCommand::execute()
         // udp tracker response does not start with 'd', so assume
         // this message belongs to DHT. nothrow.
         receiver_->receiveMessage(remoteAddr, remotePort,
-                                 std::span{data}.first(length));
+                                  std::span{data}.first(length));
       }
       else {
         // this may be udp tracker response. nothrow.
         std::shared_ptr<UDPTrackerRequest> req;
         if (udpTrackerClient_->receiveReply(
-                req, std::span{reinterpret_cast<const std::byte*>(data.data()),
-                               static_cast<size_t>(length)},
+                req,
+                std::span{reinterpret_cast<const std::byte*>(data.data()),
+                          static_cast<size_t>(length)},
                 remoteAddr, remotePort, global::wallclock()) == 0) {
           if (req->action == UDPTrackerAction::Announce) {
             auto c = static_cast<TrackerWatcherCommand*>(req->user_data);

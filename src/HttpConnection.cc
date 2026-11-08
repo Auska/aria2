@@ -63,14 +63,15 @@ namespace aria2 {
 
 HttpRequestEntry::HttpRequestEntry(std::unique_ptr<HttpRequest> httpRequest)
     : httpRequest_{std::move(httpRequest)},
-      proc_{
-          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::CLIENT_PARSER)}
+      proc_{make_unique<HttpHeaderProcessor>(
+          HttpHeaderProcessor::ParserMode::CLIENT_PARSER)}
 {
 }
 
 void HttpRequestEntry::resetHttpHeaderProcessor()
 {
-  proc_ = make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
+  proc_ = make_unique<HttpHeaderProcessor>(
+      HttpHeaderProcessor::ParserMode::CLIENT_PARSER);
 }
 
 std::unique_ptr<HttpRequest> HttpRequestEntry::popHttpRequest()
@@ -94,7 +95,7 @@ HttpConnection::HttpConnection(
 {
 }
 
-HttpConnection::~HttpConnection() = default;
+HttpConnection::~HttpConnection() noexcept = default;
 
 std::string HttpConnection::eraseConfidentialInfo(const std::string& request)
 {
@@ -130,8 +131,7 @@ std::string HttpConnection::eraseConfidentialInfo(const std::string& request)
 void HttpConnection::sendRequest(std::unique_ptr<HttpRequest> httpRequest,
                                  std::string request)
 {
-  A2_LOG_INFO(
-      fmt(MSG_SENDING_REQUEST, cuid_, eraseConfidentialInfo(request)));
+  A2_LOG_INFO(fmt(MSG_SENDING_REQUEST, cuid_, eraseConfidentialInfo(request)));
   socketBuffer_.pushStr(std::move(request));
   socketBuffer_.send();
   outstandingHttpRequests_.push_back(
@@ -163,9 +163,9 @@ std::unique_ptr<HttpResponse> HttpConnection::receiveResponse()
   }
 
   const auto& proc = outstandingHttpRequests_.front()->getHttpHeaderProcessor();
-  if (proc->parse(std::as_bytes(
-          std::span{socketRecvBuffer_->getBuffer(),
-                    socketRecvBuffer_->getBufferLength()}))) {
+  if (proc->parse(
+          std::as_bytes(std::span{socketRecvBuffer_->getBuffer(),
+                                  socketRecvBuffer_->getBufferLength()}))) {
     A2_LOG_INFO(fmt(MSG_RECEIVE_RESPONSE, cuid_,
                     eraseConfidentialInfo(proc->getHeaderString())));
     auto result = proc->getResult();

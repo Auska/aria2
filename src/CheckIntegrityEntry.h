@@ -65,7 +65,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~CheckIntegrityEntry();
+  virtual ~CheckIntegrityEntry() noexcept;
 
   virtual int64_t getTotalLength() override;
 

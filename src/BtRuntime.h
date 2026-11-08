@@ -55,7 +55,7 @@ private:
 public:
   BtRuntime();
 
-  ~BtRuntime();
+  ~BtRuntime() noexcept;
 
   int64_t getUploadLengthAtStartup() const { return uploadLengthAtStartup_; }
 

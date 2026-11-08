@@ -90,7 +90,7 @@ public:
       cuid_t cuid, DownloadEngine* e, int family,
       const std::vector<std::pair<std::string, uint16_t>>& entryPoints);
 
-  virtual ~DHTEntryPointNameResolveCommand();
+  virtual ~DHTEntryPointNameResolveCommand() noexcept;
 
   virtual bool execute() override;
 

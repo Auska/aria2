@@ -50,7 +50,8 @@ namespace aria2 {
 
 DHTTokenTracker::DHTTokenTracker()
 {
-  util::generateRandomData(std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
   memcpy(secret_[1], secret_[0], SECRET_SIZE);
 }
 
@@ -60,7 +61,7 @@ DHTTokenTracker::DHTTokenTracker(const unsigned char* initialSecret)
   memcpy(secret_[1], initialSecret, SECRET_SIZE);
 }
 
-DHTTokenTracker::~DHTTokenTracker() = default;
+DHTTokenTracker::~DHTTokenTracker() noexcept = default;
 
 std::string DHTTokenTracker::generateToken(const DHTID& infoHash,
                                            const std::string& ipaddr,
@@ -71,8 +72,8 @@ std::string DHTTokenTracker::generateToken(const DHTID& infoHash,
   memset(src, 0, sizeof(src));
   int compactlen = bittorrent::packcompact(src + DHT_ID_LENGTH, ipaddr, port);
   if (compactlen == 0) {
-    throw DL_ABORT_EX(fmt("Token generation failed: ipaddr={}, port={}",
-                          ipaddr, port));
+    throw DL_ABORT_EX(
+        fmt("Token generation failed: ipaddr={}, port={}", ipaddr, port));
   }
   std::copy(std::begin(infoHash), std::end(infoHash), src);
   memcpy(src + DHT_ID_LENGTH + COMPACT_LEN_IPV6, secret, SECRET_SIZE);
@@ -105,7 +106,8 @@ bool DHTTokenTracker::validateToken(const std::string& token,
 void DHTTokenTracker::updateTokenSecret()
 {
   memcpy(secret_[1], secret_[0], SECRET_SIZE);
-  util::generateRandomData(std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{secret_[0], SECRET_SIZE}));
 }
 
 } // namespace aria2

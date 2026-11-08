@@ -45,7 +45,7 @@ namespace aria2 {
 
 class BinaryStream {
 public:
-  virtual ~BinaryStream() = default;
+  virtual ~BinaryStream() noexcept = default;
 
   virtual void writeData(std::span<const std::byte> data, int64_t offset) = 0;
 

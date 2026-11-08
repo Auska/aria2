@@ -56,7 +56,7 @@ public:
 
   static const std::unique_ptr<SimpleRandomizer>& getInstance();
 
-  virtual ~SimpleRandomizer();
+  virtual ~SimpleRandomizer() noexcept;
 
   /**
    * Returns random number in [0, to).

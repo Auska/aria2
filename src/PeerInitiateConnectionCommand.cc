@@ -66,7 +66,7 @@ PeerInitiateConnectionCommand::PeerInitiateConnectionCommand(
   requestGroup_->increaseNumCommand();
 }
 
-PeerInitiateConnectionCommand::~PeerInitiateConnectionCommand()
+PeerInitiateConnectionCommand::~PeerInitiateConnectionCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
   btRuntime_->decreaseConnections();

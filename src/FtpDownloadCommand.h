@@ -59,7 +59,7 @@ public:
                      DownloadEngine* e,
                      const std::shared_ptr<SocketCore>& dataSocket,
                      const std::shared_ptr<SocketCore>& ctrlSocket);
-  virtual ~FtpDownloadCommand();
+  virtual ~FtpDownloadCommand() noexcept;
 };
 
 } // namespace aria2

@@ -62,7 +62,7 @@ public:
 template <typename T, typename F> struct Defer {
   Defer(T t, F f) : t(t), f(std::move(f)) {}
 
-  ~Defer() { f(t); }
+  ~Defer() noexcept { f(t); }
 
   T t;
   F f;
@@ -143,12 +143,12 @@ template <typename T> struct DerefEqual {
   bool operator()(const T& other) const { return *target == *other; }
 };
 
-template <typename T> struct DerefEqual<T> derefEqual(const T& t) {
+template <typename T> struct DerefEqual<T> derefEqual(const T& t)
+{
   return DerefEqual<T>(t);
 }
 
-template <typename T>
-struct RefLess {
+template <typename T> struct RefLess {
   bool operator()(const std::shared_ptr<T>& lhs,
                   const std::shared_ptr<T>& rhs) const
   {

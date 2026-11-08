@@ -167,7 +167,7 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
          // 0x0090800fL
 }
 
-OpenSSLTLSContext::~OpenSSLTLSContext() { SSL_CTX_free(sslCtx_); }
+OpenSSLTLSContext::~OpenSSLTLSContext() noexcept { SSL_CTX_free(sslCtx_); }
 
 bool OpenSSLTLSContext::good() const { return good_; }
 

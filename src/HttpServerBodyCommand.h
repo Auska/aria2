@@ -70,7 +70,7 @@ public:
                         DownloadEngine* e,
                         const std::shared_ptr<SocketCore>& socket);
 
-  virtual ~HttpServerBodyCommand();
+  virtual ~HttpServerBodyCommand() noexcept;
 
   virtual bool execute() override;
 };

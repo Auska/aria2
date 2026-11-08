@@ -93,7 +93,7 @@ public:
   DownloadContext(int32_t pieceLength, int64_t totalLength,
                   std::string path = A2STR::NIL);
 
-  ~DownloadContext();
+  ~DownloadContext() noexcept;
 
   const std::string& getPieceHash(size_t index) const;
 

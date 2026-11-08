@@ -43,6 +43,6 @@ DiskAdaptor::DiskAdaptor()
 {
 }
 
-DiskAdaptor::~DiskAdaptor() = default;
+DiskAdaptor::~DiskAdaptor() noexcept = default;
 
 } // namespace aria2

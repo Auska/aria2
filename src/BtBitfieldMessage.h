@@ -51,7 +51,7 @@ public:
 
   BtBitfieldMessage(std::span<const unsigned char> bitfield);
 
-  virtual ~BtBitfieldMessage();
+  virtual ~BtBitfieldMessage() noexcept;
 
   static const uint8_t ID = 5;
 
@@ -63,7 +63,8 @@ public:
 
   size_t getBitfieldLength() const { return bitfield_.size(); }
 
-  static std::unique_ptr<BtBitfieldMessage> create(std::span<const std::byte> data);
+  static std::unique_ptr<BtBitfieldMessage>
+  create(std::span<const std::byte> data);
 
   virtual void doReceivedAction() override;
 

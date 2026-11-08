@@ -59,7 +59,7 @@ private:
 public:
   DHTPingTask(const std::shared_ptr<DHTNode>& remoteNode, int numMaxRetry = 0);
 
-  virtual ~DHTPingTask();
+  virtual ~DHTPingTask() noexcept;
 
   virtual void startup() override;
 

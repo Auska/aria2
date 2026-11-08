@@ -51,7 +51,7 @@ public:
   RangeBtMessageValidator(const RangeBtMessage* message, size_t numPiece,
                           int32_t pieceLength);
 
-  ~RangeBtMessageValidator();
+  ~RangeBtMessageValidator() noexcept;
 
   virtual void validate() override;
 };

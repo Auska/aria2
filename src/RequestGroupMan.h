@@ -151,7 +151,7 @@ public:
   RequestGroupMan(std::vector<std::shared_ptr<RequestGroup>> requestGroups,
                   int maxConcurrentDownloads, const Option* option);
 
-  ~RequestGroupMan();
+  ~RequestGroupMan() noexcept;
 
   bool downloadFinished();
 

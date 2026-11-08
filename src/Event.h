@@ -52,7 +52,7 @@ namespace aria2 {
 
 template <typename SocketEntry> class Event {
 public:
-  virtual ~Event() = default;
+  virtual ~Event() noexcept = default;
 
   virtual void processEvents(int events) = 0;
 
@@ -211,7 +211,8 @@ public:
 
   void addCommandEvent(const CommandEvent& cev)
   {
-    auto i = std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
+    auto i =
+        std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
     if (i == commandEvents_.end()) {
       commandEvents_.push_back(cev);
     }
@@ -222,7 +223,8 @@ public:
 
   void removeCommandEvent(const CommandEvent& cev)
   {
-    auto i = std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
+    auto i =
+        std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
     if (i == commandEvents_.end()) {
       // not found
     }

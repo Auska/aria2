@@ -94,9 +94,8 @@ void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)
   }
 
   auto it = std::ranges::find_if(
-      socks_, [fd](const AsyncNameResolverSocketEntry& ent) {
-        return ent.fd == fd;
-      });
+      socks_,
+      [fd](const AsyncNameResolverSocketEntry& ent) { return ent.fd == fd; });
   if (it == std::end(socks_)) {
     if (events == EventPoll::EventType::NONE) {
       return;
@@ -132,7 +131,7 @@ AsyncNameResolver::AsyncNameResolver(int family, const std::string& servers)
   }
 }
 
-AsyncNameResolver::~AsyncNameResolver() { ares_destroy(channel_); }
+AsyncNameResolver::~AsyncNameResolver() noexcept { ares_destroy(channel_); }
 
 void AsyncNameResolver::resolve(const std::string& name)
 {
@@ -170,11 +169,13 @@ void AsyncNameResolver::process(fd_set* rfdsPtr, fd_set* wfdsPtr)
     ares_socket_t readfd = ARES_SOCKET_BAD;
     ares_socket_t writefd = ARES_SOCKET_BAD;
 
-    if (FD_ISSET(ent.fd, rfdsPtr) && (ent.events & EventPoll::EventType::READ)) {
+    if (FD_ISSET(ent.fd, rfdsPtr) &&
+        (ent.events & EventPoll::EventType::READ)) {
       readfd = ent.fd;
     }
 
-    if (FD_ISSET(ent.fd, wfdsPtr) && (ent.events & EventPoll::EventType::WRITE)) {
+    if (FD_ISSET(ent.fd, wfdsPtr) &&
+        (ent.events & EventPoll::EventType::WRITE)) {
       writefd = ent.fd;
     }
 

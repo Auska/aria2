@@ -75,7 +75,7 @@ public:
                           DownloadEngine* e,
                           const std::shared_ptr<SocketCore>& s);
 
-  virtual ~HttpSkipResponseCommand();
+  virtual ~HttpSkipResponseCommand() noexcept;
 
   void installStreamFilter(std::unique_ptr<StreamFilter> streamFilter);
 

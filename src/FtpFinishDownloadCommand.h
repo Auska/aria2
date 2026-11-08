@@ -57,7 +57,7 @@ public:
                            const std::shared_ptr<FtpConnection>& ftpConnection,
                            DownloadEngine* e,
                            const std::shared_ptr<SocketCore>& socket);
-  virtual ~FtpFinishDownloadCommand();
+  virtual ~FtpFinishDownloadCommand() noexcept;
 };
 
 } // namespace aria2

@@ -91,7 +91,7 @@ public:
                       RequestGroup* requestGroup,
                       const std::shared_ptr<HttpConnection>& httpConnection,
                       DownloadEngine* e, const std::shared_ptr<SocketCore>& s);
-  ~HttpResponseCommand();
+  ~HttpResponseCommand() noexcept;
 };
 
 } // namespace aria2

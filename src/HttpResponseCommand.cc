@@ -138,7 +138,7 @@ HttpResponseCommand::HttpResponseCommand(
   checkSocketRecvBuffer();
 }
 
-HttpResponseCommand::~HttpResponseCommand() = default;
+HttpResponseCommand::~HttpResponseCommand() noexcept = default;
 
 bool HttpResponseCommand::executeInternal()
 {
@@ -197,8 +197,7 @@ bool HttpResponseCommand::executeInternal()
     }
 
     A2_LOG_NOTICE(fmt(MSG_DOWNLOAD_ALREADY_COMPLETED,
-                      GroupId::toHex(grp->getGID()),
-                      grp->getFirstFilePath()));
+                      GroupId::toHex(grp->getGID()), grp->getFirstFilePath()));
     poolConnection();
     fe->poolRequest(req);
     return true;
@@ -211,8 +210,7 @@ bool HttpResponseCommand::executeInternal()
       for (const auto& checksum : checksums) {
         if (ctx->getHashType().empty()) {
           A2_LOG_DEBUG(fmt("Setting digest: type={}, digest={}",
-                           checksum.getHashType(),
-                           checksum.getDigest()));
+                           checksum.getHashType(), checksum.getDigest()));
           ctx->setDigest(checksum.getHashType(), checksum.getDigest());
           break;
         }
@@ -264,8 +262,9 @@ bool HttpResponseCommand::executeInternal()
       // we ignore content-length when inflate is required
       fe->setLength(0);
       if (req->getMethod() == Request::METHOD_GET &&
-          (totalLength != 0 || !httpResponse->getHttpHeader()->defined(
-                                   HttpHeader::InterestingHeader::CONTENT_LENGTH))) {
+          (totalLength != 0 ||
+           !httpResponse->getHttpHeader()->defined(
+               HttpHeader::InterestingHeader::CONTENT_LENGTH))) {
         // DownloadContext::knowsTotalLength() == true only when
         // server says the size of file is 0 explicitly.
         getDownloadContext()->markTotalLengthIsUnknown();
@@ -276,7 +275,8 @@ bool HttpResponseCommand::executeInternal()
     return handleDefaultEncoding(std::move(httpResponse));
   }
 
-  if (!ctx->getHashType().empty() && httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
+  if (!ctx->getHashType().empty() &&
+      httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
     std::vector<Checksum> checksums;
     httpResponse->getDigest(checksums);
     for (const auto& checksum : checksums) {

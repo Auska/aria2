@@ -38,7 +38,7 @@ namespace aria2 {
 
 CUIDCounter::CUIDCounter() : count_(0) {}
 
-CUIDCounter::~CUIDCounter() = default;
+CUIDCounter::~CUIDCounter() noexcept = default;
 
 cuid_t CUIDCounter::newID()
 {

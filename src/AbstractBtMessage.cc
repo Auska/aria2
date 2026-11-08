@@ -54,7 +54,7 @@ AbstractBtMessage::AbstractBtMessage(uint8_t id, const char* name)
 {
 }
 
-AbstractBtMessage::~AbstractBtMessage() = default;
+AbstractBtMessage::~AbstractBtMessage() noexcept = default;
 
 void AbstractBtMessage::setPeer(const std::shared_ptr<Peer>& peer)
 {

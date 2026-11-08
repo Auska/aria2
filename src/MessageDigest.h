@@ -55,7 +55,7 @@ public:
   // We don't implement assignment operator.
   MessageDigest& operator=(const MessageDigest&) = delete;
 
-  ~MessageDigest();
+  ~MessageDigest() noexcept;
 
   // Factory functions
   static std::unique_ptr<MessageDigest> sha1();

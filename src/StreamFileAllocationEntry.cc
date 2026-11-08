@@ -56,7 +56,7 @@ StreamFileAllocationEntry::StreamFileAllocationEntry(
 {
 }
 
-StreamFileAllocationEntry::~StreamFileAllocationEntry() = default;
+StreamFileAllocationEntry::~StreamFileAllocationEntry() noexcept = default;
 
 void StreamFileAllocationEntry::prepareForNextAction(
     std::vector<std::unique_ptr<Command>>& commands, DownloadEngine* e)

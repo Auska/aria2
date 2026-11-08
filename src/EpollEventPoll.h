@@ -104,7 +104,7 @@ public:
 
   bool good() const;
 
-  virtual ~EpollEventPoll();
+  virtual ~EpollEventPoll() noexcept;
 
   virtual void poll(const struct timeval& tv) override;
 

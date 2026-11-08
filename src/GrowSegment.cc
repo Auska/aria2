@@ -43,7 +43,7 @@ GrowSegment::GrowSegment(const std::shared_ptr<Piece>& piece)
 {
 }
 
-GrowSegment::~GrowSegment() = default;
+GrowSegment::~GrowSegment() noexcept = default;
 
 void GrowSegment::updateWrittenLength(int64_t bytes)
 {

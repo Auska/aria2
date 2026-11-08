@@ -57,7 +57,7 @@ public:
       const std::shared_ptr<SocketCore>& s,
       std::unique_ptr<PeerConnection> peerConnection = nullptr);
 
-  virtual ~PeerReceiveHandshakeCommand();
+  virtual ~PeerReceiveHandshakeCommand() noexcept;
 };
 
 } // namespace aria2

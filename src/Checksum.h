@@ -50,7 +50,7 @@ public:
   // digest_ is raw byte array of hash value, not ascii hexadecimal notation.
   Checksum(std::string hashType, std::string digest);
   Checksum();
-  ~Checksum();
+  ~Checksum() noexcept;
 
   bool isEmpty() const;
 

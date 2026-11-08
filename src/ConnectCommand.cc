@@ -60,7 +60,7 @@ ConnectCommand::ConnectCommand(cuid_t cuid, const std::shared_ptr<Request>& req,
   setWriteCheckSocket(getSocket());
 }
 
-ConnectCommand::~ConnectCommand()
+ConnectCommand::~ConnectCommand() noexcept
 {
   if (backupConnectionInfo_) {
     backupConnectionInfo_->cancel = true;

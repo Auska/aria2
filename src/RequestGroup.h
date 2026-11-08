@@ -213,7 +213,7 @@ public:
   RequestGroup(const std::shared_ptr<GroupId>& gid,
                const std::shared_ptr<Option>& option);
 
-  ~RequestGroup();
+  ~RequestGroup() noexcept;
 
   bool isCheckIntegrityReady();
 

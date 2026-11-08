@@ -47,7 +47,7 @@ UriStruct::UriStruct() : port(0), hasPassword(false), ipv6LiteralAddress(false)
 
 UriStruct::UriStruct(const UriStruct& c) = default;
 
-UriStruct::~UriStruct() = default;
+UriStruct::~UriStruct() noexcept = default;
 
 UriStruct& UriStruct::operator=(const UriStruct& c)
 {

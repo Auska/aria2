@@ -43,7 +43,7 @@ class EvictSocketPoolCommand : public TimeBasedCommand {
 public:
   EvictSocketPoolCommand(cuid_t cuid, DownloadEngine* e,
                          std::chrono::seconds interval);
-  virtual ~EvictSocketPoolCommand();
+  virtual ~EvictSocketPoolCommand() noexcept;
   virtual void preProcess() override;
   virtual void process() override;
 };

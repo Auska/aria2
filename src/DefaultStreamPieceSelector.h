@@ -47,7 +47,7 @@ class BitfieldMan;
 class DefaultStreamPieceSelector : public StreamPieceSelector {
 public:
   DefaultStreamPieceSelector(BitfieldMan* bitfieldMan);
-  virtual ~DefaultStreamPieceSelector();
+  virtual ~DefaultStreamPieceSelector() noexcept;
 
   virtual std::optional<size_t>
   select(size_t minSplitSize,

@@ -69,8 +69,7 @@ private:
 
   Timer lastUpdated_;
 
-  bool isInRange(const DHTID& nodeID, const DHTID& max,
-                 const DHTID& min) const;
+  bool isInRange(const DHTID& nodeID, const DHTID& max, const DHTID& min) const;
 
 public:
   DHTBucket(const std::shared_ptr<DHTNode>& localNode);
@@ -78,7 +77,7 @@ public:
   DHTBucket(size_t prefixLength, const DHTID& max, const DHTID& min,
             const std::shared_ptr<DHTNode>& localNode);
 
-  ~DHTBucket();
+  ~DHTBucket() noexcept;
 
   static const size_t K = 8;
 
@@ -121,9 +120,8 @@ public:
 
   bool contains(const std::shared_ptr<DHTNode>& node) const;
 
-  std::shared_ptr<DHTNode> getNode(const DHTID& nodeID,
-                                   const std::string& ipaddr,
-                                   uint16_t port) const;
+  std::shared_ptr<DHTNode>
+  getNode(const DHTID& nodeID, const std::string& ipaddr, uint16_t port) const;
 
   bool operator==(const DHTBucket& bucket) const;
 

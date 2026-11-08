@@ -93,7 +93,7 @@ JsonParser::JsonParser(StructParserStateMachine* psm)
   stateStack_.push(JSON_FINISH);
 }
 
-JsonParser::~JsonParser() = default;
+JsonParser::~JsonParser() noexcept = default;
 
 namespace {
 bool isSpace(char c) { return util::isLws(c) || util::isCRLF(c); }
@@ -176,7 +176,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         }
         else if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_VAL);
+          return lastError_ =
+                     static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_VAL);
         }
       }
       break;
@@ -235,7 +236,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_KEY);
+          return lastError_ = static_cast<int>(
+                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_KEY);
         }
       }
       break;
@@ -250,7 +252,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_VAL);
+          return lastError_ = static_cast<int>(
+                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_VAL);
         }
       }
       break;
@@ -265,7 +268,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_SEP);
+          return lastError_ = static_cast<int>(
+                     JsonError::UNEXPECTED_CHAR_BEFORE_OBJ_SEP);
         }
       }
       break;
@@ -282,7 +286,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         if (!isSpace(c)) {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::UNEXPECTED_CHAR_BEFORE_ARRAY_SEP);
+          return lastError_ = static_cast<int>(
+                     JsonError::UNEXPECTED_CHAR_BEFORE_ARRAY_SEP);
         }
       }
       break;
@@ -316,24 +321,19 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       default:
         switch (c) {
         case 'b':
-          runCharactersCallback(
-              std::as_bytes(std::span{"\b", 1}));
+          runCharactersCallback(std::as_bytes(std::span{"\b", 1}));
           break;
         case 'f':
-          runCharactersCallback(
-              std::as_bytes(std::span{"\f", 1}));
+          runCharactersCallback(std::as_bytes(std::span{"\f", 1}));
           break;
         case 'n':
-          runCharactersCallback(
-              std::as_bytes(std::span{"\n", 1}));
+          runCharactersCallback(std::as_bytes(std::span{"\n", 1}));
           break;
         case 'r':
-          runCharactersCallback(
-              std::as_bytes(std::span{"\r", 1}));
+          runCharactersCallback(std::as_bytes(std::span{"\r", 1}));
           break;
         case 't':
-          runCharactersCallback(
-              std::as_bytes(std::span{"\t", 1}));
+          runCharactersCallback(std::as_bytes(std::span{"\t", 1}));
           break;
         default: {
           char temp[1];
@@ -353,7 +353,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+          return lastError_ =
+                     static_cast<int>(JsonError::INVALID_UNICODE_POINT);
         }
       }
       i = j - 1;
@@ -394,7 +395,8 @@ ssize_t JsonParser::parseUpdate(std::span<const std::byte> dataIn)
         }
         else {
           currentState_ = JSON_ERROR;
-          return lastError_ = static_cast<int>(JsonError::INVALID_UNICODE_POINT);
+          return lastError_ =
+                     static_cast<int>(JsonError::INVALID_UNICODE_POINT);
         }
       }
       i = j - 1;

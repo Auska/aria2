@@ -110,7 +110,7 @@ AbstractCommand::AbstractCommand(
 #endif // ENABLE_ASYNC_DNS
 }
 
-AbstractCommand::~AbstractCommand()
+AbstractCommand::~AbstractCommand() noexcept
 {
   disableReadCheckSocket();
   disableWriteCheckSocket();

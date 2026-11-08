@@ -47,7 +47,7 @@ class BitfieldMan;
 class InorderStreamPieceSelector : public StreamPieceSelector {
 public:
   InorderStreamPieceSelector(BitfieldMan* bitfieldMan);
-  virtual ~InorderStreamPieceSelector();
+  virtual ~InorderStreamPieceSelector() noexcept;
 
   virtual std::optional<size_t>
   select(size_t minSplitSize,

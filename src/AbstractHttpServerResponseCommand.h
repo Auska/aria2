@@ -69,7 +69,7 @@ public:
       cuid_t cuid, const std::shared_ptr<HttpServer>& httpServer,
       DownloadEngine* e, const std::shared_ptr<SocketCore>& socket);
 
-  virtual ~AbstractHttpServerResponseCommand();
+  virtual ~AbstractHttpServerResponseCommand() noexcept;
 
   virtual bool execute() override;
 };

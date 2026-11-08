@@ -84,7 +84,7 @@ HttpSkipResponseCommand::HttpSkipResponseCommand(
   checkSocketRecvBuffer();
 }
 
-HttpSkipResponseCommand::~HttpSkipResponseCommand() = default;
+HttpSkipResponseCommand::~HttpSkipResponseCommand() noexcept = default;
 
 void HttpSkipResponseCommand::installStreamFilter(
     std::unique_ptr<StreamFilter> streamFilter)
@@ -107,7 +107,8 @@ bool HttpSkipResponseCommand::executeInternal()
     // If content-length header is not present, then EOF is expected in the end.
     // In this case, the content is thrown away and socket cannot be pooled.
     if (getRequest()->getMethod() == Request::METHOD_HEAD ||
-        httpResponse_->getHttpHeader()->defined(HttpHeader::InterestingHeader::CONTENT_LENGTH)) {
+        httpResponse_->getHttpHeader()->defined(
+            HttpHeader::InterestingHeader::CONTENT_LENGTH)) {
       poolConnection();
     }
     return processResponse();

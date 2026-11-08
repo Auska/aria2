@@ -44,7 +44,7 @@ GeomStreamPieceSelector::GeomStreamPieceSelector(BitfieldMan* bitfieldMan,
 {
 }
 
-GeomStreamPieceSelector::~GeomStreamPieceSelector() = default;
+GeomStreamPieceSelector::~GeomStreamPieceSelector() noexcept = default;
 
 std::optional<size_t>
 GeomStreamPieceSelector::select(size_t minSplitSize,

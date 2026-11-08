@@ -231,7 +231,7 @@ public:
       const std::shared_ptr<SocketRecvBuffer>& socketRecvBuffer = nullptr,
       bool incNumConnection = true);
 
-  virtual ~AbstractCommand();
+  virtual ~AbstractCommand() noexcept;
 
   virtual bool execute() override;
 };

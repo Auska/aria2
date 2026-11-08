@@ -53,7 +53,7 @@ GZipDecodingStreamFilter::GZipDecodingStreamFilter(
 {
 }
 
-GZipDecodingStreamFilter::~GZipDecodingStreamFilter() { release(); }
+GZipDecodingStreamFilter::~GZipDecodingStreamFilter() noexcept { release(); }
 
 void GZipDecodingStreamFilter::init()
 {

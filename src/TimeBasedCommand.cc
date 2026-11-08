@@ -50,7 +50,7 @@ TimeBasedCommand::TimeBasedCommand(cuid_t cuid, DownloadEngine* e,
 {
 }
 
-TimeBasedCommand::~TimeBasedCommand() = default;
+TimeBasedCommand::~TimeBasedCommand() noexcept = default;
 
 bool TimeBasedCommand::execute()
 {

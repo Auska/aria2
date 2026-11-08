@@ -60,7 +60,7 @@ private:
 public:
   DHTRoutingTableDeserializer(int family);
 
-  ~DHTRoutingTableDeserializer();
+  ~DHTRoutingTableDeserializer() noexcept;
 
   const std::shared_ptr<DHTNode>& getLocalNode() const { return localNode_; }
 

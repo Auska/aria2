@@ -48,7 +48,7 @@ public:
                           RequestGroup* requestGroup, DownloadEngine* e,
                           const std::shared_ptr<Request>& proxyRequest,
                           const std::shared_ptr<SocketCore>& s);
-  virtual ~FtpTunnelRequestCommand();
+  virtual ~FtpTunnelRequestCommand() noexcept;
 
   virtual std::unique_ptr<Command> getNextCommand() override;
 };

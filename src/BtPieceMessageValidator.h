@@ -51,7 +51,7 @@ public:
   BtPieceMessageValidator(const BtPieceMessage* message, size_t numPiece,
                           int32_t pieceLength);
 
-  ~BtPieceMessageValidator();
+  ~BtPieceMessageValidator() noexcept;
 
   virtual void validate() override;
 };

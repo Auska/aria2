@@ -120,7 +120,7 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 1. [x] **阶段 1**：A 组缺陷（A1 拷贝控制 + static_assert、A2 `gmtime_r`、A3 `localtime_r`、A4 `readAll()`）→ 门禁 → 提交 `PLAN-009 阶段1: 修复 WrDiskCacheEntry 所有权与非线程安全时间函数`
 2. [x] **阶段 2**：B1 39 处 cast + B2 15 find/18 sort + B5 2 个透明比较器 → 门禁 → 提交 `PLAN-009 阶段2: C 风格转换与 find/sort 改用 static_cast 与 std::ranges`
 3. [x] **阶段 3**：B3 索引循环 → `views::enumerate`（+ `zip`）→ 门禁 → 提交 `PLAN-009 阶段3: 索引 for 循环改用 std::views::enumerate`
-4. [ ] **阶段 4**：B4 265 处声明 + 257 处定义加 `noexcept` → 门禁 → 提交 `PLAN-009 阶段4: 析构函数标注 noexcept`
+4. [x] **阶段 4**：B4 析构声明与定义加 `noexcept` → 门禁 → 提交 `PLAN-009 阶段4: 析构函数标注 noexcept`
 5. [ ] **阶段 5**：文档收尾 → 提交 `PLAN-009: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
 ### 阶段 1 实测（2026-11-08）
@@ -162,6 +162,19 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 - 坑：`std::views::zip` 的实参必须是 range，**裸指针 `unsigned char* md` 不是**（`error: no match for call to '(const std::ranges::views::_Zip) (unsigned char*&, unsigned char [20], unsigned char [20])'`）→ 包成 `std::span{md, sizeof(xh)}`。
 - 门禁：干净 worktree `/tmp/aria2-m9-p3`（base `93dfe3c6`）+ `git apply /tmp/p9-stage3.patch`（383 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0 + `make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`error:` 0、`Failures !!!` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 - 专项验证：`git grep -nE 'for \(size_t i = 0; i <' -- 'src/*.cc' 'src/*.h' | wc -l` → 32（保留项，均在上表）。
+
+### 阶段 4 实测（2026-11-08）
+
+- 实际改动 **537 文件 +953/−983**（脚本 `/tmp/p9_noexcept.py` + `/tmp/p9_noexcept2.py` + `/tmp/p9_noexcept3.py`，按「声明/定义」三类形态分别插入）：
+  - `src/*.h` 带函数体的析构（含 `virtual`）：**264 处**；
+  - `src/*.h` 的 `~X() = default;`：**81 处**；
+  - `src/*.cc` 的 `Class::~Class() {…}`：**53 处**；
+  - `src/*.cc` 的 `Class::~Class() = default;`：**201 处**；
+  - 合计 **599 处**。原型 `~X() noexcept` 的 3 处（`src/Exception.h`、`src/OptionHandlerException.h`、`src/UnknownOptionException.h`）脚本自动跳过。
+- **必须排除 `src/includes/aria2/aria2.h`**：脚本第一轮给 `src/DownloadHandle` 的 `virtual ~DownloadHandle() = default;` 也加了 `noexcept`，门禁时 ABI 哈希变成 `55a1bfa034bade759337971f8f1e558223c76a6e`（期望 `2216641161b15acb3c3ddf2600dc19e3decd59d5`）。已 `git checkout --` 回滚该文件并重跑门禁，哈希恢复。
+- 坑：按 `(?:[A-Za-z_]\w*::)+~Foo(...)` 匹配 `.cc` 时，`src/BitfieldMan.cc` 的 `~array(bitfield_.data())`（按位取反表达式）会被误当析构 → 8 处语法错误 `expected ';' before 'noexcept'`。改成「行首 + 可选 `virtual` + `~Ident(`」并对 `.cc` 强制要求 `Class::` 前缀后才收敛。
+- 门禁：干净 worktree `/tmp/aria2-m9-p4`（base `adbe7399`）+ `git apply /tmp/p9-stage4.patch`（9308 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0 + `make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`error:` 0、`Failures !!!` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+- 专项验证：`git grep -nE '~[A-Za-z_]\w*\s*\([^;{}]*\)(\s*=\s*(default|delete)\s*)?\s*(override\s*)?[;{]' -- 'src/*.h' 'src/*.cc' | grep -v noexcept | grep -v 'array(' | wc -l` → 0。
 
 ## 预计修改的文件
 

@@ -94,7 +94,7 @@ protected:
 public:
   RpcMethod();
 
-  virtual ~RpcMethod();
+  virtual ~RpcMethod() noexcept;
 
   virtual void authorize(RpcRequest& req, DownloadEngine* e);
 

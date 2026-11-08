@@ -41,7 +41,7 @@ namespace aria2 {
 
 class ValueValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~ValueValueBaseStructParserState() = default;
+  virtual ~ValueValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
@@ -54,7 +54,7 @@ public:
 
 class DictValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~DictValueBaseStructParserState() = default;
+  virtual ~DictValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
@@ -67,7 +67,7 @@ public:
 
 class DictKeyValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~DictKeyValueBaseStructParserState() = default;
+  virtual ~DictKeyValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override
@@ -81,7 +81,7 @@ public:
 class DictDataValueBaseStructParserState
     : public ValueValueBaseStructParserState {
 public:
-  virtual ~DictDataValueBaseStructParserState() = default;
+  virtual ~DictDataValueBaseStructParserState() noexcept = default;
 
   virtual void endElement(ValueBaseStructParserStateMachine* psm,
                           StructElementType elementType) override;
@@ -89,7 +89,7 @@ public:
 
 class ArrayValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~ArrayValueBaseStructParserState() = default;
+  virtual ~ArrayValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
@@ -103,7 +103,7 @@ public:
 class ArrayDataValueBaseStructParserState
     : public ValueValueBaseStructParserState {
 public:
-  virtual ~ArrayDataValueBaseStructParserState() = default;
+  virtual ~ArrayDataValueBaseStructParserState() noexcept = default;
 
   virtual void endElement(ValueBaseStructParserStateMachine* psm,
                           StructElementType elementType) override;
@@ -111,7 +111,7 @@ public:
 
 class StringValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~StringValueBaseStructParserState() = default;
+  virtual ~StringValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override
@@ -124,7 +124,7 @@ public:
 
 class NumberValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~NumberValueBaseStructParserState() = default;
+  virtual ~NumberValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override
@@ -137,7 +137,7 @@ public:
 
 class BoolValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~BoolValueBaseStructParserState() = default;
+  virtual ~BoolValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override
@@ -150,7 +150,7 @@ public:
 
 class NullValueBaseStructParserState : public ValueBaseStructParserState {
 public:
-  virtual ~NullValueBaseStructParserState() = default;
+  virtual ~NullValueBaseStructParserState() noexcept = default;
 
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override

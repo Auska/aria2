@@ -58,7 +58,7 @@ class WebSocketSession {
 public:
   WebSocketSession(const std::shared_ptr<SocketCore>& socket,
                    DownloadEngine* e);
-  ~WebSocketSession();
+  ~WebSocketSession() noexcept;
   // Returns true if this session object wants to read data from the
   // remote endpoint.
   bool wantRead();

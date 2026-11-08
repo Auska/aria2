@@ -43,7 +43,7 @@ class AbstractAuthResolver : public AuthResolver {
 public:
   AbstractAuthResolver();
 
-  virtual ~AbstractAuthResolver();
+  virtual ~AbstractAuthResolver() noexcept;
 
   void setUserDefinedCred(std::string user, std::string password);
 

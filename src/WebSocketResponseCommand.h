@@ -52,7 +52,7 @@ public:
                            DownloadEngine* e,
                            const std::shared_ptr<SocketCore>& socket);
 
-  virtual ~WebSocketResponseCommand();
+  virtual ~WebSocketResponseCommand() noexcept;
 };
 
 } // namespace rpc

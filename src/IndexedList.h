@@ -50,12 +50,10 @@ template <typename SeqType, typename ValueType, typename ReferenceType,
           typename PointerType, typename SeqIteratorType>
 struct IndexedListIterator {
   using iterator = IndexedListIterator<SeqType, ValueType, ValueType&,
-                                       ValueType*,
-                                       typename SeqType::iterator>;
-  using const_iterator = IndexedListIterator<SeqType, ValueType,
-                                             const ValueType&,
-                                             const ValueType*,
-                                             typename SeqType::const_iterator>;
+                                       ValueType*, typename SeqType::iterator>;
+  using const_iterator =
+      IndexedListIterator<SeqType, ValueType, const ValueType&,
+                          const ValueType*, typename SeqType::const_iterator>;
 
   using iterator_category = typename SeqIteratorType::iterator_category;
   using value_type = ValueType;
@@ -308,7 +306,7 @@ operator-(const IndexedListIterator<SeqType, ValueType, ReferenceTypeL,
 template <typename KeyType, typename ValuePtrType> class IndexedList {
 public:
   IndexedList() = default;
-  ~IndexedList() = default;
+  ~IndexedList() noexcept = default;
 
   using key_type = KeyType;
   using value_type = ValuePtrType;
@@ -320,7 +318,8 @@ public:
                           typename SeqType::iterator>;
   using const_iterator =
       IndexedListIterator<SeqType, ValuePtrType, const ValuePtrType&,
-                          const ValuePtrType*, typename SeqType::const_iterator>;
+                          const ValuePtrType*,
+                          typename SeqType::const_iterator>;
 
   ValuePtrType& operator[](size_t n) { return seq_[n].second; }
 

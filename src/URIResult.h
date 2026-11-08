@@ -54,7 +54,7 @@ private:
 public:
   URIResult(std::string_view uri, error_code::Value result);
 
-  ~URIResult();
+  ~URIResult() noexcept;
 
   const std::string& getURI() const { return uri_; }
 

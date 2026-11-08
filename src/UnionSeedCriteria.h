@@ -48,7 +48,7 @@ private:
 
 public:
   UnionSeedCriteria();
-  virtual ~UnionSeedCriteria();
+  virtual ~UnionSeedCriteria() noexcept;
 
   virtual void reset() override;
 

@@ -119,7 +119,7 @@ public:
   MSEHandshake(cuid_t cuid, const std::shared_ptr<SocketCore>& socket,
                const Option* op);
 
-  ~MSEHandshake();
+  ~MSEHandshake() noexcept;
 
   HandshakeType identifyHandshakeType();
 

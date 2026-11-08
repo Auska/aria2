@@ -80,7 +80,7 @@ DHTGetPeersCommand::DHTGetPeersCommand(cuid_t cuid, RequestGroup* requestGroup,
   requestGroup_->increaseNumCommand();
 }
 
-DHTGetPeersCommand::~DHTGetPeersCommand()
+DHTGetPeersCommand::~DHTGetPeersCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
 }
@@ -97,10 +97,9 @@ bool DHTGetPeersCommand::execute()
                      elapsed >= GET_PEER_INTERVAL_LOW)) ||
                    (btRuntime_->getConnections() == 0 &&
                     elapsed >= GET_PEER_INTERVAL_ZERO))))) {
-    A2_LOG_DEBUG(
-        fmt("Issuing PeerLookup for infoHash={}",
-            bittorrent::getInfoHashString(requestGroup_->getDownloadContext())
-                ));
+    A2_LOG_DEBUG(fmt(
+        "Issuing PeerLookup for infoHash={}",
+        bittorrent::getInfoHashString(requestGroup_->getDownloadContext())));
     task_ = taskFactory_->createPeerLookupTask(
         requestGroup_->getDownloadContext(), e_->getBtRegistry()->getTcpPort(),
         peerStorage_);

@@ -75,7 +75,7 @@ DefaultBtAnnounce::DefaultBtAnnounce(DownloadContext* downloadContext,
 {
 }
 
-DefaultBtAnnounce::~DefaultBtAnnounce() = default;
+DefaultBtAnnounce::~DefaultBtAnnounce() noexcept = default;
 
 bool DefaultBtAnnounce::isDefaultAnnounceReady()
 {

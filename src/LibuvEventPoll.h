@@ -142,7 +142,7 @@ private:
 
 public:
   LibuvEventPoll();
-  virtual ~LibuvEventPoll();
+  virtual ~LibuvEventPoll() noexcept;
 
   bool good() const { return loop_; }
 

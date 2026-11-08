@@ -60,7 +60,7 @@ enum class BencodeError {
 class BencodeParser {
 public:
   BencodeParser(StructParserStateMachine* psm);
-  ~BencodeParser();
+  ~BencodeParser() noexcept;
   // Parses |size| bytes of data |data| and returns the number of
   // bytes processed. On error, one of the negative error codes is
   // returned.

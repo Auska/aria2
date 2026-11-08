@@ -121,7 +121,7 @@ public:
   // std::make_shared.
   SocketCore(sock_t sockfd, int sockType);
 
-  ~SocketCore();
+  ~SocketCore() noexcept;
 
   sock_t getSockfd() const { return sockfd_; }
 

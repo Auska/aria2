@@ -43,7 +43,7 @@ class BtFileAllocationEntry : public FileAllocationEntry {
 public:
   BtFileAllocationEntry(RequestGroup* requestGroup);
 
-  virtual ~BtFileAllocationEntry();
+  virtual ~BtFileAllocationEntry() noexcept;
 
   virtual void
   prepareForNextAction(std::vector<std::unique_ptr<Command>>& commands,

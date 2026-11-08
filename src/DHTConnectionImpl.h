@@ -55,7 +55,7 @@ private:
 public:
   DHTConnectionImpl(int family);
 
-  virtual ~DHTConnectionImpl();
+  virtual ~DHTConnectionImpl() noexcept;
 
   /**
    * Binds port. All number in sgl are tried. All numbers in sgl must

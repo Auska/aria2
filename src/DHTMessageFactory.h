@@ -65,7 +65,7 @@ class Peer;
 
 class DHTMessageFactory {
 public:
-  virtual ~DHTMessageFactory() = default;
+  virtual ~DHTMessageFactory() noexcept = default;
 
   virtual std::unique_ptr<DHTQueryMessage>
   createQueryMessage(const Dict* dict, const std::string& ipaddr,
@@ -81,8 +81,7 @@ public:
 
   virtual std::unique_ptr<DHTPingReplyMessage>
   createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                         const DHTID& id,
-                         const std::string& transactionID) = 0;
+                         const DHTID& id, const std::string& transactionID) = 0;
 
   virtual std::unique_ptr<DHTFindNodeMessage>
   createFindNodeMessage(const std::shared_ptr<DHTNode>& remoteNode,

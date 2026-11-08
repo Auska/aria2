@@ -55,7 +55,7 @@ public:
                         DownloadEngine* e,
                         FileAllocationEntry* fileAllocationEntry);
 
-  virtual ~FileAllocationCommand();
+  virtual ~FileAllocationCommand() noexcept;
 
   virtual bool executeInternal() override;
 

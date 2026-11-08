@@ -43,7 +43,7 @@ DefaultStreamPieceSelector::DefaultStreamPieceSelector(BitfieldMan* bitfieldMan)
 {
 }
 
-DefaultStreamPieceSelector::~DefaultStreamPieceSelector() = default;
+DefaultStreamPieceSelector::~DefaultStreamPieceSelector() noexcept = default;
 
 std::optional<size_t> DefaultStreamPieceSelector::select(
     size_t minSplitSize, std::span<const unsigned char> ignoreBitfield)

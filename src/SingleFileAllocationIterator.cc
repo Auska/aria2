@@ -58,7 +58,8 @@ SingleFileAllocationIterator::SingleFileAllocationIterator(BinaryStream* stream,
 {
 }
 
-SingleFileAllocationIterator::~SingleFileAllocationIterator() = default;
+SingleFileAllocationIterator::~SingleFileAllocationIterator() noexcept =
+    default;
 
 void SingleFileAllocationIterator::init()
 {
@@ -80,8 +81,7 @@ void SingleFileAllocationIterator::init()
 
 void SingleFileAllocationIterator::allocateChunk()
 {
-  stream_->writeData(std::as_bytes(std::span{buffer_.get(), BUFSIZE}),
-                     offset_);
+  stream_->writeData(std::as_bytes(std::span{buffer_.get(), BUFSIZE}), offset_);
   offset_ += BUFSIZE;
 
   if (totalLength_ < offset_) {

@@ -67,7 +67,7 @@ AbstractDiskWriter::AbstractDiskWriter(const std::string& filename)
 {
 }
 
-AbstractDiskWriter::~AbstractDiskWriter() { closeFile(); }
+AbstractDiskWriter::~AbstractDiskWriter() noexcept { closeFile(); }
 
 namespace {
 int fileError() { return errno; }

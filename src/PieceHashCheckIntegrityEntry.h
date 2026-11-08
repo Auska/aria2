@@ -45,7 +45,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~PieceHashCheckIntegrityEntry();
+  virtual ~PieceHashCheckIntegrityEntry() noexcept;
 
   virtual bool isValidationReady() override;
 

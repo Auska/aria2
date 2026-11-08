@@ -61,7 +61,7 @@ private:
 public:
   DHKeyExchange();
 
-  ~DHKeyExchange();
+  ~DHKeyExchange() noexcept;
 
   void init(std::string_view prime, size_t primeBits,
             std::string_view generator, size_t privateKeyBits);

@@ -44,9 +44,8 @@ public:
   ApiCallbackDownloadEventListener(Session* session,
                                    DownloadEventCallback callback,
                                    void* userData);
-  virtual ~ApiCallbackDownloadEventListener();
-  virtual void onEvent(DownloadEvent event,
-                       const RequestGroup* group) override;
+  virtual ~ApiCallbackDownloadEventListener() noexcept;
+  virtual void onEvent(DownloadEvent event, const RequestGroup* group) override;
 
 private:
   Session* session_;

@@ -59,7 +59,7 @@ public:
     HUP = 1 << 3,
   };
 
-  virtual ~EventPoll() = default;
+  virtual ~EventPoll() noexcept = default;
 
   virtual void poll(const struct timeval& tv) = 0;
 

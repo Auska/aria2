@@ -59,7 +59,7 @@ private:
 public:
   explicit DHTPeerAnnounceEntry(const DHTID& infoHash);
 
-  ~DHTPeerAnnounceEntry();
+  ~DHTPeerAnnounceEntry() noexcept;
 
   // add peer addr entry.
   // if it already exists, update "Last Updated" property.

@@ -50,7 +50,7 @@ BtLeecherStateChoke::BtLeecherStateChoke()
 {
 }
 
-BtLeecherStateChoke::~BtLeecherStateChoke() = default;
+BtLeecherStateChoke::~BtLeecherStateChoke() noexcept = default;
 
 BtLeecherStateChoke::PeerEntry::PeerEntry(const std::shared_ptr<Peer>& peer)
     : peer_(peer),
@@ -83,7 +83,7 @@ BtLeecherStateChoke::PeerEntry::operator=(const PeerEntry& c)
   return *this;
 }
 
-BtLeecherStateChoke::PeerEntry::~PeerEntry() = default;
+BtLeecherStateChoke::PeerEntry::~PeerEntry() noexcept = default;
 
 const std::shared_ptr<Peer>& BtLeecherStateChoke::PeerEntry::getPeer() const
 {

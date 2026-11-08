@@ -49,7 +49,7 @@ public:
                  const std::shared_ptr<FileEntry>& fileEntry,
                  RequestGroup* requestGroup, DownloadEngine* e,
                  const std::shared_ptr<SocketCore>& s);
-  virtual ~ConnectCommand();
+  virtual ~ConnectCommand() noexcept;
   void
   setControlChain(const std::shared_ptr<ControlChain<ConnectCommand*>>& chain);
   void setBackupConnectInfo(const std::shared_ptr<BackupConnectInfo>& info);

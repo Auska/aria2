@@ -61,7 +61,7 @@ public:
       const std::shared_ptr<HttpConnection>& httpConnection, DownloadEngine* e,
       const std::shared_ptr<SocketCore>& s);
 
-  virtual ~AbstractProxyResponseCommand();
+  virtual ~AbstractProxyResponseCommand() noexcept;
 
   virtual std::unique_ptr<Command> getNextCommand() = 0;
 };

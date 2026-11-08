@@ -88,7 +88,7 @@ protected:
 public:
   AbstractBtMessage(uint8_t id, const char* name);
 
-  virtual ~AbstractBtMessage();
+  virtual ~AbstractBtMessage() noexcept;
 
   virtual bool isInvalidate() override { return invalidate_; }
 
@@ -117,8 +117,8 @@ public:
   {
   }
 
-  virtual void onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event)
-      override
+  virtual void
+  onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event) override
   {
   }
 

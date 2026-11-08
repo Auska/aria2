@@ -65,7 +65,8 @@ IteratableChunkChecksumValidator::IteratableChunkChecksumValidator(
 {
 }
 
-IteratableChunkChecksumValidator::~IteratableChunkChecksumValidator() = default;
+IteratableChunkChecksumValidator::~IteratableChunkChecksumValidator() noexcept =
+    default;
 
 void IteratableChunkChecksumValidator::validateChunk()
 {

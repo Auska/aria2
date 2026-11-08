@@ -47,14 +47,14 @@ namespace aria2 {
 class RequestGroup;
 
 struct DownloadEventListener {
-  virtual ~DownloadEventListener() = default;
+  virtual ~DownloadEventListener() noexcept = default;
   virtual void onEvent(DownloadEvent event, const RequestGroup* group) = 0;
 };
 
 class Notifier {
 public:
   Notifier();
-  ~Notifier();
+  ~Notifier() noexcept;
   void addDownloadEventListener(DownloadEventListener* listener);
   // Notifies the download event to all listeners.
   void notifyDownloadEvent(DownloadEvent event, const RequestGroup* group);

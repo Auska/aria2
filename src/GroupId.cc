@@ -46,7 +46,8 @@ std::shared_ptr<GroupId> GroupId::create()
 {
   a2_gid_t n;
   for (;;) {
-    util::generateRandomData(std::as_writable_bytes(std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
+    util::generateRandomData(std::as_writable_bytes(
+        std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
     if (n != 0 && !set_.contains(n)) {
       break;
     }
@@ -125,7 +126,8 @@ GroupId::Err GroupId::toNumericId(a2_gid_t& n, const char* hex)
 std::string GroupId::toHex(a2_gid_t gid)
 {
   a2_gid_t n = hton64(gid);
-  return util::toHex(std::as_bytes(std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
+  return util::toHex(std::as_bytes(
+      std::span{reinterpret_cast<unsigned char*>(&n), sizeof(n)}));
 }
 
 std::string GroupId::toAbbrevHex(a2_gid_t gid)
@@ -142,6 +144,6 @@ std::string GroupId::toAbbrevHex() const { return toAbbrevHex(gid_); }
 
 GroupId::GroupId(a2_gid_t gid) : gid_(gid) { set_.insert(gid_); }
 
-GroupId::~GroupId() { set_.erase(gid_); }
+GroupId::~GroupId() noexcept { set_.erase(gid_); }
 
 } // namespace aria2

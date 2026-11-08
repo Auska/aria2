@@ -52,7 +52,7 @@ public:
 
   PeerStat(cuid_t cuid = 0);
 
-  ~PeerStat();
+  ~PeerStat() noexcept;
 
   // Don't allow copying
   PeerStat(const PeerStat&);

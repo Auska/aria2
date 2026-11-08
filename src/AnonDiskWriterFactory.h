@@ -46,7 +46,7 @@ template <class DiskWriterType>
 class AnonDiskWriterFactory : public DiskWriterFactory {
 public:
   AnonDiskWriterFactory() = default;
-  virtual ~AnonDiskWriterFactory() = default;
+  virtual ~AnonDiskWriterFactory() noexcept = default;
 
   virtual std::unique_ptr<DiskWriter>
   newDiskWriter(const std::string& filename) override

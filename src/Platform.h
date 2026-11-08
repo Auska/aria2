@@ -60,7 +60,7 @@ private:
 public:
   Platform();
 
-  ~Platform();
+  ~Platform() noexcept;
 
   static bool setUp();
 

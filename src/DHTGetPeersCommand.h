@@ -76,7 +76,7 @@ public:
   DHTGetPeersCommand(cuid_t cuid, RequestGroup* requestGroup,
                      DownloadEngine* e);
 
-  virtual ~DHTGetPeersCommand();
+  virtual ~DHTGetPeersCommand() noexcept;
 
   virtual bool execute() override;
 

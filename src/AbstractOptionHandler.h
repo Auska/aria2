@@ -61,10 +61,9 @@ public:
                         const std::string& defaultValue = NO_DEFAULT_VALUE,
                         ArgType argType = ArgType::REQ_ARG, char shortName = 0);
 
-  virtual ~AbstractOptionHandler();
+  virtual ~AbstractOptionHandler() noexcept;
 
-  virtual void parse(Option& option,
-                     const std::string& arg) const override;
+  virtual void parse(Option& option, const std::string& arg) const override;
 
   virtual bool hasTag(HelpTag tag) const override;
 
@@ -74,10 +73,7 @@ public:
 
   virtual const char* getName() const override;
 
-  virtual const char* getDescription() const override
-  {
-    return description_;
-  }
+  virtual const char* getDescription() const override { return description_; }
 
   virtual const std::string& getDefaultValue() const override
   {

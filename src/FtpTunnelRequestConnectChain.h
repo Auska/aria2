@@ -44,7 +44,7 @@ namespace aria2 {
 
 struct FtpTunnelRequestConnectChain : public ControlChain<ConnectCommand*> {
   FtpTunnelRequestConnectChain() {}
-  virtual ~FtpTunnelRequestConnectChain() {}
+  virtual ~FtpTunnelRequestConnectChain() noexcept {}
   virtual int run(ConnectCommand* t, DownloadEngine* e) override
   {
     auto c = make_unique<FtpTunnelRequestCommand>(

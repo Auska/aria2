@@ -52,7 +52,7 @@ struct Range {
 
   Range(const Range& c);
 
-  ~Range();
+  ~Range() noexcept;
 
   Range& operator=(const Range& c);
 

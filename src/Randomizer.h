@@ -41,7 +41,7 @@ namespace aria2 {
 
 class Randomizer {
 public:
-  virtual ~Randomizer() = default;
+  virtual ~Randomizer() noexcept = default;
 
   /**
    * Returns random number in [0, to).

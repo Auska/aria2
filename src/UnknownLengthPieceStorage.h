@@ -69,7 +69,7 @@ public:
   UnknownLengthPieceStorage(
       const std::shared_ptr<DownloadContext>& downloadContext);
 
-  virtual ~UnknownLengthPieceStorage();
+  virtual ~UnknownLengthPieceStorage() noexcept;
 
 #ifdef ENABLE_BITTORRENT
 

@@ -53,17 +53,18 @@ private:
                          const std::vector<std::string>& resolvedAddresses);
 
 protected:
-  virtual std::unique_ptr<Command> createNextCommand(
-      const std::string& hostname, const std::string& addr, uint16_t port,
-      const std::vector<std::string>& resolvedAddresses,
-      const std::shared_ptr<Request>& proxyRequest) override;
+  virtual std::unique_ptr<Command>
+  createNextCommand(const std::string& hostname, const std::string& addr,
+                    uint16_t port,
+                    const std::vector<std::string>& resolvedAddresses,
+                    const std::shared_ptr<Request>& proxyRequest) override;
 
 public:
   FtpInitiateConnectionCommand(cuid_t cuid, const std::shared_ptr<Request>& req,
                                const std::shared_ptr<FileEntry>& fileEntry,
                                RequestGroup* requestGroup, DownloadEngine* e);
 
-  virtual ~FtpInitiateConnectionCommand();
+  virtual ~FtpInitiateConnectionCommand() noexcept;
 };
 
 } // namespace aria2

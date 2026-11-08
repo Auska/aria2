@@ -74,12 +74,11 @@ public:
   AdaptiveURISelector(std::shared_ptr<ServerStatMan> serverStatMan,
                       RequestGroup* requestGroup);
 
-  virtual ~AdaptiveURISelector();
+  virtual ~AdaptiveURISelector() noexcept;
 
   virtual std::string
   select(FileEntry* fileEntry,
-         const std::vector<std::pair<size_t, std::string>>& usedHosts)
-      override;
+         const std::vector<std::pair<size_t, std::string>>& usedHosts) override;
 
   virtual void tuneDownloadCommand(const std::deque<std::string>& uris,
                                    DownloadCommand* command) override;

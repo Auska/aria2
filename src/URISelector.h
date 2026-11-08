@@ -47,14 +47,14 @@ class FileEntry;
 
 class URISelector {
 public:
-  virtual ~URISelector() = default;
+  virtual ~URISelector() noexcept = default;
 
   virtual std::string
   select(FileEntry* fileEntry,
          const std::vector<std::pair<size_t, std::string>>& usedHosts) = 0;
 
   virtual void tuneDownloadCommand(const std::deque<std::string>& uris,
-                                   DownloadCommand* command){};
+                                   DownloadCommand* command) {};
 
   virtual void resetCounters() { return; };
 };

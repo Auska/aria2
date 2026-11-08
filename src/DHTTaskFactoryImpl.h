@@ -66,7 +66,7 @@ private:
 public:
   DHTTaskFactoryImpl();
 
-  virtual ~DHTTaskFactoryImpl();
+  virtual ~DHTTaskFactoryImpl() noexcept;
 
   virtual std::shared_ptr<DHTTask>
   createPingTask(const std::shared_ptr<DHTNode>& remoteNode,

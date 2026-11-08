@@ -90,7 +90,7 @@ public:
                   RequestGroup* requestGroup, DownloadEngine* e,
                   const std::shared_ptr<SocketCore>& s,
                   const std::shared_ptr<SocketRecvBuffer>& socketRecvBuffer);
-  virtual ~DownloadCommand();
+  virtual ~DownloadCommand() noexcept;
 
   const std::unique_ptr<StreamFilter>& getStreamFilter() const
   {

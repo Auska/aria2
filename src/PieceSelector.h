@@ -44,7 +44,7 @@ namespace aria2 {
 
 class PieceSelector {
 public:
-  virtual ~PieceSelector() = default;
+  virtual ~PieceSelector() noexcept = default;
 
   virtual std::optional<size_t> select(const unsigned char* bitfield,
                                        size_t nbits) const = 0;

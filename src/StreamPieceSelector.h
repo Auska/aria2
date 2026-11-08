@@ -47,7 +47,7 @@ namespace aria2 {
 // PieceSelector interface.
 class StreamPieceSelector {
 public:
-  virtual ~StreamPieceSelector() = default;
+  virtual ~StreamPieceSelector() noexcept = default;
   // Selected piece index will be stored in index.  To ignore some
   // piece indexes from selection, use ignoreBitfield and set
   // corresponding bit. length is the number of byte of

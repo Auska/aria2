@@ -53,7 +53,7 @@ public:
     pthread_mutexattr_destroy(&attr);
   }
 
-  ~Lock() { ::pthread_mutex_destroy(&mutex_); }
+  ~Lock() noexcept { ::pthread_mutex_destroy(&mutex_); }
 
   inline void aquire() { ::pthread_mutex_lock(&mutex_); }
 
@@ -68,7 +68,7 @@ private:
 
 public:
   inline LockGuard(Lock& lock) : lock_(lock) { lock_.aquire(); }
-  inline ~LockGuard() { lock_.release(); }
+  inline ~LockGuard() noexcept { lock_.release(); }
 };
 
 } // namespace aria2

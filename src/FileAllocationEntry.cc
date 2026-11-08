@@ -50,7 +50,7 @@ FileAllocationEntry::FileAllocationEntry(RequestGroup* requestGroup,
 {
 }
 
-FileAllocationEntry::~FileAllocationEntry() = default;
+FileAllocationEntry::~FileAllocationEntry() noexcept = default;
 
 int64_t FileAllocationEntry::getCurrentLength()
 {

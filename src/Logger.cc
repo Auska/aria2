@@ -58,7 +58,7 @@ Logger::Logger()
 {
 }
 
-Logger::~Logger() = default;
+Logger::~Logger() noexcept = default;
 
 void Logger::openFile(const std::string& filename)
 {

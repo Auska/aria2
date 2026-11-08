@@ -50,7 +50,7 @@ class SocketCore;
 class SocketRecvBuffer {
 public:
   SocketRecvBuffer(std::shared_ptr<SocketCore> socket);
-  ~SocketRecvBuffer();
+  ~SocketRecvBuffer() noexcept;
   // Reads data from socket as much as capacity allows. Returns the
   // number of bytes read.
   ssize_t recv();

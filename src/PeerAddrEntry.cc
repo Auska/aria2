@@ -46,7 +46,7 @@ PeerAddrEntry::PeerAddrEntry(std::string_view ipaddr, uint16_t port,
 
 PeerAddrEntry::PeerAddrEntry(const PeerAddrEntry& c) = default;
 
-PeerAddrEntry::~PeerAddrEntry() = default;
+PeerAddrEntry::~PeerAddrEntry() noexcept = default;
 
 PeerAddrEntry& PeerAddrEntry::operator=(const PeerAddrEntry& c)
 {

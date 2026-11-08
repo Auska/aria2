@@ -70,7 +70,7 @@ NameResolveCommand::NameResolveCommand(
   setStatus(Command::Status::ONESHOT_REALTIME);
 }
 
-NameResolveCommand::~NameResolveCommand()
+NameResolveCommand::~NameResolveCommand() noexcept
 {
 #ifdef ENABLE_ASYNC_DNS
   asyncNameResolverMan_->disableNameResolverCheck(e_, this);

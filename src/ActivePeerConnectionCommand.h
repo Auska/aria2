@@ -67,7 +67,7 @@ public:
   ActivePeerConnectionCommand(cuid_t cuid, RequestGroup* requestGroup,
                               DownloadEngine* e, std::chrono::seconds interval);
 
-  virtual ~ActivePeerConnectionCommand();
+  virtual ~ActivePeerConnectionCommand() noexcept;
 
   virtual bool execute() override;
 

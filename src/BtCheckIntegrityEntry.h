@@ -43,7 +43,7 @@ class BtCheckIntegrityEntry : public PieceHashCheckIntegrityEntry {
 public:
   BtCheckIntegrityEntry(RequestGroup* requestGroup);
 
-  virtual ~BtCheckIntegrityEntry();
+  virtual ~BtCheckIntegrityEntry() noexcept;
 
   virtual void
   onDownloadFinished(std::vector<std::unique_ptr<Command>>& commands,

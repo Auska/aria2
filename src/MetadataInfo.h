@@ -55,7 +55,7 @@ public:
 
   MetadataInfo();
 
-  ~MetadataInfo();
+  ~MetadataInfo() noexcept;
 
   bool dataOnly() const { return !gid_; }
 

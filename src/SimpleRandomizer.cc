@@ -69,7 +69,7 @@ std::random_device rd;
 
 SimpleRandomizer::SimpleRandomizer() : gen_(rd()) {}
 
-SimpleRandomizer::~SimpleRandomizer() = default;
+SimpleRandomizer::~SimpleRandomizer() noexcept = default;
 
 long int SimpleRandomizer::getRandomNumber(long int to)
 {

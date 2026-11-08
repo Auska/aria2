@@ -90,7 +90,7 @@ private:
 public:
   HttpServer(const std::shared_ptr<SocketCore>& socket);
 
-  ~HttpServer();
+  ~HttpServer() noexcept;
 
   bool receiveRequest();
 

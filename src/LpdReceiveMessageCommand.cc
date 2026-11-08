@@ -59,7 +59,7 @@ LpdReceiveMessageCommand::LpdReceiveMessageCommand(
   e_->addSocketForReadCheck(receiver_->getSocket(), this);
 }
 
-LpdReceiveMessageCommand::~LpdReceiveMessageCommand()
+LpdReceiveMessageCommand::~LpdReceiveMessageCommand() noexcept
 {
   e_->deleteSocketForReadCheck(receiver_->getSocket(), this);
 }

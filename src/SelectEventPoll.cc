@@ -154,7 +154,7 @@ void SelectEventPoll::AsyncNameResolverEntry::process(fd_set* rfdsPtr,
 
 SelectEventPoll::SelectEventPoll() { updateFdSet(); }
 
-SelectEventPoll::~SelectEventPoll() = default;
+SelectEventPoll::~SelectEventPoll() noexcept = default;
 
 void SelectEventPoll::poll(const struct timeval& tv)
 {

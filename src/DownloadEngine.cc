@@ -112,7 +112,7 @@ DownloadEngine::DownloadEngine(std::unique_ptr<EventPoll> eventPoll)
   sessionId_.assign(&sessionId[0], &sessionId[sizeof(sessionId)]);
 }
 
-DownloadEngine::~DownloadEngine() {}
+DownloadEngine::~DownloadEngine() noexcept {}
 
 namespace {
 void executeCommand(std::deque<std::unique_ptr<Command>>& commands,
@@ -519,7 +519,7 @@ DownloadEngine::SocketPoolEntry::SocketPoolEntry(
 {
 }
 
-DownloadEngine::SocketPoolEntry::~SocketPoolEntry() = default;
+DownloadEngine::SocketPoolEntry::~SocketPoolEntry() noexcept = default;
 
 bool DownloadEngine::SocketPoolEntry::isTimeout() const
 {

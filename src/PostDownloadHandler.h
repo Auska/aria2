@@ -43,7 +43,7 @@ namespace aria2 {
 
 class PostDownloadHandler : public DownloadHandler {
 public:
-  virtual ~PostDownloadHandler() {}
+  virtual ~PostDownloadHandler() noexcept {}
 
   virtual void
   getNextRequestGroups(std::vector<std::shared_ptr<RequestGroup>>& groups,

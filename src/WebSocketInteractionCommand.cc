@@ -61,7 +61,7 @@ WebSocketInteractionCommand::WebSocketInteractionCommand(
   e_->addSocketForReadCheck(socket_, this);
 }
 
-WebSocketInteractionCommand::~WebSocketInteractionCommand()
+WebSocketInteractionCommand::~WebSocketInteractionCommand() noexcept
 {
   e_->deleteSocketForReadCheck(socket_, this);
   if (writeCheck_) {
@@ -91,8 +91,7 @@ bool WebSocketInteractionCommand::execute()
   }
   if (wsSession_->onReadEvent() == -1 || wsSession_->onWriteEvent() == -1) {
     if (wsSession_->closeSent() || wsSession_->closeReceived()) {
-      A2_LOG_INFO(
-          fmt("CUID#{} - WebSocket session terminated.", getCuid()));
+      A2_LOG_INFO(fmt("CUID#{} - WebSocket session terminated.", getCuid()));
     }
     else {
       A2_LOG_INFO(fmt("CUID#{} - WebSocket session terminated"

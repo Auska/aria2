@@ -58,7 +58,7 @@ DHTRoutingTableDeserializer::DHTRoutingTableDeserializer(int family)
 {
 }
 
-DHTRoutingTableDeserializer::~DHTRoutingTableDeserializer() = default;
+DHTRoutingTableDeserializer::~DHTRoutingTableDeserializer() noexcept = default;
 
 #define READ_CHECK(fp, ptr, count)                                             \
   if (fp.read(std::span{reinterpret_cast<std::byte*>(ptr),                     \

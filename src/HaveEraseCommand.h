@@ -44,7 +44,7 @@ public:
   HaveEraseCommand(cuid_t cuid, DownloadEngine* e,
                    std::chrono::seconds interval);
 
-  virtual ~HaveEraseCommand();
+  virtual ~HaveEraseCommand() noexcept;
 
   virtual void preProcess() override;
 

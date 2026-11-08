@@ -52,7 +52,7 @@ public:
     psm_.setAllowEmptyMemberName(allowEmptyName);
   }
 
-  ~GenericParser() = default;
+  ~GenericParser() noexcept = default;
 
   using ResultType = typename ParserStateMachine::ResultType;
   using ParserStateMachineType = ParserStateMachine;

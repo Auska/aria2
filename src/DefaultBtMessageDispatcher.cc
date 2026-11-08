@@ -71,7 +71,7 @@ DefaultBtMessageDispatcher::DefaultBtMessageDispatcher()
 {
 }
 
-DefaultBtMessageDispatcher::~DefaultBtMessageDispatcher()
+DefaultBtMessageDispatcher::~DefaultBtMessageDispatcher() noexcept
 {
   A2_LOG_DEBUG("DefaultBtMessageDispatcher::deleted");
 }

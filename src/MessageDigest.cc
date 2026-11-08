@@ -70,7 +70,7 @@ MessageDigest::MessageDigest(std::unique_ptr<MessageDigestImpl> impl)
 {
 }
 
-MessageDigest::~MessageDigest() = default;
+MessageDigest::~MessageDigest() noexcept = default;
 
 std::unique_ptr<MessageDigest> MessageDigest::sha1()
 {
@@ -118,10 +118,14 @@ size_t MessageDigest::getDigestLength(const std::string& hashType)
 
 bool MessageDigest::isStronger(const std::string& lhs, const std::string& rhs)
 {
-  auto lEntry = std::ranges::find_if(
-      hashTypes, [&lhs](const HashTypeEntry& entry) { return lhs == entry.hashType; });
-  auto rEntry = std::ranges::find_if(
-      hashTypes, [&rhs](const HashTypeEntry& entry) { return rhs == entry.hashType; });
+  auto lEntry =
+      std::ranges::find_if(hashTypes, [&lhs](const HashTypeEntry& entry) {
+        return lhs == entry.hashType;
+      });
+  auto rEntry =
+      std::ranges::find_if(hashTypes, [&rhs](const HashTypeEntry& entry) {
+        return rhs == entry.hashType;
+      });
   if (lEntry == std::end(hashTypes)) {
     return false;
   }

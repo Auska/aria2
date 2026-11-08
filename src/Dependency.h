@@ -41,7 +41,7 @@ namespace aria2 {
 
 class Dependency {
 public:
-  virtual ~Dependency() = default;
+  virtual ~Dependency() noexcept = default;
 
   virtual bool resolve() = 0;
 };

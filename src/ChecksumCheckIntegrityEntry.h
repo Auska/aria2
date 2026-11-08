@@ -48,7 +48,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~ChecksumCheckIntegrityEntry();
+  virtual ~ChecksumCheckIntegrityEntry() noexcept;
 
   virtual bool isValidationReady() override;
 

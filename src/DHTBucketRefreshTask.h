@@ -46,7 +46,7 @@ private:
 public:
   DHTBucketRefreshTask();
 
-  virtual ~DHTBucketRefreshTask();
+  virtual ~DHTBucketRefreshTask() noexcept;
 
   virtual void startup() override;
 

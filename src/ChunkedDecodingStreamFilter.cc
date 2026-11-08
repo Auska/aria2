@@ -74,7 +74,7 @@ ChunkedDecodingStreamFilter::ChunkedDecodingStreamFilter(
 {
 }
 
-ChunkedDecodingStreamFilter::~ChunkedDecodingStreamFilter() = default;
+ChunkedDecodingStreamFilter::~ChunkedDecodingStreamFilter() noexcept = default;
 
 void ChunkedDecodingStreamFilter::init() {}
 
@@ -137,11 +137,10 @@ ChunkedDecodingStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       }
       break;
     case CHUNK: {
-      auto readlen =
-          std::min<int64_t>(chunkRemaining_,
-                            static_cast<int64_t>(inbuf.size() - i));
-      outlen += getDelegate()->transform(out, segment,
-                                         inbuf.subspan(i, readlen));
+      auto readlen = std::min<int64_t>(chunkRemaining_,
+                                       static_cast<int64_t>(inbuf.size() - i));
+      outlen +=
+          getDelegate()->transform(out, segment, inbuf.subspan(i, readlen));
       chunkRemaining_ -= readlen;
       i += readlen - 1;
       if (chunkRemaining_ == 0) {

@@ -42,7 +42,7 @@ namespace aria2 {
 class Sqlite3MozCookieParser : public Sqlite3CookieParser {
 public:
   Sqlite3MozCookieParser(const std::string& filename);
-  virtual ~Sqlite3MozCookieParser();
+  virtual ~Sqlite3MozCookieParser() noexcept;
 
 protected:
   virtual const char* getQuery() const override;
@@ -51,7 +51,7 @@ protected:
 class Sqlite3ChromiumCookieParser : public Sqlite3CookieParser {
 public:
   Sqlite3ChromiumCookieParser(const std::string& filename);
-  virtual ~Sqlite3ChromiumCookieParser();
+  virtual ~Sqlite3ChromiumCookieParser() noexcept;
 
 protected:
   virtual const char* getQuery() const override;

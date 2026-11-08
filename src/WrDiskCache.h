@@ -48,7 +48,7 @@ class WrDiskCacheEntry;
 class WrDiskCache {
 public:
   WrDiskCache(size_t limit);
-  ~WrDiskCache();
+  ~WrDiskCache() noexcept;
   // Adds the cache entry |ent| to the storage. The size of cached
   // data of ent is added to total_.
   bool add(WrDiskCacheEntry* ent);

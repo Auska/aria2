@@ -46,7 +46,7 @@ BtNotInterestedMessage::BtNotInterestedMessage()
 {
 }
 
-BtNotInterestedMessage::~BtNotInterestedMessage() = default;
+BtNotInterestedMessage::~BtNotInterestedMessage() noexcept = default;
 
 std::unique_ptr<BtNotInterestedMessage>
 BtNotInterestedMessage::create(std::span<const std::byte> data)

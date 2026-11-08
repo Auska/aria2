@@ -53,14 +53,14 @@ SocketBuffer::ByteArrayBufEntry::ByteArrayBufEntry(
 {
 }
 
-SocketBuffer::ByteArrayBufEntry::~ByteArrayBufEntry() = default;
+SocketBuffer::ByteArrayBufEntry::~ByteArrayBufEntry() noexcept = default;
 
 ssize_t
 SocketBuffer::ByteArrayBufEntry::send(const std::shared_ptr<SocketCore>& socket,
                                       size_t offset)
 {
-  return socket->writeData(std::as_bytes(
-      std::span{bytes_.data() + offset, bytes_.size() - offset}));
+  return socket->writeData(
+      std::as_bytes(std::span{bytes_.data() + offset, bytes_.size() - offset}));
 }
 
 bool SocketBuffer::ByteArrayBufEntry::final(size_t offset) const
@@ -109,7 +109,7 @@ SocketBuffer::SocketBuffer(std::shared_ptr<SocketCore> socket)
 {
 }
 
-SocketBuffer::~SocketBuffer() = default;
+SocketBuffer::~SocketBuffer() noexcept = default;
 
 void SocketBuffer::pushBytes(std::vector<unsigned char> bytes,
                              std::unique_ptr<ProgressUpdate> progressUpdate)

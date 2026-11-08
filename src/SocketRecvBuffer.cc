@@ -47,7 +47,7 @@ SocketRecvBuffer::SocketRecvBuffer(std::shared_ptr<SocketCore> socket)
 {
 }
 
-SocketRecvBuffer::~SocketRecvBuffer() = default;
+SocketRecvBuffer::~SocketRecvBuffer() noexcept = default;
 
 ssize_t SocketRecvBuffer::recv()
 {
@@ -56,8 +56,8 @@ ssize_t SocketRecvBuffer::recv()
     A2_LOG_DEBUG("Buffer full");
     return 0;
   }
-  auto readLength = static_cast<size_t>(
-      socket_->readData(std::as_writable_bytes(
+  auto readLength =
+      static_cast<size_t>(socket_->readData(std::as_writable_bytes(
           std::span{last_, static_cast<size_t>(std::end(buf_) - last_)})));
   last_ += readLength;
   return readLength;

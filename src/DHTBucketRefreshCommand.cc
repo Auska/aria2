@@ -51,7 +51,7 @@ DHTBucketRefreshCommand::DHTBucketRefreshCommand(cuid_t cuid, DownloadEngine* e,
 {
 }
 
-DHTBucketRefreshCommand::~DHTBucketRefreshCommand() = default;
+DHTBucketRefreshCommand::~DHTBucketRefreshCommand() noexcept = default;
 
 void DHTBucketRefreshCommand::preProcess()
 {

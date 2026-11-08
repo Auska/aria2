@@ -60,7 +60,7 @@ DefaultBtRequestFactory::DefaultBtRequestFactory()
 {
 }
 
-DefaultBtRequestFactory::~DefaultBtRequestFactory() = default;
+DefaultBtRequestFactory::~DefaultBtRequestFactory() noexcept = default;
 
 void DefaultBtRequestFactory::addTargetPiece(
     const std::shared_ptr<Piece>& piece)

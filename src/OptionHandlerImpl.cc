@@ -74,7 +74,7 @@ BooleanOptionHandler::BooleanOptionHandler(PrefPtr pref,
 {
 }
 
-BooleanOptionHandler::~BooleanOptionHandler() = default;
+BooleanOptionHandler::~BooleanOptionHandler() noexcept = default;
 
 void BooleanOptionHandler::parseArg(Option& option,
                                     const std::string& optarg) const
@@ -110,7 +110,7 @@ IntegerRangeOptionHandler::IntegerRangeOptionHandler(
 {
 }
 
-IntegerRangeOptionHandler::~IntegerRangeOptionHandler() = default;
+IntegerRangeOptionHandler::~IntegerRangeOptionHandler() noexcept = default;
 
 void IntegerRangeOptionHandler::parseArg(Option& option,
                                          const std::string& optarg) const
@@ -145,7 +145,7 @@ NumberOptionHandler::NumberOptionHandler(PrefPtr pref, const char* description,
 {
 }
 
-NumberOptionHandler::~NumberOptionHandler() = default;
+NumberOptionHandler::~NumberOptionHandler() noexcept = default;
 
 void NumberOptionHandler::parseArg(Option& option,
                                    const std::string& optarg) const
@@ -209,7 +209,7 @@ UnitNumberOptionHandler::UnitNumberOptionHandler(
 {
 }
 
-UnitNumberOptionHandler::~UnitNumberOptionHandler() = default;
+UnitNumberOptionHandler::~UnitNumberOptionHandler() noexcept = default;
 
 void UnitNumberOptionHandler::parseArg(Option& option,
                                        const std::string& optarg) const
@@ -228,7 +228,7 @@ FloatNumberOptionHandler::FloatNumberOptionHandler(
 {
 }
 
-FloatNumberOptionHandler::~FloatNumberOptionHandler() = default;
+FloatNumberOptionHandler::~FloatNumberOptionHandler() noexcept = default;
 
 void FloatNumberOptionHandler::parseArg(Option& option,
                                         const std::string& optarg) const
@@ -287,7 +287,7 @@ DefaultOptionHandler::DefaultOptionHandler(
 {
 }
 
-DefaultOptionHandler::~DefaultOptionHandler() = default;
+DefaultOptionHandler::~DefaultOptionHandler() noexcept = default;
 
 void DefaultOptionHandler::parseArg(Option& option,
                                     const std::string& optarg) const
@@ -316,7 +316,7 @@ CumulativeOptionHandler::CumulativeOptionHandler(
 {
 }
 
-CumulativeOptionHandler::~CumulativeOptionHandler() = default;
+CumulativeOptionHandler::~CumulativeOptionHandler() noexcept = default;
 
 void CumulativeOptionHandler::parseArg(Option& option,
                                        const std::string& optarg) const
@@ -340,7 +340,7 @@ IndexOutOptionHandler::IndexOutOptionHandler(PrefPtr pref,
 {
 }
 
-IndexOutOptionHandler::~IndexOutOptionHandler() = default;
+IndexOutOptionHandler::~IndexOutOptionHandler() noexcept = default;
 
 void IndexOutOptionHandler::parseArg(Option& option,
                                      const std::string& optarg) const
@@ -375,7 +375,7 @@ ChecksumOptionHandler::ChecksumOptionHandler(
 {
 }
 
-ChecksumOptionHandler::~ChecksumOptionHandler() = default;
+ChecksumOptionHandler::~ChecksumOptionHandler() noexcept = default;
 
 void ChecksumOptionHandler::parseArg(Option& option,
                                      const std::string& optarg) const
@@ -410,7 +410,7 @@ ParameterOptionHandler::ParameterOptionHandler(
 {
 }
 
-ParameterOptionHandler::~ParameterOptionHandler() = default;
+ParameterOptionHandler::~ParameterOptionHandler() noexcept = default;
 
 void ParameterOptionHandler::parseArg(Option& option,
                                       const std::string& optarg) const
@@ -452,7 +452,7 @@ HostPortOptionHandler::HostPortOptionHandler(
 {
 }
 
-HostPortOptionHandler::~HostPortOptionHandler() = default;
+HostPortOptionHandler::~HostPortOptionHandler() noexcept = default;
 
 void HostPortOptionHandler::parseArg(Option& option,
                                      const std::string& optarg) const
@@ -491,7 +491,7 @@ HttpProxyOptionHandler::HttpProxyOptionHandler(PrefPtr pref,
 {
 }
 
-HttpProxyOptionHandler::~HttpProxyOptionHandler() = default;
+HttpProxyOptionHandler::~HttpProxyOptionHandler() noexcept = default;
 
 void HttpProxyOptionHandler::parseArg(Option& option,
                                       const std::string& optarg) const

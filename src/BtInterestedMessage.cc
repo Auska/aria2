@@ -46,7 +46,7 @@ BtInterestedMessage::BtInterestedMessage()
 {
 }
 
-BtInterestedMessage::~BtInterestedMessage() = default;
+BtInterestedMessage::~BtInterestedMessage() noexcept = default;
 
 std::unique_ptr<BtInterestedMessage>
 BtInterestedMessage::create(std::span<const std::byte> data)

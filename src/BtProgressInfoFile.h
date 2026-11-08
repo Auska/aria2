@@ -43,7 +43,7 @@ namespace aria2 {
 
 class BtProgressInfoFile {
 public:
-  virtual ~BtProgressInfoFile() = default;
+  virtual ~BtProgressInfoFile() noexcept = default;
 
   virtual std::string getFilename() = 0;
 

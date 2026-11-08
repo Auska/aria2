@@ -100,7 +100,7 @@ void logTooShortLength(const std::string& remoteAddr, uint16_t remotePort,
 }
 } // namespace
 
-UDPTrackerClient::~UDPTrackerClient()
+UDPTrackerClient::~UDPTrackerClient() noexcept
 {
   // Make all contained requests fail
   auto error = UDPTrackerError::Shutdown;

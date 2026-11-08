@@ -56,7 +56,7 @@ private:
 public:
   DHTRoutingTableSerializer(int family);
 
-  ~DHTRoutingTableSerializer();
+  ~DHTRoutingTableSerializer() noexcept;
 
   void setLocalNode(const std::shared_ptr<DHTNode>& localNode);
 

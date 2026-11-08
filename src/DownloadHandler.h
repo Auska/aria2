@@ -47,7 +47,7 @@ class RequestGroupCriteria;
 
 class DownloadHandler {
 public:
-  virtual ~DownloadHandler() {}
+  virtual ~DownloadHandler() noexcept {}
 
   bool canHandle(const RequestGroup* requestGroup) const;
 

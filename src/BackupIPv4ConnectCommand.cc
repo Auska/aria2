@@ -67,7 +67,7 @@ BackupIPv4ConnectCommand::BackupIPv4ConnectCommand(
   requestGroup_->increaseNumCommand();
 }
 
-BackupIPv4ConnectCommand::~BackupIPv4ConnectCommand()
+BackupIPv4ConnectCommand::~BackupIPv4ConnectCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
   requestGroup_->decreaseStreamCommand();

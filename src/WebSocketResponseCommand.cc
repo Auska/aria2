@@ -50,7 +50,7 @@ WebSocketResponseCommand::WebSocketResponseCommand(
 {
 }
 
-WebSocketResponseCommand::~WebSocketResponseCommand() = default;
+WebSocketResponseCommand::~WebSocketResponseCommand() noexcept = default;
 
 void WebSocketResponseCommand::afterSend(
     const std::shared_ptr<HttpServer>& httpServer, DownloadEngine* e)

@@ -54,7 +54,7 @@ public:
 
   ServerStat(const std::string& hostname, const std::string& protocol);
 
-  ~ServerStat();
+  ~ServerStat() noexcept;
 
   const std::string& getHostname() const { return hostname_; }
 

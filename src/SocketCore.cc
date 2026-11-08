@@ -129,7 +129,7 @@ void SocketCore::init()
   wantWrite_ = false;
 }
 
-SocketCore::~SocketCore() { closeConnection(); }
+SocketCore::~SocketCore() noexcept { closeConnection(); }
 
 namespace {
 void applySocketBufferSize(sock_t fd)

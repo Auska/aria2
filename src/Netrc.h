@@ -45,7 +45,7 @@ namespace aria2 {
 
 class Authenticatable {
 public:
-  virtual ~Authenticatable() = default;
+  virtual ~Authenticatable() noexcept = default;
 
   virtual bool match(const std::string& hostname) const = 0;
 };
@@ -63,7 +63,7 @@ public:
   Authenticator(std::string machine, std::string login, std::string password,
                 std::string account);
 
-  virtual ~Authenticator();
+  virtual ~Authenticator() noexcept;
 
   virtual bool match(const std::string& hostname) const override;
 
@@ -91,7 +91,7 @@ public:
   DefaultAuthenticator(std::string login, std::string password,
                        std::string account);
 
-  virtual ~DefaultAuthenticator();
+  virtual ~DefaultAuthenticator() noexcept;
 
   virtual bool match(const std::string& hostname) const override;
 };
@@ -105,7 +105,7 @@ private:
 public:
   Netrc();
 
-  ~Netrc();
+  ~Netrc() noexcept;
 
   void parse(const std::string& path);
 

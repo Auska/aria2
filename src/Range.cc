@@ -45,7 +45,7 @@ Range::Range(int64_t startByte, int64_t endByte, int64_t entityLength)
 
 Range::Range(const Range& c) = default;
 
-Range::~Range() = default;
+Range::~Range() noexcept = default;
 
 Range& Range::operator=(const Range& c)
 {

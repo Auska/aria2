@@ -73,7 +73,7 @@ OSSL_PROVIDER* Platform::default_provider_ = nullptr;
 
 Platform::Platform() { setUp(); }
 
-Platform::~Platform() { tearDown(); }
+Platform::~Platform() noexcept { tearDown(); }
 
 bool Platform::setUp()
 {

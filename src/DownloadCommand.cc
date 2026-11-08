@@ -107,7 +107,7 @@ DownloadCommand::DownloadCommand(
   checkSocketRecvBuffer();
 }
 
-DownloadCommand::~DownloadCommand()
+DownloadCommand::~DownloadCommand() noexcept
 {
   peerStat_->downloadStop();
   getSegmentMan()->updateFastestPeerStat(peerStat_);

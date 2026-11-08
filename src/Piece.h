@@ -81,7 +81,7 @@ public:
   Piece();
   Piece(size_t index, int64_t length, int32_t blockLength = BLOCK_LENGTH);
 
-  ~Piece();
+  ~Piece() noexcept;
 
   bool operator==(const Piece& piece) const { return index_ == piece.index_; }
 

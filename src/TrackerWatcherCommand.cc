@@ -75,7 +75,7 @@ HTTPAnnRequest::HTTPAnnRequest(std::unique_ptr<RequestGroup> rg)
 {
 }
 
-HTTPAnnRequest::~HTTPAnnRequest() = default;
+HTTPAnnRequest::~HTTPAnnRequest() noexcept = default;
 
 bool HTTPAnnRequest::stopped() const { return rg_->getNumCommand() == 0; }
 
@@ -138,7 +138,7 @@ UDPAnnRequest::UDPAnnRequest(const std::shared_ptr<UDPTrackerRequest>& req)
 {
 }
 
-UDPAnnRequest::~UDPAnnRequest() = default;
+UDPAnnRequest::~UDPAnnRequest() noexcept = default;
 
 bool UDPAnnRequest::stopped() const
 {
@@ -197,7 +197,7 @@ TrackerWatcherCommand::TrackerWatcherCommand(cuid_t cuid,
   }
 }
 
-TrackerWatcherCommand::~TrackerWatcherCommand()
+TrackerWatcherCommand::~TrackerWatcherCommand() noexcept
 {
   requestGroup_->decreaseNumCommand();
   if (udpTrackerClient_) {

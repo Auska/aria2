@@ -99,7 +99,7 @@ HttpServerCommand::HttpServerCommand(
   checkSocketRecvBuffer();
 }
 
-HttpServerCommand::~HttpServerCommand()
+HttpServerCommand::~HttpServerCommand() noexcept
 {
   e_->deleteSocketForReadCheck(socket_, this);
   if (writeCheck_) {
@@ -142,7 +142,8 @@ int websocketHandshake(const HttpHeader* header)
       header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_KEY).empty()) {
     return 400;
   }
-  else if (header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION) != "13") {
+  else if (header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_VERSION) !=
+           "13") {
     return 426;
   }
   else if (header->getRequestPath() != "/jsonrpc") {
@@ -211,16 +212,17 @@ bool HttpServerCommand::execute()
         return true;
       }
       auto& header = httpServer_->getRequestHeader();
-      if (header->fieldContains(HttpHeader::InterestingHeader::UPGRADE, "websocket") &&
-          header->fieldContains(HttpHeader::InterestingHeader::CONNECTION, "upgrade")) {
+      if (header->fieldContains(HttpHeader::InterestingHeader::UPGRADE,
+                                "websocket") &&
+          header->fieldContains(HttpHeader::InterestingHeader::CONNECTION,
+                                "upgrade")) {
 #ifdef ENABLE_WEBSOCKET
         int status = websocketHandshake(header.get());
         if (status == 101) {
           std::string serverKey = createWebSocketServerKey(
               header->find(HttpHeader::InterestingHeader::SEC_WEBSOCKET_KEY));
           httpServer_->feedUpgradeResponse(
-              "websocket",
-              fmt("Sec-WebSocket-Accept: {}\r\n", serverKey));
+              "websocket", fmt("Sec-WebSocket-Accept: {}\r\n", serverKey));
           e_->addCommand(make_unique<rpc::WebSocketResponseCommand>(
               getCuid(), httpServer_, e_, socket_));
         }
@@ -271,9 +273,9 @@ bool HttpServerCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#{} - Error occurred while reading HTTP request",
-                       getCuid()),
-                   e);
+    A2_LOG_INFO_EX(
+        fmt("CUID#{} - Error occurred while reading HTTP request", getCuid()),
+        e);
     return true;
   }
 }

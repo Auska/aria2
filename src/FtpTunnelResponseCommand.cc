@@ -53,7 +53,7 @@ FtpTunnelResponseCommand::FtpTunnelResponseCommand(
 {
 }
 
-FtpTunnelResponseCommand::~FtpTunnelResponseCommand() = default;
+FtpTunnelResponseCommand::~FtpTunnelResponseCommand() noexcept = default;
 
 std::unique_ptr<Command> FtpTunnelResponseCommand::getNextCommand()
 {

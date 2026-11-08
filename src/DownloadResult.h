@@ -102,7 +102,7 @@ struct DownloadResult {
   bool inMemoryDownload;
 
   DownloadResult();
-  ~DownloadResult();
+  ~DownloadResult() noexcept;
 
   // Don't allow copying
   DownloadResult(const DownloadResult& c) = delete;

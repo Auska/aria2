@@ -164,7 +164,7 @@ public:
   DefaultBtInteractive(const std::shared_ptr<DownloadContext>& downloadContext,
                        const std::shared_ptr<Peer>& peer);
 
-  virtual ~DefaultBtInteractive();
+  virtual ~DefaultBtInteractive() noexcept;
 
   virtual void initiateHandshake() override;
 

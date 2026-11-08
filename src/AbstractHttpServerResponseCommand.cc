@@ -61,7 +61,7 @@ AbstractHttpServerResponseCommand::AbstractHttpServerResponseCommand(
   e_->addSocketForWriteCheck(socket_, this);
 }
 
-AbstractHttpServerResponseCommand::~AbstractHttpServerResponseCommand()
+AbstractHttpServerResponseCommand::~AbstractHttpServerResponseCommand() noexcept
 {
   if (readCheck_) {
     e_->deleteSocketForReadCheck(socket_, this);
@@ -107,21 +107,23 @@ bool AbstractHttpServerResponseCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#{} - Error occurred while transmitting response body.",
-                       getCuid()),
-                   e);
+    A2_LOG_INFO_EX(
+        fmt("CUID#{} - Error occurred while transmitting response body.",
+            getCuid()),
+        e);
     return true;
   }
   if (httpServer_->sendBufferIsEmpty()) {
-    A2_LOG_INFO(fmt("CUID#{} - HttpServer: all response transmitted.",
-                    getCuid()));
+    A2_LOG_INFO(
+        fmt("CUID#{} - HttpServer: all response transmitted.", getCuid()));
     afterSend(httpServer_, e_);
     return true;
   }
   else {
     if (timeoutTimer_.difference(global::wallclock()) >= 30_s) {
-      A2_LOG_INFO(fmt("CUID#{} - HttpServer: Timeout while transmitting response.",
-                      getCuid()));
+      A2_LOG_INFO(
+          fmt("CUID#{} - HttpServer: Timeout while transmitting response.",
+              getCuid()));
       return true;
     }
     else {

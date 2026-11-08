@@ -58,7 +58,10 @@ SeedCheckCommand::SeedCheckCommand(cuid_t cuid, RequestGroup* requestGroup,
   requestGroup_->increaseNumCommand();
 }
 
-SeedCheckCommand::~SeedCheckCommand() { requestGroup_->decreaseNumCommand(); }
+SeedCheckCommand::~SeedCheckCommand() noexcept
+{
+  requestGroup_->decreaseNumCommand();
+}
 
 bool SeedCheckCommand::execute()
 {

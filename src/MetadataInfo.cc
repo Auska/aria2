@@ -47,7 +47,7 @@ MetadataInfo::MetadataInfo(const std::shared_ptr<GroupId>& gid,
 
 MetadataInfo::MetadataInfo() {}
 
-MetadataInfo::~MetadataInfo() = default;
+MetadataInfo::~MetadataInfo() noexcept = default;
 
 a2_gid_t MetadataInfo::getGID() const
 {

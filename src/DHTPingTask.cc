@@ -54,7 +54,7 @@ DHTPingTask::DHTPingTask(const std::shared_ptr<DHTNode>& remoteNode,
 {
 }
 
-DHTPingTask::~DHTPingTask() = default;
+DHTPingTask::~DHTPingTask() noexcept = default;
 
 void DHTPingTask::addMessage()
 {

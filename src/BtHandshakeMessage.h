@@ -71,15 +71,16 @@ public:
   BtHandshakeMessage(std::span<const unsigned char> infoHash,
                      std::span<const unsigned char> peerId);
 
-  static std::unique_ptr<BtHandshakeMessage> create(std::span<const std::byte> data);
+  static std::unique_ptr<BtHandshakeMessage>
+  create(std::span<const std::byte> data);
 
-  virtual ~BtHandshakeMessage();
+  virtual ~BtHandshakeMessage() noexcept;
 
   static const uint8_t ID = INT8_MAX;
 
   const static char NAME[];
 
-  virtual void doReceivedAction() override{};
+  virtual void doReceivedAction() override {};
 
   virtual std::vector<unsigned char> createMessage() override;
 

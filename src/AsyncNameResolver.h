@@ -77,7 +77,7 @@ private:
 public:
   AsyncNameResolver(int family, const std::string& servers);
 
-  ~AsyncNameResolver();
+  ~AsyncNameResolver() noexcept;
 
   void resolve(const std::string& name);
 

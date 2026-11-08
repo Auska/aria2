@@ -60,7 +60,7 @@ public:
       const std::shared_ptr<DownloadContext>& dctx,
       const std::shared_ptr<PieceStorage>& pieceStorage);
 
-  virtual ~IteratableChecksumValidator();
+  virtual ~IteratableChecksumValidator() noexcept;
 
   virtual void init() override;
 
@@ -68,10 +68,7 @@ public:
 
   virtual bool finished() const override;
 
-  virtual int64_t getCurrentOffset() const override
-  {
-    return currentOffset_;
-  }
+  virtual int64_t getCurrentOffset() const override { return currentOffset_; }
 
   virtual int64_t getTotalLength() const override;
 };

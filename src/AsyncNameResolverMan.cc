@@ -54,7 +54,10 @@ AsyncNameResolverMan::AsyncNameResolverMan()
 {
 }
 
-AsyncNameResolverMan::~AsyncNameResolverMan() { assert(!resolverCheck_); }
+AsyncNameResolverMan::~AsyncNameResolverMan() noexcept
+{
+  assert(!resolverCheck_);
+}
 
 bool AsyncNameResolverMan::started() const
 {

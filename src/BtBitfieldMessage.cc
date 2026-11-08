@@ -55,7 +55,7 @@ BtBitfieldMessage::BtBitfieldMessage(std::span<const unsigned char> bitfield)
 {
 }
 
-BtBitfieldMessage::~BtBitfieldMessage() = default;
+BtBitfieldMessage::~BtBitfieldMessage() noexcept = default;
 
 void BtBitfieldMessage::setBitfield(std::span<const unsigned char> bitfield)
 {

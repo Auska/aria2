@@ -89,7 +89,7 @@ private:
 public:
   PeerSessionResource(int32_t pieceLength, int64_t totalLength);
 
-  ~PeerSessionResource();
+  ~PeerSessionResource() noexcept;
 
   // localhost is choking this peer
   bool amChoking() const { return amChoking_; }

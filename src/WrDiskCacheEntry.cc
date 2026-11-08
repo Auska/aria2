@@ -55,7 +55,7 @@ WrDiskCacheEntry::WrDiskCacheEntry(
 {
 }
 
-WrDiskCacheEntry::~WrDiskCacheEntry()
+WrDiskCacheEntry::~WrDiskCacheEntry() noexcept
 {
   if (!set_.empty()) {
     A2_LOG_WARN(fmt("WrDiskCacheEntry is not empty size={}",
@@ -90,8 +90,8 @@ void WrDiskCacheEntry::clear() { deleteDataCells(); }
 
 bool WrDiskCacheEntry::cacheData(DataCell* dataCell)
 {
-  A2_LOG_DEBUG(fmt("WrDiskCacheEntry cache goff={}, len={}",
-                   dataCell->goff, static_cast<unsigned long>(dataCell->len)));
+  A2_LOG_DEBUG(fmt("WrDiskCacheEntry cache goff={}, len={}", dataCell->goff,
+                   static_cast<unsigned long>(dataCell->len)));
   if (set_.insert(dataCell).second) {
     size_ += dataCell->len;
     return true;
@@ -101,8 +101,7 @@ bool WrDiskCacheEntry::cacheData(DataCell* dataCell)
   }
 }
 
-size_t WrDiskCacheEntry::append(int64_t goff,
-                                std::span<const std::byte> data)
+size_t WrDiskCacheEntry::append(int64_t goff, std::span<const std::byte> data)
 {
   if (set_.empty()) {
     return 0;

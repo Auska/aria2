@@ -57,7 +57,7 @@ public:
                     std::unique_ptr<DHTBucketTreeNode> right);
   // Ctor for leaf node
   DHTBucketTreeNode(std::shared_ptr<DHTBucket> bucket);
-  ~DHTBucketTreeNode();
+  ~DHTBucketTreeNode() noexcept;
   // Returns child node, left or right, which contains key.  If dig is
   // called against leaf node, then returns 0.
   DHTBucketTreeNode* dig(const DHTID& key);

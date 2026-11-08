@@ -66,7 +66,7 @@ public:
                     DownloadEngine* e,
                     const std::shared_ptr<SocketCore>& socket);
 
-  virtual ~HttpServerCommand();
+  virtual ~HttpServerCommand() noexcept;
 
   virtual bool execute() override;
 };

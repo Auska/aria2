@@ -44,7 +44,7 @@ class ProtocolDetector {
 public:
   ProtocolDetector();
 
-  ~ProtocolDetector();
+  ~ProtocolDetector() noexcept;
 
   // Returns true if uri is http(s)/ftp, otherwise returns false.
   bool isStreamProtocol(const std::string& uri) const;
@@ -56,7 +56,6 @@ public:
   // Returns true if ProtocolDetector thinks uri is BitTorrent Magnet link.
   // magnet:?xt=urn:btih:<info-hash>...
   bool guessTorrentMagnet(const std::string& uri) const;
-
 };
 
 } // namespace aria2

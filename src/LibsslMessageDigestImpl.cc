@@ -69,7 +69,7 @@ public:
     EVP_MD_CTX_reset(ctx_);
     reset();
   }
-  virtual ~MessageDigestBase() { EVP_MD_CTX_free(ctx_); }
+  virtual ~MessageDigestBase() noexcept { EVP_MD_CTX_free(ctx_); }
 
   static size_t length() { return EVP_MD_size(init_fn()); }
   virtual size_t getDigestLength() const override { return len_; }

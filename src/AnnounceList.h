@@ -62,7 +62,7 @@ public:
   AnnounceList();
   AnnounceList(const std::vector<std::vector<std::string>>& announceList);
   AnnounceList(const std::deque<std::shared_ptr<AnnounceTier>>& tiers);
-  ~AnnounceList();
+  ~AnnounceList() noexcept;
 
   // Don't allow copying
   AnnounceList(const AnnounceList&) = delete;

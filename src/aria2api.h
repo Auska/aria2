@@ -48,7 +48,7 @@ class ApiCallbackDownloadEventListener;
 
 struct Session {
   Session(const KeyVals& options);
-  ~Session();
+  ~Session() noexcept;
   std::shared_ptr<Context> context;
   std::unique_ptr<ApiCallbackDownloadEventListener> listener;
 };

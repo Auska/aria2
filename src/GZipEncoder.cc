@@ -45,7 +45,7 @@ namespace aria2 {
 
 GZipEncoder::GZipEncoder() : strm_{}, initialized_(false) {}
 
-GZipEncoder::~GZipEncoder() { release(); }
+GZipEncoder::~GZipEncoder() noexcept { release(); }
 
 void GZipEncoder::init()
 {

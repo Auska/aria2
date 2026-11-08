@@ -147,7 +147,7 @@ MultiUrlRequestInfo::MultiUrlRequestInfo(
 #endif // !HAVE_SIGACTION
 }
 
-MultiUrlRequestInfo::~MultiUrlRequestInfo() = default;
+MultiUrlRequestInfo::~MultiUrlRequestInfo() noexcept = default;
 
 void MultiUrlRequestInfo::printMessageForContinue()
 {

@@ -61,8 +61,8 @@ HttpServer::HttpServer(const std::shared_ptr<SocketCore>& socket)
     : socket_(socket),
       socketRecvBuffer_(std::make_shared<SocketRecvBuffer>(socket_)),
       socketBuffer_(socket),
-      headerProcessor_(
-          make_unique<HttpHeaderProcessor>(HttpHeaderProcessor::ParserMode::SERVER_PARSER)),
+      headerProcessor_(make_unique<HttpHeaderProcessor>(
+          HttpHeaderProcessor::ParserMode::SERVER_PARSER)),
       lastContentLength_(0),
       bodyConsumed_(0),
       reqType_(RequestType::RPC_TYPE_NONE),
@@ -73,7 +73,7 @@ HttpServer::HttpServer(const std::shared_ptr<SocketCore>& socket)
 {
 }
 
-HttpServer::~HttpServer() = default;
+HttpServer::~HttpServer() noexcept = default;
 
 namespace {
 const char* getStatusString(int status)
@@ -177,9 +177,9 @@ bool HttpServer::receiveRequest()
       throw DL_ABORT_EX(EX_EOF_FROM_PEER);
     }
   }
-  if (headerProcessor_->parse(std::as_bytes(
-          std::span{socketRecvBuffer_->getBuffer(),
-                    socketRecvBuffer_->getBufferLength()}))) {
+  if (headerProcessor_->parse(
+          std::as_bytes(std::span{socketRecvBuffer_->getBuffer(),
+                                  socketRecvBuffer_->getBufferLength()}))) {
     lastRequestHeader_ = headerProcessor_->getResult();
     A2_LOG_INFO(fmt("HTTP Server received request\n{}",
                     headerProcessor_->getHeaderString()));
@@ -193,8 +193,7 @@ bool HttpServer::receiveRequest()
     if (!contentLengthHdr.empty()) {
       if (!util::parseLLIntNoThrow(lastContentLength_, contentLengthHdr) ||
           lastContentLength_ < 0) {
-        throw DL_ABORT_EX(
-            fmt("Invalid Content-Length={}", contentLengthHdr));
+        throw DL_ABORT_EX(fmt("Invalid Content-Length={}", contentLengthHdr));
       }
     }
     else {
@@ -203,8 +202,8 @@ bool HttpServer::receiveRequest()
     headerProcessor_->clear();
 
     std::vector<Scip> acceptEncodings;
-    const std::string& acceptEnc =
-        lastRequestHeader_->find(HttpHeader::InterestingHeader::ACCEPT_ENCODING);
+    const std::string& acceptEnc = lastRequestHeader_->find(
+        HttpHeader::InterestingHeader::ACCEPT_ENCODING);
     util::splitIter(acceptEnc.begin(), acceptEnc.end(),
                     std::back_inserter(acceptEncodings), ',', true);
     acceptsGZip_ = false;
@@ -266,14 +265,13 @@ void HttpServer::feedResponse(int status, const std::string& headers,
                               std::string text, const std::string& contentType)
 {
   std::string httpDate = Time().toHTTPDate();
-  std::string header =
-      fmt("HTTP/1.1 {}\r\n"
-          "Date: {}\r\n"
-          "Content-Length: {}\r\n"
-          "Expires: {}\r\n"
-          "Cache-Control: no-cache\r\n",
-          getStatusString(status), httpDate,
-          static_cast<unsigned long>(text.size()), httpDate);
+  std::string header = fmt("HTTP/1.1 {}\r\n"
+                           "Date: {}\r\n"
+                           "Content-Length: {}\r\n"
+                           "Expires: {}\r\n"
+                           "Cache-Control: no-cache\r\n",
+                           getStatusString(status), httpDate,
+                           static_cast<unsigned long>(text.size()), httpDate);
   if (!contentType.empty()) {
     header += "Content-Type: ";
     header += contentType;

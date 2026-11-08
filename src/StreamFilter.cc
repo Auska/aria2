@@ -41,7 +41,7 @@ StreamFilter::StreamFilter(std::unique_ptr<StreamFilter> delegate)
 {
 }
 
-StreamFilter::~StreamFilter() = default;
+StreamFilter::~StreamFilter() noexcept = default;
 
 bool StreamFilter::installDelegate(std::unique_ptr<StreamFilter> filter)
 {

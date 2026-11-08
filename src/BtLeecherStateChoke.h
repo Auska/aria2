@@ -62,7 +62,7 @@ private:
   public:
     PeerEntry(const std::shared_ptr<Peer>& peer);
     PeerEntry(const PeerEntry& c);
-    ~PeerEntry();
+    ~PeerEntry() noexcept;
 
     PeerEntry& operator=(const PeerEntry& c);
 
@@ -106,7 +106,7 @@ private:
 public:
   BtLeecherStateChoke();
 
-  ~BtLeecherStateChoke();
+  ~BtLeecherStateChoke() noexcept;
 
   void executeChoke(const PeerSet& peerSet);
 

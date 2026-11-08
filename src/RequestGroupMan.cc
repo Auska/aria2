@@ -131,7 +131,10 @@ RequestGroupMan::RequestGroupMan(
                       requestGroups.end());
 }
 
-RequestGroupMan::~RequestGroupMan() { openedFileCounter_->deactivate(); }
+RequestGroupMan::~RequestGroupMan() noexcept
+{
+  openedFileCounter_->deactivate();
+}
 
 bool RequestGroupMan::setupOptimizeConcurrentDownloads(void)
 {

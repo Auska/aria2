@@ -70,7 +70,7 @@ PeerConnection::PeerConnection(cuid_t cuid, const std::shared_ptr<Peer>& peer,
 {
 }
 
-PeerConnection::~PeerConnection() = default;
+PeerConnection::~PeerConnection() noexcept = default;
 
 void PeerConnection::pushBytes(std::vector<unsigned char> data,
                                std::unique_ptr<ProgressUpdate> progressUpdate)
@@ -197,14 +197,15 @@ bool PeerConnection::receiveHandshake(unsigned char* data, size_t& dataLength,
   size_t remaining = BtHandshakeMessage::MESSAGE_LENGTH - resbufLength_;
   if (remaining > 0) {
     size_t temp = remaining;
-    remaining = readData(
-        std::span{resbuf_.get() + resbufLength_,
-                  BtHandshakeMessage::MESSAGE_LENGTH - resbufLength_},
-        encryptionEnabled_);
+    remaining =
+        readData(std::span{resbuf_.get() + resbufLength_,
+                           BtHandshakeMessage::MESSAGE_LENGTH - resbufLength_},
+                 encryptionEnabled_);
     if (remaining == 0 && !socket_->wantRead() && !socket_->wantWrite()) {
       // we got EOF
-      A2_LOG_DEBUG(fmt("CUID#{} - In PeerConnection::receiveHandshake(), remain={}",
-                       cuid_, static_cast<unsigned long>(temp)));
+      A2_LOG_DEBUG(
+          fmt("CUID#{} - In PeerConnection::receiveHandshake(), remain={}",
+              cuid_, static_cast<unsigned long>(temp)));
       peer_->setDisconnectedGracefully(true);
       throw DL_ABORT_EX(EX_EOF_FROM_PEER);
     }
@@ -222,8 +223,7 @@ bool PeerConnection::receiveHandshake(unsigned char* data, size_t& dataLength,
   return retval;
 }
 
-size_t PeerConnection::readData(std::span<unsigned char> data,
-                               bool encryption)
+size_t PeerConnection::readData(std::span<unsigned char> data, bool encryption)
 {
   auto length =
       static_cast<size_t>(socket_->readData(std::as_writable_bytes(data)));

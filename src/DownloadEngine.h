@@ -110,7 +110,7 @@ private:
     SocketPoolEntry(const std::shared_ptr<SocketCore>& socket,
                     std::chrono::seconds timeout);
 
-    ~SocketPoolEntry();
+    ~SocketPoolEntry() noexcept;
 
     bool isTimeout() const;
 
@@ -174,7 +174,7 @@ private:
 public:
   DownloadEngine(std::unique_ptr<EventPoll> eventPoll);
 
-  ~DownloadEngine();
+  ~DownloadEngine() noexcept;
 
   // If oneshot is true, this function returns after one event polling
   // and performing action for them. This function returns 1 when

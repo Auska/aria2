@@ -95,7 +95,7 @@ private:
 public:
   Peer(std::string ipaddr, uint16_t port, bool incoming = false);
 
-  ~Peer();
+  ~Peer() noexcept;
 
   const std::string& getIPAddress() const { return ipaddr_; }
 

@@ -73,7 +73,7 @@ public:
                               DownloadEngine* e,
                               const std::shared_ptr<SocketCore>& s);
 
-  virtual ~ReceiverMSEHandshakeCommand();
+  virtual ~ReceiverMSEHandshakeCommand() noexcept;
 };
 
 } // namespace aria2

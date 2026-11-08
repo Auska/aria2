@@ -61,7 +61,7 @@ public:
   };
 
   DiskAdaptor();
-  virtual ~DiskAdaptor();
+  virtual ~DiskAdaptor() noexcept;
 
   virtual void openFile() = 0;
 
@@ -117,7 +117,7 @@ public:
   virtual void writeCache(const WrDiskCacheEntry* entry) = 0;
 
   // Force physical write of data from OS buffer cache.
-  virtual void flushOSBuffers(){};
+  virtual void flushOSBuffers() {};
 
   void setFileAllocationMethod(FileAllocationMethod method)
   {

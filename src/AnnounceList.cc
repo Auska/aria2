@@ -58,7 +58,7 @@ AnnounceList::AnnounceList(
   resetIterator();
 }
 
-AnnounceList::~AnnounceList() = default;
+AnnounceList::~AnnounceList() noexcept = default;
 
 void AnnounceList::reconfigure(
     const std::vector<std::vector<std::string>>& announceList)

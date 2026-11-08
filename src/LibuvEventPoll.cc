@@ -34,7 +34,6 @@
  */
 /* copyright --> */
 
-
 #include "LibuvEventPoll.h"
 
 #include <algorithm>
@@ -93,7 +92,7 @@ int LibuvEventPoll::KSocketEntry::getEvents() const
 
 LibuvEventPoll::LibuvEventPoll() { loop_ = uv_loop_new(); }
 
-LibuvEventPoll::~LibuvEventPoll()
+LibuvEventPoll::~LibuvEventPoll() noexcept
 {
   for (auto& p : polls_) {
     p.second->close();
@@ -127,7 +126,8 @@ void LibuvEventPoll::poll(const struct timeval& tv)
     uv_close((uv_handle_t*)timer, close_callback<uv_timer_t>);
   }
   else {
-    while (uv_run(loop_, static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT)) > 0) {
+    while (uv_run(loop_,
+                  static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT)) > 0) {
     }
   }
 

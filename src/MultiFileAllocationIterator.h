@@ -56,7 +56,7 @@ private:
 public:
   MultiFileAllocationIterator(MultiDiskAdaptor* diskAdaptor);
 
-  virtual ~MultiFileAllocationIterator();
+  virtual ~MultiFileAllocationIterator() noexcept;
 
   virtual void allocateChunk() override;
 

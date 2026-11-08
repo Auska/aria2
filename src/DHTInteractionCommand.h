@@ -62,7 +62,7 @@ private:
 public:
   DHTInteractionCommand(cuid_t cuid, DownloadEngine* e);
 
-  virtual ~DHTInteractionCommand();
+  virtual ~DHTInteractionCommand() noexcept;
 
   virtual bool execute() override;
 

@@ -79,7 +79,7 @@ public:
                       const std::shared_ptr<Option>& op,
                       const std::shared_ptr<UriListParser>& uriListParser);
 
-  ~MultiUrlRequestInfo();
+  ~MultiUrlRequestInfo() noexcept;
 
   // Returns FINISHED if all downloads have completed, otherwise returns the
   // last download result.

@@ -42,7 +42,7 @@ namespace aria2 {
 
 class NullProgressInfoFile : public BtProgressInfoFile {
 public:
-  virtual ~NullProgressInfoFile() = default;
+  virtual ~NullProgressInfoFile() noexcept = default;
 
   virtual std::string getFilename() override { return A2STR::NIL; }
 

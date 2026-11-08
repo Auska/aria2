@@ -44,7 +44,7 @@ namespace aria2 {
 
 WrDiskCache::WrDiskCache(size_t limit) : limit_(limit), total_(0), clock_(0) {}
 
-WrDiskCache::~WrDiskCache()
+WrDiskCache::~WrDiskCache() noexcept
 {
   if (total_) {
     A2_LOG_WARN(fmt("Write disk cache is not empty size={}",
@@ -64,7 +64,7 @@ bool WrDiskCache::add(WrDiskCacheEntry* ent)
   }
   else {
     A2_LOG_WARN(fmt("Found duplicate cache entry a.{{size={},clock={}}} "
-                        "b{{size={},clock={}}}",
+                    "b{{size={},clock={}}}",
                     static_cast<unsigned long>((*rv.first)->getSize()),
                     (*rv.first)->getLastUpdate(),
                     static_cast<unsigned long>(ent->getSize()),

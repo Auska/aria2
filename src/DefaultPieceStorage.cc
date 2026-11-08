@@ -115,7 +115,7 @@ DefaultPieceStorage::DefaultPieceStorage(
   }
 }
 
-DefaultPieceStorage::~DefaultPieceStorage() = default;
+DefaultPieceStorage::~DefaultPieceStorage() noexcept = default;
 
 std::shared_ptr<Piece> DefaultPieceStorage::checkOutPiece(size_t index,
                                                           cuid_t cuid)

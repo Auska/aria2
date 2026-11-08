@@ -99,7 +99,7 @@ MSEHandshake::MSEHandshake(cuid_t cuid,
 {
 }
 
-MSEHandshake::~MSEHandshake() = default;
+MSEHandshake::~MSEHandshake() noexcept = default;
 
 MSEHandshake::HandshakeType MSEHandshake::identifyHandshakeType()
 {

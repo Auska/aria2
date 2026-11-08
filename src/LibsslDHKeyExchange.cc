@@ -63,7 +63,7 @@ DHKeyExchange::DHKeyExchange()
 {
 }
 
-DHKeyExchange::~DHKeyExchange()
+DHKeyExchange::~DHKeyExchange() noexcept
 {
   BN_CTX_free(bnCtx_);
   BN_free(prime_);

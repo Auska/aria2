@@ -65,7 +65,7 @@ public:
   {
   }
 
-  virtual ~DelayedCommand() {}
+  virtual ~DelayedCommand() noexcept {}
 };
 
 } // namespace aria2

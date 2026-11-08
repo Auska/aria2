@@ -42,6 +42,6 @@ URIResult::URIResult(std::string_view uri, error_code::Value result)
 {
 }
 
-URIResult::~URIResult() = default;
+URIResult::~URIResult() noexcept = default;
 
 } // namespace aria2

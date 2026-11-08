@@ -51,7 +51,7 @@ public:
     memcpy(buf_.get(), data, size);
   }
 
-  virtual ~ulong() = default;
+  virtual ~ulong() noexcept = default;
 
   ulong<dim>& operator=(const ulong<dim>& rhs)
   {

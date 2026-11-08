@@ -78,7 +78,7 @@ namespace aria2 {
 
 DHTSetup::DHTSetup() = default;
 
-DHTSetup::~DHTSetup() = default;
+DHTSetup::~DHTSetup() noexcept = default;
 
 std::pair<std::vector<std::unique_ptr<Command>>,
           std::vector<std::unique_ptr<Command>>>

@@ -51,7 +51,7 @@ public:
   CheckIntegrityCommand(cuid_t cuid, RequestGroup* requestGroup,
                         DownloadEngine* e, CheckIntegrityEntry* entry);
 
-  virtual ~CheckIntegrityCommand();
+  virtual ~CheckIntegrityCommand() noexcept;
 
   virtual bool executeInternal() override;
 

@@ -53,7 +53,7 @@ public:
   AsyncNameResolverMan();
   // Destructor does not call disableNameResolverCheck(). Application
   // must call it before the destruction of this object.
-  ~AsyncNameResolverMan();
+  ~AsyncNameResolverMan() noexcept;
   // Enable IPv4 address lookup. default: true
   void setIPv4(bool ipv4) { ipv4_ = ipv4; }
   // Enable IPv6 address lookup. default: true

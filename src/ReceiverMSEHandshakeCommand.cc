@@ -67,7 +67,7 @@ ReceiverMSEHandshakeCommand::ReceiverMSEHandshakeCommand(
   mseHandshake_->setWantRead(true);
 }
 
-ReceiverMSEHandshakeCommand::~ReceiverMSEHandshakeCommand() = default;
+ReceiverMSEHandshakeCommand::~ReceiverMSEHandshakeCommand() noexcept = default;
 
 bool ReceiverMSEHandshakeCommand::exitBeforeExecute()
 {
@@ -214,7 +214,8 @@ void ReceiverMSEHandshakeCommand::createCommand()
 {
   auto peerConnection =
       make_unique<PeerConnection>(getCuid(), getPeer(), getSocket());
-  if (mseHandshake_->getNegotiatedCryptoType() == MSEHandshake::CryptoType::Arc4) {
+  if (mseHandshake_->getNegotiatedCryptoType() ==
+      MSEHandshake::CryptoType::Arc4) {
     peerConnection->enableEncryption(mseHandshake_->popEncryptor(),
                                      mseHandshake_->popDecryptor());
   }

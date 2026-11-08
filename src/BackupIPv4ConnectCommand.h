@@ -69,7 +69,7 @@ public:
                            const std::shared_ptr<BackupConnectInfo>& info,
                            Command* mainCommand, RequestGroup* requestGroup,
                            DownloadEngine* e);
-  ~BackupIPv4ConnectCommand();
+  ~BackupIPv4ConnectCommand() noexcept;
   virtual bool execute() override;
 
 private:

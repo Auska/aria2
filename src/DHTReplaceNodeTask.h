@@ -59,7 +59,7 @@ public:
   DHTReplaceNodeTask(const std::shared_ptr<DHTBucket>& bucket,
                      const std::shared_ptr<DHTNode>& newNode);
 
-  virtual ~DHTReplaceNodeTask();
+  virtual ~DHTReplaceNodeTask() noexcept;
 
   virtual void startup() override;
 

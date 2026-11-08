@@ -64,7 +64,7 @@ public:
              const std::shared_ptr<DHTNode>& remoteNode,
              std::string_view transactionID = A2STR::NIL);
 
-  virtual ~DHTMessage();
+  virtual ~DHTMessage() noexcept;
 
   const std::string& getTransactionID() const { return transactionID_; }
 

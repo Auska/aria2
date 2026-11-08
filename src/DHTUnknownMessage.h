@@ -55,7 +55,7 @@ public:
                     std::span<const unsigned char> data,
                     std::string_view ipaddr, uint16_t port);
 
-  virtual ~DHTUnknownMessage();
+  virtual ~DHTUnknownMessage() noexcept;
 
   // do nothing
   virtual void doReceivedAction() override;

@@ -118,7 +118,7 @@ bool DiskWriterEntry::operator<(const DiskWriterEntry& entry) const
 
 MultiDiskAdaptor::MultiDiskAdaptor() : pieceLength_{0}, readOnly_{false} {}
 
-MultiDiskAdaptor::~MultiDiskAdaptor() { closeFile(); }
+MultiDiskAdaptor::~MultiDiskAdaptor() noexcept { closeFile(); }
 
 namespace {
 std::unique_ptr<DiskWriterEntry>

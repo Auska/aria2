@@ -58,7 +58,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  ~FileAllocationEntry();
+  ~FileAllocationEntry() noexcept;
 
   virtual int64_t getCurrentLength() override;
 

@@ -51,7 +51,7 @@ class DHTPingReplyMessage;
 
 class DHTMessageCallback {
 public:
-  virtual ~DHTMessageCallback() = default;
+  virtual ~DHTMessageCallback() noexcept = default;
 
   void onReceived(DHTResponseMessage* message) { message->accept(this); }
 

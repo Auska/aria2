@@ -65,7 +65,7 @@ DefaultPeerStorage::DefaultPeerStorage()
 {
 }
 
-DefaultPeerStorage::~DefaultPeerStorage()
+DefaultPeerStorage::~DefaultPeerStorage() noexcept
 {
   assert(uniqPeers_.size() == unusedPeers_.size() + usedPeers_.size());
 }

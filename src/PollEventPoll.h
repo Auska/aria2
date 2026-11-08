@@ -104,7 +104,7 @@ private:
 public:
   PollEventPoll();
 
-  virtual ~PollEventPoll();
+  virtual ~PollEventPoll() noexcept;
 
   virtual void poll(const struct timeval& tv) override;
 

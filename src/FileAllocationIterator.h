@@ -43,7 +43,7 @@ namespace aria2 {
 
 class FileAllocationIterator {
 public:
-  virtual ~FileAllocationIterator() = default;
+  virtual ~FileAllocationIterator() noexcept = default;
 
   virtual void allocateChunk() = 0;
 

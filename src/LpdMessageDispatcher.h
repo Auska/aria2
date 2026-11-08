@@ -63,7 +63,7 @@ public:
                        const std::string& multicastAddr, uint16_t multicastPort,
                        std::chrono::seconds interval = 5_min);
 
-  ~LpdMessageDispatcher();
+  ~LpdMessageDispatcher() noexcept;
 
   // No throw
   bool init(const std::string& localAddr, unsigned char ttl,

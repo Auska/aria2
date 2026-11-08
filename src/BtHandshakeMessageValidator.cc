@@ -50,7 +50,7 @@ BtHandshakeMessageValidator::BtHandshakeMessageValidator(
   std::copy(infoHash.begin(), infoHash.end(), std::begin(infoHash_));
 }
 
-BtHandshakeMessageValidator::~BtHandshakeMessageValidator() = default;
+BtHandshakeMessageValidator::~BtHandshakeMessageValidator() noexcept = default;
 
 void BtHandshakeMessageValidator::validate()
 {
@@ -59,15 +59,16 @@ void BtHandshakeMessageValidator::validate()
         fmt("invalid handshake pstrlen={}", message_->getPstrlen()));
   }
   if (memcmp(BtHandshakeMessage::BT_PSTR, message_->getPstr(), 19) != 0) {
-    throw DL_ABORT_EX(
-        fmt("invalid handshake pstr={}",
-            util::percentEncode(std::as_bytes(std::span{message_->getPstr(), 19}))));
+    throw DL_ABORT_EX(fmt("invalid handshake pstr={}",
+                          util::percentEncode(std::as_bytes(
+                              std::span{message_->getPstr(), 19}))));
   }
   if (memcmp(infoHash_, message_->getInfoHash(), sizeof(infoHash_)) != 0) {
     throw DL_ABORT_EX(
         fmt("invalid handshake info hash: expected:{}, actual:{}",
             util::toHex(std::as_bytes(std::span{infoHash_, sizeof(infoHash_)})),
-            util::toHex(std::as_bytes(std::span{message_->getInfoHash(), INFO_HASH_LENGTH}))));
+            util::toHex(std::as_bytes(
+                std::span{message_->getInfoHash(), INFO_HASH_LENGTH}))));
   }
 }
 

@@ -58,7 +58,7 @@ public:
                       std::unique_ptr<HttpResponse> httpResponse,
                       const std::shared_ptr<HttpConnection>& httpConnection,
                       DownloadEngine* e, const std::shared_ptr<SocketCore>& s);
-  virtual ~HttpDownloadCommand();
+  virtual ~HttpDownloadCommand() noexcept;
 };
 
 } // namespace aria2

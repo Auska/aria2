@@ -63,7 +63,7 @@ OpenSSLTLSSession::OpenSSLTLSSession(OpenSSLTLSContext* tlsContext)
 {
 }
 
-OpenSSLTLSSession::~OpenSSLTLSSession()
+OpenSSLTLSSession::~OpenSSLTLSSession() noexcept
 {
   if (ssl_) {
     SSL_free(ssl_);
@@ -230,7 +230,8 @@ TLSErrorCode OpenSSLTLSSession::tlsConnect(const std::string& hostname,
   if (ret != TLSErrorCode::OK) {
     return ret;
   }
-  if (tlsContext_->getSide() == TLSSessionSide::CLIENT && tlsContext_->getVerifyPeer()) {
+  if (tlsContext_->getSide() == TLSSessionSide::CLIENT &&
+      tlsContext_->getVerifyPeer()) {
     // verify peer
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
     auto peerCert = SSL_get1_peer_certificate(ssl_);

@@ -44,7 +44,7 @@ PeerChokeCommand::PeerChokeCommand(cuid_t cuid, DownloadEngine* e)
 {
 }
 
-PeerChokeCommand::~PeerChokeCommand() = default;
+PeerChokeCommand::~PeerChokeCommand() noexcept = default;
 
 bool PeerChokeCommand::execute()
 {

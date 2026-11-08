@@ -68,7 +68,7 @@ private:
 public:
   DHTRoutingTable(const std::shared_ptr<DHTNode>& localNode);
 
-  ~DHTRoutingTable();
+  ~DHTRoutingTable() noexcept;
 
   bool addNode(const std::shared_ptr<DHTNode>& node);
 
@@ -92,8 +92,7 @@ public:
   std::shared_ptr<DHTBucket>
   getBucketFor(const std::shared_ptr<DHTNode>& node) const;
 
-  std::shared_ptr<DHTNode> getNode(const DHTID& id,
-                                   const std::string& ipaddr,
+  std::shared_ptr<DHTNode> getNode(const DHTID& id, const std::string& ipaddr,
                                    uint16_t port) const;
 
   void getBuckets(std::vector<std::shared_ptr<DHTBucket>>& buckets) const;

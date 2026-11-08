@@ -45,7 +45,7 @@ RangeBtMessageValidator::RangeBtMessageValidator(const RangeBtMessage* message,
 {
 }
 
-RangeBtMessageValidator::~RangeBtMessageValidator() = default;
+RangeBtMessageValidator::~RangeBtMessageValidator() noexcept = default;
 
 void RangeBtMessageValidator::validate()
 {

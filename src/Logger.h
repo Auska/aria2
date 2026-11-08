@@ -82,7 +82,7 @@ private:
 public:
   Logger();
 
-  ~Logger();
+  ~Logger() noexcept;
 
   void log(LEVEL level, const std::string& msg,
            std::source_location location = std::source_location::current());

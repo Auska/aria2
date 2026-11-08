@@ -58,7 +58,7 @@ public:
   DHTAutoSaveCommand(cuid_t cuid, DownloadEngine* e, int family,
                      std::chrono::seconds interval);
 
-  virtual ~DHTAutoSaveCommand();
+  virtual ~DHTAutoSaveCommand() noexcept;
 
   virtual void preProcess() override;
 

@@ -55,7 +55,7 @@ using PeerSet = std::set<std::shared_ptr<Peer>, RefLess<Peer>>;
 
 class PeerStorage {
 public:
-  virtual ~PeerStorage() = default;
+  virtual ~PeerStorage() noexcept = default;
 
   /**
    * Adds new peer to the internal peer list.

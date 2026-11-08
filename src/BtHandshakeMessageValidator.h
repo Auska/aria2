@@ -54,7 +54,7 @@ public:
   BtHandshakeMessageValidator(const BtHandshakeMessage* message,
                               std::span<const unsigned char> infoHash);
 
-  ~BtHandshakeMessageValidator();
+  ~BtHandshakeMessageValidator() noexcept;
 
   virtual void validate() override;
 };

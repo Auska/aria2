@@ -56,7 +56,7 @@ CheckIntegrityCommand::CheckIntegrityCommand(cuid_t cuid,
 {
 }
 
-CheckIntegrityCommand::~CheckIntegrityCommand()
+CheckIntegrityCommand::~CheckIntegrityCommand() noexcept
 {
   getDownloadEngine()->getCheckIntegrityMan()->dropPickedEntry();
 }

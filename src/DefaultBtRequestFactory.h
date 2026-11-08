@@ -64,13 +64,11 @@ private:
 public:
   DefaultBtRequestFactory();
 
-  virtual ~DefaultBtRequestFactory();
+  virtual ~DefaultBtRequestFactory() noexcept;
 
-  virtual void
-  addTargetPiece(const std::shared_ptr<Piece>& piece) override;
+  virtual void addTargetPiece(const std::shared_ptr<Piece>& piece) override;
 
-  virtual void
-  removeTargetPiece(const std::shared_ptr<Piece>& piece) override;
+  virtual void removeTargetPiece(const std::shared_ptr<Piece>& piece) override;
 
   virtual void removeAllTargetPiece() override;
 

@@ -68,7 +68,7 @@ DHTBucket::DHTBucket(const std::shared_ptr<DHTNode>& localNode)
   min_.fill(0);
 }
 
-DHTBucket::~DHTBucket() = default;
+DHTBucket::~DHTBucket() noexcept = default;
 
 void DHTBucket::getRandomNodeID(DHTID& nodeID) const
 {

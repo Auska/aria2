@@ -61,7 +61,7 @@ struct SegmentEntry {
   std::shared_ptr<Segment> segment;
 
   SegmentEntry(cuid_t cuid, const std::shared_ptr<Segment>& segment);
-  ~SegmentEntry();
+  ~SegmentEntry() noexcept;
 
   // Don't allow copying
   SegmentEntry(const SegmentEntry&);
@@ -103,7 +103,7 @@ public:
   SegmentMan(const std::shared_ptr<DownloadContext>& downloadContext,
              const std::shared_ptr<PieceStorage>& pieceStorage);
 
-  ~SegmentMan();
+  ~SegmentMan() noexcept;
 
   // Initializes totalSize, isSplittable, downloadStarted, errors.
   // Clears command queue. Also, closes diskWriter.

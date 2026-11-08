@@ -63,7 +63,7 @@ public:
                      RequestGroup* requestGroup,
                      const std::shared_ptr<HttpConnection>& httpConnection,
                      DownloadEngine* e, const std::shared_ptr<SocketCore>& s);
-  virtual ~HttpRequestCommand();
+  virtual ~HttpRequestCommand() noexcept;
 
   void setProxyRequest(const std::shared_ptr<Request>& proxyRequest);
 };

@@ -46,7 +46,7 @@ private:
 
 public:
   CUIDCounter();
-  ~CUIDCounter();
+  ~CUIDCounter() noexcept;
   cuid_t newID();
 };
 

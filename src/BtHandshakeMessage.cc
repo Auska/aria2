@@ -55,7 +55,7 @@ BtHandshakeMessage::BtHandshakeMessage(std::span<const unsigned char> infoHash,
   std::copy(peerId.begin(), peerId.end(), std::begin(peerId_));
 }
 
-BtHandshakeMessage::~BtHandshakeMessage() = default;
+BtHandshakeMessage::~BtHandshakeMessage() noexcept = default;
 
 void BtHandshakeMessage::init()
 {
@@ -97,8 +97,10 @@ std::vector<unsigned char> BtHandshakeMessage::createMessage()
 std::string BtHandshakeMessage::toString() const
 {
   return fmt("{} peerId={}, reserved={}", NAME,
-             util::percentEncode(std::as_bytes(std::span{peerId_.data(), peerId_.size()})),
-             util::toHex(std::as_bytes(std::span{reserved_.data(), reserved_.size()})));
+             util::percentEncode(
+                 std::as_bytes(std::span{peerId_.data(), peerId_.size()})),
+             util::toHex(
+                 std::as_bytes(std::span{reserved_.data(), reserved_.size()})));
 }
 
 bool BtHandshakeMessage::isFastExtensionSupported() const

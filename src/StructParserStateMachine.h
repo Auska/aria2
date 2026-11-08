@@ -57,7 +57,7 @@ enum class StructElementType {
 // JSON, Bencode).
 class StructParserStateMachine {
 public:
-  virtual ~StructParserStateMachine() = default;
+  virtual ~StructParserStateMachine() noexcept = default;
 
   virtual void beginElement(StructElementType elementType) = 0;
   virtual void endElement(StructElementType elementType) = 0;

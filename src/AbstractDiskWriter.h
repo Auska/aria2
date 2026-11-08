@@ -64,7 +64,7 @@ protected:
 
 public:
   AbstractDiskWriter(const std::string& filename);
-  virtual ~AbstractDiskWriter();
+  virtual ~AbstractDiskWriter() noexcept;
 
   virtual void openFile(int64_t totalLength = 0) override;
 
@@ -80,8 +80,7 @@ public:
   virtual void truncate(int64_t length) override;
 
   // File must be opened before calling this function.
-  virtual void allocate(int64_t offset, int64_t length,
-                        bool sparse) override;
+  virtual void allocate(int64_t offset, int64_t length, bool sparse) override;
 
   virtual int64_t size() override;
 

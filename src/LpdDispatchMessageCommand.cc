@@ -52,7 +52,7 @@ LpdDispatchMessageCommand::LpdDispatchMessageCommand(
 {
 }
 
-LpdDispatchMessageCommand::~LpdDispatchMessageCommand() = default;
+LpdDispatchMessageCommand::~LpdDispatchMessageCommand() noexcept = default;
 
 bool LpdDispatchMessageCommand::execute()
 {

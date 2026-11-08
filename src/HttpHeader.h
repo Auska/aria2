@@ -103,7 +103,7 @@ private:
 
 public:
   HttpHeader();
-  ~HttpHeader();
+  ~HttpHeader() noexcept;
 
   // For all methods, use lowercased header field name.
   void put(InterestingHeader hdKey, std::string_view value);

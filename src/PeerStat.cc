@@ -46,7 +46,7 @@ PeerStat::PeerStat(cuid_t cuid, std::string_view hostname,
 
 PeerStat::PeerStat(cuid_t cuid) : cuid_(cuid) {}
 
-PeerStat::~PeerStat() = default;
+PeerStat::~PeerStat() noexcept = default;
 
 /**
  * Returns current download speed in byte per sec.

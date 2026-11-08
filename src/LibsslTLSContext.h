@@ -50,7 +50,7 @@ class OpenSSLTLSContext : public TLSContext {
 public:
   OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer);
 
-  ~OpenSSLTLSContext();
+  ~OpenSSLTLSContext() noexcept;
 
   // private key `keyfile' must be decrypted.
   virtual bool addCredentialFile(const std::string& certfile,
@@ -67,10 +67,7 @@ public:
   virtual TLSSessionSide getSide() const override { return side_; }
 
   virtual bool getVerifyPeer() const override { return verifyPeer_; }
-  virtual void setVerifyPeer(bool verify) override
-  {
-    verifyPeer_ = verify;
-  }
+  virtual void setVerifyPeer(bool verify) override { verifyPeer_ = verify; }
 
   SSL_CTX* getSSLCtx() const { return sslCtx_; }
 

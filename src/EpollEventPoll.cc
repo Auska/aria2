@@ -88,7 +88,7 @@ EpollEventPoll::EpollEventPoll()
   epfd_ = epoll_create(EPOLL_EVENTS_MAX);
 }
 
-EpollEventPoll::~EpollEventPoll()
+EpollEventPoll::~EpollEventPoll() noexcept
 {
   if (epfd_ != -1) {
     int r = close(epfd_);

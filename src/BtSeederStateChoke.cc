@@ -49,7 +49,7 @@ BtSeederStateChoke::BtSeederStateChoke() : round_(0), lastRound_(Timer::zero())
 {
 }
 
-BtSeederStateChoke::~BtSeederStateChoke() = default;
+BtSeederStateChoke::~BtSeederStateChoke() noexcept = default;
 
 namespace {
 constexpr auto TIME_FRAME = 20_s;
@@ -67,7 +67,7 @@ BtSeederStateChoke::PeerEntry::PeerEntry(const std::shared_ptr<Peer>& peer)
 
 BtSeederStateChoke::PeerEntry::PeerEntry(const PeerEntry& c) = default;
 
-BtSeederStateChoke::PeerEntry::~PeerEntry() = default;
+BtSeederStateChoke::PeerEntry::~PeerEntry() noexcept = default;
 
 void BtSeederStateChoke::PeerEntry::swap(PeerEntry& c)
 {

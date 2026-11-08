@@ -52,7 +52,7 @@ FillRequestGroupCommand::FillRequestGroupCommand(cuid_t cuid, DownloadEngine* e)
   setStatusRealtime();
 }
 
-FillRequestGroupCommand::~FillRequestGroupCommand() = default;
+FillRequestGroupCommand::~FillRequestGroupCommand() noexcept = default;
 
 bool FillRequestGroupCommand::execute()
 {

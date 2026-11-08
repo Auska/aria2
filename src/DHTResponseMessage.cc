@@ -49,7 +49,7 @@ DHTResponseMessage::DHTResponseMessage(
 {
 }
 
-DHTResponseMessage::~DHTResponseMessage() = default;
+DHTResponseMessage::~DHTResponseMessage() noexcept = default;
 
 const std::string& DHTResponseMessage::getType() const { return R; }
 
@@ -64,11 +64,9 @@ std::string DHTResponseMessage::toString() const
 {
   return fmt("dht response {} TransactionID={} Remote:{}({}), id={}, v={}, {}",
              getMessageType(), util::toHex(getTransactionID()),
-             getRemoteNode()->getIPAddress(),
-             getRemoteNode()->getPort(),
+             getRemoteNode()->getIPAddress(), getRemoteNode()->getPort(),
              util::toHex(std::as_bytes(std::span{getRemoteNode()->getID()})),
-             util::torrentPercentEncode(getVersion()),
-             toStringOptional());
+             util::torrentPercentEncode(getVersion()), toStringOptional());
 }
 
 } // namespace aria2

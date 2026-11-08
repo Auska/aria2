@@ -48,7 +48,7 @@ private:
 
 public:
   BtBitfieldMessageValidator(const BtBitfieldMessage* message, size_t numPiece);
-  ~BtBitfieldMessageValidator();
+  ~BtBitfieldMessageValidator() noexcept;
 
   virtual void validate() override;
 };

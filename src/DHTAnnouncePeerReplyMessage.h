@@ -45,7 +45,7 @@ public:
                               const std::shared_ptr<DHTNode>& remoteNode,
                               const std::string& transactionID);
 
-  virtual ~DHTAnnouncePeerReplyMessage();
+  virtual ~DHTAnnouncePeerReplyMessage() noexcept;
 
   virtual void doReceivedAction() override;
 

@@ -49,7 +49,7 @@ private:
 public:
   IndexBtMessageValidator(const IndexBtMessage* message, size_t numPiece);
 
-  ~IndexBtMessageValidator();
+  ~IndexBtMessageValidator() noexcept;
 
   virtual void validate() override;
 };

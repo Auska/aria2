@@ -44,6 +44,6 @@ TorrentAttribute::TorrentAttribute()
 {
 }
 
-TorrentAttribute::~TorrentAttribute() = default;
+TorrentAttribute::~TorrentAttribute() noexcept = default;
 
 } // namespace aria2

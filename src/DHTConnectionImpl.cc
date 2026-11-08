@@ -52,7 +52,7 @@ DHTConnectionImpl::DHTConnectionImpl(int family)
 {
 }
 
-DHTConnectionImpl::~DHTConnectionImpl() = default;
+DHTConnectionImpl::~DHTConnectionImpl() noexcept = default;
 
 std::optional<uint16_t> DHTConnectionImpl::bind(const std::string& addr,
                                                 SegList<int>& sgl)

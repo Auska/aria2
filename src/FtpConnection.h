@@ -84,7 +84,7 @@ public:
                 const std::shared_ptr<Request>& req,
                 const std::shared_ptr<AuthConfig>& authConfig,
                 const Option* op);
-  ~FtpConnection();
+  ~FtpConnection() noexcept;
   bool sendUser();
   bool sendPass();
   bool sendType();

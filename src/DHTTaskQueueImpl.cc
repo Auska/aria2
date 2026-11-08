@@ -50,7 +50,7 @@ DHTTaskQueueImpl::DHTTaskQueueImpl()
 {
 }
 
-DHTTaskQueueImpl::~DHTTaskQueueImpl() = default;
+DHTTaskQueueImpl::~DHTTaskQueueImpl() noexcept = default;
 
 void DHTTaskQueueImpl::executeTask()
 {

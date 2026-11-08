@@ -42,7 +42,7 @@ TimeSeedCriteria::TimeSeedCriteria(std::chrono::seconds duration)
 {
 }
 
-TimeSeedCriteria::~TimeSeedCriteria() = default;
+TimeSeedCriteria::~TimeSeedCriteria() noexcept = default;
 
 void TimeSeedCriteria::reset() { watch_ = global::wallclock(); }
 

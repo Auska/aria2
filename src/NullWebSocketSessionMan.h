@@ -53,7 +53,7 @@ class WebSocketSession {};
 class WebSocketSessionMan {
 public:
   WebSocketSessionMan() = default;
-  ~WebSocketSessionMan() = default;
+  ~WebSocketSessionMan() noexcept = default;
   void addSession(const std::shared_ptr<WebSocketSession>& wsSession) {}
   void removeSession(const std::shared_ptr<WebSocketSession>& wsSession) {}
   void addNotification(const std::string& method, const RequestGroup* group) {}

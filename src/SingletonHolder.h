@@ -48,7 +48,7 @@ private:
   SingletonHolder() = default;
 
 public:
-  ~SingletonHolder() = default;
+  ~SingletonHolder() noexcept = default;
 
   static std::unique_ptr<T>& instance() { return instance_; }
 

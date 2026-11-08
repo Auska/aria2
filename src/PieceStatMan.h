@@ -50,7 +50,7 @@ private:
 public:
   PieceStatMan(size_t pieceNum, bool randomShuffle);
 
-  ~PieceStatMan();
+  ~PieceStatMan() noexcept;
 
   void addPieceStats(size_t index);
 

@@ -73,7 +73,7 @@ public:
   // copy would free the same cells twice.
   WrDiskCacheEntry(const WrDiskCacheEntry&) = delete;
   WrDiskCacheEntry& operator=(const WrDiskCacheEntry&) = delete;
-  ~WrDiskCacheEntry();
+  ~WrDiskCacheEntry() noexcept;
 
   // Flushes the cached data to the disk and deletes them.
   void writeToDisk();

@@ -50,7 +50,7 @@ public:
   };
 
   NetStat();
-  ~NetStat();
+  ~NetStat() noexcept;
 
   // Don't allow copying
   NetStat(const NetStat&);

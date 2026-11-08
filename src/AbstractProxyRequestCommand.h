@@ -68,7 +68,7 @@ public:
                               const std::shared_ptr<Request>& proxyRequest,
                               const std::shared_ptr<SocketCore>& s);
 
-  virtual ~AbstractProxyRequestCommand();
+  virtual ~AbstractProxyRequestCommand() noexcept;
 
   virtual std::unique_ptr<Command> getNextCommand() = 0;
 };

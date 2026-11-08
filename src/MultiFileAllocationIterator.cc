@@ -53,7 +53,7 @@ MultiFileAllocationIterator::MultiFileAllocationIterator(
 {
 }
 
-MultiFileAllocationIterator::~MultiFileAllocationIterator()
+MultiFileAllocationIterator::~MultiFileAllocationIterator() noexcept
 {
   if (diskWriter_) {
     diskWriter_->closeFile();

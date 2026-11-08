@@ -113,7 +113,7 @@ BitfieldMan& BitfieldMan::operator=(const BitfieldMan& bitfieldMan)
   return *this;
 }
 
-BitfieldMan::~BitfieldMan() = default;
+BitfieldMan::~BitfieldMan() noexcept = default;
 
 int32_t BitfieldMan::getLastBlockLength() const
 {

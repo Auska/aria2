@@ -54,7 +54,7 @@ public:
       RequestGroup* requestGroup,
       std::unique_ptr<Command> nextCommand = std::unique_ptr<Command>());
 
-  virtual ~RequestGroupEntry();
+  virtual ~RequestGroupEntry() noexcept;
 
   RequestGroup* getRequestGroup() const { return requestGroup_; }
 

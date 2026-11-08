@@ -46,7 +46,7 @@ class BufferedFile : public IOFile {
 public:
   BufferedFile(const char* filename, const char* mode);
   BufferedFile(FILE* fp);
-  virtual ~BufferedFile();
+  virtual ~BufferedFile() noexcept;
 
 protected:
   // wrapper for fread. Using 1 for 2nd argument of fread.

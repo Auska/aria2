@@ -49,7 +49,7 @@ private:
 public:
   ChunkedDecodingStreamFilter(std::unique_ptr<StreamFilter> delegate = nullptr);
 
-  virtual ~ChunkedDecodingStreamFilter();
+  virtual ~ChunkedDecodingStreamFilter() noexcept;
 
   virtual void init() override;
 
@@ -63,10 +63,7 @@ public:
 
   virtual const std::string& getName() const override;
 
-  virtual size_t getBytesProcessed() const override
-  {
-    return bytesProcessed_;
-  }
+  virtual size_t getBytesProcessed() const override { return bytesProcessed_; }
 
   static const std::string NAME;
 };

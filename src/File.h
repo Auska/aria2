@@ -62,7 +62,7 @@ public:
 
   File(const File& c);
 
-  ~File();
+  ~File() noexcept;
 
   File& operator=(const File& c);
 

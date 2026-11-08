@@ -55,7 +55,7 @@ private:
 
     AddrEntry(std::string_view addr);
     AddrEntry(const AddrEntry& c);
-    ~AddrEntry();
+    ~AddrEntry() noexcept;
 
     AddrEntry& operator=(const AddrEntry& c);
   };
@@ -67,7 +67,7 @@ private:
 
     CacheEntry(std::string_view hostname, uint16_t port);
     CacheEntry(const CacheEntry& c);
-    ~CacheEntry();
+    ~CacheEntry() noexcept;
 
     CacheEntry& operator=(const CacheEntry& c);
 
@@ -105,7 +105,7 @@ private:
 public:
   DNSCache();
   DNSCache(const DNSCache& c);
-  ~DNSCache();
+  ~DNSCache() noexcept;
 
   DNSCache& operator=(const DNSCache& c);
 

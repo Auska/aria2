@@ -44,7 +44,7 @@ public:
   AutoSaveCommand(cuid_t cuid, DownloadEngine* e,
                   std::chrono::seconds interval);
 
-  virtual ~AutoSaveCommand();
+  virtual ~AutoSaveCommand() noexcept;
 
   virtual void preProcess() override;
 

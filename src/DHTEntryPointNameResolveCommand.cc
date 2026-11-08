@@ -79,7 +79,7 @@ DHTEntryPointNameResolveCommand::DHTEntryPointNameResolveCommand(
 #endif // ENABLE_ASYNC_DNS
 }
 
-DHTEntryPointNameResolveCommand::~DHTEntryPointNameResolveCommand()
+DHTEntryPointNameResolveCommand::~DHTEntryPointNameResolveCommand() noexcept
 {
 #ifdef ENABLE_ASYNC_DNS
   asyncNameResolverMan_->disableNameResolverCheck(e_, this);
@@ -183,8 +183,8 @@ int DHTEntryPointNameResolveCommand::resolveHostname(
       return -1;
     }
     else {
-      A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname,
-                      res.front()));
+      A2_LOG_INFO(
+          fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
       return 1;
     }
   }

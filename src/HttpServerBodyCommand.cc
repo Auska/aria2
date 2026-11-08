@@ -82,7 +82,7 @@ HttpServerBodyCommand::HttpServerBodyCommand(
   }
 }
 
-HttpServerBodyCommand::~HttpServerBodyCommand()
+HttpServerBodyCommand::~HttpServerBodyCommand() noexcept
 {
   e_->deleteSocketForReadCheck(socket_, this);
   if (writeCheck_) {
@@ -193,14 +193,16 @@ bool HttpServerBodyCommand::execute()
           auto& header = httpServer_->getRequestHeader();
           std::string accessControlHeaders;
           if (!header->find(HttpHeader::InterestingHeader::ORIGIN).empty() &&
-              !header->find(HttpHeader::InterestingHeader::ACCESS_CONTROL_REQUEST_METHOD)
+              !header
+                   ->find(HttpHeader::InterestingHeader::
+                              ACCESS_CONTROL_REQUEST_METHOD)
                    .empty() &&
               !httpServer_->getAllowOrigin().empty()) {
             accessControlHeaders +=
                 "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n"
                 "Access-Control-Max-Age: 1728000\r\n";
-            const std::string& accReqHeaders =
-                header->find(HttpHeader::InterestingHeader::ACCESS_CONTROL_REQUEST_HEADERS);
+            const std::string& accReqHeaders = header->find(
+                HttpHeader::InterestingHeader::ACCESS_CONTROL_REQUEST_HEADERS);
             if (!accReqHeaders.empty()) {
               // We allow all headers requested.
               accessControlHeaders += "Access-Control-Allow-Headers: ";
@@ -237,8 +239,8 @@ bool HttpServerBodyCommand::execute()
             dw->reset();
           }
           if (error < 0) {
-            A2_LOG_INFO(fmt("CUID#{} - Failed to parse JSON-RPC request",
-                            getCuid()));
+            A2_LOG_INFO(
+                fmt("CUID#{} - Failed to parse JSON-RPC request", getCuid()));
             rpc::RpcResponse res(rpc::createJsonRpcErrorResponse(
                 -32700, "Parse error.", Null::g()));
             sendJsonRpcResponse(res, callback);
@@ -297,9 +299,10 @@ bool HttpServerBodyCommand::execute()
     }
   }
   catch (RecoverableException& e) {
-    A2_LOG_INFO_EX(fmt("CUID#{} - Error occurred while reading HTTP request body",
-                       getCuid()),
-                   e);
+    A2_LOG_INFO_EX(
+        fmt("CUID#{} - Error occurred while reading HTTP request body",
+            getCuid()),
+        e);
     return true;
   }
 }

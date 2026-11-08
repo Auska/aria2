@@ -71,7 +71,7 @@ public:
                             const std::shared_ptr<PieceStorage>& pieceStorage,
                             const Option* option);
 
-  virtual ~DefaultBtProgressInfoFile();
+  virtual ~DefaultBtProgressInfoFile() noexcept;
 
   virtual std::string getFilename() override { return filename_; }
 

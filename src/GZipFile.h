@@ -45,7 +45,7 @@ namespace aria2 {
 class GZipFile : public IOFile {
 public:
   GZipFile(const char* filename, const char* mode);
-  virtual ~GZipFile();
+  virtual ~GZipFile() noexcept;
 
 protected:
   virtual size_t onRead(std::span<std::byte> data) override;

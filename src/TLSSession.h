@@ -45,11 +45,7 @@ namespace aria2 {
 
 enum class TLSDirection { WANT_READ = 1, WANT_WRITE };
 
-enum class TLSErrorCode {
-  OK = 0,
-  ERROR = -1,
-  WOULDBLOCK = -2
-};
+enum class TLSErrorCode { OK = 0, ERROR = -1, WOULDBLOCK = -2 };
 
 // To create another SSL/TLS backend, implement TLSSession class below.
 //
@@ -58,7 +54,7 @@ public:
   static TLSSession* make(TLSContext* ctx);
 
   // MUST deallocate all resources
-  virtual ~TLSSession() = default;
+  virtual ~TLSSession() noexcept = default;
 
   // Initializes SSL/TLS session. The |sockfd| is the underlying
   // transport socket. This function returns TLS_ERR_OK if it

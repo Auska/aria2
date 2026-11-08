@@ -50,7 +50,7 @@ struct UDPTrackerRequest;
 
 class BtAnnounce {
 public:
-  virtual ~BtAnnounce() = default;
+  virtual ~BtAnnounce() noexcept = default;
 
   /**
    * Returns true if announce is required.

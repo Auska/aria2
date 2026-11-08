@@ -67,7 +67,7 @@ GZipFile::GZipFile(const char* filename, const char* mode) : fp_(nullptr)
   }
 }
 
-GZipFile::~GZipFile() { close(); }
+GZipFile::~GZipFile() noexcept { close(); }
 
 int GZipFile::onClose()
 {

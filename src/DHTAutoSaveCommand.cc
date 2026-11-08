@@ -65,7 +65,7 @@ DHTAutoSaveCommand::DHTAutoSaveCommand(cuid_t cuid, DownloadEngine* e,
 {
 }
 
-DHTAutoSaveCommand::~DHTAutoSaveCommand() = default;
+DHTAutoSaveCommand::~DHTAutoSaveCommand() noexcept = default;
 
 void DHTAutoSaveCommand::preProcess()
 {
@@ -109,9 +109,9 @@ void DHTAutoSaveCommand::save()
     serializer.serialize(dhtFile);
   }
   catch (RecoverableException& e) {
-    A2_LOG_ERROR_EX(fmt("Exception caught while saving DHT routing table to {}",
-                        dhtFile),
-                    e);
+    A2_LOG_ERROR_EX(
+        fmt("Exception caught while saving DHT routing table to {}", dhtFile),
+        e);
   }
 }
 

@@ -51,7 +51,7 @@ class ServerStatMan {
 public:
   ServerStatMan();
 
-  ~ServerStatMan();
+  ~ServerStatMan() noexcept;
 
   std::shared_ptr<ServerStat> find(const std::string& hostname,
                                    const std::string& protocol) const;
@@ -65,9 +65,8 @@ public:
   void removeStaleServerStat(const std::chrono::seconds& timeout);
 
 private:
-  using ServerStatSet =
-      std::set<std::shared_ptr<ServerStat>,
-               DerefLess<std::shared_ptr<ServerStat>>>;
+  using ServerStatSet = std::set<std::shared_ptr<ServerStat>,
+                                 DerefLess<std::shared_ptr<ServerStat>>>;
   ServerStatSet serverStats_;
 };
 

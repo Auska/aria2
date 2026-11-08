@@ -47,7 +47,7 @@ namespace aria2 {
 class SocketCore;
 
 struct ProgressUpdate {
-  virtual ~ProgressUpdate() = default;
+  virtual ~ProgressUpdate() noexcept = default;
   virtual void update(size_t length, bool complete) = 0;
 };
 
@@ -59,7 +59,7 @@ private:
         : progressUpdate_(std::move(progressUpdate))
     {
     }
-    virtual ~BufEntry() = default;
+    virtual ~BufEntry() noexcept = default;
     virtual ssize_t send(const std::shared_ptr<SocketCore>& socket,
                          size_t offset) = 0;
     virtual bool final(size_t offset) const = 0;
@@ -80,7 +80,7 @@ private:
   public:
     ByteArrayBufEntry(std::vector<unsigned char> bytes,
                       std::unique_ptr<ProgressUpdate> progressUpdate);
-    virtual ~ByteArrayBufEntry();
+    virtual ~ByteArrayBufEntry() noexcept;
     virtual ssize_t send(const std::shared_ptr<SocketCore>& socket,
                          size_t offset) override;
     virtual bool final(size_t offset) const override;
@@ -117,7 +117,7 @@ private:
 public:
   SocketBuffer(std::shared_ptr<SocketCore> socket);
 
-  ~SocketBuffer();
+  ~SocketBuffer() noexcept;
 
   // Don't allow copying
   SocketBuffer(const SocketBuffer&) = delete;

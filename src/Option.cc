@@ -46,7 +46,7 @@ Option::Option()
 {
 }
 
-Option::~Option() = default;
+Option::~Option() noexcept = default;
 
 Option::Option(const Option& option) = default;
 

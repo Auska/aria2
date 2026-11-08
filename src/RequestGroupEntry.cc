@@ -46,7 +46,10 @@ RequestGroupEntry::RequestGroupEntry(RequestGroup* requestGroup,
   requestGroup_->increaseNumCommand();
 }
 
-RequestGroupEntry::~RequestGroupEntry() { requestGroup_->decreaseNumCommand(); }
+RequestGroupEntry::~RequestGroupEntry() noexcept
+{
+  requestGroup_->decreaseNumCommand();
+}
 
 const std::unique_ptr<Command>& RequestGroupEntry::getNextCommand() const
 {

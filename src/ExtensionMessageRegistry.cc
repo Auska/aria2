@@ -44,7 +44,7 @@ ExtensionMessageRegistry::ExtensionMessageRegistry()
 {
 }
 
-ExtensionMessageRegistry::~ExtensionMessageRegistry() = default;
+ExtensionMessageRegistry::~ExtensionMessageRegistry() noexcept = default;
 
 namespace {
 const char* EXTENSION_NAMES[] = {"ut_metadata", "ut_pex", nullptr};

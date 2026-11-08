@@ -56,7 +56,7 @@ private:
 public:
   UriListParser(const std::string& filename);
 
-  ~UriListParser();
+  ~UriListParser() noexcept;
 
   void parseNext(std::vector<std::string>& uris, Option& op);
 
