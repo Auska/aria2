@@ -210,7 +210,15 @@ void visit(const String&) override;
 - 干净 worktree `/tmp/aria2-m11-p4`（base `e8796b3e`）全量重建：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (911)`、`error:` 0、C++ `warning:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
 - 教训：**不要对仅改了一行 include 的文件跑 `clang-format`**——仓库并非整体 clang-format-clean，会顺带重排 `test/UtilTest1.cc`（769 行）、`src/Makefile.am`（877 行）等无关内容；且 `clang-format` 会把 `*.am` 当 C++ 处理。只对实质修改的文件格式化。
 
-5. [ ] 阶段 5：`IndexedList` → `IndexedDeque`（或 `std::deque`）→ 提交 `PLAN-011 阶段5: 用标准容器替换自研 IndexedList`
+5. [x] ~~阶段 5：`IndexedList` → `IndexedDeque`（或 `std::deque`）~~ —— **取消**
+
+### 阶段 5 实测（2026-11-08）：前提不成立，取消
+
+- 计划假设「`IndexedList` 598 行里只用到 9 个方法，可缩到约 80 行」。实测推翻：
+  - `src/RequestGroupMan.cc` 实际用到 `push_back`(:167,:561,:918)、`push_front`(:437)、`insert(size_t, Key, Value)`(:207)、`insert(iterator, KeyFunc, first, last)`(:586)、`insert(size_t, KeyFunc, first, last)`(:198)、`move`(:227)、`get`(:217,:219,:906)、`remove`(:239,:911)、`remove_if`(:479)、`pop_front`(:548,:937)、`operator[]`(:923)、`begin`(:547)、`size`/`empty`/`clear`。
+  - 真正死掉的只有 `erase(iterator)`（`src/IndexedList.h:462`，只有 `test/IndexedListTest.cc` 的 `testErase` 在用）和 `insert(iterator, Key, Value)`（`:387`），合计约 25 行。
+  - 自定义双向迭代器（`:59-130`）是活的：`getPaginationRange` 用 `std::advance`、`move()` 用 `std::rotate`。
+- 结论：**活代码占 96%**。「重写成 IndexedDeque」只会把 598 行变成约 570 行，净收益为负；`move()` 的 `OFFSET_MODE_CUR/SET/END` 与 `insert` 的索引维护又是 `aria2.changePosition` RPC 的用户可见语义，重写有回归风险。经用户确认，**阶段 5 取消**，`src/IndexedList.h` 与 `test/IndexedListTest.cc` 原样保留。
 6. [ ] 阶段 6：头文件 `const char*` 形参 → `std::string_view` → 提交 `PLAN-011 阶段6: 头文件 const char* 形参改 string_view`
 7. [ ] 阶段 7：收尾（勾选、状态行、实测表、偏差）→ 提交 `PLAN-011: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
