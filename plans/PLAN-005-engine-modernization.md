@@ -272,7 +272,7 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
      `typedef` 类型名）。`src/GroupId.cc:54,64` 裸 new（私有构造）、
      `src/prefs.cc:65,94,110`（`PrefPtr` 是 `const Pref*`）、
      `src/OptionHandlerImpl.cc:675`（deleter 语义）按计划保留。
-2. [ ] **阶段 2 — B-IO 与事件（94 文件）**：`AbstractDiskWriter`/`SocketCore`/
+2. [x] **阶段 2 — B-IO 与事件（94 文件）**：`AbstractDiskWriter`/`SocketCore`/
    `*EventPoll*`/`*StreamFilter*`/`WrDiskCache*` 的 ptr+len 接口按 span 规则改；
    `src/SocketRecvBuffer::getBuffer()` 保持 `const unsigned char*`；
    `src/SinkStreamFilter::dataCopy` 保持 `std::unique_ptr<unsigned char[]>`
@@ -283,6 +283,21 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    `src/GZipEncoder`/`src/GZipDecodingStreamFilter` 保持
    `z_stream strm_ + bool initialized_`（偏差⑧）。同步改测试
    `test/*StreamFilterTest.cc`、`test/SocketCoreTest.cc` 等。门禁通过后提交。
+
+   实测（2026-11-08）：`src/Event.h:215,227,244,253` 4 处 `std::find` →
+   `std::ranges::find` 并收敛为 `auto i =`；`src/SocketCore` 的 `TlsState`
+   改 `enum class` 并移入 `SocketCore` 类内（`src/SocketCore.h:79-88`），
+   `secure_` 由 `int` 改为 `TlsState`（`:89`），9 处使用点改 `TlsState::*`、
+   3 处 `if (!secure_)` 改 `if (secure_ == TlsState::NONE)`；
+   `src/LibsslTLSContext.cc` 5 个裸指针 `typedef` → `using` 与
+   `std::stringstream`→`std::ostringstream`；`src/FileAllocationMan.h:45`
+   typedef → `using`；`src/GZipFile.cc:107,125` 与 `src/LibuvEventPoll.cc:102,130`
+   的 C cast → `static_cast`。
+   `src/SocketCore.cc` 的 `(a2_sockopt_t)&x` **保持 C cast**：`a2_sockopt_t`
+   是 `#define a2_sockopt_t void*`（`src/a2netcompat.h:40`），宏替换后
+   `static_cast<void*>(&x)` 语法不成立 —— 属可解释残余。
+   `src/WrDiskCacheEntry.h:82 append(int64_t, const unsigned char*, size_t)`
+   的 span 化留到阶段 3（唯一调用点 `src/Piece.cc:369` 在 Peer/Piece 链）。
 3. [ ] **阶段 3 — C-Peer/Piece/RequestGroup（112 文件）**：**BitfieldMan 专项**
    （三个成员 vector 化、`expr::array` 调用点、34 个 `getBitfield()` +
    3 个 `getFilterBitfield()` 消费点、8 条 `test/BitfieldManTest.cc` 断言）；

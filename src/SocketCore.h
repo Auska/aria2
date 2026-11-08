@@ -76,8 +76,17 @@ private:
 
   static int socketRecvBufferSize_;
 
+  enum class TlsState {
+    // TLS object is not initialized.
+    NONE = 0,
+    // TLS object is now handshaking.
+    HANDSHAKING = 2,
+    // TLS object is now connected.
+    CONNECTED = 3
+  };
+
   bool blocking_;
-  int secure_;
+  TlsState secure_;
 
   bool wantRead_;
   bool wantWrite_;

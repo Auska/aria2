@@ -104,7 +104,7 @@ size_t GZipFile::onRead(std::span<std::byte> buf)
   size_t count = buf.size();
   size_t read = 0;
   while (count) {
-    size_t len = std::min(count, (size_t)std::numeric_limits<unsigned>::max());
+    size_t len = std::min(count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
     int rv = gzread(fp_, data, len);
     if (rv <= 0) {
       break;
@@ -122,7 +122,7 @@ size_t GZipFile::onWrite(std::span<const std::byte> buf)
   size_t count = buf.size();
   size_t written = 0;
   while (count) {
-    size_t len = std::min(count, (size_t)std::numeric_limits<unsigned>::max());
+    size_t len = std::min(count, static_cast<size_t>(std::numeric_limits<unsigned>::max()));
     int rv = gzwrite(fp_, data, len);
     if (rv <= 0) {
       break;

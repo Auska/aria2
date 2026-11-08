@@ -42,7 +42,7 @@ namespace aria2 {
 
 class FileAllocationEntry;
 
-typedef SequentialPicker<FileAllocationEntry> FileAllocationMan;
+using FileAllocationMan = SequentialPicker<FileAllocationEntry>;
 
 } // namespace aria2
 

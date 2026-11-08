@@ -99,7 +99,7 @@ LibuvEventPoll::~LibuvEventPoll()
     p.second->close();
   }
   // Actually kill the polls, and timers, if any.
-  uv_run(loop_, (uv_run_mode)(UV_RUN_ONCE | UV_RUN_NOWAIT));
+  uv_run(loop_, static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT));
 
   if (loop_) {
     uv_loop_delete(loop_);
@@ -127,7 +127,7 @@ void LibuvEventPoll::poll(const struct timeval& tv)
     uv_close((uv_handle_t*)timer, close_callback<uv_timer_t>);
   }
   else {
-    while (uv_run(loop_, (uv_run_mode)(UV_RUN_ONCE | UV_RUN_NOWAIT)) > 0) {
+    while (uv_run(loop_, static_cast<uv_run_mode>(UV_RUN_ONCE | UV_RUN_NOWAIT)) > 0) {
     }
   }
 

@@ -86,17 +86,6 @@ std::string errorMsg(int errNum)
 }
 } // namespace
 
-namespace {
-enum TlsState {
-  // TLS object is not initialized.
-  A2_TLS_NONE = 0,
-  // TLS object is now handshaking.
-  A2_TLS_HANDSHAKING = 2,
-  // TLS object is now connected.
-  A2_TLS_CONNECTED = 3
-};
-} // namespace
-
 int SocketCore::protocolFamily_ = AF_UNSPEC;
 int SocketCore::ipDscp_ = 0;
 
@@ -137,7 +126,7 @@ SocketCore::SocketCore(sock_t sockfd, int sockType)
 void SocketCore::init()
 {
   blocking_ = true;
-  secure_ = A2_TLS_NONE;
+  secure_ = TlsState::NONE;
 
   wantRead_ = false;
   wantWrite_ = false;
@@ -699,7 +688,7 @@ ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
   ssize_t ret = 0;
   wantRead_ = false;
   wantWrite_ = false;
-  if (!secure_) {
+  if (secure_ == TlsState::NONE) {
     while ((ret = writev(sockfd_, iov, iovcnt)) == -1 &&
            SOCKET_ERRNO == A2_EINTR)
       ;
@@ -734,7 +723,7 @@ ssize_t SocketCore::writeData(std::span<const std::byte> data)
   wantRead_ = false;
   wantWrite_ = false;
 
-  if (!secure_) {
+  if (secure_ == TlsState::NONE) {
     // Cast for Windows send()
     while ((ret = send(sockfd_, reinterpret_cast<const char*>(data.data()),
                        data.size(), 0)) == -1 &&
@@ -776,7 +765,7 @@ ssize_t SocketCore::readData(std::span<std::byte> data)
   wantRead_ = false;
   wantWrite_ = false;
 
-  if (!secure_) {
+  if (secure_ == TlsState::NONE) {
       // Cast for Windows recv()
       while ((ret = recv(sockfd_, reinterpret_cast<char*>(data.data()),
                          data.size(), 0)) == -1 &&
@@ -830,12 +819,12 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
   wantRead_ = false;
   wantWrite_ = false;
 
-  if (secure_ == A2_TLS_CONNECTED) {
+  if (secure_ == TlsState::CONNECTED) {
     // Already connected!
     return true;
   }
 
-  if (secure_ == A2_TLS_NONE) {
+  if (secure_ == TlsState::NONE) {
     // Do some initial setup
     A2_LOG_DEBUG("Creating TLS session");
     tlsSession_.reset(TLSSession::make(tlsctx));
@@ -856,11 +845,11 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
       }
     }
     // Done with the setup, now let handshaking begin immediately.
-    secure_ = A2_TLS_HANDSHAKING;
+    secure_ = TlsState::HANDSHAKING;
     A2_LOG_DEBUG("TLS Handshaking");
   }
 
-  if (secure_ == A2_TLS_HANDSHAKING) {
+  if (secure_ == TlsState::HANDSHAKING) {
     // Starting handshake after initial setup or still handshaking.
     TLSVersion ver = TLSVersion::NONE;
     auto rv = TLSErrorCode::OK;
@@ -901,7 +890,7 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
                        tlsVersion));
 
       // 2. We're connected now!
-      secure_ = A2_TLS_CONNECTED;
+      secure_ = TlsState::CONNECTED;
       return true;
     }
 

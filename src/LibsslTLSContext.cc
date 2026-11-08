@@ -55,7 +55,7 @@ struct bio_deleter {
       BIO_free(b);
   }
 };
-typedef std::unique_ptr<BIO, bio_deleter> bio_t;
+using bio_t = std::unique_ptr<BIO, bio_deleter>;
 struct p12_deleter {
   void operator()(PKCS12* p)
   {
@@ -63,7 +63,7 @@ struct p12_deleter {
       PKCS12_free(p);
   }
 };
-typedef std::unique_ptr<PKCS12, p12_deleter> p12_t;
+using p12_t = std::unique_ptr<PKCS12, p12_deleter>;
 struct pkey_deleter {
   void operator()(EVP_PKEY* x)
   {
@@ -71,7 +71,7 @@ struct pkey_deleter {
       EVP_PKEY_free(x);
   }
 };
-typedef std::unique_ptr<EVP_PKEY, pkey_deleter> pkey_t;
+using pkey_t = std::unique_ptr<EVP_PKEY, pkey_deleter>;
 struct x509_deleter {
   void operator()(X509* x)
   {
@@ -79,7 +79,7 @@ struct x509_deleter {
       X509_free(x);
   }
 };
-typedef std::unique_ptr<X509, x509_deleter> x509_t;
+using x509_t = std::unique_ptr<X509, x509_deleter>;
 struct x509_sk_deleter {
   void operator()(STACK_OF(X509) * x)
   {
@@ -87,7 +87,7 @@ struct x509_sk_deleter {
       sk_X509_pop_free(x, X509_free);
   }
 };
-typedef std::unique_ptr<STACK_OF(X509), x509_sk_deleter> x509_sk_t;
+using x509_sk_t = std::unique_ptr<STACK_OF(X509), x509_sk_deleter>;
 } // namespace
 
 namespace aria2 {
@@ -197,7 +197,7 @@ bool OpenSSLTLSContext::addCredentialFile(const std::string& certfile,
 }
 bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
 {
-  std::stringstream ss;
+  std::ostringstream ss;
   BufferedFile(p12file.c_str(), BufferedFile::READ).transfer(ss);
 
   auto data = ss.str();

@@ -211,8 +211,7 @@ public:
 
   void addCommandEvent(const CommandEvent& cev)
   {
-    typename std::deque<CommandEvent>::iterator i =
-        std::find(commandEvents_.begin(), commandEvents_.end(), cev);
+    auto i = std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
     if (i == commandEvents_.end()) {
       commandEvents_.push_back(cev);
     }
@@ -223,8 +222,7 @@ public:
 
   void removeCommandEvent(const CommandEvent& cev)
   {
-    typename std::deque<CommandEvent>::iterator i =
-        std::find(commandEvents_.begin(), commandEvents_.end(), cev);
+    auto i = std::ranges::find(commandEvents_.begin(), commandEvents_.end(), cev);
     if (i == commandEvents_.end()) {
       // not found
     }
@@ -240,8 +238,7 @@ public:
 
   void addADNSEvent(const ADNSEvent& aev)
   {
-    typename std::deque<ADNSEvent>::iterator i =
-        std::find(adnsEvents_.begin(), adnsEvents_.end(), aev);
+    auto i = std::ranges::find(adnsEvents_.begin(), adnsEvents_.end(), aev);
     if (i == adnsEvents_.end()) {
       adnsEvents_.push_back(aev);
     }
@@ -249,8 +246,7 @@ public:
 
   void removeADNSEvent(const ADNSEvent& aev)
   {
-    typename std::deque<ADNSEvent>::iterator i =
-        std::find(adnsEvents_.begin(), adnsEvents_.end(), aev);
+    auto i = std::ranges::find(adnsEvents_.begin(), adnsEvents_.end(), aev);
     if (i == adnsEvents_.end()) {
       // not found
     }
