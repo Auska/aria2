@@ -66,7 +66,7 @@ InitiatorMSEHandshakeCommand::InitiatorMSEHandshakeCommand(
     : PeerAbstractCommand(cuid, p, e, s),
       requestGroup_(requestGroup),
       btRuntime_(btRuntime),
-      sequence_(INITIATOR_SEND_KEY),
+      sequence_(Seq::SEND_KEY),
       mseHandshake_(make_unique<MSEHandshake>(cuid, s, getOption().get()))
 {
   disableReadCheckSocket();
@@ -92,7 +92,7 @@ bool InitiatorMSEHandshakeCommand::executeInternal()
   bool done = false;
   while (!done) {
     switch (sequence_) {
-    case INITIATOR_SEND_KEY: {
+    case Seq::SEND_KEY: {
       if (!getSocket()->isWritable(0)) {
         addCommandSelf();
         return false;
@@ -100,57 +100,57 @@ bool InitiatorMSEHandshakeCommand::executeInternal()
       setTimeout(std::chrono::seconds(getOption()->getAsInt(PREF_BT_TIMEOUT)));
       mseHandshake_->initEncryptionFacility(true);
       mseHandshake_->sendPublicKey();
-      sequence_ = INITIATOR_SEND_KEY_PENDING;
+      sequence_ = Seq::SEND_KEY_PENDING;
       break;
     }
-    case INITIATOR_SEND_KEY_PENDING:
+    case Seq::SEND_KEY_PENDING:
       if (mseHandshake_->send()) {
-        sequence_ = INITIATOR_WAIT_KEY;
+        sequence_ = Seq::WAIT_KEY;
       }
       else {
         done = true;
       }
       break;
-    case INITIATOR_WAIT_KEY: {
+    case Seq::WAIT_KEY: {
       if (mseHandshake_->receivePublicKey()) {
         mseHandshake_->initCipher(
             bittorrent::getInfoHash(requestGroup_->getDownloadContext())
                 .data());
         mseHandshake_->sendInitiatorStep2();
-        sequence_ = INITIATOR_SEND_STEP2_PENDING;
+        sequence_ = Seq::SEND_STEP2_PENDING;
       }
       else {
         done = true;
       }
       break;
     }
-    case INITIATOR_SEND_STEP2_PENDING:
+    case Seq::SEND_STEP2_PENDING:
       if (mseHandshake_->send()) {
-        sequence_ = INITIATOR_FIND_VC_MARKER;
+        sequence_ = Seq::FIND_VC_MARKER;
       }
       else {
         done = true;
       }
       break;
-    case INITIATOR_FIND_VC_MARKER: {
+    case Seq::FIND_VC_MARKER: {
       if (mseHandshake_->findInitiatorVCMarker()) {
-        sequence_ = INITIATOR_RECEIVE_PAD_D_LENGTH;
+        sequence_ = Seq::RECEIVE_PAD_D_LENGTH;
       }
       else {
         done = true;
       }
       break;
     }
-    case INITIATOR_RECEIVE_PAD_D_LENGTH: {
+    case Seq::RECEIVE_PAD_D_LENGTH: {
       if (mseHandshake_->receiveInitiatorCryptoSelectAndPadDLength()) {
-        sequence_ = INITIATOR_RECEIVE_PAD_D;
+        sequence_ = Seq::RECEIVE_PAD_D;
       }
       else {
         done = true;
       }
       break;
     }
-    case INITIATOR_RECEIVE_PAD_D: {
+    case Seq::RECEIVE_PAD_D: {
       if (mseHandshake_->receivePad()) {
         auto peerConnection =
             make_unique<PeerConnection>(getCuid(), getPeer(), getSocket());
@@ -217,7 +217,7 @@ void InitiatorMSEHandshakeCommand::tryNewPeer()
 
 bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
 {
-  if (sequence_ == INITIATOR_SEND_KEY) {
+  if (sequence_ == Seq::SEND_KEY) {
     // We don't try legacy handshake when connection did not
     // established.
     tryNewPeer();
@@ -247,7 +247,7 @@ bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
 
 void InitiatorMSEHandshakeCommand::onAbort()
 {
-  if (sequence_ == INITIATOR_SEND_KEY ||
+  if (sequence_ == Seq::SEND_KEY ||
       getOption()->getAsBool(PREF_BT_FORCE_ENCRYPTION) ||
       getOption()->getAsBool(PREF_BT_REQUIRE_CRYPTO)) {
     peerStorage_->returnPeer(getPeer());

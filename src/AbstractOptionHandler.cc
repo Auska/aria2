@@ -94,78 +94,79 @@ std::string AbstractOptionHandler::toTagString() const
 
 const char* AbstractOptionHandler::getName() const { return pref_->k; }
 
-void AbstractOptionHandler::updateFlags(int flag, bool val)
+void AbstractOptionHandler::updateFlags(Flag flag, bool val)
 {
+  auto bit = static_cast<uint8_t>(flag);
   if (val) {
-    flags_ |= flag;
+    flags_ |= bit;
   }
   else {
-    flags_ &= ~flag;
+    flags_ &= ~bit;
   }
 }
 
-bool AbstractOptionHandler::isHidden() const { return flags_ & FLAG_HIDDEN; }
+bool AbstractOptionHandler::isHidden() const { return (flags_ & static_cast<uint8_t>(Flag::HIDDEN)) != 0; }
 
-void AbstractOptionHandler::hide() { updateFlags(FLAG_HIDDEN, true); }
+void AbstractOptionHandler::hide() { updateFlags(Flag::HIDDEN, true); }
 
 bool AbstractOptionHandler::getEraseAfterParse() const
 {
-  return flags_ & FLAG_ERASE_AFTER_PARSE;
+  return (flags_ & static_cast<uint8_t>(Flag::ERASE_AFTER_PARSE)) != 0;
 }
 
 void AbstractOptionHandler::setEraseAfterParse(bool f)
 {
-  updateFlags(FLAG_ERASE_AFTER_PARSE, f);
+  updateFlags(Flag::ERASE_AFTER_PARSE, f);
 }
 
 bool AbstractOptionHandler::getInitialOption() const
 {
-  return flags_ & FLAG_INITIAL_OPTION;
+  return (flags_ & static_cast<uint8_t>(Flag::INITIAL_OPTION)) != 0;
 }
 
 void AbstractOptionHandler::setInitialOption(bool f)
 {
-  updateFlags(FLAG_INITIAL_OPTION, f);
+  updateFlags(Flag::INITIAL_OPTION, f);
 }
 
 bool AbstractOptionHandler::getChangeOption() const
 {
-  return flags_ & FLAG_CHANGE_OPTION;
+  return (flags_ & static_cast<uint8_t>(Flag::CHANGE_OPTION)) != 0;
 }
 
 void AbstractOptionHandler::setChangeOption(bool f)
 {
-  updateFlags(FLAG_CHANGE_OPTION, f);
+  updateFlags(Flag::CHANGE_OPTION, f);
 }
 
 bool AbstractOptionHandler::getChangeOptionForReserved() const
 {
-  return flags_ & FLAG_CHANGE_OPTION_FOR_RESERVED;
+  return (flags_ & static_cast<uint8_t>(Flag::CHANGE_OPTION_FOR_RESERVED)) != 0;
 }
 
 void AbstractOptionHandler::setChangeOptionForReserved(bool f)
 {
-  updateFlags(FLAG_CHANGE_OPTION_FOR_RESERVED, f);
+  updateFlags(Flag::CHANGE_OPTION_FOR_RESERVED, f);
 }
 
 bool AbstractOptionHandler::getChangeGlobalOption() const
 {
-  return flags_ & FLAG_CHANGE_GLOBAL_OPTION;
+  return (flags_ & static_cast<uint8_t>(Flag::CHANGE_GLOBAL_OPTION)) != 0;
 }
 
 void AbstractOptionHandler::setChangeGlobalOption(bool f)
 {
-  updateFlags(FLAG_CHANGE_GLOBAL_OPTION, f);
+  updateFlags(Flag::CHANGE_GLOBAL_OPTION, f);
 }
 
 bool AbstractOptionHandler::getCumulative() const
 {
-  return flags_ & FLAG_CUMULATIVE;
+  return (flags_ & static_cast<uint8_t>(Flag::CUMULATIVE)) != 0;
 }
 
 void AbstractOptionHandler::setCumulative(bool f)
 {
-  updateFlags(FLAG_CUMULATIVE, f);
+  updateFlags(Flag::CUMULATIVE, f);
 }
 
 } // namespace aria2

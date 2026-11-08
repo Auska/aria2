@@ -70,7 +70,7 @@ HttpServerCommand::HttpServerCommand(cuid_t cuid, DownloadEngine* e,
       httpServer_(std::make_shared<HttpServer>(socket)),
       writeCheck_(false)
 {
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   e_->addSocketForReadCheck(socket_, this);
   httpServer_->setSecure(secure);
   httpServer_->setUsernamePassword(e_->getOption()->get(PREF_RPC_USER),
@@ -114,7 +114,7 @@ void HttpServerCommand::checkSocketRecvBuffer()
     return;
   }
 
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   e_->setNoWait(true);
 }
 

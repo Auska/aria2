@@ -39,22 +39,22 @@
 
 namespace aria2 {
 
-typedef int64_t cuid_t;
+using cuid_t = int64_t;
 
 class Command {
 public:
-  enum STATUS {
-    STATUS_ALL,
-    STATUS_INACTIVE,
-    STATUS_ACTIVE,
-    STATUS_REALTIME,
-    STATUS_ONESHOT_REALTIME
+  enum class Status {
+    ALL,
+    INACTIVE,
+    ACTIVE,
+    REALTIME,
+    ONESHOT_REALTIME
   };
 
 private:
   cuid_t cuid_;
 
-  STATUS status_;
+  Status status_;
 
   bool readEvent_;
   bool writeEvent_;
@@ -79,15 +79,15 @@ public:
 
   cuid_t getCuid() const { return cuid_; }
 
-  void setStatusActive() { status_ = STATUS_ACTIVE; }
+  void setStatusActive() { status_ = Status::ACTIVE; }
 
-  void setStatusInactive() { status_ = STATUS_INACTIVE; }
+  void setStatusInactive() { status_ = Status::INACTIVE; }
 
-  void setStatusRealtime() { status_ = STATUS_REALTIME; }
+  void setStatusRealtime() { status_ = Status::REALTIME; }
 
-  void setStatus(STATUS status);
+  void setStatus(Status status);
 
-  bool statusMatch(Command::STATUS statusFilter) const
+  bool statusMatch(Command::Status statusFilter) const
   {
     return statusFilter <= status_;
   }

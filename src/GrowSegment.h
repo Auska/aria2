@@ -71,8 +71,8 @@ public:
 
   virtual void updateWrittenLength(int64_t bytes) override;
 
-  virtual bool updateHash(int64_t begin, const unsigned char* data,
-                          size_t dataLength) override
+  virtual bool updateHash(int64_t begin,
+                          std::span<const std::byte> data) override
   {
     return false;
   }

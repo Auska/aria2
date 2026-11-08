@@ -135,7 +135,7 @@ bool DHTInteractionCommand::execute()
           if (req->action == UDPTrackerAction::Announce) {
             auto c = static_cast<TrackerWatcherCommand*>(req->user_data);
             if (c) {
-              c->setStatus(Command::STATUS_ONESHOT_REALTIME);
+              c->setStatus(Command::Status::ONESHOT_REALTIME);
               e_->setNoWait(true);
             }
           }

@@ -50,7 +50,7 @@ struct FtpTunnelRequestConnectChain : public ControlChain<ConnectCommand*> {
     auto c = make_unique<FtpTunnelRequestCommand>(
         t->getCuid(), t->getRequest(), t->getFileEntry(), t->getRequestGroup(),
         t->getDownloadEngine(), t->getProxyRequest(), t->getSocket());
-    c->setStatus(Command::STATUS_ONESHOT_REALTIME);
+    c->setStatus(Command::Status::ONESHOT_REALTIME);
     e->setNoWait(true);
     e->addCommand(std::move(c));
     return 0;

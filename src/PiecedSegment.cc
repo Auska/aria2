@@ -81,10 +81,10 @@ void PiecedSegment::updateWrittenLength(int64_t bytes)
   writtenLength_ = newWrittenLength;
 }
 
-bool PiecedSegment::updateHash(int64_t begin, const unsigned char* data,
-                               size_t dataLength)
+bool PiecedSegment::updateHash(int64_t begin,
+                               std::span<const std::byte> data)
 {
-  return piece_->updateHash(begin, data, dataLength);
+  return piece_->updateHash(begin, data);
 }
 
 bool PiecedSegment::isHashCalculated() const

@@ -55,7 +55,7 @@ struct HttpRequestConnectChain : public ControlChain<ConnectCommand*> {
         t->getCuid(), t->getRequest(), t->getFileEntry(), t->getRequestGroup(),
         k, e, t->getSocket());
     c->setProxyRequest(t->getProxyRequest());
-    c->setStatus(Command::STATUS_ONESHOT_REALTIME);
+    c->setStatus(Command::Status::ONESHOT_REALTIME);
     e->setNoWait(true);
     e->addCommand(std::move(c));
     return 0;

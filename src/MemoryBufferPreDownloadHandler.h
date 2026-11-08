@@ -40,8 +40,8 @@
 
 namespace aria2 {
 
-typedef MemoryPreDownloadHandler<ByteArrayDiskWriterFactory>
-    MemoryBufferPreDownloadHandler;
+using MemoryBufferPreDownloadHandler =
+    MemoryPreDownloadHandler<ByteArrayDiskWriterFactory>;
 
 } // namespace aria2
 

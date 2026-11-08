@@ -38,6 +38,8 @@
 #include "common.h"
 
 #include <stdint.h>
+#include <cstddef>
+#include <span>
 #include <string>
 #include <memory>
 
@@ -67,8 +69,8 @@ public:
   virtual void updateWrittenLength(int64_t bytes) = 0;
 
   // `begin' is a offset inside this segment.
-  virtual bool updateHash(int64_t begin, const unsigned char* data,
-                          size_t dataLength) = 0;
+  virtual bool updateHash(int64_t begin,
+                          std::span<const std::byte> data) = 0;
 
   virtual bool isHashCalculated() const = 0;
 

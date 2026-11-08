@@ -97,7 +97,7 @@ bool BackupIPv4ConnectCommand::execute()
           info_->ipaddr = ipaddr_;
           e_->deleteSocketForWriteCheck(socket_, this);
           info_->socket.swap(socket_);
-          mainCommand_->setStatus(STATUS_ONESHOT_REALTIME);
+          mainCommand_->setStatus(Status::ONESHOT_REALTIME);
           e_->setNoWait(true);
           retval = true;
         }

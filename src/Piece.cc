@@ -196,19 +196,18 @@ int64_t Piece::getCompletedLength() { return bitfield_->getCompletedLength(); }
 
 void Piece::setHashType(const std::string& hashType) { hashType_ = hashType; }
 
-bool Piece::updateHash(int64_t begin, const unsigned char* data,
-                       size_t dataLength)
+bool Piece::updateHash(int64_t begin, std::span<const std::byte> data)
 {
   if (hashType_.empty()) {
     return false;
   }
   if (begin == nextBegin_ &&
-      nextBegin_ + static_cast<int64_t>(dataLength) <= length_) {
+      nextBegin_ + static_cast<int64_t>(data.size()) <= length_) {
     if (!mdctx_) {
       mdctx_ = MessageDigest::create(hashType_);
     }
-    mdctx_->update(std::as_bytes(std::span{data, dataLength}));
-    nextBegin_ += dataLength;
+    mdctx_->update(data);
+    nextBegin_ += data.size();
     return true;
   }
   else {

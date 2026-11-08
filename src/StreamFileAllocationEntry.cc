@@ -89,7 +89,7 @@ void StreamFileAllocationEntry::prepareForNextAction(
       }
     }
     // give _nextCommand a chance to execute in the next execution loop.
-    getNextCommand()->setStatus(Command::STATUS_ONESHOT_REALTIME);
+    getNextCommand()->setStatus(Command::Status::ONESHOT_REALTIME);
     e->setNoWait(true);
     commands.push_back(popNextCommand());
     // try remaining uris

@@ -55,6 +55,9 @@ public:
   // is a advice to derived class not to select piece such which the
   // distance between it and already selected piece is less than
   // minSplitSize.
+  // shortcut: ignoreBitfield stays a raw pointer because BitfieldMan's
+  // getMissingUnusedIndex family (src/bitfield.h) is raw-pointer based;
+  // switch to std::span once that family is converted.
   virtual bool select(size_t& index, size_t minSplitSize,
                       const unsigned char* ignoreBitfield, size_t length) = 0;
 

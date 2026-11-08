@@ -121,14 +121,14 @@ public:
 
   virtual void setCumulative(bool f) override;
 
-  enum Flag {
-    FLAG_HIDDEN = 1,
-    FLAG_ERASE_AFTER_PARSE = 1 << 1,
-    FLAG_INITIAL_OPTION = 1 << 2,
-    FLAG_CHANGE_OPTION = 1 << 3,
-    FLAG_CHANGE_OPTION_FOR_RESERVED = 1 << 4,
-    FLAG_CHANGE_GLOBAL_OPTION = 1 << 5,
-    FLAG_CUMULATIVE = 1 << 6
+  enum class Flag : uint8_t {
+    HIDDEN = 1,
+    ERASE_AFTER_PARSE = 1 << 1,
+    INITIAL_OPTION = 1 << 2,
+    CHANGE_OPTION = 1 << 3,
+    CHANGE_OPTION_FOR_RESERVED = 1 << 4,
+    CHANGE_GLOBAL_OPTION = 1 << 5,
+    CUMULATIVE = 1 << 6
   };
 
 private:
@@ -138,7 +138,7 @@ private:
   // bitwise OR of Flag values.
   uint8_t flags_;
 
-  void updateFlags(int flag, bool val);
+  void updateFlags(Flag flag, bool val);
 };
 
 } // namespace aria2

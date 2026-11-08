@@ -42,8 +42,8 @@ namespace aria2 {
 
 namespace bittorrent {
 
-typedef MemoryPreDownloadHandler<BencodeDiskWriterFactory>
-    MemoryBencodePreDownloadHandler;
+using MemoryBencodePreDownloadHandler =
+    MemoryPreDownloadHandler<BencodeDiskWriterFactory>;
 
 } // namespace bittorrent
 

@@ -161,7 +161,7 @@ PeerInteractionCommand::PeerInteractionCommand(
   else {
     if (sequence_ == Seq::RECEIVER_WAIT_HANDSHAKE &&
         peerConnection->getBufferLength() > 0) {
-      setStatus(Command::STATUS_ONESHOT_REALTIME);
+      setStatus(Command::Status::ONESHOT_REALTIME);
       getDownloadEngine()->setNoWait(true);
     }
   }

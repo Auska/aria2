@@ -34,7 +34,7 @@
 /* copyright --> */
 #include "Exception.h"
 
-#include <sstream>
+#include <string>
 
 namespace aria2 {
 
@@ -99,25 +99,41 @@ Exception::~Exception() noexcept = default;
 
 std::string Exception::stackTrace() const
 {
-  std::stringstream s;
-  s << "Exception: "
-    << "[" << file_ << ":" << line_ << "] ";
+  std::string s = "Exception: [";
+  s += file_;
+  s += ":";
+  s += std::to_string(line_);
+  s += "] ";
   if (errNum_) {
-    s << "errNum=" << errNum_ << " ";
+    s += "errNum=";
+    s += std::to_string(errNum_);
+    s += " ";
   }
-  s << "errorCode=" << errorCode_ << " ";
-  s << what() << "\n";
+  s += "errorCode=";
+  s += std::to_string(errorCode_);
+  s += " ";
+  s += what();
+  s += "\n";
   std::shared_ptr<Exception> e = cause_;
   while (e) {
-    s << "  -> "
-      << "[" << e->file_ << ":" << e->line_ << "] ";
+    s += "  -> [";
+    s += e->file_;
+    s += ":";
+    s += std::to_string(e->line_);
+    s += "] ";
     if (e->getErrNum()) {
-      s << "errNum=" << e->getErrNum() << " ";
+      s += "errNum=";
+      s += std::to_string(e->getErrNum());
+      s += " ";
     }
-    s << "errorCode=" << e->getErrorCode() << " " << e->what() << "\n";
+    s += "errorCode=";
+    s += std::to_string(e->getErrorCode());
+    s += " ";
+    s += e->what();
+    s += "\n";
     e = e->cause_;
   }
-  return s.str();
+  return s;
 }
 
 const char* Exception::what() const noexcept { return msg_.c_str(); }

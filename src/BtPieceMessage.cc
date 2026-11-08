@@ -136,7 +136,9 @@ void BtPieceMessage::doReceivedAction()
     A2_LOG_DEBUG(fmt(
         MSG_PIECE_BITFIELD, getCuid(),
         util::toHex(std::as_bytes(std::span{piece->getBitfield(), piece->getBitfieldLength()}))));
-    piece->updateHash(begin_, data_ + 9, blockLength_);
+    piece->updateHash(
+        begin_,
+        std::as_bytes(std::span{data_ + 9, static_cast<size_t>(blockLength_)}));
     getBtMessageDispatcher()->removeOutstandingRequest(slot);
     if (piece->pieceComplete()) {
       if (checkPieceHash(piece)) {

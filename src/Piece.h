@@ -148,7 +148,7 @@ public:
   // Updates hash value. This function compares begin and private variable
   // nextBegin_ and only when they are equal, hash is updated eating data and
   // returns true. Otherwise returns false.
-  bool updateHash(int64_t begin, const unsigned char* data, size_t dataLength);
+  bool updateHash(int64_t begin, std::span<const std::byte> data);
 
   bool isHashCalculated() const;
 

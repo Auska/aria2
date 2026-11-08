@@ -460,7 +460,7 @@ bool AbstractCommand::prepareForRetry(time_t wait)
   else {
     // We don't use wait so that Command can be executed by
     // DownloadEngine::setRefreshInterval(std::chrono::milliseconds(0)).
-    command->setStatus(Command::STATUS_INACTIVE);
+    command->setStatus(Command::Status::INACTIVE);
   }
   e_->addCommand(std::move(command));
   return true;
@@ -699,7 +699,7 @@ bool inNoProxy(const std::shared_ptr<Request>& req, const std::string& noProxy)
   }
 
   for (const auto& e : entries) {
-    const auto slashpos = std::find(e.first, e.second, '/');
+    const auto slashpos = std::ranges::find(e.first, e.second, '/');
     if (slashpos == e.second) {
       if (util::noProxyDomainMatch(req->getHost(),
                                    std::string(e.first, e.second))) {
@@ -930,7 +930,7 @@ void AbstractCommand::checkSocketRecvBuffer()
     return;
   }
 
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   e_->setNoWait(true);
 }
 

@@ -48,14 +48,14 @@ class Option;
 
 class InitiatorMSEHandshakeCommand : public PeerAbstractCommand {
 public:
-  enum Seq {
-    INITIATOR_SEND_KEY,
-    INITIATOR_SEND_KEY_PENDING,
-    INITIATOR_WAIT_KEY,
-    INITIATOR_SEND_STEP2_PENDING,
-    INITIATOR_FIND_VC_MARKER,
-    INITIATOR_RECEIVE_PAD_D_LENGTH,
-    INITIATOR_RECEIVE_PAD_D,
+  enum class Seq {
+    SEND_KEY,
+    SEND_KEY_PENDING,
+    WAIT_KEY,
+    SEND_STEP2_PENDING,
+    FIND_VC_MARKER,
+    RECEIVE_PAD_D_LENGTH,
+    RECEIVE_PAD_D,
   };
 
 private:

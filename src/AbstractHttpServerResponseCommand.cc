@@ -57,7 +57,7 @@ AbstractHttpServerResponseCommand::AbstractHttpServerResponseCommand(
       readCheck_(false),
       writeCheck_(true)
 {
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   e_->addSocketForWriteCheck(socket_, this);
 }
 

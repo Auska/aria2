@@ -67,7 +67,7 @@ NameResolveCommand::NameResolveCommand(
   // Currently we only utilize IPv4 DHT for UDP tracker
   asyncNameResolverMan_->setIPv6(false);
 #endif // ENABLE_ASYNC_DNS
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
 }
 
 NameResolveCommand::~NameResolveCommand()

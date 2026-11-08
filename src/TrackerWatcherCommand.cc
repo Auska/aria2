@@ -106,18 +106,17 @@ bool HTTPAnnRequest::processResponse(
     const std::shared_ptr<BtAnnounce>& btAnnounce)
 {
   try {
-    std::stringstream strm;
+    std::string res;
     std::array<std::byte, 2048> data;
     rg_->getPieceStorage()->getDiskAdaptor()->openFile();
     while (1) {
       ssize_t dataLength = rg_->getPieceStorage()->getDiskAdaptor()->readData(
-          data, strm.tellp());
+          data, res.size());
       if (dataLength == 0) {
         break;
       }
-      strm.write(reinterpret_cast<const char*>(data.data()), dataLength);
+      res.append(reinterpret_cast<const char*>(data.data()), dataLength);
     }
-    std::string res = strm.str();
     btAnnounce->processAnnounceResponse(
         std::as_bytes(std::span{res.data(), res.size()}));
     return true;

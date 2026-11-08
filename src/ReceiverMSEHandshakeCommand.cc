@@ -59,7 +59,7 @@ ReceiverMSEHandshakeCommand::ReceiverMSEHandshakeCommand(
     :
 
       PeerAbstractCommand(cuid, peer, e, s),
-      sequence_(RECEIVER_IDENTIFY_HANDSHAKE),
+      sequence_(Seq::IDENTIFY_HANDSHAKE),
       mseHandshake_(make_unique<MSEHandshake>(cuid, s, e->getOption()))
 {
   setTimeout(std::chrono::seconds(
@@ -83,7 +83,7 @@ bool ReceiverMSEHandshakeCommand::executeInternal()
   bool done = false;
   while (!done) {
     switch (sequence_) {
-    case RECEIVER_IDENTIFY_HANDSHAKE: {
+    case Seq::IDENTIFY_HANDSHAKE: {
       auto type = mseHandshake_->identifyHandshakeType();
       switch (type) {
       case MSEHandshake::HandshakeType::NotYet:
@@ -91,7 +91,7 @@ bool ReceiverMSEHandshakeCommand::executeInternal()
         break;
       case MSEHandshake::HandshakeType::Encrypted:
         mseHandshake_->initEncryptionFacility(false);
-        sequence_ = RECEIVER_WAIT_KEY;
+        sequence_ = Seq::WAIT_KEY;
         break;
       case MSEHandshake::HandshakeType::Legacy: {
         const auto option = getDownloadEngine()->getOption();
@@ -116,74 +116,74 @@ bool ReceiverMSEHandshakeCommand::executeInternal()
       }
       break;
     }
-    case RECEIVER_WAIT_KEY: {
+    case Seq::WAIT_KEY: {
       if (mseHandshake_->receivePublicKey()) {
         mseHandshake_->sendPublicKey();
-        sequence_ = RECEIVER_SEND_KEY_PENDING;
+        sequence_ = Seq::SEND_KEY_PENDING;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_SEND_KEY_PENDING:
+    case Seq::SEND_KEY_PENDING:
       if (mseHandshake_->send()) {
-        sequence_ = RECEIVER_FIND_HASH_MARKER;
+        sequence_ = Seq::FIND_HASH_MARKER;
       }
       else {
         done = true;
       }
       break;
-    case RECEIVER_FIND_HASH_MARKER: {
+    case Seq::FIND_HASH_MARKER: {
       if (mseHandshake_->findReceiverHashMarker()) {
-        sequence_ = RECEIVER_RECEIVE_PAD_C_LENGTH;
+        sequence_ = Seq::RECEIVE_PAD_C_LENGTH;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_RECEIVE_PAD_C_LENGTH: {
+    case Seq::RECEIVE_PAD_C_LENGTH: {
       std::vector<std::shared_ptr<DownloadContext>> downloadContexts;
       getDownloadEngine()->getBtRegistry()->getAllDownloadContext(
           std::back_inserter(downloadContexts));
       if (mseHandshake_->receiveReceiverHashAndPadCLength(downloadContexts)) {
-        sequence_ = RECEIVER_RECEIVE_PAD_C;
+        sequence_ = Seq::RECEIVE_PAD_C;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_RECEIVE_PAD_C: {
+    case Seq::RECEIVE_PAD_C: {
       if (mseHandshake_->receivePad()) {
-        sequence_ = RECEIVER_RECEIVE_IA_LENGTH;
+        sequence_ = Seq::RECEIVE_IA_LENGTH;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_RECEIVE_IA_LENGTH: {
+    case Seq::RECEIVE_IA_LENGTH: {
       if (mseHandshake_->receiveReceiverIALength()) {
-        sequence_ = RECEIVER_RECEIVE_IA;
+        sequence_ = Seq::RECEIVE_IA;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_RECEIVE_IA: {
+    case Seq::RECEIVE_IA: {
       if (mseHandshake_->receiveReceiverIA()) {
         mseHandshake_->sendReceiverStep2();
-        sequence_ = RECEIVER_SEND_STEP2_PENDING;
+        sequence_ = Seq::SEND_STEP2_PENDING;
       }
       else {
         done = true;
       }
       break;
     }
-    case RECEIVER_SEND_STEP2_PENDING:
+    case Seq::SEND_STEP2_PENDING:
       if (mseHandshake_->send()) {
         createCommand();
         return true;

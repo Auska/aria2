@@ -179,6 +179,7 @@ error_code::Value option_processing(Option& op, bool standalone,
   try {
     bool noConf = false;
     std::string ucfname;
+    // shortcut: OptionParser::parse() takes std::istream&.
     std::stringstream cmdstream;
     {
       // first evaluate --no-conf and --conf-path options.
@@ -225,6 +226,7 @@ error_code::Value option_processing(Option& op, bool standalone,
                           : ucfname;
 
       if (File(cfname).isFile()) {
+        // shortcut: OptionParser::parse() takes std::istream&.
         std::stringstream ss;
         {
           BufferedFile fp(cfname.c_str(), BufferedFile::READ);

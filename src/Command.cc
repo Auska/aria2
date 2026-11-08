@@ -39,7 +39,7 @@ namespace aria2 {
 
 Command::Command(cuid_t cuid)
     : cuid_(cuid),
-      status_(STATUS_INACTIVE),
+      status_(Status::INACTIVE),
       readEvent_(false),
       writeEvent_(false),
       errorEvent_(false),
@@ -50,14 +50,14 @@ Command::Command(cuid_t cuid)
 void Command::transitStatus()
 {
   switch (status_) {
-  case STATUS_REALTIME:
+  case Status::REALTIME:
     break;
   default:
-    status_ = STATUS_INACTIVE;
+    status_ = Status::INACTIVE;
   }
 }
 
-void Command::setStatus(STATUS status) { status_ = status; }
+void Command::setStatus(Status status) { status_ = status; }
 
 void Command::readEventReceived() { readEvent_ = true; }
 

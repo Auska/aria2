@@ -137,7 +137,7 @@ bool File::mkdirs()
   std::string::iterator begin = name_.begin();
   std::string::iterator end = name_.end();
   for (std::string::iterator i = begin; i != end;) {
-    std::string::iterator j = std::find(i, end, '/');
+    std::string::iterator j = std::ranges::find(i, end, '/');
     if (std::distance(i, j) == 0) {
       ++i;
       continue;

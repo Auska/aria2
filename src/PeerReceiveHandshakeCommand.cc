@@ -70,7 +70,7 @@ PeerReceiveHandshakeCommand::PeerReceiveHandshakeCommand(
 {
   if (peerConnection_) {
     if (peerConnection_->getBufferLength() > 0) {
-      setStatus(Command::STATUS_ONESHOT_REALTIME);
+      setStatus(Command::Status::ONESHOT_REALTIME);
       getDownloadEngine()->setNoWait(true);
     }
   }

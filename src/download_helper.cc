@@ -214,6 +214,7 @@ createBtRequestGroup(const std::string& metaInfoUri,
   auto sgl = util::parseIntSegments(option->get(PREF_SELECT_FILE));
   sgl.normalize();
   dctx->setFileFilter(std::move(sgl));
+  // shortcut: util::createIndexPaths() takes std::istream&.
   std::istringstream indexOutIn(option->get(PREF_INDEX_OUT));
   auto indexPaths = util::createIndexPaths(indexOutIn);
   for (const auto& i : indexPaths) {

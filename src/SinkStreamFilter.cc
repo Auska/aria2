@@ -89,9 +89,7 @@ ssize_t SinkStreamFilter::transform(const std::shared_ptr<BinaryStream>& out,
       out->writeData(inbuf.first(wlen), segment->getPositionToWrite());
     }
     if (hashUpdate_) {
-      segment->updateHash(segment->getWrittenLength(),
-                          reinterpret_cast<const unsigned char*>(inbuf.data()),
-                          wlen);
+      segment->updateHash(segment->getWrittenLength(), inbuf.first(wlen));
     }
     segment->updateWrittenLength(wlen);
   }

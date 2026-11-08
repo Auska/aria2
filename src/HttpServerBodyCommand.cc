@@ -74,7 +74,7 @@ HttpServerBodyCommand::HttpServerBodyCommand(
       writeCheck_(false)
 {
   // To handle Content-Length == 0 case
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   e_->addSocketForReadCheck(socket_, this);
   if (!httpServer_->getSocketRecvBuffer()->bufferEmpty() ||
       socket_->getRecvBufferedLength()) {

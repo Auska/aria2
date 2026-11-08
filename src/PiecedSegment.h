@@ -77,8 +77,8 @@ public:
   virtual void updateWrittenLength(int64_t bytes) override;
 
   // `begin' is a offset inside this segment.
-  virtual bool updateHash(int64_t begin, const unsigned char* data,
-                          size_t dataLength) override;
+  virtual bool updateHash(int64_t begin,
+                          std::span<const std::byte> data) override;
 
   virtual bool isHashCalculated() const override;
 

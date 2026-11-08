@@ -116,7 +116,7 @@ DownloadEngine::~DownloadEngine() {}
 
 namespace {
 void executeCommand(std::deque<std::unique_ptr<Command>>& commands,
-                    Command::STATUS statusFilter)
+                    Command::Status statusFilter)
 {
   size_t max = commands.size();
   for (size_t i = 0; i < max; ++i) {
@@ -169,12 +169,12 @@ int DownloadEngine::run(bool oneshot)
         refreshInterval_) {
       refreshInterval_ = DEFAULT_REFRESH_INTERVAL;
       lastRefresh_ = global::wallclock();
-      executeCommand(commands_, Command::STATUS_ALL);
+      executeCommand(commands_, Command::Status::ALL);
     }
     else {
-      executeCommand(commands_, Command::STATUS_ACTIVE);
+      executeCommand(commands_, Command::Status::ACTIVE);
     }
-    executeCommand(routineCommands_, Command::STATUS_ALL);
+    executeCommand(routineCommands_, Command::Status::ALL);
     afterEachIteration();
     if (!noWait_ && oneshot) {
       return 1;

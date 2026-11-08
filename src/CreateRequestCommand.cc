@@ -60,7 +60,7 @@ CreateRequestCommand::CreateRequestCommand(cuid_t cuid,
                       std::shared_ptr<SocketCore>(),
                       std::shared_ptr<SocketRecvBuffer>(), false)
 {
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   disableReadCheckSocket();
   disableWriteCheckSocket();
 }

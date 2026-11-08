@@ -548,7 +548,8 @@ void createFileEntry(List* files, InputIterator first, InputIterator last,
 namespace {
 bool requested_key(const std::vector<std::string>& keys, const std::string& k)
 {
-  return keys.empty() || std::find(keys.begin(), keys.end(), k) != keys.end();
+  return keys.empty() ||
+         std::ranges::find(keys.begin(), keys.end(), k) != keys.end();
 }
 } // namespace
 
@@ -1484,6 +1485,7 @@ void changeOption(const std::shared_ptr<RequestGroup>& group,
 #ifdef ENABLE_BITTORRENT
   if (option.defined(PREF_DIR) || option.defined(PREF_INDEX_OUT)) {
     if (dctx->hasAttribute(ContextAttributeType::BT)) {
+      // shortcut: util::createIndexPaths() takes std::istream&.
       std::istringstream indexOutIn(grOption->get(PREF_INDEX_OUT));
       std::vector<std::pair<size_t, std::string>> indexPaths =
           util::createIndexPaths(indexOutIn);

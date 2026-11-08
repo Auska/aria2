@@ -344,7 +344,7 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    （共用 `std::ostream&` 接口）—— 均已加 `shortcut:` 注释。
 
    门禁通过后提交。
-4. [ ] **阶段 4 — D-命令/引擎/编排（142 文件）**：D 簇 4 个枚举
+4. [x] **阶段 4 — D-命令/引擎/编排（142 文件）**：D 簇 4 个枚举
    （`src/Command.h:46` `STATUS`、`src/InitiatorMSEHandshakeCommand.h:51` 与
    `src/ReceiverMSEHandshakeCommand.h:48` 的 `Seq`、
    `src/AbstractOptionHandler.h:124` `Flag`）全部 enum class 化；
@@ -354,6 +354,38 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    `src/option_processing.cc` 与协议层/配置层调用点完整清理；
    `src/prefs.cc` 的裸 new 已在阶段 1 列为保留项；`src/OutputFile.h:51-52`
    的 `vprintf`/`printf` 接口保持（`src/Context.cc` 属 C 簇，阶段 3）。
+   实测（2026-11-08）：`typedef` 4 处 → `using`（`src/Command.h:42 cuid_t`、
+   `src/BencodeDiskWriterFactory.h:45`、`src/MemoryBencodePreDownloadHandler.h:45-46`、
+   `src/MemoryBufferPreDownloadHandler.h:43-44`）；`std::find` 4 处
+   → `std::ranges::`（`src/AbstractCommand.cc:702`、`src/DefaultPeerStorage.cc:168`、
+   `src/File.cc:140`、`src/RpcMethodImpl.cc:551`）。
+   **枚举**：`src/Command.h:46` 的 `enum STATUS` → `enum class Status`
+   （`STATUS_ALL`→`Status::ALL` 等），`status_` 与 `setStatus`/`statusMatch`
+   形参同步，16 个 `src/*Command*.cc`/`*ConnectChain.h` 调用点全改；
+   `src/AbstractOptionHandler.h:124` 的 `enum Flag` → `enum class Flag : uint8_t`
+   （`FLAG_HIDDEN`→`Flag::HIDDEN` 等 7 个），`updateFlags` 与 14 处
+   `flags_ & …` 改 `static_cast<uint8_t>`；`src/InitiatorMSEHandshakeCommand.h:51`
+   与 `src/ReceiverMSEHandshakeCommand.h:48` 的 `enum Seq` → `enum class Seq`
+   （常量去 `INITIATOR_`/`RECEIVER_` 前缀）。
+   **span 化（收口 PLAN-004 留下的 Peer/Piece 链债）**：`src/Segment.h:70`
+   `updateHash(int64_t, std::span<const std::byte>)` 虚函数改签名，
+   `src/GrowSegment.h:72`、`src/PiecedSegment.h:80`、`src/Piece.h:151` 与
+   `test/MockSegment.h:29` 同步；调用点 `src/SinkStreamFilter.cc:92`
+   改 `segment->updateHash(..., inbuf.first(wlen))`、
+   `src/BtPieceMessage.cc:139` 改
+   `std::as_bytes(std::span{data_ + 9, static_cast<size_t>(blockLength_)})`、
+   `test/PieceTest.cc:149,154` 改 `std::as_bytes(std::span{spam})`。
+   **std::stringstream 去 2 处**：`src/TrackerWatcherCommand.cc:109` 改
+   `std::string res` + `readData(data, res.size())` + `append`；
+   `src/Exception.cc:102` `stackTrace()` 改 `std::string` + `std::to_string`。
+   可解释残余（均加 `shortcut:` 注释）：`src/option_processing.cc:182,228`、
+   `src/RpcMethodImpl.cc:1488`、`src/download_helper.cc:217` 的
+   `std::stringstream`/`std::istringstream`（`OptionParser::parse()` 与
+   `util::createIndexPaths()` 收 `std::istream&`）；`src/StreamPieceSelector.h:58`
+   与 `src/UnknownLengthPieceStorage.h:120` 的 `ignoreBitfield, length`
+   （`BitfieldMan::get*MissingUnusedIndex` 与 `src/bitfield.h` 整族仍是
+   裸指针契约，等整族 span 化时一并改）。
+
    门禁通过后提交。
 5. [ ] **收尾**：勾选与实际一致；标题下加
    `> 状态：✅ 已完成（YYYY-MM-DD）`（或 `⚠️ 部分完成` / `❌ 已中止`

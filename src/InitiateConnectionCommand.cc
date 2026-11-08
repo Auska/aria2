@@ -64,7 +64,7 @@ InitiateConnectionCommand::InitiateConnectionCommand(
 {
   setTimeout(std::chrono::seconds(getOption()->getAsInt(PREF_DNS_TIMEOUT)));
   // give a chance to be executed in the next loop in DownloadEngine
-  setStatus(Command::STATUS_ONESHOT_REALTIME);
+  setStatus(Command::Status::ONESHOT_REALTIME);
   disableReadCheckSocket();
   disableWriteCheckSocket();
 }
@@ -92,7 +92,7 @@ bool InitiateConnectionCommand::executeInternal()
   }
   try {
     auto c = createNextCommand(hostname, ipaddr, port, addrs, proxyRequest);
-    c->setStatus(Command::STATUS_ONESHOT_REALTIME);
+    c->setStatus(Command::Status::ONESHOT_REALTIME);
     getDownloadEngine()->setNoWait(true);
     getDownloadEngine()->addCommand(std::move(c));
     return true;
