@@ -1,5 +1,7 @@
 # 任务：A 组缺陷修复 + B 组标准库/语法清理（C cast、ranges、enumerate、noexcept、比较器）
 
+> 状态：✅ 已完成（2026-11-08）
+
 ## 目标
 
 PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层、异常层与 span 主干现代化，语言基线 C++23。本计划处理上一轮审查报告里剩下的 **A 组（真缺陷）** 与 **B 组（低成本高确定性清理）**：
@@ -74,7 +76,7 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 
 | 决策点 | 选项 | 推荐 | 状态 |
 |---|---|---|---|
-| B3 范围 | 实测 67 处索引循环中只有 34 处带容器下标（可换 `views::enumerate`/`zip`），另 33 处是纯计数循环。① 只换 34 处；② 34 处 + 33 处 `iota` 全消灭；③ 再核一遍 | ① | **已确认：选 ①**（m10515） |
+| B3 范围 | 实测 67 处索引循环中只有 34 处带容器下标（可换 `views::enumerate`/`zip`），另 33 处是纯计数循环。① 只换 34 处；② 34 处 + 33 处 `iota` 全消灭；③ 再核一遍 | ① | **已确认：选 ①**（m10515）；**实际落地 13 处**，其余 32 处因上界非容器长度或 `i` 兼作位掩码/偏移而保留，见「实际偏差 3」 |
 
 ## 提议的方法
 
@@ -121,7 +123,7 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 2. [x] **阶段 2**：B1 39 处 cast + B2 15 find/18 sort + B5 2 个透明比较器 → 门禁 → 提交 `PLAN-009 阶段2: C 风格转换与 find/sort 改用 static_cast 与 std::ranges`
 3. [x] **阶段 3**：B3 索引循环 → `views::enumerate`（+ `zip`）→ 门禁 → 提交 `PLAN-009 阶段3: 索引 for 循环改用 std::views::enumerate`
 4. [x] **阶段 4**：B4 析构声明与定义加 `noexcept` → 门禁 → 提交 `PLAN-009 阶段4: 析构函数标注 noexcept`
-5. [ ] **阶段 5**：文档收尾 → 提交 `PLAN-009: 勾选全部阶段、标记计划完成并记录实测门禁结果`
+5. [x] **阶段 5**：文档收尾 → 提交 `PLAN-009: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
 ### 阶段 1 实测（2026-11-08）
 
@@ -228,7 +230,7 @@ git hash-object src/includes/aria2/aria2.h      # 2216641161b15acb3c3ddf2600dc19
 3. `src/includes/aria2/aria2.h` 修改次数 = 0。
 4. `configure.ac`、`src/Makefile.am`、`test/Makefile.am`、7 个 `src/*.c` shim、`.github/workflows/build.yml`、`README.rst` 不动。
 5. 阶段 1 的 `static_assert` 生效：把 `= delete` 临时删掉后编译必须失败（人工验证一次，随后恢复）。
-6. 阶段 4 后 `git grep -hE '~[A-Za-z_]\w*\s*\(\s*\)\s*;' -- 'src/*.h' | grep -vc noexcept` = 0，且 `.cc` 定义同步。
+6. 阶段 4 后 `src/**` 内析构声明与定义全部带 `noexcept`（唯一例外是公开 ABI 头 `src/includes/aria2/aria2.h:725` 的 `DownloadHandle`，按验收标准 3 不动）。
 7. 收尾时计划文档含状态行、实测门禁表、债务前后对比表、实际偏差（含「未验证」条目）。
 
 ## 风险与权衡
@@ -246,6 +248,39 @@ git hash-object src/includes/aria2/aria2.h      # 2216641161b15acb3c3ddf2600dc19
 1. **引用真实**：本文所有行号来自 `git grep -n` 实测（`/tmp/p9_cast.txt`、`/tmp/p9_loops.txt`、`/tmp/p9_dtors.txt`），文件路径全部 `git ls-files` 校验存在；「预计修改的文件」逐条落在实测清单内。
 2. **阶段可编译、测试不假绿**：阶段 1 的 `= delete` 与 `static_assert`、阶段 2 的 `partition` 返回值、阶段 3 的 `ptrdiff_t`、阶段 4 的声明/定义同步都在阶段内闭环；每阶段用干净 worktree 全量 `make check`，不依赖增量编译。
 3. **覆盖所有分支与消费点**：`Dict` 的 5 个方法 + 消费者已列；`WrDiskCacheEntry` 的 12 个构造点已列；析构 `noexcept` 的继承族风险已写；4 个条件编译分支标「未验证」。
+
+## 实测门禁结果（2026-11-08）
+
+| 阶段 | 提交 | 干净 worktree（base） | `make -j8 check` | ABI 哈希 |
+|---|---|---|---|---|
+| 1 | `52774b20` | `/tmp/aria2-m9-p1`（`4a05252a`） | `TOTAL 1` / `PASS 1` / `FAIL 0` / `ERROR 0`、`OK (914)`、`error:` 0 | 不变 |
+| 2 | `93dfe3c6` | `/tmp/aria2-m9-p2`（`52774b20`） | 同上 | 不变 |
+| 3 | `adbe7399` | `/tmp/aria2-m9-p3`（`93dfe3c6`） | 同上 | 不变 |
+| 4 | `cd825b16` | `/tmp/aria2-m9-p4`（`adbe7399`） | 同上 | 不变 |
+
+四轮的 worktree 均在 `--enable-werror`（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）下从零全量编译；`grep -c 'error:'` 全为 0，`Failures !!!` 全为 0。
+
+## 债务前后对比
+
+| 指标 | 改造前 | 改造后 | 命令 |
+|---|---|---|---|
+| 真实 C 风格转换 | 36 | 0 | `git grep -cE '\((int|size_t|uint64_t|int64_t|float|double|char|unsigned char|unsigned long|ssize_t)\)[A-Za-z_(]' -- 'src/*.cc' 'src/*.h'` |
+| `std::find` / `std::find_if` | 15 | 0 | `git grep -nE 'std::(find|find_if)\(' -- src` |
+| `std::sort`/`stable_sort`/`partition`（非 ranges） | 18 | 2（保留 2 处 `std::partition`） | 同上 |
+| 析构缺 `noexcept` | 345 | 1（仅公开 ABI 头 `src/includes/aria2/aria2.h:725` 的 `DownloadHandle`，按约定不动） | `git grep -nE '~[A-Za-z_]\w*\s*\([^;{}]*\)(\s*=\s*(default|delete)\s*)?\s*(override\s*)?[;{]' -- 'src/*.h' 'src/*.cc' \| grep -v noexcept \| grep -v 'array('` |
+| 索引式 for 循环（有容器下标） | 34 | 13 处改写（余 32 处按下文理由保留）；`for (size_t i = 0; i <` 总数 67 → 32 | `git grep -nE 'for \(size_t i = 0; i <' -- 'src/*.cc' 'src/*.h' \| wc -l` |
+| 非线程安全时间函数 | 2 | 0 | `git grep -nE '\bgmtime\(|\blocaltime\(' -- src` |
+| `WrDiskCacheEntry` 拷贝控制 | 无 | `= delete` ×2 + `static_assert` | — |
+
+## 实际偏差
+
+1. **B1 实改 36 处，非计划写的 39 处**。计划表的 40 处里 `src/FileEntry.cc:287` 的 `(void)` 弃值惯用法保留；`src/Logger.cc` 实际 1 处（非 3 处）、`src/util.cc` 的 1 处在阶段 2 复扫时已由脚本归入其他文件计数。门禁后 `git grep` 专项验证为 0。
+2. **B2 保留 2 处 `std::partition`**（`src/BtLeecherStateChoke.cc:146,163`）。ranges 版返回 `subrange`，而调用方把返回值直接当迭代器喂给 `std::shuffle` / `std::sort` / 与 `std::begin(peerEntries)` 比较；包一层 `.begin()` 反而更长。`std::ranges::sort` 对自定义 `operator<` 的 `PeerEntry` 需显式传 `std::less<>{}`，已在 `src/BtSeederStateChoke.cc:125`、`src/BtLeecherStateChoke.cc:166` 加上。
+3. **B3 只改 13 处，非计划的 34 处**。剩余 32 处的上界都不是容器长度（`to - 1`、`len - 1`、`nbits`、`iovcnt`、`mislen`、`blocks`、`schemeEnd`、`count_`），或 `i` 被用作位掩码/多容器共享偏移/裸指针数组下标（`asyncNameResolver_[i]` 传给 `setNameResolverCheck(i,…)`）。换算后仍需 `static_cast<size_t>(i)` 且要包 `std::span`，代码更长、语义更隐晦，按 ponytail 保留。清单见「阶段 3 实测」。
+4. **B4 实改 599 处**（`.h` 264 + `.h` `= default` 81 + `.cc` 53 + `.cc` `= default` 201），比计划写的「265 声明 + 257 定义」多：脚本把 `= default` 形态以及 `.cc` 里默认形态一并处理，且覆盖面比 grep 初测更全（初测的 349 只统计「不带头文件内联定义」的形态）。
+5. **`src/includes/aria2/aria2.h` 第一轮被脚本误改**（`DownloadHandle::~DownloadHandle() noexcept = default;`）→ 门禁抓到 ABI 哈希变成 `55a1bfa0…`；已回滚该文件并重跑门禁恢复 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。**这是「干净 worktree + ABI 哈希」判据唯一一次真正拦住问题的实例。**
+6. **`src/InternalARC4Encryptor.cc`、`src/bignum.h` 的条件编译分支未验证**（`USE_INTERNAL_ARC4` / `USE_INTERNAL_BIGNUM` 未定义，本机不编译）；它们本轮也没有被改动（阶段 3 判断为「上界非常量容器」，保留）。
+7. **clang 未验证**：本机无 `clang++`，CI 用 `clang-18`。`noexcept` 声明与定义都写了，理论上不触发 IFNDR，但 `-Wnoexcept`/`std::terminate` 类诊断只能在 CI 上看到。
 
 ## 备注
 
