@@ -36,6 +36,7 @@
 #define D_PEER_SESSION_RESOURCE_H
 
 #include "common.h"
+#include <span>
 
 #include <string>
 #include <set>
@@ -131,7 +132,7 @@ public:
 
   void updateBitfield(size_t index, int operation);
 
-  void setBitfield(const unsigned char* bitfield, size_t bitfieldLength);
+  void setBitfield(std::span<const unsigned char> bitfield);
 
   const unsigned char* getBitfield() const;
 

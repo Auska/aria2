@@ -36,6 +36,7 @@
 #define D_DEFAULT_PIECE_STORAGE_H
 
 #include "PieceStorage.h"
+#include <span>
 
 #include <deque>
 #include <set>
@@ -128,8 +129,7 @@ public:
 
 #ifdef ENABLE_BITTORRENT
 
-  virtual bool
-  hasMissingPiece(const std::shared_ptr<Peer>& peer) override;
+  virtual bool hasMissingPiece(const std::shared_ptr<Peer>& peer) override;
 
   virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>& pieces,
                                size_t minMissingBlocks,
@@ -154,8 +154,7 @@ public:
                                    cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece>
-  getMissingPiece(const std::shared_ptr<Peer>& peer,
-                  cuid_t cuid) override;
+  getMissingPiece(const std::shared_ptr<Peer>& peer, cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece>
   getMissingPiece(const std::shared_ptr<Peer>& peer,
@@ -174,16 +173,16 @@ public:
   virtual bool hasMissingUnusedPiece() override;
 
   virtual std::shared_ptr<Piece>
-  getMissingPiece(size_t minSplitSize, const unsigned char* ignoreBitfield,
-                  size_t length, cuid_t cuid) override;
+  getMissingPiece(size_t minSplitSize,
+                  std::span<const unsigned char> ignoreBitfield,
+                  cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece> getMissingPiece(size_t index,
                                                  cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece> getPiece(size_t index) override;
 
-  virtual void
-  completePiece(const std::shared_ptr<Piece>& piece) override;
+  virtual void completePiece(const std::shared_ptr<Piece>& piece) override;
 
   virtual void cancelPiece(const std::shared_ptr<Piece>& piece,
                            cuid_t cuid) override;
@@ -210,8 +209,7 @@ public:
 
   virtual bool allDownloadFinished() override;
 
-  virtual void setBitfield(const unsigned char* bitfield,
-                           size_t bitfieldLength) override;
+  virtual void setBitfield(std::span<const unsigned char> bitfield) override;
 
   virtual size_t getBitfieldLength() override;
 
@@ -241,9 +239,9 @@ public:
   virtual void advertisePiece(cuid_t cuid, size_t index,
                               Timer registeredTime) override;
 
-  virtual uint64_t
-  getAdvertisedPieceIndexes(std::vector<size_t>& indexes, cuid_t myCuid,
-                            uint64_t lastHaveIndex) override;
+  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
+                                             cuid_t myCuid,
+                                             uint64_t lastHaveIndex) override;
 
   virtual void removeAdvertisedPiece(const Timer& expiry) override;
 
@@ -253,8 +251,8 @@ public:
 
   virtual void markPieceMissing(size_t index) override;
 
-  virtual void addInFlightPiece(
-      const std::vector<std::shared_ptr<Piece>>& pieces) override;
+  virtual void
+  addInFlightPiece(const std::vector<std::shared_ptr<Piece>>& pieces) override;
 
   virtual size_t countInFlightPiece() override;
 
@@ -263,15 +261,14 @@ public:
 
   virtual void addPieceStats(size_t index) override;
 
-  virtual void addPieceStats(const unsigned char* bitfield,
-                             size_t bitfieldLength) override;
-
-  virtual void subtractPieceStats(const unsigned char* bitfield,
-                                  size_t bitfieldLength) override;
+  virtual void addPieceStats(std::span<const unsigned char> bitfield) override;
 
   virtual void
-  updatePieceStats(const unsigned char* newBitfield, size_t newBitfieldLength,
-                   const unsigned char* oldBitfield) override;
+  subtractPieceStats(std::span<const unsigned char> bitfield) override;
+
+  virtual void
+  updatePieceStats(std::span<const unsigned char> newBitfield,
+                   std::span<const unsigned char> oldBitfield) override;
 
   virtual size_t getNextUsedIndex(size_t index) override;
 

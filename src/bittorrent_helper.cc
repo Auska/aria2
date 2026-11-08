@@ -197,9 +197,8 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
     if (nameData) {
       utf8Name = util::encodeNonUtf8(nameData->s());
       if (util::detectDirTraversal(utf8Name)) {
-        throw DL_ABORT_EX2(
-            fmt(MSG_DIR_TRAVERSAL_DETECTED, nameData->s()),
-            error_code::BITTORRENT_PARSE_ERROR);
+        throw DL_ABORT_EX2(fmt(MSG_DIR_TRAVERSAL_DETECTED, nameData->s()),
+                           error_code::BITTORRENT_PARSE_ERROR);
       }
     }
     else {
@@ -557,8 +556,7 @@ void loadFromMemory(std::span<const std::byte> content,
                     const std::string& overrideName)
 {
   processRootDictionary(ctx, bencode2::decode(content).get(), option,
-                        defaultName, overrideName,
-                        std::vector<std::string>());
+                        defaultName, overrideName, std::vector<std::string>());
 }
 
 void loadFromMemory(std::span<const std::byte> content,
@@ -610,7 +608,8 @@ TorrentAttribute* getTorrentAttrs(const std::shared_ptr<DownloadContext>& dctx)
 
 TorrentAttribute* getTorrentAttrs(DownloadContext* dctx)
 {
-  return static_cast<TorrentAttribute*>(dctx->getAttribute(ContextAttributeType::BT).get());
+  return static_cast<TorrentAttribute*>(
+      dctx->getAttribute(ContextAttributeType::BT).get());
 }
 
 std::array<unsigned char, INFO_HASH_LENGTH>
@@ -736,9 +735,8 @@ const std::array<unsigned char, PEER_ID_LENGTH>& getStaticPeerId()
 {
   static const std::array<unsigned char, PEER_ID_LENGTH> id = [] {
     std::array<unsigned char, PEER_ID_LENGTH> buf;
-    const auto& src = peerId.empty()
-                          ? generateStaticPeerId(DEFAULT_PEER_ID_PREFIX)
-                          : peerId;
+    const auto& src =
+        peerId.empty() ? generateStaticPeerId(DEFAULT_PEER_ID_PREFIX) : peerId;
     std::copy_n(reinterpret_cast<const unsigned char*>(src.data()),
                 PEER_ID_LENGTH, buf.begin());
     return buf;
@@ -848,12 +846,12 @@ void setShortIntParam(unsigned char* dest, uint16_t param)
   memcpy(dest, &nParam, sizeof(nParam));
 }
 
-void createPeerMessageString(unsigned char* msg, size_t msgLength,
-                             size_t payloadLength, uint8_t messageId)
+void createPeerMessageString(std::span<unsigned char> msg, size_t payloadLength,
+                             uint8_t messageId)
 {
-  assert(msgLength >= 5);
-  memset(msg, 0, msgLength);
-  setIntParam(msg, payloadLength);
+  assert(msg.size() >= 5);
+  memset(msg.data(), 0, msg.size());
+  setIntParam(msg.data(), payloadLength);
   msg[4] = messageId;
 }
 

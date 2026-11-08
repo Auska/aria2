@@ -62,7 +62,8 @@ BtPortMessage::BtPortMessage(uint16_t port)
 {
 }
 
-std::unique_ptr<BtPortMessage> BtPortMessage::create(std::span<const std::byte> data)
+std::unique_ptr<BtPortMessage>
+BtPortMessage::create(std::span<const std::byte> data)
 {
   auto dataPtr = reinterpret_cast<const unsigned char*>(data.data());
   auto dataLength = data.size();
@@ -110,7 +111,7 @@ std::vector<unsigned char> BtPortMessage::createMessage()
    * total: 7bytes
    */
   auto msg = std::vector<unsigned char>(MESSAGE_LENGTH);
-  bittorrent::createPeerMessageString(msg.data(), MESSAGE_LENGTH, 3, ID);
+  bittorrent::createPeerMessageString(msg, 3, ID);
   bittorrent::setShortIntParam(&msg[5], port_);
   return msg;
 }

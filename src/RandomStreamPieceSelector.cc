@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "RandomStreamPieceSelector.h"
+#include <span>
 #include "BitfieldMan.h"
 #include "SimpleRandomizer.h"
 
@@ -45,23 +46,24 @@ RandomStreamPieceSelector::RandomStreamPieceSelector(BitfieldMan* bitfieldMan)
 
 RandomStreamPieceSelector::~RandomStreamPieceSelector() = default;
 
-std::optional<size_t> RandomStreamPieceSelector::select(
-    size_t minSplitSize, const unsigned char* ignoreBitfield, size_t length)
+std::optional<size_t>
+RandomStreamPieceSelector::select(size_t minSplitSize,
+                                  std::span<const unsigned char> ignoreBitfield)
 {
   size_t start = SimpleRandomizer::getInstance()->getRandomNumber(
       bitfieldMan_->countBlock());
 
   auto rv = bitfieldMan_->getInorderMissingUnusedIndex(
-      start, bitfieldMan_->countBlock(), minSplitSize, ignoreBitfield, length);
+      start, bitfieldMan_->countBlock(), minSplitSize, ignoreBitfield);
   if (!rv) {
     rv = bitfieldMan_->getInorderMissingUnusedIndex(0, start, minSplitSize,
-                                                    ignoreBitfield, length);
+                                                    ignoreBitfield);
   }
   if (!rv) {
     // Fall back to inorder search because randomized search may fail
     // because of |minSplitSize| constraint.
     rv = bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
-                                                    ignoreBitfield, length);
+                                                    ignoreBitfield);
   }
   return rv;
 }

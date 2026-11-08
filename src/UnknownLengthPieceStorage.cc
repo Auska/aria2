@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "UnknownLengthPieceStorage.h"
+#include <span>
 
 #include <cstdlib>
 
@@ -126,10 +127,9 @@ std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
 
 bool UnknownLengthPieceStorage::hasMissingUnusedPiece() { abort(); }
 
-std::shared_ptr<Piece>
-UnknownLengthPieceStorage::getMissingPiece(size_t minSplitSize,
-                                           const unsigned char* ignoreBitfield,
-                                           size_t length, cuid_t cuid)
+std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
+    size_t minSplitSize, std::span<const unsigned char> ignoreBitfield,
+    cuid_t cuid)
 {
   if (downloadFinished_) {
     return nullptr;
@@ -147,7 +147,7 @@ std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(size_t index,
                                                                   cuid_t cuid)
 {
   if (index == 0) {
-    return getMissingPiece(0, nullptr, 0, cuid);
+    return getMissingPiece(0, {}, cuid);
   }
   else {
     return nullptr;

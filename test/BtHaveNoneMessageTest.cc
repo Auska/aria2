@@ -35,14 +35,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtHaveNoneMessageTest);
 void BtHaveNoneMessageTest::testCreate()
 {
   unsigned char msg[5];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 15);
-  std::shared_ptr<BtHaveNoneMessage> pm(BtHaveNoneMessage::create(asBytesSpan(&msg[4], 1)));
+  bittorrent::createPeerMessageString(std::span{msg}, 1, 15);
+  std::shared_ptr<BtHaveNoneMessage> pm(
+      BtHaveNoneMessage::create(asBytesSpan(&msg[4], 1)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)15, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[6];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 15);
+    bittorrent::createPeerMessageString(std::span{msg}, 2, 15);
     BtHaveNoneMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -51,7 +52,7 @@ void BtHaveNoneMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[5];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 16);
+    bittorrent::createPeerMessageString(std::span{msg}, 1, 16);
     BtHaveNoneMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -63,7 +64,7 @@ void BtHaveNoneMessageTest::testCreateMessage()
 {
   BtHaveNoneMessage msg;
   unsigned char data[5];
-  bittorrent::createPeerMessageString(data, sizeof(data), 1, 15);
+  bittorrent::createPeerMessageString(std::span{data}, 1, 15);
   auto rawmsg = msg.createMessage();
   CPPUNIT_ASSERT_EQUAL((size_t)5, rawmsg.size());
   CPPUNIT_ASSERT(std::equal(std::begin(rawmsg), std::end(rawmsg), data));

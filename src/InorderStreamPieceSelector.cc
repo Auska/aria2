@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "InorderStreamPieceSelector.h"
+#include <span>
 #include "BitfieldMan.h"
 
 namespace aria2 {
@@ -45,10 +46,10 @@ InorderStreamPieceSelector::InorderStreamPieceSelector(BitfieldMan* bitfieldMan)
 InorderStreamPieceSelector::~InorderStreamPieceSelector() = default;
 
 std::optional<size_t> InorderStreamPieceSelector::select(
-    size_t minSplitSize, const unsigned char* ignoreBitfield, size_t length)
+    size_t minSplitSize, std::span<const unsigned char> ignoreBitfield)
 {
   return bitfieldMan_->getInorderMissingUnusedIndex(minSplitSize,
-                                                    ignoreBitfield, length);
+                                                    ignoreBitfield);
 }
 
 void InorderStreamPieceSelector::onBitfieldInit() {}

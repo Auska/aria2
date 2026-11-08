@@ -40,6 +40,7 @@
 #include <optional>
 
 #include <vector>
+#include <span>
 
 namespace aria2 {
 
@@ -63,7 +64,7 @@ private:
 
   bool filterEnabled_;
 
-  bool setBitInternal(unsigned char* bitfield, size_t index, bool on);
+  bool setBitInternal(std::span<unsigned char> bitfield, size_t index, bool on);
   bool setFilterBit(size_t index);
 
   size_t getStartIndex(size_t index) const;
@@ -106,7 +107,7 @@ public:
   // but not set in this object.
   //
   // affected by filter
-  bool hasMissingPiece(const unsigned char* bitfield, size_t len) const;
+  bool hasMissingPiece(std::span<const unsigned char> bitfield) const;
 
   // affected by filter
   std::optional<size_t> getFirstMissingUnusedIndex() const;
@@ -130,10 +131,9 @@ public:
   // if such bit index is found. Otherwise returns false.
   //
   // affected by filter
-  std::optional<size_t>
-  getSparseMissingUnusedIndex(int32_t minSplitSize,
-                              const unsigned char* ignoreBitfield,
-                              size_t ignoreBitfieldLength) const;
+  std::optional<size_t> getSparseMissingUnusedIndex(
+      int32_t minSplitSize,
+      std::span<const unsigned char> ignoreBitfield) const;
 
   // Stores missing bit index to index. This function first try to
   // select smallest index starting offsetIndex in the order:
@@ -151,9 +151,8 @@ public:
   // affected by filter
   std::optional<size_t>
   getGeomMissingUnusedIndex(int32_t minSplitSize,
-                            const unsigned char* ignoreBitfield,
-                            size_t ignoreBitfieldLength, double base,
-                            size_t offsetIndex) const;
+                            std::span<const unsigned char> ignoreBitfield,
+                            double base, size_t offsetIndex) const;
 
   // Stores missing bit index to index. This function selects smallest
   // index of missing piece, considering minSplitSize.  Set bits in
@@ -161,32 +160,29 @@ public:
   // found. Otherwise returns false.
   //
   // affected by filter
-  std::optional<size_t>
-  getInorderMissingUnusedIndex(int32_t minSplitSize,
-                               const unsigned char* ignoreBitfield,
-                               size_t ignoreBitfieldLength) const;
+  std::optional<size_t> getInorderMissingUnusedIndex(
+      int32_t minSplitSize,
+      std::span<const unsigned char> ignoreBitfield) const;
 
   // Just like getInorderMissingUnusedIndex() above, but limit the
   // search area in [startIndex, endIndex).  |endIndex| is normalized
   // to min(|endIndex|, blocks_)
   //
   // affected by filter
-  std::optional<size_t>
-  getInorderMissingUnusedIndex(size_t startIndex, size_t endIndex,
-                               int32_t minSplitSize,
-                               const unsigned char* ignoreBitfield,
-                               size_t ignoreBitfieldLength) const;
+  std::optional<size_t> getInorderMissingUnusedIndex(
+      size_t startIndex, size_t endIndex, int32_t minSplitSize,
+      std::span<const unsigned char> ignoreBitfield) const;
 
   // affected by filter
-  bool getAllMissingIndexes(unsigned char* misbitfield, size_t mislen) const;
+  bool getAllMissingIndexes(std::span<unsigned char> misbitfield) const;
 
   // affected by filter
-  bool getAllMissingIndexes(unsigned char* misbitfield, size_t mislen,
-                            const unsigned char* bitfield, size_t len) const;
+  bool getAllMissingIndexes(std::span<unsigned char> misbitfield,
+                            std::span<const unsigned char> bitfield) const;
   // affected by filter
-  bool getAllMissingUnusedIndexes(unsigned char* misbitfield, size_t mislen,
-                                  const unsigned char* bitfield,
-                                  size_t len) const;
+  bool
+  getAllMissingUnusedIndexes(std::span<unsigned char> misbitfield,
+                             std::span<const unsigned char> bitfield) const;
   // affected by filter
   size_t countMissingBlock() const;
 
@@ -226,7 +222,7 @@ public:
 
   size_t getMaxIndex() const { return blocks_ - 1; }
 
-  void setBitfield(const unsigned char* bitfield, size_t bitfieldLength);
+  void setBitfield(std::span<const unsigned char> bitfield);
 
   void clearAllBit();
   void setAllBit();

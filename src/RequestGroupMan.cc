@@ -788,8 +788,8 @@ void RequestGroupMan::formatDownloadResultFull(
 {
   BitfieldMan bt(downloadResult->pieceLength, downloadResult->totalLength);
   bt.setBitfield(
-      reinterpret_cast<const unsigned char*>(downloadResult->bitfield.data()),
-      downloadResult->bitfield.size());
+      {reinterpret_cast<const unsigned char*>(downloadResult->bitfield.data()),
+       downloadResult->bitfield.size()});
   bool head = true;
   const std::vector<std::shared_ptr<FileEntry>>& fileEntries =
       downloadResult->fileEntries;

@@ -31,22 +31,22 @@ void GeomStreamPieceSelectorTest::testOnBitfieldInit()
   unsigned char igbf[3];
   memset(igbf, 0, 3);
   // 11111|11111|00000|00000
-  auto index = sel.select(20_k, igbf, sizeof(igbf));
+  auto index = sel.select(20_k, {igbf, sizeof(igbf)});
   CPPUNIT_ASSERT(index);
   CPPUNIT_ASSERT_EQUAL((size_t)11, *index);
   bf.setUseBit(11);
   // 11111|11111|10000|00000
-  index = sel.select(20_k, igbf, sizeof(igbf));
+  index = sel.select(20_k, {igbf, sizeof(igbf)});
   CPPUNIT_ASSERT(index);
   CPPUNIT_ASSERT_EQUAL((size_t)12, *index);
   bf.setUseBit(12);
   // 11111|11111|11000|00000
-  index = sel.select(20_k, igbf, sizeof(igbf));
+  index = sel.select(20_k, {igbf, sizeof(igbf)});
   CPPUNIT_ASSERT(index);
   CPPUNIT_ASSERT_EQUAL((size_t)13, *index);
   bf.setUseBit(13);
   // 11111|11111|11100|00000
-  index = sel.select(20_k, igbf, sizeof(igbf));
+  index = sel.select(20_k, {igbf, sizeof(igbf)});
   CPPUNIT_ASSERT(index);
   CPPUNIT_ASSERT_EQUAL((size_t)15, *index);
 }

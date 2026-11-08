@@ -36,6 +36,7 @@
 #define D_INORDER_STREAM_PIECE_SELECTOR_H
 
 #include "StreamPieceSelector.h"
+#include <span>
 
 #include <optional>
 
@@ -48,9 +49,9 @@ public:
   InorderStreamPieceSelector(BitfieldMan* bitfieldMan);
   virtual ~InorderStreamPieceSelector();
 
-  virtual std::optional<size_t> select(size_t minSplitSize,
-                                       const unsigned char* ignoreBitfield,
-                                       size_t length) override;
+  virtual std::optional<size_t>
+  select(size_t minSplitSize,
+         std::span<const unsigned char> ignoreBitfield) override;
 
   virtual void onBitfieldInit() override;
 

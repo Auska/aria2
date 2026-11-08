@@ -50,15 +50,9 @@ public:
     {
     }
 
-    virtual void doChokedAction() override
-    {
-      doChokedActionCalled = true;
-    }
+    virtual void doChokedAction() override { doChokedActionCalled = true; }
 
-    virtual void doChokingAction() override
-    {
-      doChokingActionCalled = true;
-    }
+    virtual void doChokingAction() override { doChokingActionCalled = true; }
   };
 
   class MockBtRequestFactory2 : public MockBtRequestFactory {
@@ -68,10 +62,7 @@ public:
   public:
     MockBtRequestFactory2() : doChokedActionCalled{false} {}
 
-    virtual void doChokedAction() override
-    {
-      doChokedActionCalled = true;
-    }
+    virtual void doChokedAction() override { doChokedActionCalled = true; }
   };
 };
 
@@ -80,14 +71,14 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtChokeMessageTest);
 void BtChokeMessageTest::testCreate()
 {
   unsigned char msg[5];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 0);
+  bittorrent::createPeerMessageString(std::span{msg}, 1, 0);
   auto pm = BtChokeMessage::create(asBytesSpan(&msg[4], 1));
   CPPUNIT_ASSERT_EQUAL((uint8_t)0, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[6];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 0);
+    bittorrent::createPeerMessageString(std::span{msg}, 2, 0);
     BtChokeMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -96,7 +87,7 @@ void BtChokeMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[5];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 1);
+    bittorrent::createPeerMessageString(std::span{msg}, 1, 1);
     BtChokeMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -108,7 +99,7 @@ void BtChokeMessageTest::testCreateMessage()
 {
   BtChokeMessage msg;
   unsigned char data[5];
-  bittorrent::createPeerMessageString(data, sizeof(data), 1, 0);
+  bittorrent::createPeerMessageString(std::span{data}, 1, 0);
   auto rawmsg = msg.createMessage();
   CPPUNIT_ASSERT_EQUAL((size_t)5, rawmsg.size());
   CPPUNIT_ASSERT(std::equal(std::begin(rawmsg), std::end(rawmsg), data));

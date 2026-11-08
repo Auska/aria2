@@ -50,7 +50,7 @@ std::vector<unsigned char> ZeroBtMessage::createMessage()
    * total: 5bytes
    */
   auto msg = std::vector<unsigned char>(MESSAGE_LENGTH);
-  bittorrent::createPeerMessageString(msg.data(), MESSAGE_LENGTH, 1, getId());
+  bittorrent::createPeerMessageString(msg, 1, getId());
   return msg;
 }
 

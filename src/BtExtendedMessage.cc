@@ -71,7 +71,7 @@ std::vector<unsigned char> BtExtendedMessage::createMessage()
   msgLength_ = 6 + payload.size();
   auto msg = std::vector<unsigned char>(msgLength_);
   auto p = msg.data();
-  bittorrent::createPeerMessageString(p, msgLength_, 2 + payload.size(), ID);
+  bittorrent::createPeerMessageString(msg, 2 + payload.size(), ID);
   p += 5;
   *p++ = extensionMessage_->getExtensionMessageID();
   std::copy(std::begin(payload), std::end(payload), p);
@@ -99,7 +99,8 @@ BtExtendedMessage::create(ExtensionMessageFactory* factory,
   bittorrent::assertPayloadLengthGreater(1, data.size(), NAME);
   bittorrent::assertID(ID, data, NAME);
   assert(factory);
-  return make_unique<BtExtendedMessage>(factory->createMessage(data.subspan(1)));
+  return make_unique<BtExtendedMessage>(
+      factory->createMessage(data.subspan(1)));
 }
 
 void BtExtendedMessage::doReceivedAction()

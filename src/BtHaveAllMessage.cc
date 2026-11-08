@@ -54,17 +54,17 @@ BtHaveAllMessage::create(std::span<const std::byte> data)
 void BtHaveAllMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
-    throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
-                          toString()));
+    throw DL_ABORT_EX(
+        fmt("{} received while fast extension is disabled", toString()));
   }
   if (isMetadataGetMode()) {
     return;
   }
-  getPieceStorage()->subtractPieceStats(getPeer()->getBitfield(),
-                                        getPeer()->getBitfieldLength());
+  getPieceStorage()->subtractPieceStats(
+      {getPeer()->getBitfield(), getPeer()->getBitfieldLength()});
   getPeer()->setAllBitfield();
-  getPieceStorage()->addPieceStats(getPeer()->getBitfield(),
-                                   getPeer()->getBitfieldLength());
+  getPieceStorage()->addPieceStats(
+      {getPeer()->getBitfield(), getPeer()->getBitfieldLength()});
   if (getPeer()->isSeeder() && getPieceStorage()->downloadFinished()) {
     throw DL_ABORT_EX(MSG_GOOD_BYE_SEEDER);
   }

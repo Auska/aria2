@@ -64,7 +64,7 @@ void PieceStatManTest::testAddPieceStats_bitfield()
 {
   PieceStatMan pieceStatMan(10, false);
   const unsigned char bitfield[] = {0xaa, 0x80};
-  pieceStatMan.addPieceStats(bitfield, sizeof(bitfield));
+  pieceStatMan.addPieceStats({bitfield, sizeof(bitfield)});
   {
     int ans[] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
     const std::vector<int>& counts(pieceStatMan.getCounts());
@@ -72,7 +72,7 @@ void PieceStatManTest::testAddPieceStats_bitfield()
       CPPUNIT_ASSERT_EQUAL(ans[i], counts[i]);
     }
   }
-  pieceStatMan.addPieceStats(bitfield, sizeof(bitfield));
+  pieceStatMan.addPieceStats({bitfield, sizeof(bitfield)});
   {
     int ans[] = {2, 0, 2, 0, 2, 0, 2, 0, 2, 0};
     const std::vector<int>& counts(pieceStatMan.getCounts());
@@ -86,10 +86,11 @@ void PieceStatManTest::testUpdatePieceStats()
 {
   PieceStatMan pieceStatMan(10, false);
   const unsigned char bitfield[] = {0xff, 0xc0};
-  pieceStatMan.addPieceStats(bitfield, sizeof(bitfield));
+  pieceStatMan.addPieceStats({bitfield, sizeof(bitfield)});
   const unsigned char oldBitfield[] = {0xf0, 0x00};
   const unsigned char newBitfield[] = {0x1f, 0x00};
-  pieceStatMan.updatePieceStats(newBitfield, sizeof(newBitfield), oldBitfield);
+  pieceStatMan.updatePieceStats({newBitfield, sizeof(newBitfield)},
+                                {oldBitfield, sizeof(oldBitfield)});
   {
     // idx: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
     // bf : 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
@@ -109,9 +110,9 @@ void PieceStatManTest::testSubtractPieceStats()
 {
   PieceStatMan pieceStatMan(10, false);
   const unsigned char bitfield[] = {0xf0, 0x00};
-  pieceStatMan.addPieceStats(bitfield, sizeof(bitfield));
+  pieceStatMan.addPieceStats({bitfield, sizeof(bitfield)});
   const unsigned char newBitfield[] = {0x3f, 0x00};
-  pieceStatMan.subtractPieceStats(newBitfield, sizeof(newBitfield));
+  pieceStatMan.subtractPieceStats({newBitfield, sizeof(newBitfield)});
   {
     // idx: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
     // bf : 1, 1, 1, 1, 0, 0, 0, 0, 0, 0

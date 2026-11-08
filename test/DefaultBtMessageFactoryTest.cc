@@ -60,7 +60,8 @@ void DefaultBtMessageFactoryTest::testCreateBtMessage_BtExtendedMessage()
   // payload:{4:name3:foo}->11bytes
   std::string payload = "4:name3:foo";
   char msg[17]; // 6+11bytes
-  bittorrent::createPeerMessageString((unsigned char*)msg, sizeof(msg), 13, 20);
+  bittorrent::createPeerMessageString(
+      std::span{reinterpret_cast<unsigned char*>(msg), sizeof(msg)}, 13, 20);
   msg[5] = 1; // Set dummy extended message ID 1
   memcpy(msg + 6, payload.c_str(), payload.size());
 
@@ -83,11 +84,11 @@ void DefaultBtMessageFactoryTest::testCreatePortMessage()
 {
   {
     unsigned char data[7];
-    bittorrent::createPeerMessageString(data, sizeof(data), 3, 9);
+    bittorrent::createPeerMessageString(std::span{data}, 3, 9);
     bittorrent::setShortIntParam(&data[5], 6881);
     try {
-      auto r = factory_->createBtMessage(
-          asBytesSpan(&data[4], sizeof(data) - 4));
+      auto r =
+          factory_->createBtMessage(asBytesSpan(&data[4], sizeof(data) - 4));
       CPPUNIT_ASSERT(BtPortMessage::ID == r->getId());
       auto m = static_cast<const BtPortMessage*>(r.get());
       CPPUNIT_ASSERT_EQUAL((uint16_t)6881, m->getPort());

@@ -33,6 +33,7 @@
  */
 /* copyright --> */
 #include "DefaultStreamPieceSelector.h"
+#include <span>
 #include "BitfieldMan.h"
 
 namespace aria2 {
@@ -45,10 +46,10 @@ DefaultStreamPieceSelector::DefaultStreamPieceSelector(BitfieldMan* bitfieldMan)
 DefaultStreamPieceSelector::~DefaultStreamPieceSelector() = default;
 
 std::optional<size_t> DefaultStreamPieceSelector::select(
-    size_t minSplitSize, const unsigned char* ignoreBitfield, size_t length)
+    size_t minSplitSize, std::span<const unsigned char> ignoreBitfield)
 {
-  return bitfieldMan_->getSparseMissingUnusedIndex(minSplitSize, ignoreBitfield,
-                                                   length);
+  return bitfieldMan_->getSparseMissingUnusedIndex(minSplitSize,
+                                                   ignoreBitfield);
 }
 
 void DefaultStreamPieceSelector::onBitfieldInit() {}

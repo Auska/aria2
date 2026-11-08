@@ -36,6 +36,7 @@
 #define D_PEER_H
 
 #include "common.h"
+#include <span>
 #include "ExtensionMessageRegistry.h"
 
 #include <cassert>
@@ -198,7 +199,7 @@ public:
    */
   int64_t getSessionDownloadLength() const;
 
-  void setBitfield(const unsigned char* bitfield, size_t bitfieldLength);
+  void setBitfield(std::span<const unsigned char> bitfield);
 
   const unsigned char* getBitfield() const;
 

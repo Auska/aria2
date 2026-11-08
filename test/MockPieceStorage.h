@@ -2,6 +2,7 @@
 #define D_MOCK_PIECE_STORAGE_H
 
 #include "PieceStorage.h"
+#include <span>
 
 #include <algorithm>
 
@@ -99,8 +100,9 @@ public:
   virtual bool hasMissingUnusedPiece() override { return false; }
 
   virtual std::shared_ptr<Piece>
-  getMissingPiece(size_t minSplitSize, const unsigned char* ignoreBitfield,
-                  size_t length, cuid_t cuid) override
+  getMissingPiece(size_t minSplitSize,
+                  std::span<const unsigned char> ignoreBitfield,
+                  cuid_t cuid) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
@@ -122,9 +124,7 @@ public:
     return std::shared_ptr<Piece>(new Piece());
   }
 
-  virtual void completePiece(const std::shared_ptr<Piece>& piece) override
-  {
-  }
+  virtual void completePiece(const std::shared_ptr<Piece>& piece) override {}
 
   virtual void cancelPiece(const std::shared_ptr<Piece>& piece,
                            cuid_t cuid) override
@@ -147,10 +147,7 @@ public:
     this->filteredTotalLength = totalLength;
   }
 
-  virtual int64_t getCompletedLength() override
-  {
-    return completedLength;
-  }
+  virtual int64_t getCompletedLength() override { return completedLength; }
 
   void setCompletedLength(int64_t completedLength)
   {
@@ -175,10 +172,7 @@ public:
 
   void setDownloadFinished(bool f) { downloadFinished_ = f; }
 
-  virtual bool allDownloadFinished() override
-  {
-    return allDownloadFinished_;
-  }
+  virtual bool allDownloadFinished() override { return allDownloadFinished_; }
 
   void setAllDownloadFinished(bool f) { allDownloadFinished_ = f; }
 
@@ -189,10 +183,9 @@ public:
     return bitfieldMan->getBitfield();
   }
 
-  virtual void setBitfield(const unsigned char* bitfield,
-                           size_t bitfieldLength) override
+  virtual void setBitfield(std::span<const unsigned char> bitfield) override
   {
-    bitfieldMan->setBitfield(bitfield, bitfieldLength);
+    bitfieldMan->setBitfield(bitfield);
   }
 
   virtual size_t getBitfieldLength() override
@@ -247,9 +240,9 @@ public:
   {
   }
 
-  virtual uint64_t
-  getAdvertisedPieceIndexes(std::vector<size_t>& indexes, cuid_t myCuid,
-                            uint64_t lastHaveIndex) override
+  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
+                                             cuid_t myCuid,
+                                             uint64_t lastHaveIndex) override
   {
     throw FATAL_EXCEPTION("Not Implemented!");
   }
@@ -258,16 +251,13 @@ public:
 
   virtual void markAllPiecesDone() override {}
 
-  virtual void addInFlightPiece(
-      const std::vector<std::shared_ptr<Piece>>& pieces) override
+  virtual void
+  addInFlightPiece(const std::vector<std::shared_ptr<Piece>>& pieces) override
   {
     std::copy(pieces.begin(), pieces.end(), back_inserter(inFlightPieces));
   }
 
-  virtual size_t countInFlightPiece() override
-  {
-    return inFlightPieces.size();
-  }
+  virtual size_t countInFlightPiece() override { return inFlightPieces.size(); }
 
   virtual void
   getInFlightPieces(std::vector<std::shared_ptr<Piece>>& pieces) override
@@ -277,19 +267,18 @@ public:
 
   virtual void addPieceStats(size_t index) override {}
 
-  virtual void addPieceStats(const unsigned char* bitfield,
-                             size_t bitfieldLength) override
+  virtual void addPieceStats(std::span<const unsigned char> bitfield) override
   {
   }
 
-  virtual void subtractPieceStats(const unsigned char* bitfield,
-                                  size_t bitfieldLength) override
+  virtual void
+  subtractPieceStats(std::span<const unsigned char> bitfield) override
   {
   }
 
-  virtual void updatePieceStats(const unsigned char* newBitfield,
-                                size_t newBitfieldLength,
-                                const unsigned char* oldBitfield) override
+  virtual void
+  updatePieceStats(std::span<const unsigned char> newBitfield,
+                   std::span<const unsigned char> oldBitfield) override
   {
   }
 

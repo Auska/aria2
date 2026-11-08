@@ -135,7 +135,7 @@ public:
 
 1. [x] **阶段 1：输出层去 `vprintf`/`printf`** — `src/OutputFile.h`、`src/IOFile.{h,cc}`、`src/NullOutputFile.h`、`src/BufferedFile.*`、`src/GZipFile.*`、`src/SHA1IOFile.*`（4 个 `onVprintf` 实现）+ 12 个调用文件 + 3 处 `stringstream`；干净 worktree 门禁；提交 `PLAN-008 阶段1: 输出层移除 C 可变参数接口`。
 2. [x] **阶段 2：异常层改用 `std::source_location`** — `src/Exception.{h,cc}`、`src/RecoverableException.{h,cc}`、6 个异常子类头、`src/LogFactory.{h,cc}`/`src/Logger.{h,cc}`；干净 worktree 门禁；提交 `PLAN-008 阶段2: 异常与日志改用 std::source_location`。
-3. [ ] **阶段 3：残余 ptr+len → `std::span`** — `src/BitfieldMan.{h,cc}` 8 个函数 + `src/DefaultPieceStorage.*`、`src/PieceStatMan.*`、`src/StreamPieceSelector.h` + 4 实现、`src/UnknownLengthPieceStorage.*`、`src/bittorrent_helper.*`、`src/ValueBase.*`、测试；干净 worktree 门禁；提交 `PLAN-008 阶段3: 残余指针加长度参数改用 std::span`。
+3. [x] **阶段 3：残余 ptr+len → `std::span`** — `src/BitfieldMan.{h,cc}` 8 个函数 + `src/DefaultPieceStorage.*`、`src/PieceStatMan.*`、`src/StreamPieceSelector.h` + 4 实现、`src/UnknownLengthPieceStorage.*`、`src/bittorrent_helper.*`、`src/ValueBase.*`、测试；干净 worktree 门禁；提交 `PLAN-008 阶段3: 残余指针加长度参数改用 std::span`。
 4. [ ] **阶段 4：只读形参 → `std::string_view`** — 159 个头文件的 672 处 `const std::string&`（`src/includes/aria2/aria2.h` 除外）+ 对应实现与调用点；干净 worktree 门禁；提交 `PLAN-008 阶段4: 只读字符串形参改用 std::string_view`。
 5. [ ] **阶段 5：收尾** — 勾选、状态行、实测门禁表、实际偏差、债务前后对比；提交 `PLAN-008: 勾选全部阶段、标记计划完成并记录实测门禁结果`。
 
@@ -154,6 +154,15 @@ public:
 - `__FILE__`/`__LINE__` 在 `src` 与 `test` 中 **已清零**（`git grep` 0 命中）。
 - `src/Logger`：4 个 `log()` 合并为 2 个（`const std::string&` + 可选 `const Exception&`，均带 `source_location` 默认参数）；`writeLog()` / 内部 `writeHeader()` 改收 `std::source_location`，输出格式 `[file:line]` 保持不变。`src/LogFactory.h` 的 `A2_LOG` / `A2_LOG_EX` 宏体改为 `logger->log(level, msg[, ex])`，调用点同样零改动。
 - 门禁（干净 worktree `/tmp/aria2-m8-p2`，base `6434ec32`）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+
+### 阶段 3 实测（2026-11-08）
+
+- 改动 **63 文件 +510/−540**。`src/BitfieldMan.{h,cc}` 8 个函数、`src/StreamPieceSelector.h` + 4 个实现、`src/PieceStorage.h` + `DefaultPieceStorage`/`UnknownLengthPieceStorage`/`MockPieceStorage` 的 `getMissingPiece`/`setBitfield`/`addPieceStats`/`subtractPieceStats`/`updatePieceStats`、`src/Peer`/`PeerSessionResource`、`src/Piece`、`src/PieceStatMan`、`src/SegmentMan.cc`、`src/bittorrent_helper::createPeerMessageString` 全部改为 `std::span`。
+- `createPeerMessageString(std::span<unsigned char> msg, size_t payloadLength, uint8_t messageId)`：删掉 `msgLength` 形参（由 `msg.size()` 得出），7 个产物点 + 66 处测试调用随之简化。
+- 关键取舍：`getBitfield()`/`getFilterBitfield()` 返回类型保持 `const unsigned char*`（公开契约，11 处声明），所以调用点统一写 `{ptr, len}` / `std::span{p, n}` 聚合初始化；`src/BitfieldMan.cc` 内部 `copyBitfield(unsigned char* dst, ...)`、`testAllBitSet(const unsigned char*, ...)` 保持裸指针（局部辅助，无跨层调用方）。
+- 明确不改（记入「实际偏差」）：`src/ValueBase.{h,cc}` 的 `String(const char*, size_t)` / `String::g(...)`（`String::g` 调用点 86 处，超阈值 40）；`src/IOFile.h` 的 `gets`/`getsn`（fgets 语义）；`src/DHTConnection.h`、`src/PeerConnection.h`、`src/GZipEncoder.h`、`src/HttpHeaderProcessor.cc`、`src/DHTMessageFactoryImpl.h`、`src/DHTRoutingTableDeserializer.cc`、`src/InternalARC4Encryptor.cc`、`src/LibsslARC4Encryptor.cc`、`src/message_digest_helper.{h,cc}` 的 ptr+len 形参（含 MS 握手 / DHT / ARC4 等协议层与外部契约，调用点跨层）；`src/bittorrent_helper.cc` 的 `getLLIntParam/getIntParam/getShortIntParam(const unsigned char* msg, size_t pos)` 是「基址 + 偏移」语义而非指针+长度，span 化不减少任何东西。
+- 门禁（干净 worktree `/tmp/aria2-m8-p3`，base `c06e974c`，clean 构建）：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0（`CXX = g++ -std=c++23`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）、`make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`test/aria2c.log` `OK (914)`、无 `Failures`、`error:` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+- 过程教训：①本地增量 `make -C test` 会因未跟踪头文件依赖而假绿（改 `test/MockPieceStorage.h` 后只有重新触发编译的文件才看到错误），必须 `touch test/*.cc` 或干净 worktree 才能暴露；②干净 worktree 每轮只暴一批新错误，`git apply` 全部重编是唯一可靠判据。
 
 ## 预计修改的文件
 

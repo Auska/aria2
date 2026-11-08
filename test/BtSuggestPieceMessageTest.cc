@@ -31,7 +31,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtSuggestPieceMessageTest);
 void BtSuggestPieceMessageTest::testCreate()
 {
   unsigned char msg[9];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 13);
+  bittorrent::createPeerMessageString(std::span{msg}, 5, 13);
   bittorrent::setIntParam(&msg[5], 12345);
   auto pm = BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 5));
   CPPUNIT_ASSERT(BtSuggestPieceMessage::ID == pm->getId());
@@ -40,7 +40,7 @@ void BtSuggestPieceMessageTest::testCreate()
   // case: payload size is wrong
   try {
     unsigned char msg[10];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 6, 13);
+    bittorrent::createPeerMessageString(std::span{msg}, 6, 13);
     BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -49,7 +49,7 @@ void BtSuggestPieceMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[9];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 5, 14);
+    bittorrent::createPeerMessageString(std::span{msg}, 5, 14);
     BtSuggestPieceMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -62,7 +62,7 @@ void BtSuggestPieceMessageTest::testCreateMessage()
   BtSuggestPieceMessage msg;
   msg.setIndex(12345);
   unsigned char data[9];
-  bittorrent::createPeerMessageString(data, sizeof(data), 5, 13);
+  bittorrent::createPeerMessageString(std::span{data}, 5, 13);
   bittorrent::setIntParam(&data[5], 12345);
   auto rawmsg = msg.createMessage();
   CPPUNIT_ASSERT_EQUAL((size_t)9, rawmsg.size());

@@ -64,15 +64,13 @@ public:
   class MockBtMessageFactory2 : public MockBtMessageFactory {
   public:
     virtual std::unique_ptr<BtPieceMessage>
-    createPieceMessage(size_t index, int32_t begin,
-                       int32_t length) override
+    createPieceMessage(size_t index, int32_t begin, int32_t length) override
     {
       return make_unique<BtPieceMessage>(index, begin, length);
     }
 
     virtual std::unique_ptr<BtRejectMessage>
-    createRejectMessage(size_t index, int32_t begin,
-                        int32_t length) override
+    createRejectMessage(size_t index, int32_t begin, int32_t length) override
     {
       return make_unique<BtRejectMessage>(index, begin, length);
     }
@@ -112,7 +110,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtRequestMessageTest);
 void BtRequestMessageTest::testCreate()
 {
   unsigned char msg[17];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 13, 6);
+  bittorrent::createPeerMessageString(std::span{msg}, 13, 6);
   bittorrent::setIntParam(&msg[5], 12345);
   bittorrent::setIntParam(&msg[9], 256);
   bittorrent::setIntParam(&msg[13], 1_k);
@@ -125,7 +123,7 @@ void BtRequestMessageTest::testCreate()
   // case: payload size is wrong
   try {
     unsigned char msg[18];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 14, 6);
+    bittorrent::createPeerMessageString(std::span{msg}, 14, 6);
     BtRequestMessage::create(asBytesSpan(&msg[4], 14));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -134,7 +132,7 @@ void BtRequestMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[17];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 13, 7);
+    bittorrent::createPeerMessageString(std::span{msg}, 13, 7);
     BtRequestMessage::create(asBytesSpan(&msg[4], 13));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -149,7 +147,7 @@ void BtRequestMessageTest::testCreateMessage()
   msg.setBegin(256);
   msg.setLength(1_k);
   unsigned char data[17];
-  bittorrent::createPeerMessageString(data, sizeof(data), 13, 6);
+  bittorrent::createPeerMessageString(std::span{data}, 13, 6);
   bittorrent::setIntParam(&data[5], 12345);
   bittorrent::setIntParam(&data[9], 256);
   bittorrent::setIntParam(&data[13], 1_k);

@@ -202,9 +202,11 @@ void SegmentMan::getInFlightSegment(
 std::shared_ptr<Segment> SegmentMan::getSegment(cuid_t cuid,
                                                 size_t minSplitSize)
 {
-  std::shared_ptr<Piece> piece = pieceStorage_->getMissingPiece(
-      minSplitSize, ignoreBitfield_.getFilterBitfield(),
-      ignoreBitfield_.getBitfieldLength(), cuid);
+  std::shared_ptr<Piece> piece =
+      pieceStorage_->getMissingPiece(minSplitSize,
+                                     {ignoreBitfield_.getFilterBitfield(),
+                                      ignoreBitfield_.getBitfieldLength()},
+                                     cuid);
   return checkoutSegment(cuid, piece);
 }
 
@@ -220,8 +222,9 @@ void SegmentMan::getSegment(std::vector<std::shared_ptr<Segment>>& segments,
   while (segments.size() < maxSegments) {
     std::shared_ptr<Segment> segment = checkoutSegment(
         cuid,
-        pieceStorage_->getMissingPiece(minSplitSize, filter.getFilterBitfield(),
-                                       filter.getBitfieldLength(), cuid));
+        pieceStorage_->getMissingPiece(
+            minSplitSize,
+            {filter.getFilterBitfield(), filter.getBitfieldLength()}, cuid));
     if (!segment) {
       break;
     }

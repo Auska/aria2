@@ -42,16 +42,17 @@ void BtExtendedMessageTest::testCreate()
   // payload:{4:name3:foo}->11bytes
   std::string payload = "4:name3:foo";
   unsigned char msg[17]; // 6+11bytes
-  bittorrent::createPeerMessageString((unsigned char*)msg, sizeof(msg), 13, 20);
+  bittorrent::createPeerMessageString(std::span{msg}, 13, 20);
   msg[5] = 1; // Set dummy extended message ID 1
   memcpy(msg + 6, payload.c_str(), payload.size());
-  auto pm = BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 13));
+  auto pm =
+      BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 13));
   CPPUNIT_ASSERT_EQUAL((uint8_t)20, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[5];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 20);
+    bittorrent::createPeerMessageString(std::span{msg}, 1, 20);
     BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -61,7 +62,7 @@ void BtExtendedMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[6];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 21);
+    bittorrent::createPeerMessageString(std::span{msg}, 2, 21);
     BtExtendedMessage::create(&exmsgFactory, peer, asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -77,7 +78,7 @@ void BtExtendedMessageTest::testCreateMessage()
   BtExtendedMessage msg{make_unique<MockExtensionMessage>(
       "charlie", extendedMessageID, payload, nullptr)};
   unsigned char data[17];
-  bittorrent::createPeerMessageString(data, sizeof(data), 13, 20);
+  bittorrent::createPeerMessageString(std::span{data}, 13, 20);
   *(data + 5) = extendedMessageID;
   memcpy(data + 6, payload.c_str(), payload.size());
   auto rawmsg = msg.createMessage();

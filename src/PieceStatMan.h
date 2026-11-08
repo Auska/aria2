@@ -36,6 +36,7 @@
 #define D_PIECE_STAT_MAN_H
 
 #include "common.h"
+#include <span>
 
 #include <vector>
 
@@ -53,13 +54,12 @@ public:
 
   void addPieceStats(size_t index);
 
-  void addPieceStats(const unsigned char* bitfield, size_t bitfieldLength);
+  void addPieceStats(std::span<const unsigned char> bitfield);
 
-  void subtractPieceStats(const unsigned char* bitfield, size_t bitfieldLength);
+  void subtractPieceStats(std::span<const unsigned char> bitfield);
 
-  void updatePieceStats(const unsigned char* newBitfield,
-                        size_t newBitfieldLength,
-                        const unsigned char* oldBitfield);
+  void updatePieceStats(std::span<const unsigned char> newBitfield,
+                        std::span<const unsigned char> oldBitfield);
 
   const std::vector<size_t>& getOrder() const { return order_; }
 

@@ -35,14 +35,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtUnchokeMessageTest);
 void BtUnchokeMessageTest::testCreate()
 {
   unsigned char msg[5];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 1);
-  std::shared_ptr<BtUnchokeMessage> pm(BtUnchokeMessage::create(asBytesSpan(&msg[4], 1)));
+  bittorrent::createPeerMessageString(std::span{msg}, 1, 1);
+  std::shared_ptr<BtUnchokeMessage> pm(
+      BtUnchokeMessage::create(asBytesSpan(&msg[4], 1)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)1, pm->getId());
 
   // case: payload size is wrong
   try {
     unsigned char msg[6];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 2, 1);
+    bittorrent::createPeerMessageString(std::span{msg}, 2, 1);
     BtUnchokeMessage::create(asBytesSpan(&msg[4], 2));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -51,7 +52,7 @@ void BtUnchokeMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[5];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 1, 2);
+    bittorrent::createPeerMessageString(std::span{msg}, 1, 2);
     BtUnchokeMessage::create(asBytesSpan(&msg[4], 1));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -63,7 +64,7 @@ void BtUnchokeMessageTest::testCreateMessage()
 {
   BtUnchokeMessage msg;
   unsigned char data[5];
-  bittorrent::createPeerMessageString(data, sizeof(data), 1, 1);
+  bittorrent::createPeerMessageString(std::span{data}, 1, 1);
   auto rawmsg = msg.createMessage();
   CPPUNIT_ASSERT_EQUAL((size_t)5, rawmsg.size());
   CPPUNIT_ASSERT(std::equal(std::begin(rawmsg), std::end(rawmsg), data));

@@ -523,8 +523,8 @@ void createFileEntry(List* files, InputIterator first, InputIterator last,
                      const std::string& bitfield)
 {
   BitfieldMan bf(pieceLength, totalLength);
-  bf.setBitfield(reinterpret_cast<const unsigned char*>(bitfield.data()),
-                 bitfield.size());
+  bf.setBitfield({reinterpret_cast<const unsigned char*>(bitfield.data()),
+                  bitfield.size()});
   createFileEntry(files, first, last, &bf);
 }
 } // namespace
@@ -537,7 +537,7 @@ void createFileEntry(List* files, InputIterator first, InputIterator last,
 {
   BitfieldMan bf(pieceLength, totalLength);
   if (ps) {
-    bf.setBitfield(ps->getBitfield(), ps->getBitfieldLength());
+    bf.setBitfield({ps->getBitfield(), ps->getBitfieldLength()});
   }
   createFileEntry(files, first, last, &bf);
 }

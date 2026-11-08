@@ -55,9 +55,9 @@ void PeerTest::testCountSeeder()
     (*i)->allocateSessionResource(1_k, 8_k);
   }
   unsigned char bitfield[] = {0xff};
-  peers[1]->setBitfield(bitfield, 1);
-  peers[3]->setBitfield(bitfield, 1);
-  peers[4]->setBitfield(bitfield, 1);
+  peers[1]->setBitfield({bitfield, 1});
+  peers[3]->setBitfield({bitfield, 1});
+  peers[4]->setBitfield({bitfield, 1});
   CPPUNIT_ASSERT_EQUAL((size_t)3, countSeeder(peers.begin(), peers.end()));
 }
 

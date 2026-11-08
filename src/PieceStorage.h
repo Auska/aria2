@@ -36,6 +36,7 @@
 #define D_PIECE_STORAGE_H
 
 #include "common.h"
+#include <span>
 
 #include <string>
 #include <vector>
@@ -134,8 +135,9 @@ public:
    * If ignoreBitfield is set, indexes of true bit are excluded.
    */
   virtual std::shared_ptr<Piece>
-  getMissingPiece(size_t minSplitSize, const unsigned char* ignoreBitfield,
-                  size_t length, cuid_t cuid) = 0;
+  getMissingPiece(size_t minSplitSize,
+                  std::span<const unsigned char> ignoreBitfield,
+                  cuid_t cuid) = 0;
 
   /**
    * Returns a missing piece whose index is index.
@@ -208,8 +210,7 @@ public:
 
   virtual const unsigned char* getBitfield() = 0;
 
-  virtual void setBitfield(const unsigned char* bitfield,
-                           size_t bitfieldLength) = 0;
+  virtual void setBitfield(std::span<const unsigned char> bitfield) = 0;
 
   virtual size_t getBitfieldLength() = 0;
 
@@ -273,15 +274,12 @@ public:
 
   virtual void addPieceStats(size_t index) = 0;
 
-  virtual void addPieceStats(const unsigned char* bitfield,
-                             size_t bitfieldLength) = 0;
+  virtual void addPieceStats(std::span<const unsigned char> bitfield) = 0;
 
-  virtual void subtractPieceStats(const unsigned char* bitfield,
-                                  size_t bitfieldLength) = 0;
+  virtual void subtractPieceStats(std::span<const unsigned char> bitfield) = 0;
 
-  virtual void updatePieceStats(const unsigned char* newBitfield,
-                                size_t newBitfieldLength,
-                                const unsigned char* oldBitfield) = 0;
+  virtual void updatePieceStats(std::span<const unsigned char> newBitfield,
+                                std::span<const unsigned char> oldBitfield) = 0;
 
   // Returns index x where all pieces in [index+1, x-1], inclusive,
   // are not used and not completed. If all pieces after index+1 are

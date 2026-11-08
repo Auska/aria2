@@ -116,10 +116,9 @@ void PeerSessionResource::updateBitfield(size_t index, int operation)
   }
 }
 
-void PeerSessionResource::setBitfield(const unsigned char* bitfield,
-                                      size_t bitfieldLength)
+void PeerSessionResource::setBitfield(std::span<const unsigned char> bitfield)
 {
-  bitfieldMan_->setBitfield(bitfield, bitfieldLength);
+  bitfieldMan_->setBitfield(bitfield);
 }
 
 const unsigned char* PeerSessionResource::getBitfield() const

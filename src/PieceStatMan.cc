@@ -75,8 +75,7 @@ void sub(int& x)
 }
 } // namespace
 
-void PieceStatMan::addPieceStats(const unsigned char* bitfield,
-                                 size_t bitfieldLength)
+void PieceStatMan::addPieceStats(std::span<const unsigned char> bitfield)
 {
   for (size_t i = 0, nbits = counts_.size(); i < nbits; ++i) {
     if (bitfield::test(bitfield, nbits, i)) {
@@ -85,8 +84,7 @@ void PieceStatMan::addPieceStats(const unsigned char* bitfield,
   }
 }
 
-void PieceStatMan::subtractPieceStats(const unsigned char* bitfield,
-                                      size_t bitfieldLength)
+void PieceStatMan::subtractPieceStats(std::span<const unsigned char> bitfield)
 {
   for (size_t i = 0, nbits = counts_.size(); i < nbits; ++i) {
     if (bitfield::test(bitfield, nbits, i)) {
@@ -95,9 +93,8 @@ void PieceStatMan::subtractPieceStats(const unsigned char* bitfield,
   }
 }
 
-void PieceStatMan::updatePieceStats(const unsigned char* newBitfield,
-                                    size_t newBitfieldLength,
-                                    const unsigned char* oldBitfield)
+void PieceStatMan::updatePieceStats(std::span<const unsigned char> newBitfield,
+                                    std::span<const unsigned char> oldBitfield)
 {
   for (size_t i = 0, nbits = counts_.size(); i < nbits; ++i) {
     bool inNew = bitfield::test(newBitfield, nbits, i);

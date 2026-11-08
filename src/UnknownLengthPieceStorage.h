@@ -36,6 +36,7 @@
 #define D_UNKNOWN_LENGTH_PIECE_STORAGE_H
 
 #include "FatalException.h"
+#include <span>
 #include "PieceStorage.h"
 
 namespace aria2 {
@@ -76,8 +77,7 @@ public:
    * Returns true if the peer has a piece that localhost doesn't have.
    * Otherwise returns false.
    */
-  virtual bool
-  hasMissingPiece(const std::shared_ptr<Peer>& peer) override;
+  virtual bool hasMissingPiece(const std::shared_ptr<Peer>& peer) override;
 
   virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>& pieces,
                                size_t minMissingBlocks,
@@ -102,8 +102,7 @@ public:
                                    cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece>
-  getMissingPiece(const std::shared_ptr<Peer>& peer,
-                  cuid_t cuid) override;
+  getMissingPiece(const std::shared_ptr<Peer>& peer, cuid_t cuid) override;
 
   virtual std::shared_ptr<Piece>
   getMissingPiece(const std::shared_ptr<Peer>& peer,
@@ -117,8 +116,9 @@ public:
    * Returns a missing piece if available. Otherwise returns 0;
    */
   virtual std::shared_ptr<Piece>
-  getMissingPiece(size_t minSplitSize, const unsigned char* ignoreBitfield,
-                  size_t length, cuid_t cuid) override;
+  getMissingPiece(size_t minSplitSize,
+                  std::span<const unsigned char> ignoreBitfield,
+                  cuid_t cuid) override;
 
   /**
    * Returns a missing piece whose index is index.
@@ -138,8 +138,7 @@ public:
   /**
    * Tells that the download of the specified piece completes.
    */
-  virtual void
-  completePiece(const std::shared_ptr<Piece>& piece) override;
+  virtual void completePiece(const std::shared_ptr<Piece>& piece) override;
 
   /**
    * Tells that the download of the specified piece is canceled.
@@ -157,10 +156,7 @@ public:
 
   virtual int64_t getTotalLength() override { return totalLength_; }
 
-  virtual int64_t getFilteredTotalLength() override
-  {
-    return totalLength_;
-  }
+  virtual int64_t getFilteredTotalLength() override { return totalLength_; }
 
   virtual int64_t getCompletedLength() override;
 
@@ -184,10 +180,7 @@ public:
    * Returns true if all files have downloaded.
    * The file filter is ignored.
    */
-  virtual bool allDownloadFinished() override
-  {
-    return downloadFinished();
-  }
+  virtual bool allDownloadFinished() override { return downloadFinished(); }
 
   /**
    * Initializes DiskAdaptor.
@@ -197,10 +190,7 @@ public:
 
   virtual const unsigned char* getBitfield() override;
 
-  virtual void setBitfield(const unsigned char* bitfield,
-                           size_t bitfieldLength) override
-  {
-  }
+  virtual void setBitfield(std::span<const unsigned char> bitfield) override {}
 
   virtual size_t getBitfieldLength() override;
 
@@ -229,9 +219,9 @@ public:
    * indexes is filled with piece index which is not advertised by the
    * caller command and newer than lastHaveIndex.
    */
-  virtual uint64_t
-  getAdvertisedPieceIndexes(std::vector<size_t>& indexes, cuid_t myCuid,
-                            uint64_t lastHaveIndex) override
+  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
+                                             cuid_t myCuid,
+                                             uint64_t lastHaveIndex) override
   {
     throw FATAL_EXCEPTION("Not Implemented!");
   }
@@ -251,8 +241,8 @@ public:
    * Do nothing because loading in-flight piece is not supported for this
    * class.
    */
-  virtual void addInFlightPiece(
-      const std::vector<std::shared_ptr<Piece>>& pieces) override
+  virtual void
+  addInFlightPiece(const std::vector<std::shared_ptr<Piece>>& pieces) override
   {
   }
 
@@ -263,19 +253,18 @@ public:
 
   virtual void addPieceStats(size_t index) override {}
 
-  virtual void addPieceStats(const unsigned char* bitfield,
-                             size_t bitfieldLength) override
+  virtual void addPieceStats(std::span<const unsigned char> bitfield) override
   {
   }
 
-  virtual void subtractPieceStats(const unsigned char* bitfield,
-                                  size_t bitfieldLength) override
+  virtual void
+  subtractPieceStats(std::span<const unsigned char> bitfield) override
   {
   }
 
-  virtual void updatePieceStats(const unsigned char* newBitfield,
-                                size_t newBitfieldLength,
-                                const unsigned char* oldBitfield) override
+  virtual void
+  updatePieceStats(std::span<const unsigned char> newBitfield,
+                   std::span<const unsigned char> oldBitfield) override
   {
   }
 

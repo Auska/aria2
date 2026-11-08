@@ -63,16 +63,17 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtPortMessageTest);
 void BtPortMessageTest::testCreate()
 {
   unsigned char msg[7];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 3, 9);
+  bittorrent::createPeerMessageString(std::span{msg}, 3, 9);
   bittorrent::setShortIntParam(&msg[5], 12345);
-  std::shared_ptr<BtPortMessage> pm(BtPortMessage::create(asBytesSpan(&msg[4], 3)));
+  std::shared_ptr<BtPortMessage> pm(
+      BtPortMessage::create(asBytesSpan(&msg[4], 3)));
   CPPUNIT_ASSERT_EQUAL((uint8_t)9, pm->getId());
   CPPUNIT_ASSERT_EQUAL((uint16_t)12345, pm->getPort());
 
   // case: payload size is wrong
   try {
     unsigned char msg[8];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 4, 9);
+    bittorrent::createPeerMessageString(std::span{msg}, 4, 9);
     BtPortMessage::create(asBytesSpan(&msg[4], 4));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -81,7 +82,7 @@ void BtPortMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[7];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 3, 10);
+    bittorrent::createPeerMessageString(std::span{msg}, 3, 10);
     BtPortMessage::create(asBytesSpan(&msg[4], 3));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -99,7 +100,7 @@ void BtPortMessageTest::testCreateMessage()
 {
   BtPortMessage msg(6881);
   unsigned char data[7];
-  bittorrent::createPeerMessageString(data, sizeof(data), 3, 9);
+  bittorrent::createPeerMessageString(std::span{data}, 3, 9);
   bittorrent::setShortIntParam(&data[5], 6881);
   auto rawmsg = msg.createMessage();
   CPPUNIT_ASSERT_EQUAL((size_t)7, rawmsg.size());
@@ -175,7 +176,8 @@ void BtPortMessageTest::testDoReceivedAction_bootstrap()
 
   auto task2 =
       std::dynamic_pointer_cast<MockDHTTask>(taskQueue.immediateTaskQueue_[1]);
-  CPPUNIT_ASSERT(memcmp(nodeID.data(), task2->targetID_.data(), DHT_ID_LENGTH) == 0);
+  CPPUNIT_ASSERT(
+      memcmp(nodeID.data(), task2->targetID_.data(), DHT_ID_LENGTH) == 0);
 }
 
 } // namespace aria2

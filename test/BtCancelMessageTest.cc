@@ -56,7 +56,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BtCancelMessageTest);
 void BtCancelMessageTest::testCreate()
 {
   unsigned char msg[17];
-  bittorrent::createPeerMessageString(msg, sizeof(msg), 13, 8);
+  bittorrent::createPeerMessageString(std::span{msg}, 13, 8);
   bittorrent::setIntParam(&msg[5], 12345);
   bittorrent::setIntParam(&msg[9], 256);
   bittorrent::setIntParam(&msg[13], 1_k);
@@ -69,7 +69,7 @@ void BtCancelMessageTest::testCreate()
   // case: payload size is wrong
   try {
     unsigned char msg[18];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 14, 8);
+    bittorrent::createPeerMessageString(std::span{msg}, 14, 8);
     BtCancelMessage::create(asBytesSpan(&msg[4], 14));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -78,7 +78,7 @@ void BtCancelMessageTest::testCreate()
   // case: id is wrong
   try {
     unsigned char msg[17];
-    bittorrent::createPeerMessageString(msg, sizeof(msg), 13, 9);
+    bittorrent::createPeerMessageString(std::span{msg}, 13, 9);
     BtCancelMessage::create(asBytesSpan(&msg[4], 13));
     CPPUNIT_FAIL("exception must be thrown.");
   }
@@ -93,7 +93,7 @@ void BtCancelMessageTest::testCreateMessage()
   msg.setBegin(256);
   msg.setLength(1_k);
   unsigned char data[17];
-  bittorrent::createPeerMessageString(data, sizeof(data), 13, 8);
+  bittorrent::createPeerMessageString(std::span{data}, 13, 8);
   bittorrent::setIntParam(&data[5], 12345);
   bittorrent::setIntParam(&data[9], 256);
   bittorrent::setIntParam(&data[13], 1_k);

@@ -96,8 +96,8 @@ void IteratableChunkChecksumValidator::validateChunk()
 
     ++currentIndex_;
     if (finished()) {
-      pieceStorage_->setBitfield(bitfield_->getBitfield(),
-                                 bitfield_->getBitfieldLength());
+      pieceStorage_->setBitfield(
+          {bitfield_->getBitfield(), bitfield_->getBitfieldLength()});
     }
   }
 }

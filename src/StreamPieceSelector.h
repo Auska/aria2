@@ -36,6 +36,7 @@
 #define D_STREAM_PIECE_SELECTOR_H
 
 #include "common.h"
+#include <span>
 
 #include <cstdlib>
 #include <optional>
@@ -56,12 +57,9 @@ public:
   // is a advice to derived class not to select piece such which the
   // distance between it and already selected piece is less than
   // minSplitSize.
-  // shortcut: ignoreBitfield stays a raw pointer because BitfieldMan's
-  // getMissingUnusedIndex family (src/bitfield.h) is raw-pointer based;
-  // switch to std::span once that family is converted.
-  virtual std::optional<size_t> select(size_t minSplitSize,
-                                       const unsigned char* ignoreBitfield,
-                                       size_t length) = 0;
+  virtual std::optional<size_t>
+  select(size_t minSplitSize,
+         std::span<const unsigned char> ignoreBitfield) = 0;
 
   // Called when initial bitfield was fixed. Optimize
   // StreamPieceSelector to take advantages of the initial bitfield.

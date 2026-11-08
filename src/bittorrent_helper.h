@@ -210,8 +210,8 @@ void checkRange(int32_t begin, int32_t length, int32_t pieceLength);
 void checkBitfield(std::span<const std::byte> bitfield, size_t pieces);
 
 // Initialize msg with 0 and set payloadLength and messageId.
-void createPeerMessageString(unsigned char* msg, size_t msgLength,
-                             size_t payloadLength, uint8_t messageId);
+void createPeerMessageString(std::span<unsigned char> msg, size_t payloadLength,
+                             uint8_t messageId);
 
 /**
  * Creates compact form(packed address + 2bytes port) and stores the

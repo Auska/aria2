@@ -48,7 +48,7 @@ std::vector<unsigned char> IndexBtMessage::createMessage()
    * total: 9bytes
    */
   auto msg = std::vector<unsigned char>(MESSAGE_LENGTH);
-  bittorrent::createPeerMessageString(msg.data(), MESSAGE_LENGTH, 5, getId());
+  bittorrent::createPeerMessageString(msg, 5, getId());
   bittorrent::setIntParam(&msg[5], index_);
   return msg;
 }

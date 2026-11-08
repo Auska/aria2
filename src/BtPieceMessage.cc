@@ -128,14 +128,14 @@ void BtPieceMessage::doReceivedAction()
     }
     else {
       getPieceStorage()->getDiskAdaptor()->writeData(
-          std::as_bytes(std::span{data_ + 9,
-                                  static_cast<size_t>(blockLength_)}),
+          std::as_bytes(
+              std::span{data_ + 9, static_cast<size_t>(blockLength_)}),
           offset);
     }
     piece->completeBlock(slot->getBlockIndex());
-    A2_LOG_DEBUG(fmt(
-        MSG_PIECE_BITFIELD, getCuid(),
-        util::toHex(std::as_bytes(std::span{piece->getBitfield(), piece->getBitfieldLength()}))));
+    A2_LOG_DEBUG(fmt(MSG_PIECE_BITFIELD, getCuid(),
+                     util::toHex(std::as_bytes(std::span{
+                         piece->getBitfield(), piece->getBitfieldLength()}))));
     piece->updateHash(
         begin_,
         std::as_bytes(std::span{data_ + 9, static_cast<size_t>(blockLength_)}));
@@ -170,7 +170,7 @@ void BtPieceMessage::createMessageHeader(unsigned char* msgHeader) const
    * begin --- begin, 4bytes
    * total: 13bytes
    */
-  bittorrent::createPeerMessageString(msgHeader, MESSAGE_HEADER_LENGTH,
+  bittorrent::createPeerMessageString({msgHeader, MESSAGE_HEADER_LENGTH},
                                       9 + blockLength_, ID);
   bittorrent::setIntParam(&msgHeader[5], index_);
   bittorrent::setIntParam(&msgHeader[9], begin_);
@@ -209,9 +209,8 @@ void BtPieceMessage::send()
   if (isInvalidate()) {
     return;
   }
-  A2_LOG_INFO(fmt(MSG_SEND_PEER_MESSAGE, getCuid(),
-                  getPeer()->getIPAddress(), getPeer()->getPort(),
-                  toString()));
+  A2_LOG_INFO(fmt(MSG_SEND_PEER_MESSAGE, getCuid(), getPeer()->getIPAddress(),
+                  getPeer()->getPort(), toString()));
   int64_t pieceDataOffset =
       static_cast<int64_t>(index_) * downloadContext_->getPieceLength() +
       begin_;
@@ -225,9 +224,8 @@ void BtPieceMessage::pushPieceData(int64_t offset, int32_t length) const
   createMessageHeader(buf.data());
   ssize_t r;
   r = getPieceStorage()->getDiskAdaptor()->readData(
-      std::as_writable_bytes(
-          std::span{buf}.subspan(MESSAGE_HEADER_LENGTH,
-                                 static_cast<size_t>(length))),
+      std::as_writable_bytes(std::span{buf}.subspan(
+          MESSAGE_HEADER_LENGTH, static_cast<size_t>(length))),
       offset);
   if (r == length) {
     const auto& peer = getPeer();
