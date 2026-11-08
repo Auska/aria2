@@ -1,5 +1,7 @@
 # 任务：警告门禁与标准库清理（PLAN-011）
 
+> 状态：✅ 已完成（2026-11-08）
+
 ## 目标
 
 前 10 轮（PLAN-001~010）把语言基线推到 C++23、把 span/optional/expected/`std::format` 铺开、清掉了绝大部分手写债务。本轮针对**仍然存在但一直没进门的四类问题**：
@@ -248,7 +250,11 @@ void visit(const String&) override;
 - `src/util.h` 的 `streq`/`startsWith`/`istartsWith`/`iendsWith`/`strless`/`makeString`：都是「扫到 `\0` 为止」的 C 串语义，`strip`/`stripIter`/`lstripIter`/`splitIterM` 的 `chars`/`delims` 同理（`strchr` 换 `find_first_of` 无行为差异但无调用方受益）。这类保留与 `error_code.h`、`ValueBase` 的选择一致：语义是 C 串就保持 C 串。
 
 - 干净 worktree `/tmp/aria2-m11-p6`（base `b9b7078a`）全量重建：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (911)`、`error:` 0、C++ `warning:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。12 文件 +43/−29。
-7. [ ] 阶段 7：收尾（勾选、状态行、实测表、偏差）→ 提交 `PLAN-011: 勾选全部阶段、标记计划完成并记录实测门禁结果`
+7. [x] 阶段 7：收尾
+
+### 阶段 7 实测（2026-11-08）
+
+- 计划文档收尾回写（本节 + 实测门禁结果 + 债务前后对比 + 实际偏差），MEMORY.md 记录，收尾提交。（勾选、状态行、实测表、偏差）→ 提交 `PLAN-011: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
 ## 预计修改的文件
 
@@ -320,6 +326,47 @@ nohup make -j8 check > /tmp/p11-pN-check.log 2>&1 &
 5. **阶段 5 的语义风险**：`IndexedDeque` 要替代的是「按 key 查找 + 保序 + 遍历中删除」。`std::unordered_map<K, deque::iterator>` 的 `iterator` 在 `deque::push_back` 后会失效吗？——不会（`deque` 的 `push_back` 不失效已有迭代器），但 `pop_front` 会失效被删元素对应的迭代器，所以 `remove_if` 必须同步从 map 里 erase。**这一点在实现时必须写进注释并有单测**。
 6. **阶段 6 的 `src/util.h` 是「被 255 个文件 include」的公共头**，改 `strip`/`split` 会牵连极广。必须逐个调用点核对是否依赖 `const char*` 的 null-terminated 语义（`src/util.h:535 const char* dlast = delims + numDelims;` 就是靠 `numDelims` 计算而非 `strlen`，反而更适合 `string_view`）。
 7. **阶段 4/5 会改动 `test/Makefile.am`**，属于构建系统文件；前 10 轮一直声明「不动构建系统」，本轮因删测试源而必须改 —— 这是用户批准的范围内改动，需在文档注明。
+
+## 实测门禁结果
+
+每个阶段都在干净的 `git worktree` 里从零重建（`autoreconf -i` → `./configure --enable-werror` → `make -j8 check`），判据为 `# TOTAL: 1` / `# PASS: 1` / `FAIL 0` / `ERROR 0`、无编译 error、无 `Failures !!!`、公开头 ABI 哈希不变。
+
+| 阶段 | 提交 | worktree | 用例 | error | warning | ABI 哈希 |
+|---|---|---|---|---|---|---|
+| 1 未使用形参 | `67757636` | `/tmp/aria2-m11-p1` | `OK (915)` | 0 | 0 | `132c72d9…` |
+| 2 剩余警告 | `deec0c38` | `/tmp/aria2-m11-p2` | `OK (915)` | 0 | 0 | `132c72d9…` |
+| 3 `-Wextra` 门禁 | `e8796b3e` | `/tmp/aria2-m11-p3` | `OK (915)` | 0 | 0 | `132c72d9…` |
+| 4 移除 array_fun | `0b8ad7c7` | `/tmp/aria2-m11-p4` | `OK (911)` | 0 | 0 | `132c72d9…` |
+| 5（取消） | `b9b7078a` | — | — | — | — | — |
+| 6 `string_view` | `c17b6638` | `/tmp/aria2-m11-p6` | `OK (911)` | 0 | 0 | `132c72d9…` |
+
+- ABI 哈希全值：`132c72d9f055756769456c35ca7f8e7a879fbaa8`（`git hash-object src/includes/aria2/aria2.h`，与 PLAN-010 起固定值一致）。
+- 用例数 915 → 911 是删掉 `test/array_funTest.cc` 的 4 个用例，不是回归。
+- 唯一的 `warning:` 行是 `deps/wslay` 的 libtool `-version-info` 提示，与本仓库 C++ 代码无关。
+
+## 债务前后对比
+
+| 指标 | 改前 | 改后 | 备注 |
+|---|---|---|---|
+| `-Wunused-parameter`（src+test） | 3305 条 / 301 站点 / 76 文件 | **0** | 删形参名 |
+| 其余 C++ 警告 | 62（去重 46 站点） | **0** | redundant-move / overflow / ignored-qualifiers / vla / implicit-fallthrough |
+| `-Wextra` 是否开启 | 否 | **是**（`src/Makefile` 与 `test/Makefile`） | `configure.ac:534` |
+| CI 是否 `--enable-werror` | 否 | **是**（两个 matrix 分支） | `.github/workflows/build.yml:65,69` |
+| `src/array_fun.h` | 134 行表达式模板 | **已删除** | 换成 `src/BitfieldMan.cc` 里 3 个逐字节 mask 辅助函数 |
+| `array_fun.h` 的 include 方 | 70 文件 | **0** | 62 个死 include 一并删 |
+| 头文件 `const char*` 形参 | 71 处 / 24 文件 | 65 处 | 只改真有 `.c_str()` 调用方的 6 处 |
+| `src/IndexedList.h` | 598 行 | 598 行（未动） | 实测活代码 96%，重写收益为负 |
+| 测试用例数 | 915 | 911 | 删 `array_funTest` 4 个用例 |
+
+## 实际偏差
+
+1. **阶段 5 取消**（用户确认）。计划的「`IndexedList` 598 → 80 行」前提不成立：`src/RequestGroupMan.cc` 实际用到 `push_back`/`push_front`/`insert`×3/`move`/`get`/`remove`/`remove_if`/`pop_front`/`operator[]`/`begin`/`size`/`empty`/`clear`，真正死的只有 `erase(iterator)` 与 `insert(iterator, Key, Value)` 约 25 行；自定义双向迭代器也是活的（`getPaginationRange` 用 `std::advance`、`move()` 用 `std::rotate`）。重写净收益为负，且有 `aria2.changePosition` 语义回归风险。
+2. **阶段 6 只做 6 处形参**（计划写「约 43 处」）。按「是否真有调用方需要 `.c_str()`」筛选：`GroupId::expandUnique`/`toNumericId`、`Logger::writeLog`/`writeStackTrace`、`HttpHeader::fieldContains`/`idInterestingHeader`。其余 65 处要么调用方全是字面量（改与不改零差别），要么语义上不能改（`OptionHandler::getDescription` 虚函数族、`ColorizedStream::operator<<` 的 `std::ostream` 歧义、`prefs.h` 的静态字面量生命周期契约、`MSEHandshake` 的字节缓冲、`util.h` 的 C 串比较族）。详见阶段 6 小节的「明确不改」清单。
+3. **`-Wunused-parameter` 站点数 344，非计划估的 301**。原因：①同一行多个未使用形参在日志里只算一个 `file:line`；②首轮扫描缺 `-Ideps/wslay/lib/includes`，`src/WebSocketSession.cc` 漏扫 5 处，补扫后补齐。
+4. **`-fsyntax-only` 会漏掉中端警告**。计划里「用 `-fsyntax-only` 全量扫」的做法不足以发现 `-Wimplicit-fallthrough`（GIMPLE 阶段才产生）。阶段 3 改用「真实编译 + 临时去掉 `-Werror`」才暴露 3 处。
+5. **阶段 5 取消后 `test/IndexedListTest.cc` 的 12 条 `-Wdeprecated-copy` 不会自动消失**，改在 `src/IndexedList.h:107` 补 `IndexedListIterator& operator=(const IndexedListIterator&) = default;` 一行解决（阶段 3）。
+6. **`src/InternalDHKeyExchange.cc` 的 VLA 修复未在干净 worktree 中编译验证**：该 TU 只在 `USE_INTERNAL_BIGNUM` 定义时编译，本机未启用；已用 `-fsyntax-only` 单独验证语法。
+7. **clang 侧未本地验证**：本机无 `clang++`，CI 的 clang-18 分支是唯一验证途径（workflow 未在本机运行）。
 
 ## 备注
 
