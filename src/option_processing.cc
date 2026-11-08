@@ -193,7 +193,7 @@ error_code::Value option_processing(Option& op, bool standalone,
       if (standalone) {
         if (op.defined(PREF_VERSION)) {
           showVersion();
-          exit(error_code::FINISHED);
+          exit(static_cast<int>(error_code::Value::FINISHED));
         }
         if (op.defined(PREF_HELP)) {
           std::string keyword;
@@ -211,7 +211,7 @@ error_code::Value option_processing(Option& op, bool standalone,
             }
           }
           showUsage(keyword, oparser, global::cout());
-          exit(error_code::FINISHED);
+          exit(static_cast<int>(error_code::Value::FINISHED));
         }
       }
     }
@@ -254,7 +254,7 @@ error_code::Value option_processing(Option& op, bool standalone,
             fmtRuntime(_("Configuration file {} is not found."), cfname));
         global::cerr()->write("\n");
         showUsage(strHelpTag(HelpTag::TAG_HELP), oparser, global::cerr());
-        return error_code::UNKNOWN_ERROR;
+        return error_code::Value::UNKNOWN_ERROR;
       }
     }
     // Override configuration with environment variables.
@@ -307,7 +307,7 @@ error_code::Value option_processing(Option& op, bool standalone,
       global::cerr()->write(fmt("{}", MSG_URI_REQUIRED));
       global::cerr()->write("\n");
       showUsage("", oparser, global::cerr());
-      return error_code::UNKNOWN_ERROR;
+      return error_code::Value::UNKNOWN_ERROR;
     }
   }
   if (standalone && op.getAsBool(PREF_DAEMON)) {
@@ -315,7 +315,7 @@ error_code::Value option_processing(Option& op, bool standalone,
 
     if (daemonized < 0) {
       perror(MSG_DAEMON_FAILED);
-      return error_code::UNKNOWN_ERROR;
+      return error_code::Value::UNKNOWN_ERROR;
     }
   }
   if (op.getAsBool(PREF_DEFERRED_INPUT) && op.defined(PREF_SAVE_SESSION)) {
@@ -324,7 +324,7 @@ error_code::Value option_processing(Option& op, bool standalone,
     op.remove(PREF_DEFERRED_INPUT);
   }
 
-  return error_code::FINISHED;
+  return error_code::Value::FINISHED;
 }
 
 } // namespace aria2

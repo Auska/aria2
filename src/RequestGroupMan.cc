@@ -120,7 +120,7 @@ RequestGroupMan::RequestGroupMan(
       keepRunning_(option->getAsBool(PREF_ENABLE_RPC)),
       queueCheck_(true),
       removedErrorResult_(0),
-      removedLastErrorResult_(error_code::FINISHED),
+      removedLastErrorResult_(error_code::Value::FINISHED),
       maxDownloadResult_(option->getAsInt(PREF_MAX_DOWNLOAD_RESULT)),
       openedFileCounter_(std::make_shared<OpenedFileCounter>(
           this, option->getAsInt(PREF_BT_MAX_OPEN_FILES))),
@@ -262,12 +262,12 @@ void executeStopHook(const std::shared_ptr<RequestGroup>& group,
   if (!option->blank(PREF_ON_DOWNLOAD_STOP)) {
     hookPref = PREF_ON_DOWNLOAD_STOP;
   }
-  if (result == error_code::FINISHED) {
+  if (result == error_code::Value::FINISHED) {
     if (!option->blank(PREF_ON_DOWNLOAD_COMPLETE)) {
       hookPref = PREF_ON_DOWNLOAD_COMPLETE;
     }
   }
-  else if (result != error_code::IN_PROGRESS && result != error_code::REMOVED) {
+  else if (result != error_code::Value::IN_PROGRESS && result != error_code::Value::REMOVED) {
     if (!option->blank(PREF_ON_DOWNLOAD_ERROR)) {
       hookPref = PREF_ON_DOWNLOAD_ERROR;
     }
@@ -276,10 +276,10 @@ void executeStopHook(const std::shared_ptr<RequestGroup>& group,
     util::executeHookByOptName(group, option, hookPref);
   }
 
-  if (result == error_code::FINISHED) {
+  if (result == error_code::Value::FINISHED) {
     notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_COMPLETE, group);
   }
-  else if (result != error_code::IN_PROGRESS && result != error_code::REMOVED) {
+  else if (result != error_code::Value::IN_PROGRESS && result != error_code::Value::REMOVED) {
     notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_ERROR, group);
   }
   else {
@@ -632,13 +632,13 @@ RequestGroupMan::DownloadStat RequestGroupMan::getDownloadStat() const
     if (dr->belongsTo != 0) {
       continue;
     }
-    if (dr->result == error_code::FINISHED) {
+    if (dr->result == error_code::Value::FINISHED) {
       ++finished;
     }
-    else if (dr->result == error_code::IN_PROGRESS) {
+    else if (dr->result == error_code::Value::IN_PROGRESS) {
       ++inprogress;
     }
-    else if (dr->result == error_code::REMOVED) {
+    else if (dr->result == error_code::Value::REMOVED) {
       ++removed;
     }
     else {
@@ -722,15 +722,15 @@ void RequestGroupMan::showDownloadResults(OutputFile& o, bool full) const
     }
     const char* status;
     switch (dr->result) {
-    case error_code::FINISHED:
+    case error_code::Value::FINISHED:
       status = getStatusStr(DownloadResultStatus::OK, useColor);
       ++ok;
       break;
-    case error_code::IN_PROGRESS:
+    case error_code::Value::IN_PROGRESS:
       status = getStatusStr(DownloadResultStatus::INPR, useColor);
       ++inpr;
       break;
-    case error_code::REMOVED:
+    case error_code::Value::REMOVED:
       status = getStatusStr(DownloadResultStatus::RM, useColor);
       ++rm;
       break;
@@ -922,14 +922,14 @@ void RequestGroupMan::addDownloadResult(
     // Save last encountered error code so that we can report it
     // later.
     const auto& dr = downloadResults_[0];
-    if (dr->belongsTo == 0 && dr->result != error_code::FINISHED) {
+    if (dr->belongsTo == 0 && dr->result != error_code::Value::FINISHED) {
       removedLastErrorResult_ = dr->result;
       ++removedErrorResult_;
 
       // Keep unfinished download result, so that we can save them by
       // SessionSerializer.
       if (option_->getAsBool(PREF_KEEP_UNFINISHED_DOWNLOAD_RESULT)) {
-        if (dr->result != error_code::REMOVED ||
+        if (dr->result != error_code::Value::REMOVED ||
             dr->option->getAsBool(PREF_FORCE_SAVE)) {
           unfinishedDownloadResults_.push_back(dr);
         }

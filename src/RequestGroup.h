@@ -200,10 +200,10 @@ private:
   void initializePostDownloadHandler();
 
   // Returns the result code of this RequestGroup.  If the download
-  // finished, then returns error_code::FINISHED.  If the
+  // finished, then returns error_code::Value::FINISHED.  If the
   // download didn't finish and error result is available in
   // _uriResults, then last result code is returned.  Otherwise
-  // returns error_code::UNKNOWN_ERROR.
+  // returns error_code::Value::UNKNOWN_ERROR.
   std::pair<error_code::Value, std::string> downloadResult() const;
 
   void removeDefunctControlFile(

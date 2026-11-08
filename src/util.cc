@@ -1717,7 +1717,7 @@ void mkdirs(const std::string& dirpath)
     if (!dir.isDir()) {
       throw DL_ABORT_EX3(errNum,
                          fmt(EX_MAKE_DIR, dir.getPath(), safeStrerror(errNum)),
-                         error_code::DIR_CREATE_ERROR);
+                         error_code::Value::DIR_CREATE_ERROR);
     }
   }
 }

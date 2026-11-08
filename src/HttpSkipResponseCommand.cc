@@ -199,7 +199,7 @@ bool HttpSkipResponseCommand::processResponse()
         httpResponse_->getHttpRequest()->getRequest()->getRedirectCount();
     if (rnum >= Request::MAX_REDIRECT) {
       throw DL_ABORT_EX2(fmt("Too many redirects: count={}", rnum),
-                         error_code::HTTP_TOO_MANY_REDIRECTS);
+                         error_code::Value::HTTP_TOO_MANY_REDIRECTS);
     }
     httpResponse_->processRedirect();
     return prepareForRetry(0);
@@ -216,32 +216,32 @@ bool HttpSkipResponseCommand::processResponse()
               getRequest()->getDir(), getOption().get())) {
         return prepareForRetry(0);
       }
-      throw DL_ABORT_EX2(EX_AUTH_FAILED, error_code::HTTP_AUTH_FAILED);
+      throw DL_ABORT_EX2(EX_AUTH_FAILED, error_code::Value::HTTP_AUTH_FAILED);
     case 404:
       if (getOption()->getAsInt(PREF_MAX_FILE_NOT_FOUND) == 0) {
         throw DL_ABORT_EX2(MSG_RESOURCE_NOT_FOUND,
-                           error_code::RESOURCE_NOT_FOUND);
+                           error_code::Value::RESOURCE_NOT_FOUND);
       }
       throw DL_RETRY_EX2(MSG_RESOURCE_NOT_FOUND,
-                         error_code::RESOURCE_NOT_FOUND);
+                         error_code::Value::RESOURCE_NOT_FOUND);
     case 502:
     case 503:
       // Only retry if pretry-wait > 0. Hammering 'busy' server is not
       // a good idea.
       if (getOption()->getAsInt(PREF_RETRY_WAIT) > 0) {
         throw DL_RETRY_EX2(fmt(EX_BAD_STATUS, statusCode),
-                           error_code::HTTP_SERVICE_UNAVAILABLE);
+                           error_code::Value::HTTP_SERVICE_UNAVAILABLE);
       }
       throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, statusCode),
-                         error_code::HTTP_SERVICE_UNAVAILABLE);
+                         error_code::Value::HTTP_SERVICE_UNAVAILABLE);
     case 504:
       // This is Gateway Timeout, so try again
       throw DL_RETRY_EX2(fmt(EX_BAD_STATUS, statusCode),
-                         error_code::HTTP_SERVICE_UNAVAILABLE);
+                         error_code::Value::HTTP_SERVICE_UNAVAILABLE);
     };
 
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, statusCode),
-                       error_code::HTTP_PROTOCOL_ERROR);
+                       error_code::Value::HTTP_PROTOCOL_ERROR);
   }
 
   return prepareForRetry(0);

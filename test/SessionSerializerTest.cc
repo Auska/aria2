@@ -34,7 +34,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SessionSerializerTest);
 void SessionSerializerTest::testSaveErrorDownload()
 {
   std::shared_ptr<DownloadResult> dr =
-      createDownloadResult(error_code::TIME_OUT, "http://error");
+      createDownloadResult(error_code::Value::TIME_OUT, "http://error");
   dr->fileEntries[0]->getSpentUris().swap(
       dr->fileEntries[0]->getRemainingUris());
   std::shared_ptr<Option> option(new Option());

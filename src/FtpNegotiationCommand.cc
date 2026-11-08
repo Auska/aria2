@@ -162,7 +162,7 @@ bool FtpNegotiationCommand::recvGreeting()
     return false;
   }
   if (status != 220) {
-    throw DL_ABORT_EX2(EX_CONNECTION_FAILED, error_code::FTP_PROTOCOL_ERROR);
+    throw DL_ABORT_EX2(EX_CONNECTION_FAILED, error_code::Value::FTP_PROTOCOL_ERROR);
   }
   sequence_ = Seq::SEQ_SEND_USER;
 
@@ -195,7 +195,7 @@ bool FtpNegotiationCommand::recvUser()
     break;
   default:
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   return true;
 }
@@ -220,7 +220,7 @@ bool FtpNegotiationCommand::recvPass()
   }
   if (status != 230) {
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   sequence_ = Seq::SEQ_SEND_TYPE;
   return true;
@@ -246,7 +246,7 @@ bool FtpNegotiationCommand::recvType()
   }
   if (status != 200) {
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   sequence_ = Seq::SEQ_SEND_PWD;
   return true;
@@ -273,7 +273,7 @@ bool FtpNegotiationCommand::recvPwd()
   }
   if (status != 257) {
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   ftp_->setBaseWorkingDir(pwd);
   A2_LOG_INFO(fmt("CUID#{} - base working directory is '{}'", getCuid(), pwd));
@@ -315,10 +315,10 @@ bool FtpNegotiationCommand::recvCwd()
     getRequestGroup()->increaseAndValidateFileNotFoundCount();
     if (status == 550)
       throw DL_ABORT_EX2(MSG_RESOURCE_NOT_FOUND,
-                         error_code::RESOURCE_NOT_FOUND);
+                         error_code::Value::RESOURCE_NOT_FOUND);
     else
       throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                         error_code::FTP_PROTOCOL_ERROR);
+                         error_code::Value::FTP_PROTOCOL_ERROR);
   }
   cwdDirs_.pop_front();
   if (cwdDirs_.empty()) {
@@ -513,7 +513,7 @@ bool FtpNegotiationCommand::recvSize()
   if (status == 213) {
     if (size > std::numeric_limits<a2_off_t>::max()) {
       throw DL_ABORT_EX2(fmt(EX_TOO_LARGE_FILE, size),
-                         error_code::FTP_PROTOCOL_ERROR);
+                         error_code::Value::FTP_PROTOCOL_ERROR);
     }
     if (!getPieceStorage()) {
 
@@ -625,7 +625,7 @@ bool FtpNegotiationCommand::recvPort()
   }
   if (status != 200) {
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   sequence_ = Seq::SEQ_SEND_REST;
   return true;
@@ -693,7 +693,7 @@ bool FtpNegotiationCommand::recvPasv()
   }
   if (status != 227) {
     throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   pasvPort_ = dest.second;
   ;
@@ -821,7 +821,7 @@ bool FtpNegotiationCommand::sendRestPasv(
   if (dataSocket_->isReadable(0)) {
     std::string error = dataSocket_->getSocketError();
     throw DL_ABORT_EX2(fmt(MSG_ESTABLISHING_CONNECTION_FAILED, error),
-                       error_code::FTP_PROTOCOL_ERROR);
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   setReadCheckSocket(getSocket());
   disableWriteCheckSocket();
@@ -851,7 +851,7 @@ bool FtpNegotiationCommand::recvRest(const std::shared_ptr<Segment>& segment)
   if (status != 350) {
     if (segment && segment->getPositionToWrite() != 0) {
       throw DL_ABORT_EX2("FTP server doesn't support resuming.",
-                         error_code::CANNOT_RESUME);
+                         error_code::Value::CANNOT_RESUME);
     }
   }
   sequence_ = Seq::SEQ_SEND_RETR;
@@ -880,10 +880,10 @@ bool FtpNegotiationCommand::recvRetr()
     getRequestGroup()->increaseAndValidateFileNotFoundCount();
     if (status == 550)
       throw DL_ABORT_EX2(MSG_RESOURCE_NOT_FOUND,
-                         error_code::RESOURCE_NOT_FOUND);
+                         error_code::Value::RESOURCE_NOT_FOUND);
     else
       throw DL_ABORT_EX2(fmt(EX_BAD_STATUS, status),
-                         error_code::FTP_PROTOCOL_ERROR);
+                         error_code::Value::FTP_PROTOCOL_ERROR);
   }
   if (getOption()->getAsBool(PREF_FTP_PASV)) {
     sequence_ = Seq::SEQ_NEGOTIATION_COMPLETED;

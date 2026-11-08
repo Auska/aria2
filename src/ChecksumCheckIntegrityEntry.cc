@@ -86,7 +86,7 @@ void ChecksumCheckIntegrityEntry::onDownloadIncomplete(
   }
 
   // If we don't redownload, set error code to indicate checksum error
-  getRequestGroup()->setLastErrorCode(error_code::CHECKSUM_ERROR);
+  getRequestGroup()->setLastErrorCode(error_code::Value::CHECKSUM_ERROR);
 }
 
 } // namespace aria2

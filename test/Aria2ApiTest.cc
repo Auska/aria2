@@ -203,10 +203,10 @@ void Aria2ApiTest::testChangeGlobalOption()
 void Aria2ApiTest::testDownloadResultDH()
 {
   std::shared_ptr<DownloadResult> dr1 =
-      createDownloadResult(error_code::TIME_OUT, "http://example.org/timeout");
+      createDownloadResult(error_code::Value::TIME_OUT, "http://example.org/timeout");
   dr1->option->put(PREF_DIR, "mydownload");
   std::shared_ptr<DownloadResult> dr2 = createDownloadResult(
-      error_code::NETWORK_PROBLEM, "http://example.org/network");
+      error_code::Value::NETWORK_PROBLEM, "http://example.org/network");
   auto& gman =
       session_->context->reqinfo->getDownloadEngine()->getRequestGroupMan();
   gman->addDownloadResult(dr1);
@@ -214,7 +214,7 @@ void Aria2ApiTest::testDownloadResultDH()
 
   DownloadHandle* hd = getDownloadHandle(session_, dr1->gid->getNumericId());
   CPPUNIT_ASSERT_EQUAL(DownloadStatus::DOWNLOAD_ERROR, hd->getStatus());
-  CPPUNIT_ASSERT_EQUAL((int)error_code::TIME_OUT, hd->getErrorCode());
+  CPPUNIT_ASSERT_EQUAL((int)error_code::Value::TIME_OUT, hd->getErrorCode());
   CPPUNIT_ASSERT_EQUAL(std::string("mydownload"), hd->getOption(PREF_DIR->k));
   // Don't return hidden option
   CPPUNIT_ASSERT(hd->getOption(PREF_STARTUP_IDLE_TIME->k).empty());

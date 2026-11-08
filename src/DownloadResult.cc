@@ -49,7 +49,7 @@ DownloadResult::DownloadResult()
       following(0),
       numPieces(0),
       pieceLength(0),
-      result(error_code::UNDEFINED),
+      result(error_code::Value::UNDEFINED),
       inMemoryDownload(false)
 {
 }

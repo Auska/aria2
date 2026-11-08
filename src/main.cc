@@ -52,7 +52,7 @@ error_code::Value main(int argc, char** argv)
 {
   Context context(true, argc, argv, KeyVals());
 
-  error_code::Value exitStatus = error_code::FINISHED;
+  error_code::Value exitStatus = error_code::Value::FINISHED;
   if (context.reqinfo) {
     exitStatus = context.reqinfo->execute();
   }
@@ -74,5 +74,5 @@ int main(int argc, char** argv)
         aria2::fmt("{}\n{}\n", EX_EXCEPTION_CAUGHT, ex.stackTrace()));
     r = ex.getErrorCode();
   }
-  return r;
+  return static_cast<int>(r);
 }

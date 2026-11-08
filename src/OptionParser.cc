@@ -173,7 +173,7 @@ std::string OptionParser::parseArg(std::vector<std::string>& nonopts, int argc,
       assert(c == '?');
       if (optind == 1) {
         throw DL_ABORT_EX2("Failed to parse command-line options.",
-                           error_code::OPTION_ERROR);
+                           error_code::Value::OPTION_ERROR);
       }
       int optlen = strlen(argv[optind - 1]);
       const char* optstr = argv[optind - 1];
@@ -184,7 +184,7 @@ std::string OptionParser::parseArg(std::vector<std::string>& nonopts, int argc,
         // If this is short option form (1 '-' prefix), just throw
         // error here.
         throw DL_ABORT_EX2("Failed to parse command-line options.",
-                           error_code::OPTION_ERROR);
+                           error_code::Value::OPTION_ERROR);
       }
       // There are 3 situations: 1) completely unknown option 2)
       // getopt_long() complained because too few arguments.  3)
@@ -198,7 +198,7 @@ std::string OptionParser::parseArg(std::vector<std::string>& nonopts, int argc,
             // Exact match, this means getopt_long detected error
             // while handling this option.
             throw DL_ABORT_EX2("Failed to parse command-line options.",
-                               error_code::OPTION_ERROR);
+                               error_code::Value::OPTION_ERROR);
           }
           else if (util::startsWith(pref->k, pref->k + strlen(pref->k), optstr,
                                     optstr + optstrlen)) {
@@ -210,7 +210,7 @@ std::string OptionParser::parseArg(std::vector<std::string>& nonopts, int argc,
         // This is successfully abbreviated option. So it must be case
         // 2).
         throw DL_ABORT_EX2("Failed to parse command-line options.",
-                           error_code::OPTION_ERROR);
+                           error_code::Value::OPTION_ERROR);
       }
       throw UNKNOWN_OPTION_EXCEPTION(argv[optind - 1]);
     }

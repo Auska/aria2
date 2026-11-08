@@ -66,13 +66,13 @@ void FileEntryTest::testRemoveURIWhoseHostnameIs()
 void FileEntryTest::testExtractURIResult()
 {
   FileEntry fileEntry;
-  fileEntry.addURIResult("http://timeout/file", error_code::TIME_OUT);
-  fileEntry.addURIResult("http://finished/file", error_code::FINISHED);
-  fileEntry.addURIResult("http://timeout/file2", error_code::TIME_OUT);
-  fileEntry.addURIResult("http://unknownerror/file", error_code::UNKNOWN_ERROR);
+  fileEntry.addURIResult("http://timeout/file", error_code::Value::TIME_OUT);
+  fileEntry.addURIResult("http://finished/file", error_code::Value::FINISHED);
+  fileEntry.addURIResult("http://timeout/file2", error_code::Value::TIME_OUT);
+  fileEntry.addURIResult("http://unknownerror/file", error_code::Value::UNKNOWN_ERROR);
 
   std::deque<URIResult> res;
-  fileEntry.extractURIResult(res, error_code::TIME_OUT);
+  fileEntry.extractURIResult(res, error_code::Value::TIME_OUT);
   CPPUNIT_ASSERT_EQUAL((size_t)2, res.size());
   CPPUNIT_ASSERT_EQUAL(std::string("http://timeout/file"), res[0].getURI());
   CPPUNIT_ASSERT_EQUAL(std::string("http://timeout/file2"), res[1].getURI());
@@ -85,7 +85,7 @@ void FileEntryTest::testExtractURIResult()
 
   res.clear();
 
-  fileEntry.extractURIResult(res, error_code::TIME_OUT);
+  fileEntry.extractURIResult(res, error_code::Value::TIME_OUT);
   CPPUNIT_ASSERT(res.empty());
   CPPUNIT_ASSERT_EQUAL((size_t)2, fileEntry.getURIResults().size());
 }
@@ -196,7 +196,7 @@ void FileEntryTest::testReuseUri()
   }
   CPPUNIT_ASSERT_EQUAL((size_t)0, fileEntry->getRemainingUris().size());
   fileEntry->addURIResult("http://localhost/aria2.zip",
-                          error_code::UNKNOWN_ERROR);
+                          error_code::Value::UNKNOWN_ERROR);
   std::vector<std::string> ignore;
   fileEntry->reuseUri(ignore);
   CPPUNIT_ASSERT_EQUAL((size_t)2, fileEntry->getRemainingUris().size());

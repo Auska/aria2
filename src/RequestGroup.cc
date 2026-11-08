@@ -142,7 +142,7 @@ RequestGroup::RequestGroup(const std::shared_ptr<GroupId>& gid,
       maxUploadSpeedLimit_(option->getAsInt(PREF_MAX_UPLOAD_LIMIT)),
       resumeFailureCount_(0),
       haltReason_(HaltReason::NONE),
-      lastErrorCode_(error_code::UNDEFINED),
+      lastErrorCode_(error_code::Value::UNDEFINED),
       saveControlFile_(true),
       preLocalFileCheckEnabled_(true),
       haltRequested_(false),
@@ -188,18 +188,18 @@ bool RequestGroup::allDownloadFinished() const
 std::pair<error_code::Value, std::string> RequestGroup::downloadResult() const
 {
   if (downloadFinished() && !downloadContext_->isChecksumVerificationNeeded()) {
-    return std::make_pair(error_code::FINISHED, "");
+    return std::make_pair(error_code::Value::FINISHED, "");
   }
 
   if (haltReason_ == HaltReason::USER_REQUEST) {
-    return std::make_pair(error_code::REMOVED, "");
+    return std::make_pair(error_code::Value::REMOVED, "");
   }
 
-  if (lastErrorCode_ == error_code::UNDEFINED) {
+  if (lastErrorCode_ == error_code::Value::UNDEFINED) {
     if (haltReason_ == HaltReason::SHUTDOWN_SIGNAL) {
-      return std::make_pair(error_code::IN_PROGRESS, "");
+      return std::make_pair(error_code::Value::IN_PROGRESS, "");
     }
-    return std::make_pair(error_code::UNKNOWN_ERROR, "");
+    return std::make_pair(error_code::Value::UNKNOWN_ERROR, "");
   }
 
   return std::make_pair(lastErrorCode_, lastErrorMessage_);
@@ -289,7 +289,7 @@ void RequestGroup::createInitialCommand(
       throw DOWNLOAD_FAILURE_EXCEPTION2(
           fmt("InfoHash {} is already registered.",
               bittorrent::getInfoHashString(downloadContext_)),
-          error_code::DUPLICATE_INFO_HASH);
+          error_code::Value::DUPLICATE_INFO_HASH);
     }
     if (metadataGetMode) {
       // Use UnknownLengthPieceStorage.
@@ -298,7 +298,7 @@ void RequestGroup::createInitialCommand(
     else if (e->getRequestGroupMan()->isSameFileBeingDownloaded(this)) {
       throw DOWNLOAD_FAILURE_EXCEPTION2(
           fmt(EX_DUPLICATE_FILE_DOWNLOAD, downloadContext_->getBasePath()),
-          error_code::DUPLICATE_DOWNLOAD);
+          error_code::Value::DUPLICATE_DOWNLOAD);
     }
     else {
       initPieceStorage();
@@ -432,7 +432,7 @@ void RequestGroup::createInitialCommand(
         // TODO we need this->haltRequested = true?
         throw DOWNLOAD_FAILURE_EXCEPTION2(
             fmt(MSG_FILE_ALREADY_EXISTS, downloadContext_->getBasePath()),
-            error_code::FILE_ALREADY_EXISTS);
+            error_code::Value::FILE_ALREADY_EXISTS);
       }
       pieceStorage_->getDiskAdaptor()->openFile();
       if (option_->getAsBool(PREF_BT_SEED_UNVERIFIED)) {
@@ -489,7 +489,7 @@ void RequestGroup::createInitialCommand(
   if (e->getRequestGroupMan()->isSameFileBeingDownloaded(this)) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
         fmt(EX_DUPLICATE_FILE_DOWNLOAD, downloadContext_->getBasePath()),
-        error_code::DUPLICATE_DOWNLOAD);
+        error_code::Value::DUPLICATE_DOWNLOAD);
   }
   initPieceStorage();
   if (downloadContext_->getFileEntries().size() > 1) {
@@ -509,7 +509,7 @@ void RequestGroup::createInitialCommand(
       // TODO we need this->haltRequested = true?
       throw DOWNLOAD_FAILURE_EXCEPTION2(
           fmt(MSG_FILE_ALREADY_EXISTS, downloadContext_->getBasePath()),
-          error_code::FILE_ALREADY_EXISTS);
+          error_code::Value::FILE_ALREADY_EXISTS);
     }
     pieceStorage_->getDiskAdaptor()->openFile();
   }
@@ -748,14 +748,14 @@ void RequestGroup::tryAutoFileRenaming()
   if (!option_->getAsBool(PREF_AUTO_FILE_RENAMING)) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
         fmt(MSG_FILE_ALREADY_EXISTS, getFirstFilePath()),
-        error_code::FILE_ALREADY_EXISTS);
+        error_code::Value::FILE_ALREADY_EXISTS);
   }
 
   std::string filepath = getFirstFilePath();
   if (filepath.empty()) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
         fmt("File renaming failed: {}", getFirstFilePath()),
-        error_code::FILE_RENAMING_FAILED);
+        error_code::Value::FILE_RENAMING_FAILED);
   }
   auto fn = filepath;
   std::string ext;
@@ -787,7 +787,7 @@ void RequestGroup::tryAutoFileRenaming()
   }
   throw DOWNLOAD_FAILURE_EXCEPTION2(
       fmt("File renaming failed: {}", getFirstFilePath()),
-      error_code::FILE_RENAMING_FAILED);
+      error_code::Value::FILE_RENAMING_FAILED);
 }
 
 void RequestGroup::createNextCommandWithAdj(
@@ -1217,7 +1217,7 @@ void RequestGroup::increaseAndValidateFileNotFoundCount()
       downloadContext_->getNetStat().getSessionDownloadLength() == 0) {
     throw DOWNLOAD_FAILURE_EXCEPTION2(
         fmt("Reached max-file-not-found count={}", maxCount),
-        error_code::MAX_FILE_NOT_FOUND);
+        error_code::Value::MAX_FILE_NOT_FOUND);
   }
 }
 

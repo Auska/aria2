@@ -333,7 +333,7 @@ bool AbstractCommand::execute()
         e_->removeCachedIPAddress(req_->getConnectedHostname(),
                                   req_->getConnectedPort());
       }
-      throw DL_RETRY_EX2(EX_TIME_OUT, error_code::TIME_OUT);
+      throw DL_RETRY_EX2(EX_TIME_OUT, error_code::Value::TIME_OUT);
     }
 
     addCommandSelf();
@@ -345,7 +345,7 @@ bool AbstractCommand::execute()
       A2_LOG_ERROR_EX(fmt(MSG_DOWNLOAD_ABORTED, getCuid(), req_->getUri()),
                       DL_ABORT_EX2(fmt("URI={}", req_->getCurrentUri()), err));
       fileEntry_->addURIResult(req_->getUri(), err.getErrorCode());
-      if (err.getErrorCode() == error_code::CANNOT_RESUME) {
+      if (err.getErrorCode() == error_code::Value::CANNOT_RESUME) {
         requestGroup_->increaseResumeFailureCount();
       }
     }
@@ -372,7 +372,7 @@ bool AbstractCommand::execute()
                       err);
       fileEntry_->addURIResult(req_->getUri(), err.getErrorCode());
       requestGroup_->setLastErrorCode(err.getErrorCode(), err.what());
-      if (err.getErrorCode() == error_code::CANNOT_RESUME) {
+      if (err.getErrorCode() == error_code::Value::CANNOT_RESUME) {
         requestGroup_->increaseResumeFailureCount();
       }
       onAbort();
@@ -380,7 +380,7 @@ bool AbstractCommand::execute()
       return true;
     }
 
-    if (err.getErrorCode() == error_code::HTTP_SERVICE_UNAVAILABLE) {
+    if (err.getErrorCode() == error_code::Value::HTTP_SERVICE_UNAVAILABLE) {
       Timer wakeTime(global::wallclock());
       wakeTime.advance(
           std::chrono::seconds(getOption()->getAsInt(PREF_RETRY_WAIT)));
@@ -502,7 +502,7 @@ void AbstractCommand::onAbort()
   // process.
   getOption()->put(PREF_ALWAYS_RESUME, A2_V_TRUE);
   std::deque<URIResult> res;
-  fileEntry_->extractURIResult(res, error_code::CANNOT_RESUME);
+  fileEntry_->extractURIResult(res, error_code::Value::CANNOT_RESUME);
   if (res.empty()) {
     return;
   }
@@ -780,7 +780,7 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
       }
       throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                              asyncNameResolverMan_->getLastError()),
-                         error_code::NAME_RESOLVE_ERROR);
+                         error_code::Value::NAME_RESOLVE_ERROR);
     case 0:
       return A2STR::NIL;
 
@@ -789,7 +789,7 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
       if (addrs.empty()) {
         throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                                "No address returned"),
-                           error_code::NAME_RESOLVE_ERROR);
+                           error_code::Value::NAME_RESOLVE_ERROR);
       }
       break;
     }

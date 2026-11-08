@@ -59,7 +59,7 @@ void RequestGroupTest::testTryAutoFileRenaming()
     group.tryAutoFileRenaming();
   }
   catch (const Exception& ex) {
-    CPPUNIT_ASSERT_EQUAL(error_code::FILE_ALREADY_EXISTS, ex.getErrorCode());
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::FILE_ALREADY_EXISTS, ex.getErrorCode());
   }
 
   option_->put(PREF_AUTO_FILE_RENAMING, "true");
@@ -118,32 +118,32 @@ void RequestGroupTest::testCreateDownloadResult()
     CPPUNIT_ASSERT_EQUAL((int64_t)0, result->sessionTime.count());
     // result is UNKNOWN_ERROR if download has not completed and no specific
     // error has been reported
-    CPPUNIT_ASSERT_EQUAL(error_code::UNKNOWN_ERROR, result->result);
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::UNKNOWN_ERROR, result->result);
 
     // if haltReason is set to RequestGroup::HaltReason::USER_REQUEST, download
     // result will become REMOVED.
     group.setHaltRequested(true, RequestGroup::HaltReason::USER_REQUEST);
     result = group.createDownloadResult();
-    CPPUNIT_ASSERT_EQUAL(error_code::REMOVED, result->result);
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::REMOVED, result->result);
     // if haltReason is set to RequestGroup::HaltReason::SHUTDOWN_SIGNAL, download
     // result will become IN_PROGRESS.
     group.setHaltRequested(true, RequestGroup::HaltReason::SHUTDOWN_SIGNAL);
     result = group.createDownloadResult();
-    CPPUNIT_ASSERT_EQUAL(error_code::IN_PROGRESS, result->result);
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::IN_PROGRESS, result->result);
   }
   {
-    group.setLastErrorCode(error_code::RESOURCE_NOT_FOUND);
+    group.setLastErrorCode(error_code::Value::RESOURCE_NOT_FOUND);
 
     std::shared_ptr<DownloadResult> result = group.createDownloadResult();
 
-    CPPUNIT_ASSERT_EQUAL(error_code::RESOURCE_NOT_FOUND, result->result);
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::RESOURCE_NOT_FOUND, result->result);
   }
   {
     group.getPieceStorage()->markAllPiecesDone();
 
     std::shared_ptr<DownloadResult> result = group.createDownloadResult();
 
-    CPPUNIT_ASSERT_EQUAL(error_code::FINISHED, result->result);
+    CPPUNIT_ASSERT_EQUAL(error_code::Value::FINISHED, result->result);
   }
 }
 

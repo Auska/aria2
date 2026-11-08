@@ -315,7 +315,7 @@ void createRequestGroupForBitTorrent(
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Bencode decoding failed",
-                       error_code::BENCODE_PARSE_ERROR);
+                       error_code::Value::BENCODE_PARSE_ERROR);
   }
   createRequestGroupForBitTorrent(result, option, uris, metaInfoUri,
                                   torrent.get(), adjustAnnounceUri);
@@ -388,7 +388,7 @@ public:
         auto torrent = parseFile(parser, uri);
         if (!torrent) {
           throw DL_ABORT_EX2("Bencode decoding failed",
-                             error_code::BENCODE_PARSE_ERROR);
+                             error_code::Value::BENCODE_PARSE_ERROR);
         }
         requestGroups_.push_back(
             createBtRequestGroup(uri, option_, {}, torrent.get()));

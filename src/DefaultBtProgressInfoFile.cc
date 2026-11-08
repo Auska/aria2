@@ -398,7 +398,7 @@ void DefaultBtProgressInfoFile::load()
           "WARNING: Detected a change in piece length. You can proceed with"
           " --allow-piece-length-change=true, but you may lose some download"
           " progress.",
-          error_code::PIECE_LENGTH_CHANGED);
+          error_code::Value::PIECE_LENGTH_CHANGED);
     }
     BitfieldMan dest(dctx_->getPieceLength(), totalLength);
     util::convertBitfield(&dest, &src);

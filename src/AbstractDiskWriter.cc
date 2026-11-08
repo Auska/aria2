@@ -146,7 +146,7 @@ void AbstractDiskWriter::openExistingFile(int64_t totalLength)
   else {
     flags |= O_RDWR;
   }
-  fd_ = openFileWithFlags(filename_, flags, error_code::FILE_OPEN_ERROR);
+  fd_ = openFileWithFlags(filename_, flags, error_code::Value::FILE_OPEN_ERROR);
 }
 
 void AbstractDiskWriter::createFile(int addFlags)
@@ -155,7 +155,7 @@ void AbstractDiskWriter::createFile(int addFlags)
   util::mkdirs(File(filename_).getDirname());
   fd_ = openFileWithFlags(filename_,
                           O_CREAT | O_RDWR | O_TRUNC | O_BINARY | addFlags,
-                          error_code::FILE_CREATE_ERROR);
+                          error_code::Value::FILE_CREATE_ERROR);
 }
 
 ssize_t AbstractDiskWriter::writeDataInternal(std::span<const std::byte> data,
@@ -209,7 +209,7 @@ void AbstractDiskWriter::seek(int64_t offset)
   if (a2lseek(fd_, offset, SEEK_SET) == (a2_off_t)-1) {
     int errNum = fileError();
     throw DL_ABORT_EX2(fmt(EX_FILE_SEEK, filename_, fileStrerror(errNum)),
-                       error_code::FILE_IO_ERROR);
+                       error_code::Value::FILE_IO_ERROR);
   }
 }
 
@@ -293,12 +293,12 @@ void AbstractDiskWriter::writeData(std::span<const std::byte> data,
     if (isDiskFullError(errNum)) {
       throw DOWNLOAD_FAILURE_EXCEPTION3(
           errNum, fmt(EX_FILE_WRITE, filename_, fileStrerror(errNum)),
-          error_code::NOT_ENOUGH_DISK_SPACE);
+          error_code::Value::NOT_ENOUGH_DISK_SPACE);
     }
     else {
       throw DL_ABORT_EX3(errNum,
                          fmt(EX_FILE_WRITE, filename_, fileStrerror(errNum)),
-                         error_code::FILE_IO_ERROR);
+                         error_code::Value::FILE_IO_ERROR);
     }
   }
 }
@@ -310,7 +310,7 @@ ssize_t AbstractDiskWriter::readData(std::span<std::byte> data, int64_t offset)
     int errNum = fileError();
     throw DL_ABORT_EX3(errNum,
                        fmt(EX_FILE_READ, filename_, fileStrerror(errNum)),
-                       error_code::FILE_IO_ERROR);
+                       error_code::Value::FILE_IO_ERROR);
   }
   return ret;
 }
@@ -324,7 +324,7 @@ void AbstractDiskWriter::truncate(int64_t length)
     int errNum = fileError();
     throw DL_ABORT_EX2(
         fmt("File truncation failed. cause: {}", fileStrerror(errNum)),
-        error_code::FILE_IO_ERROR);
+        error_code::Value::FILE_IO_ERROR);
   }
 }
 
@@ -348,16 +348,16 @@ void AbstractDiskWriter::allocate(int64_t offset, int64_t length, bool sparse)
   if (r == -1) {
     throw DL_ABORT_EX3(
         errNum, fmt("fallocate failed. cause: {}", util::safeStrerror(errNum)),
-        isDiskFullError(errNum) ? error_code::NOT_ENOUGH_DISK_SPACE
-                                : error_code::FILE_IO_ERROR);
+        isDiskFullError(errNum) ? error_code::Value::NOT_ENOUGH_DISK_SPACE
+                                : error_code::Value::FILE_IO_ERROR);
   }
 #  elif HAVE_POSIX_FALLOCATE
   int r = posix_fallocate(fd_, offset, length);
   if (r != 0) {
     throw DL_ABORT_EX3(
         r, fmt("posix_fallocate failed. cause: {}", util::safeStrerror(r)),
-        isDiskFullError(r) ? error_code::NOT_ENOUGH_DISK_SPACE
-                           : error_code::FILE_IO_ERROR);
+        isDiskFullError(r) ? error_code::Value::NOT_ENOUGH_DISK_SPACE
+                           : error_code::Value::FILE_IO_ERROR);
   }
 #  else
 #    error "no *_fallocate function available."

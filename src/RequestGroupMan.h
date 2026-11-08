@@ -229,7 +229,7 @@ public:
 
   public:
     DownloadStat(int error, int inProgress, int waiting,
-                 error_code::Value lastErrorResult = error_code::FINISHED)
+                 error_code::Value lastErrorResult = error_code::Value::FINISHED)
         : error_(error),
           inProgress_(inProgress),
           waiting_(waiting),

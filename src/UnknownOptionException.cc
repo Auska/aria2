@@ -45,7 +45,7 @@ constexpr auto MESSAGE = _("Unknown option '{}'");
 UnknownOptionException::UnknownOptionException(std::string_view unknownOption,
                                                std::source_location location)
     : RecoverableException(fmt(MESSAGE, unknownOption),
-                           error_code::OPTION_ERROR, location),
+                           error_code::Value::OPTION_ERROR, location),
       unknownOption_(unknownOption)
 {
 }
@@ -54,7 +54,7 @@ UnknownOptionException::UnknownOptionException(std::string_view unknownOption,
                                                const Exception& cause,
                                                std::source_location location)
     : RecoverableException(fmt(MESSAGE, unknownOption),
-                           error_code::OPTION_ERROR, cause, location),
+                           error_code::Value::OPTION_ERROR, cause, location),
       unknownOption_(unknownOption)
 {
 }

@@ -99,7 +99,7 @@ void BtPostDownloadHandler::getNextRequestGroups(
   }
   if (!torrent) {
     throw DL_ABORT_EX2("Could not parse BitTorrent metainfo",
-                       error_code::BENCODE_PARSE_ERROR);
+                       error_code::Value::BENCODE_PARSE_ERROR);
   }
   std::vector<std::shared_ptr<RequestGroup>> newRgs;
   createRequestGroupForBitTorrent(newRgs, requestGroup->getOption(),

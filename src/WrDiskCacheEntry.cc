@@ -50,7 +50,7 @@ WrDiskCacheEntry::WrDiskCacheEntry(
       lastUpdate_(0),
       size_(0),
       error_(CACHE_ERR_SUCCESS),
-      errorCode_(error_code::UNDEFINED),
+      errorCode_(error_code::Value::UNDEFINED),
       diskAdaptor_(diskAdaptor)
 {
 }

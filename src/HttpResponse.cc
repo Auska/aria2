@@ -83,14 +83,14 @@ void HttpResponse::validateResponse() const
                 httpRequest_->getEndByte(), httpRequest_->getEntityLength(),
                 responseRange.startByte, responseRange.endByte,
                 responseRange.entityLength),
-            error_code::CANNOT_RESUME);
+            error_code::Value::CANNOT_RESUME);
       }
     }
     return;
   case 304: // Not Modified
     if (!httpRequest_->conditionalRequest()) {
       throw DL_ABORT_EX2("Got 304 without If-Modified-Since or If-None-Match",
-                         error_code::HTTP_PROTOCOL_ERROR);
+                         error_code::Value::HTTP_PROTOCOL_ERROR);
     }
     return;
   case 300: // Multiple Choices
@@ -101,7 +101,7 @@ void HttpResponse::validateResponse() const
   case 308: // Permanent Redirect
     if (!httpHeader_->defined(HttpHeader::InterestingHeader::LOCATION)) {
       throw DL_ABORT_EX2(fmt(EX_LOCATION_HEADER_REQUIRED, statusCode),
-                         error_code::HTTP_PROTOCOL_ERROR);
+                         error_code::Value::HTTP_PROTOCOL_ERROR);
     }
     return;
   }
@@ -109,7 +109,7 @@ void HttpResponse::validateResponse() const
     return;
   }
   throw DL_ABORT_EX2(fmt("Unexpected status {}", statusCode),
-                     error_code::HTTP_PROTOCOL_ERROR);
+                     error_code::Value::HTTP_PROTOCOL_ERROR);
 }
 
 std::string HttpResponse::determineFilename(bool contentDispositionUTF8) const

@@ -56,7 +56,7 @@ void NameResolver::resolve(std::vector<std::string>& resolvedAddresses,
                       0);
   if (s) {
     throw DL_ABORT_EX2(fmt(EX_RESOLVE_HOSTNAME, hostname, gai_strerror(s)),
-                       error_code::NAME_RESOLVE_ERROR);
+                       error_code::Value::NAME_RESOLVE_ERROR);
   }
   std::unique_ptr<addrinfo, decltype(&freeaddrinfo)> resDeleter(res,
                                                                 freeaddrinfo);

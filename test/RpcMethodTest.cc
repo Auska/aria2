@@ -437,7 +437,7 @@ void RpcMethodTest::testGetOption()
   auto group = std::make_shared<RequestGroup>(GroupId::create(), option_);
   group->getOption()->put(PREF_DIR, "alpha");
   e_->getRequestGroupMan()->addReservedGroup(group);
-  auto dr = createDownloadResult(error_code::FINISHED, "http://host/fin");
+  auto dr = createDownloadResult(error_code::Value::FINISHED, "http://host/fin");
   dr->option->put(PREF_DIR, "bravo");
   e_->getRequestGroupMan()->addDownloadResult(dr);
 
@@ -791,7 +791,7 @@ void RpcMethodTest::testGatherStoppedDownload()
   d->inMemoryDownload = false;
   d->sessionDownloadLength = UINT64_MAX;
   d->sessionTime = 1_s;
-  d->result = error_code::FINISHED;
+  d->result = error_code::Value::FINISHED;
   d->followedBy = followedBy;
   d->following = 1;
   d->belongsTo = 2;

@@ -280,7 +280,7 @@ int MultiUrlRequestInfo::prepare()
 
 error_code::Value MultiUrlRequestInfo::getResult()
 {
-  error_code::Value returnValue = error_code::FINISHED;
+  error_code::Value returnValue = error_code::Value::FINISHED;
   if (!option_->blank(PREF_SAVE_COOKIES)) {
     e_->getCookieStorage()->saveNsFormat(option_->get(PREF_SAVE_COOKIES));
   }
@@ -299,9 +299,9 @@ error_code::Value MultiUrlRequestInfo::getResult()
   RequestGroupMan::DownloadStat s = e_->getRequestGroupMan()->getDownloadStat();
   if (!s.allCompleted()) {
     printMessageForContinue();
-    if (s.getLastErrorResult() == error_code::FINISHED &&
+    if (s.getLastErrorResult() == error_code::Value::FINISHED &&
         s.getInProgress() > 0) {
-      returnValue = error_code::IN_PROGRESS;
+      returnValue = error_code::Value::IN_PROGRESS;
     }
     else {
       returnValue = s.getLastErrorResult();
@@ -326,7 +326,7 @@ error_code::Value MultiUrlRequestInfo::getResult()
 error_code::Value MultiUrlRequestInfo::execute()
 {
   if (prepare() != 0) {
-    return error_code::UNKNOWN_ERROR;
+    return error_code::Value::UNKNOWN_ERROR;
   }
   // TODO Enclosed in try..catch block for just in case. Really need
   // this?

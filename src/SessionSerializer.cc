@@ -281,15 +281,15 @@ bool saveDownloadResult(IOFile& fp, std::set<a2_gid_t>& metainfoCache,
     const auto& dr = *first;
     auto save = false;
     switch (dr->result) {
-    case error_code::FINISHED:
-    case error_code::REMOVED:
+    case error_code::Value::FINISHED:
+    case error_code::Value::REMOVED:
       save = dr->option->getAsBool(PREF_FORCE_SAVE);
       break;
-    case error_code::IN_PROGRESS:
+    case error_code::Value::IN_PROGRESS:
       save = saveInProgress;
       break;
-    case error_code::RESOURCE_NOT_FOUND:
-    case error_code::MAX_FILE_NOT_FOUND:
+    case error_code::Value::RESOURCE_NOT_FOUND:
+    case error_code::Value::MAX_FILE_NOT_FOUND:
       save = saveError && dr->option->getAsBool(PREF_SAVE_NOT_FOUND);
       break;
     default:
@@ -326,8 +326,8 @@ bool SessionSerializer::save(IOFile& fp) const
     const RequestGroupList& groups = rgman_->getRequestGroups();
     for (const auto& rg : groups) {
       auto dr = rg->createDownloadResult();
-      bool stopped = dr->result == error_code::FINISHED ||
-                     dr->result == error_code::REMOVED;
+      bool stopped = dr->result == error_code::Value::FINISHED ||
+                     dr->result == error_code::Value::REMOVED;
       if ((!stopped && saveInProgress_) ||
           (stopped && dr->option->getAsBool(PREF_FORCE_SAVE))) {
         if (!writeDownloadResult(fp, metainfoCache, dr,

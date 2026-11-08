@@ -198,7 +198,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
       utf8Name = util::encodeNonUtf8(nameData->s());
       if (util::detectDirTraversal(utf8Name)) {
         throw DL_ABORT_EX2(fmt(MSG_DIR_TRAVERSAL_DETECTED, nameData->s()),
-                           error_code::BITTORRENT_PARSE_ERROR);
+                           error_code::Value::BITTORRENT_PARSE_ERROR);
       }
     }
     else {
@@ -228,13 +228,13 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
           downcast<Integer>(fileDict->get(C_LENGTH));
       if (!fileLengthData) {
         throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_LENGTH),
-                           error_code::BITTORRENT_PARSE_ERROR);
+                           error_code::Value::BITTORRENT_PARSE_ERROR);
       }
 
       if (fileLengthData->i() < 0) {
         throw DL_ABORT_EX2(
             fmt(MSG_NEGATIVE_LENGTH_BT_INFO, C_LENGTH, fileLengthData->i()),
-            error_code::BITTORRENT_PARSE_ERROR);
+            error_code::Value::BITTORRENT_PARSE_ERROR);
       }
 
       if (length > std::numeric_limits<int64_t>::max() - fileLengthData->i()) {
@@ -254,7 +254,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
       const List* pathList = downcast<List>(fileDict->get(pathKey));
       if (!pathList || pathList->empty()) {
         throw DL_ABORT_EX2("Path is empty.",
-                           error_code::BITTORRENT_PARSE_ERROR);
+                           error_code::Value::BITTORRENT_PARSE_ERROR);
       }
 
       std::vector<std::string> pathelem(pathList->size() + 1);
@@ -268,7 +268,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
         }
         else {
           throw DL_ABORT_EX2("Path element is not string.",
-                             error_code::BITTORRENT_PARSE_ERROR);
+                             error_code::Value::BITTORRENT_PARSE_ERROR);
         }
       }
       std::string utf8Path = strjoin(
@@ -276,7 +276,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
           std::function<std::string(const std::string&)>(util::encodeNonUtf8));
       if (util::detectDirTraversal(utf8Path)) {
         throw DL_ABORT_EX2(fmt(MSG_DIR_TRAVERSAL_DETECTED, utf8Path),
-                           error_code::BITTORRENT_PARSE_ERROR);
+                           error_code::Value::BITTORRENT_PARSE_ERROR);
       }
       std::string pePath =
           strjoin(pathelem.begin(), pathelem.end(), "/",
@@ -305,14 +305,14 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
     const Integer* lengthData = downcast<Integer>(infoDict->get(C_LENGTH));
     if (!lengthData) {
       throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_LENGTH),
-                         error_code::BITTORRENT_PARSE_ERROR);
+                         error_code::Value::BITTORRENT_PARSE_ERROR);
     }
     int64_t totalLength = lengthData->i();
 
     if (totalLength < 0) {
       throw DL_ABORT_EX2(
           fmt(MSG_NEGATIVE_LENGTH_BT_INFO, C_LENGTH, totalLength),
-          error_code::BITTORRENT_PARSE_ERROR);
+          error_code::Value::BITTORRENT_PARSE_ERROR);
     }
 
     if (totalLength > std::numeric_limits<a2_off_t>::max()) {
@@ -421,12 +421,12 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
   const Dict* rootDict = downcast<Dict>(root);
   if (!rootDict) {
     throw DL_ABORT_EX2("torrent file does not contain a root dictionary.",
-                       error_code::BITTORRENT_PARSE_ERROR);
+                       error_code::Value::BITTORRENT_PARSE_ERROR);
   }
   const Dict* infoDict = downcast<Dict>(rootDict->get(C_INFO));
   if (!infoDict) {
     throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_INFO),
-                       error_code::BITTORRENT_PARSE_ERROR);
+                       error_code::Value::BITTORRENT_PARSE_ERROR);
   }
   auto torrent = std::make_shared<TorrentAttribute>();
 
@@ -444,7 +444,7 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
   const String* piecesData = downcast<String>(infoDict->get(C_PIECES));
   if (!piecesData) {
     throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_PIECES),
-                       error_code::BITTORRENT_PARSE_ERROR);
+                       error_code::Value::BITTORRENT_PARSE_ERROR);
   }
   // Commented out To download 0 length torrent.
   //   if(piecesData.s().empty()) {
@@ -460,13 +460,13 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
       downcast<Integer>(infoDict->get(C_PIECE_LENGTH));
   if (!pieceLengthData) {
     throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_PIECE_LENGTH),
-                       error_code::BITTORRENT_PARSE_ERROR);
+                       error_code::Value::BITTORRENT_PARSE_ERROR);
   }
 
   if (pieceLengthData->i() < 0) {
     throw DL_ABORT_EX2(
         fmt(MSG_NEGATIVE_LENGTH_BT_INFO, C_PIECE_LENGTH, pieceLengthData->i()),
-        error_code::BITTORRENT_PARSE_ERROR);
+        error_code::Value::BITTORRENT_PARSE_ERROR);
   }
 
   size_t pieceLength = pieceLengthData->i();
@@ -498,7 +498,7 @@ void processRootDictionary(const std::shared_ptr<DownloadContext>& ctx,
                      overrideName, urlList);
   if ((ctx->getTotalLength() + pieceLength - 1) / pieceLength != numPieces) {
     throw DL_ABORT_EX2("Too few/many piece hash.",
-                       error_code::BITTORRENT_PARSE_ERROR);
+                       error_code::Value::BITTORRENT_PARSE_ERROR);
   }
   // retrieve announce
   extractAnnounce(torrent.get(), rootDict);
@@ -915,12 +915,12 @@ std::unique_ptr<TorrentAttribute> parseMagnet(const std::string& magnet)
   auto r = magnet::parse(magnet);
   if (!r) {
     throw DL_ABORT_EX2("Bad BitTorrent Magnet URI.",
-                       error_code::MAGNET_PARSE_ERROR);
+                       error_code::Value::MAGNET_PARSE_ERROR);
   }
   const List* xts = downcast<List>(r->get("xt"));
   if (!xts) {
     throw DL_ABORT_EX2("Missing xt parameter in Magnet URI.",
-                       error_code::MAGNET_PARSE_ERROR);
+                       error_code::Value::MAGNET_PARSE_ERROR);
   }
   auto attrs = make_unique<TorrentAttribute>();
   std::string infoHash;
@@ -947,7 +947,7 @@ std::unique_ptr<TorrentAttribute> parseMagnet(const std::string& magnet)
   if (infoHash.empty()) {
     throw DL_ABORT_EX2("Bad BitTorrent Magnet URI. "
                        "No valid BitTorrent Info Hash found.",
-                       error_code::MAGNET_PARSE_ERROR);
+                       error_code::Value::MAGNET_PARSE_ERROR);
   }
   const List* trs = downcast<List>(r->get("tr"));
   if (trs) {

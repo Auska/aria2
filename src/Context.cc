@@ -133,9 +133,9 @@ Context::Context(bool standalone, int argc, char** argv, const KeyVals& options)
   auto op = std::make_shared<Option>();
   error_code::Value rv;
   rv = option_processing(*op.get(), standalone, args, argc, argv, options);
-  if (rv != error_code::FINISHED) {
+  if (rv != error_code::Value::FINISHED) {
     if (standalone) {
-      exit(rv);
+      exit(static_cast<int>(rv));
     }
     else {
       throw DL_ABORT_EX("Option processing failed");

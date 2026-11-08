@@ -772,10 +772,10 @@ void gatherStoppedDownload(Dict* entryDict,
     entryDict->put(KEY_ERROR_MESSAGE, ds->resultMessage);
   }
   if (requested_key(keys, KEY_STATUS)) {
-    if (ds->result == error_code::REMOVED) {
+    if (ds->result == error_code::Value::REMOVED) {
       entryDict->put(KEY_STATUS, VLB_REMOVED);
     }
-    else if (ds->result == error_code::FINISHED) {
+    else if (ds->result == error_code::Value::FINISHED) {
       entryDict->put(KEY_STATUS, VLB_COMPLETE);
     }
     else {

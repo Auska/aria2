@@ -108,7 +108,7 @@ void AdaptiveURISelector::mayRetryWithIncreasedTimeout(FileEntry* fileEntry)
   std::deque<std::string>& uris = fileEntry->getRemainingUris();
   // looking for retries
   std::deque<URIResult> timeouts;
-  fileEntry->extractURIResult(timeouts, error_code::TIME_OUT);
+  fileEntry->extractURIResult(timeouts, error_code::Value::TIME_OUT);
   std::transform(std::begin(timeouts), std::end(timeouts),
                  std::back_inserter(uris), std::mem_fn(&URIResult::getURI));
 

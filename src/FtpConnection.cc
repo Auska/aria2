@@ -336,7 +336,7 @@ std::optional<std::pair<int, std::string>> FtpConnection::bulkReceiveResponse()
   if (strbuf_.size() >= 4) {
     status = getStatus(strbuf_);
     if (status == 0) {
-      throw DL_ABORT_EX2(EX_INVALID_RESPONSE, error_code::FTP_PROTOCOL_ERROR);
+      throw DL_ABORT_EX2(EX_INVALID_RESPONSE, error_code::Value::FTP_PROTOCOL_ERROR);
     }
   }
   else {
@@ -518,7 +518,7 @@ int FtpConnection::receivePwdResponse(std::string& pwd)
                    response->second.begin() + last);
       }
       else {
-        throw DL_ABORT_EX2(EX_INVALID_RESPONSE, error_code::FTP_PROTOCOL_ERROR);
+        throw DL_ABORT_EX2(EX_INVALID_RESPONSE, error_code::Value::FTP_PROTOCOL_ERROR);
       }
     }
     return response->first;

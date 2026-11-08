@@ -147,6 +147,21 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 - 若出现「隐式转 int」的地方（如 `static_cast<int>(code)`、`fmt("{}", code)`），逐处 `static_cast` 或 `std::to_underlying`（C++23 已可用，本机验证过）。
 - **不改** `src/DownloadResult.h:98` 的字段类型（仍是 `error_code::Value`）。
 
+### 阶段 2 实测（2026-11-08）
+
+- 6 个 enum 全部改 `enum class`：`DownloadEvent`、`RUN_MODE`、`OffsetMode`、`UriStatus`、`BtFileMode`、`DownloadStatus`；值引用点 14 个文件（`src/BtCheckIntegrityEntry.cc`、`src/DefaultPieceStorage.cc`、`src/IndexedList.h`、`src/RequestGroupMan.cc`、`src/RpcMethodImpl.cc`、`src/TorrentAttribute.cc`、`src/WebSocketSessionMan.cc`、`src/aria2api.cc`、`src/bittorrent_helper.cc`、`test/Aria2ApiTest.cc`、`test/BittorrentHelperTest.cc`、`test/IndexedListTest.cc`、`test/RequestGroupManTest.cc`、`test/RpcMethodTest.cc`）。
+- 3 个 `typedef` → `using`；4 个只读形参 → `std::string_view`（`hexToGid`、`addTorrent` ×2、`getGlobalOption`、`getOption`）；返回类型 `const std::string&` 未动。
+- 连带改 `src/prefs.h:63` / `src/prefs.cc:76,88,108`：`option::k2p(const std::string&)` → `k2p(std::string_view)`，`PrefFactory::k2p_` 加 `std::less<>` 透明比较器（否则 `getOption(std::string_view)` 每次都要构造 `std::string`）。
+- 3 处函数体适配：`src/RpcMethodImpl.cc:641` `if (torrentAttrs->mode != BtFileMode::BT_FILE_MODE_NONE)`（原 `if (mode)`）；`src/aria2api.cc hexToGid` 加 `std::string hexCopy{hex}` 给 `GroupId::toNumericId`；`addTorrent` 加 `std::string torrentFileCopy{torrentFile}` 给 `createRequestGroupForBitTorrent`。
+- 门禁：`autoreconf -i` rc=0、`./configure --enable-werror` rc=0、`make -j8 check` → `# TOTAL: 1` / `# PASS: 1`、`OK (914)`、`error:` 0。
+- **新 ABI 哈希：`132c72d9f055756769456c35ca7f8e7a879fbaa8`**（旧值 `2216641161b15acb3c3ddf2600dc19e3decd59d5` 作废）。提交 `0f4143e7`。
+
+### 阶段 3 实测（2026-11-08）
+
+- `src/error_code.h:44` `enum Value` → `enum class Value`；40 个文件的 `error_code::XXX` → `error_code::Value::XXX`（227 处引用）。
+- 4 处需显式转整型：`src/main.cc:77` `return static_cast<int>(r);`、`src/Context.cc:138` `exit(static_cast<int>(rv));`、`src/option_processing.cc:196,214` `exit(static_cast<int>(error_code::Value::FINISHED));`、`src/Exception.cc:118,135` 用 `std::to_string(std::to_underlying(errorCode_))` 并补 `#include <utility>`。
+- 门禁：`# TOTAL: 1` / `# PASS: 1`、`OK (914)`、`error:` 0、ABI 哈希保持 `132c72d9...`。
+
 ### 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）
 
 只改「负数从不外泄」的 4 个类，不动 `TLSSession`（内部仍需负值区分 WOULDBLOCK）：
@@ -203,8 +218,8 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 ## 分步计划
 
 1. [x] 阶段 1：删除 6 个 `.c` shim 与对应 configure/Makefile 条件（提交 `PLAN-010 阶段1: 删除未编译的 C 移植 shim`）
-2. [ ] 阶段 2：公开 ABI 头现代化（提交 `PLAN-010 阶段2: 公开 ABI 头现代化`，随后记录新哈希）
-3. [ ] 阶段 3：`error_code::Value` → `enum class`（提交 `PLAN-010 阶段3: error_code::Value 改为 enum class`）
+2. [x] 阶段 2：公开 ABI 头现代化（提交 `PLAN-010 阶段2: 公开 ABI 头现代化`，随后记录新哈希）
+3. [x] 阶段 3：`error_code::Value` → `enum class`（提交 `PLAN-010 阶段3: error_code::Value 改为 enum class`）
 4. [ ] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
 5. [ ] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
 6. [ ] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）

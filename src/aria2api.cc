@@ -754,9 +754,9 @@ struct DownloadResultDH : public DownloadHandle {
   virtual DownloadStatus getStatus() override
   {
     switch (dr->result) {
-    case error_code::FINISHED:
+    case error_code::Value::FINISHED:
       return DOWNLOAD_COMPLETE;
-    case error_code::REMOVED:
+    case error_code::Value::REMOVED:
       return DownloadStatus::DOWNLOAD_REMOVED;
     default:
       return DownloadStatus::DOWNLOAD_ERROR;

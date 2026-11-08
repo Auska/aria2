@@ -41,7 +41,7 @@ namespace aria2 {
 
 namespace error_code {
 
-enum Value {
+enum class Value {
   UNDEFINED = -1,
   FINISHED = 0,
   UNKNOWN_ERROR = 1,

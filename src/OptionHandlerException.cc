@@ -44,7 +44,7 @@ constexpr auto MESSAGE =
 
 OptionHandlerException::OptionHandlerException(PrefPtr pref,
                                                std::source_location location)
-    : RecoverableException(fmt(MESSAGE, pref->k), error_code::OPTION_ERROR,
+    : RecoverableException(fmt(MESSAGE, pref->k), error_code::Value::OPTION_ERROR,
                            location),
       pref_(pref)
 {
@@ -53,7 +53,7 @@ OptionHandlerException::OptionHandlerException(PrefPtr pref,
 OptionHandlerException::OptionHandlerException(PrefPtr pref,
                                                const Exception& cause,
                                                std::source_location location)
-    : RecoverableException(fmt(MESSAGE, pref->k), error_code::OPTION_ERROR,
+    : RecoverableException(fmt(MESSAGE, pref->k), error_code::Value::OPTION_ERROR,
                            cause, location),
       pref_(pref)
 {

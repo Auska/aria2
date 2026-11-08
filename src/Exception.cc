@@ -34,6 +34,7 @@
 /* copyright --> */
 #include "Exception.h"
 #include <string_view>
+#include <utility>
 
 #include <string>
 
@@ -44,7 +45,7 @@ Exception::Exception(std::string_view msg, std::source_location location)
       line_(static_cast<int>(location.line())),
       errNum_(0),
       msg_(msg),
-      errorCode_(error_code::UNKNOWN_ERROR)
+      errorCode_(error_code::Value::UNKNOWN_ERROR)
 {
 }
 
@@ -86,7 +87,7 @@ Exception::Exception(int errNum, std::string_view msg,
       line_(static_cast<int>(location.line())),
       errNum_(errNum),
       msg_(msg),
-      errorCode_(error_code::UNKNOWN_ERROR)
+      errorCode_(error_code::Value::UNKNOWN_ERROR)
 {
 }
 
@@ -115,7 +116,7 @@ std::string Exception::stackTrace() const
     s += " ";
   }
   s += "errorCode=";
-  s += std::to_string(errorCode_);
+  s += std::to_string(std::to_underlying(errorCode_));
   s += " ";
   s += what();
   s += "\n";
@@ -132,7 +133,7 @@ std::string Exception::stackTrace() const
       s += " ";
     }
     s += "errorCode=";
-    s += std::to_string(e->getErrorCode());
+    s += std::to_string(std::to_underlying(e->getErrorCode()));
     s += " ";
     s += e->what();
     s += "\n";

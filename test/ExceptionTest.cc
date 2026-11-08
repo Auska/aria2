@@ -28,7 +28,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ExceptionTest);
 void ExceptionTest::testStackTrace()
 {
   DownloadFailureException c1 =
-      DOWNLOAD_FAILURE_EXCEPTION2("cause1", error_code::TIME_OUT);
+      DOWNLOAD_FAILURE_EXCEPTION2("cause1", error_code::Value::TIME_OUT);
   DownloadFailureException c2 = DOWNLOAD_FAILURE_EXCEPTION2("cause2", c1);
   DownloadFailureException e =
       DOWNLOAD_FAILURE_EXCEPTION2("exception thrown", c2);

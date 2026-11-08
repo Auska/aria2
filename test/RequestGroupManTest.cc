@@ -286,12 +286,12 @@ void RequestGroupManTest::testAddDownloadResult()
 {
   std::string uri = "http://example.org";
   rgman_->setMaxDownloadResult(3);
-  rgman_->addDownloadResult(createDownloadResult(error_code::TIME_OUT, uri));
-  rgman_->addDownloadResult(createDownloadResult(error_code::FINISHED, uri));
-  rgman_->addDownloadResult(createDownloadResult(error_code::FINISHED, uri));
-  rgman_->addDownloadResult(createDownloadResult(error_code::FINISHED, uri));
-  rgman_->addDownloadResult(createDownloadResult(error_code::FINISHED, uri));
-  CPPUNIT_ASSERT_EQUAL(error_code::TIME_OUT,
+  rgman_->addDownloadResult(createDownloadResult(error_code::Value::TIME_OUT, uri));
+  rgman_->addDownloadResult(createDownloadResult(error_code::Value::FINISHED, uri));
+  rgman_->addDownloadResult(createDownloadResult(error_code::Value::FINISHED, uri));
+  rgman_->addDownloadResult(createDownloadResult(error_code::Value::FINISHED, uri));
+  rgman_->addDownloadResult(createDownloadResult(error_code::Value::FINISHED, uri));
+  CPPUNIT_ASSERT_EQUAL(error_code::Value::TIME_OUT,
                        rgman_->getDownloadStat().getLastErrorResult());
 }
 
