@@ -43,6 +43,7 @@
 #include <functional>
 
 #include "console.h"
+#include "help_tags.h"
 #include "prefs.h"
 
 namespace aria2 {
@@ -66,9 +67,9 @@ public:
 
   virtual std::string createPossibleValuesString() const = 0;
 
-  virtual bool hasTag(uint32_t tag) const = 0;
+  virtual bool hasTag(HelpTag tag) const = 0;
 
-  virtual void addTag(uint32_t tag) = 0;
+  virtual void addTag(HelpTag tag) = 0;
 
   virtual std::string toTagString() const = 0;
 
@@ -84,9 +85,9 @@ public:
 
   virtual PrefPtr getPref() const = 0;
 
-  enum ARG_TYPE { REQ_ARG, OPT_ARG, NO_ARG };
+  enum class ArgType { REQ_ARG, OPT_ARG, NO_ARG };
 
-  virtual ARG_TYPE getArgType() const = 0;
+  virtual ArgType getArgType() const = 0;
 
   virtual char getShortName() const = 0;
 

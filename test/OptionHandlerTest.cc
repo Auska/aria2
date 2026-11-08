@@ -1,5 +1,7 @@
 #include "OptionHandlerImpl.h"
 
+#include <memory>
+
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "Option.h"
@@ -188,13 +190,13 @@ void OptionHandlerTest::testDefaultOptionHandler()
   CPPUNIT_ASSERT_EQUAL(std::string(""), option.get(PREF_TIMEOUT));
   CPPUNIT_ASSERT_EQUAL(std::string(""), handler.createPossibleValuesString());
 
-  handler.addTag(TAG_ADVANCED);
+  handler.addTag(HelpTag::TAG_ADVANCED);
   CPPUNIT_ASSERT_EQUAL(std::string("#advanced"), handler.toTagString());
-  handler.addTag(TAG_BASIC);
+  handler.addTag(HelpTag::TAG_BASIC);
   CPPUNIT_ASSERT_EQUAL(std::string("#basic, #advanced"), handler.toTagString());
-  CPPUNIT_ASSERT(handler.hasTag(TAG_ADVANCED));
-  CPPUNIT_ASSERT(handler.hasTag(TAG_BASIC));
-  CPPUNIT_ASSERT(!handler.hasTag(TAG_HTTP));
+  CPPUNIT_ASSERT(handler.hasTag(HelpTag::TAG_ADVANCED));
+  CPPUNIT_ASSERT(handler.hasTag(HelpTag::TAG_BASIC));
+  CPPUNIT_ASSERT(!handler.hasTag(HelpTag::TAG_HTTP));
 }
 
 void OptionHandlerTest::testFloatNumberOptionHandler()
@@ -300,15 +302,16 @@ void OptionHandlerTest::testHttpProxyOptionHandler()
 void OptionHandlerTest::testDeprecatedOptionHandler()
 {
   {
-    DeprecatedOptionHandler handler(new DefaultOptionHandler(PREF_TIMEOUT));
+    DeprecatedOptionHandler handler(
+        std::make_unique<DefaultOptionHandler>(PREF_TIMEOUT));
     Option option;
     handler.parse(option, "foo");
     CPPUNIT_ASSERT(!option.defined(PREF_TIMEOUT));
   }
   {
     DefaultOptionHandler dir(PREF_DIR);
-    DeprecatedOptionHandler handler(new DefaultOptionHandler(PREF_TIMEOUT),
-                                    &dir);
+    DeprecatedOptionHandler handler(
+        std::make_unique<DefaultOptionHandler>(PREF_TIMEOUT), &dir);
     Option option;
     handler.parse(option, "foo");
     CPPUNIT_ASSERT(!option.defined(PREF_TIMEOUT));

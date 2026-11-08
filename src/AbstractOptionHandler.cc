@@ -47,7 +47,7 @@ namespace aria2 {
 AbstractOptionHandler::AbstractOptionHandler(PrefPtr pref,
                                              const char* description,
                                              const std::string& defaultValue,
-                                             ARG_TYPE argType, char shortName)
+                                             ArgType argType, char shortName)
     : pref_(pref),
       description_(description),
       defaultValue_(defaultValue),
@@ -70,19 +70,22 @@ void AbstractOptionHandler::parse(Option& option, const std::string& arg) const
   }
 }
 
-bool AbstractOptionHandler::hasTag(uint32_t tag) const
+bool AbstractOptionHandler::hasTag(HelpTag tag) const
 {
-  return (tags_ & (1 << tag));
+  return (tags_ & (1u << static_cast<uint32_t>(tag))) != 0;
 }
 
-void AbstractOptionHandler::addTag(uint32_t tag) { tags_ |= (1 << tag); }
+void AbstractOptionHandler::addTag(HelpTag tag)
+{
+  tags_ |= (1u << static_cast<uint32_t>(tag));
+}
 
 std::string AbstractOptionHandler::toTagString() const
 {
   std::string s;
-  for (int i = 0; i < MAX_HELP_TAG; ++i) {
-    if (tags_ & (1 << i)) {
-      s += strHelpTag(i);
+  for (uint32_t i = 0; i < static_cast<uint32_t>(HelpTag::MAX_HELP_TAG); ++i) {
+    if (tags_ & (1u << i)) {
+      s += strHelpTag(static_cast<HelpTag>(i));
       s += ", ";
     }
   }

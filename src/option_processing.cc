@@ -201,7 +201,7 @@ error_code::Value option_processing(Option& op, bool standalone,
         if (op.defined(PREF_HELP)) {
           std::string keyword;
           if (op.get(PREF_HELP).empty()) {
-            keyword = strHelpTag(TAG_BASIC);
+            keyword = strHelpTag(HelpTag::TAG_BASIC);
           }
           else {
             keyword = op.get(PREF_HELP);
@@ -257,7 +257,7 @@ error_code::Value option_processing(Option& op, bool standalone,
         global::cerr()->printf(_("Configuration file %s is not found."),
                                cfname.c_str());
         global::cerr()->printf("\n");
-        showUsage(strHelpTag(TAG_HELP), oparser, global::cerr());
+        showUsage(strHelpTag(HelpTag::TAG_HELP), oparser, global::cerr());
         return error_code::UNKNOWN_ERROR;
       }
     }

@@ -1,6 +1,7 @@
 #include "OptionParser.h"
 
 #include <cstring>
+#include <memory>
 #include <sstream>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -38,30 +39,33 @@ public:
   {
     oparser_.reset(new OptionParser());
 
-    OptionHandler* timeout(
-        new DefaultOptionHandler(PREF_TIMEOUT, NO_DESCRIPTION, "ALPHA", "",
-                                 OptionHandler::REQ_ARG, 'A'));
-    timeout->addTag(TAG_BASIC);
+    auto timeout = std::make_unique<DefaultOptionHandler>(
+        PREF_TIMEOUT, NO_DESCRIPTION, "ALPHA", "",
+        OptionHandler::ArgType::REQ_ARG, 'A');
+    timeout->addTag(HelpTag::TAG_BASIC);
     timeout->setEraseAfterParse(true);
-    oparser_->addOptionHandler(timeout);
 
-    OptionHandler* dir(new DefaultOptionHandler(PREF_DIR));
-    dir->addTag(TAG_BASIC);
-    dir->addTag(TAG_HTTP);
-    dir->addTag(TAG_FILE);
-    oparser_->addOptionHandler(dir);
+    auto dir = std::make_unique<DefaultOptionHandler>(PREF_DIR);
+    dir->addTag(HelpTag::TAG_BASIC);
+    dir->addTag(HelpTag::TAG_HTTP);
+    dir->addTag(HelpTag::TAG_FILE);
 
-    DefaultOptionHandler* daemon(
-        new DefaultOptionHandler(PREF_DAEMON, NO_DESCRIPTION, "CHARLIE", "",
-                                 OptionHandler::REQ_ARG, 'C'));
+    auto daemon = std::make_unique<DefaultOptionHandler>(
+        PREF_DAEMON, NO_DESCRIPTION, "CHARLIE", "",
+        OptionHandler::ArgType::REQ_ARG, 'C');
     daemon->hide();
-    daemon->addTag(TAG_FILE);
-    oparser_->addOptionHandler(daemon);
+    daemon->addTag(HelpTag::TAG_FILE);
 
-    OptionHandler* out(new UnitNumberOptionHandler(PREF_OUT, NO_DESCRIPTION,
-                                                   "1M", -1, -1, 'D'));
-    out->addTag(TAG_FILE);
-    oparser_->addOptionHandler(out);
+    auto out = std::make_unique<UnitNumberOptionHandler>(
+        PREF_OUT, NO_DESCRIPTION, "1M", -1, -1, 'D');
+    out->addTag(HelpTag::TAG_FILE);
+
+    std::vector<std::unique_ptr<OptionHandler>> handlers;
+    handlers.push_back(std::move(timeout));
+    handlers.push_back(std::move(dir));
+    handlers.push_back(std::move(daemon));
+    handlers.push_back(std::move(out));
+    oparser_->setOptionHandlers(std::move(handlers));
   }
 
   void tearDown() {}
@@ -99,7 +103,8 @@ void OptionParserTest::testFindByNameSubstring()
 
 void OptionParserTest::testFindByTag()
 {
-  std::vector<const OptionHandler*> res = oparser_->findByTag(TAG_FILE);
+  std::vector<const OptionHandler*> res =
+      oparser_->findByTag(HelpTag::TAG_FILE);
   CPPUNIT_ASSERT_EQUAL((size_t)2, res.size());
   CPPUNIT_ASSERT_EQUAL(std::string("dir"), std::string(res[0]->getName()));
   CPPUNIT_ASSERT_EQUAL(std::string("out"), std::string(res[1]->getName()));

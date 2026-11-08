@@ -143,7 +143,7 @@ bool writeOption(IOFile& fp, const std::shared_ptr<Option>& op)
 
 namespace {
 template <typename T> class Unique {
-  typedef T type;
+  using type = T;
   struct PointerCmp {
     inline bool operator()(const type* x, const type* y) const
     {

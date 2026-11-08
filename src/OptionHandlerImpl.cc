@@ -68,7 +68,7 @@ namespace aria2 {
 BooleanOptionHandler::BooleanOptionHandler(PrefPtr pref,
                                            const char* description,
                                            const std::string& defaultValue,
-                                           OptionHandler::ARG_TYPE argType,
+                                           OptionHandler::ArgType argType,
                                            char shortName)
     : AbstractOptionHandler(pref, description, defaultValue, argType, shortName)
 {
@@ -79,8 +79,8 @@ BooleanOptionHandler::~BooleanOptionHandler() = default;
 void BooleanOptionHandler::parseArg(Option& option,
                                     const std::string& optarg) const
 {
-  if (optarg == "true" || ((argType_ == OptionHandler::OPT_ARG ||
-                            argType_ == OptionHandler::NO_ARG) &&
+  if (optarg == "true" || ((argType_ == OptionHandler::ArgType::OPT_ARG ||
+                            argType_ == OptionHandler::ArgType::NO_ARG) &&
                            optarg.empty())) {
     option.put(pref_, A2_V_TRUE);
   }
@@ -104,7 +104,7 @@ IntegerRangeOptionHandler::IntegerRangeOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     int32_t min, int32_t max, char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       min_(min),
       max_(max)
 {
@@ -139,7 +139,7 @@ NumberOptionHandler::NumberOptionHandler(PrefPtr pref, const char* description,
                                          int64_t min, int64_t max,
                                          char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       min_(min),
       max_(max)
 {
@@ -155,7 +155,7 @@ void NumberOptionHandler::parseArg(Option& option,
     parseArg(option, number);
   }
   else {
-    throw DL_ABORT_EX(fmt("Bad number {}", optarg.c_str()));
+    throw DL_ABORT_EX(fmt("Bad number {}", optarg));
   }
 }
 
@@ -222,7 +222,7 @@ FloatNumberOptionHandler::FloatNumberOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     double min, double max, char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       min_(min),
       max_(max)
 {
@@ -278,7 +278,7 @@ std::string FloatNumberOptionHandler::createPossibleValuesString() const
 
 DefaultOptionHandler::DefaultOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
-    const std::string& possibleValuesString, OptionHandler::ARG_TYPE argType,
+    const std::string& possibleValuesString, OptionHandler::ArgType argType,
     char shortName)
     : AbstractOptionHandler(pref, description, defaultValue, argType,
                             shortName),
@@ -308,7 +308,7 @@ void DefaultOptionHandler::setAllowEmpty(bool allow) { allowEmpty_ = allow; }
 CumulativeOptionHandler::CumulativeOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     const std::string& delim, const std::string& possibleValuesString,
-    OptionHandler::ARG_TYPE argType, char shortName)
+    OptionHandler::ArgType argType, char shortName)
     : AbstractOptionHandler(pref, description, defaultValue, argType,
                             shortName),
       delim_(delim),
@@ -336,7 +336,7 @@ IndexOutOptionHandler::IndexOutOptionHandler(PrefPtr pref,
                                              const char* description,
                                              char shortName)
     : AbstractOptionHandler(pref, description, NO_DEFAULT_VALUE,
-                            OptionHandler::REQ_ARG, shortName)
+                            OptionHandler::ArgType::REQ_ARG, shortName)
 {
 }
 
@@ -362,7 +362,7 @@ ChecksumOptionHandler::ChecksumOptionHandler(PrefPtr pref,
                                              const char* description,
                                              char shortName)
     : AbstractOptionHandler(pref, description, NO_DEFAULT_VALUE,
-                            OptionHandler::REQ_ARG, shortName)
+                            OptionHandler::ArgType::REQ_ARG, shortName)
 {
 }
 
@@ -370,7 +370,7 @@ ChecksumOptionHandler::ChecksumOptionHandler(
     PrefPtr pref, const char* description,
     std::vector<std::string> acceptableTypes, char shortName)
     : AbstractOptionHandler(pref, description, NO_DEFAULT_VALUE,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       acceptableTypes_(std::move(acceptableTypes))
 {
 }
@@ -385,8 +385,7 @@ void ChecksumOptionHandler::parseArg(Option& option,
   if (!acceptableTypes_.empty() &&
       std::ranges::find(acceptableTypes_, hashType) ==
           std::end(acceptableTypes_)) {
-    throw DL_ABORT_EX(
-        fmt("Checksum type {} is not acceptable", hashType.c_str()));
+    throw DL_ABORT_EX(fmt("Checksum type {} is not acceptable", hashType));
   }
   std::string hexDigest(p.second.first, p.second.second);
   util::lowercase(hashType);
@@ -406,7 +405,7 @@ ParameterOptionHandler::ParameterOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     std::vector<std::string> validParamValues, char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       validParamValues_(std::move(validParamValues))
 {
 }
@@ -447,7 +446,7 @@ HostPortOptionHandler::HostPortOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     PrefPtr hostOptionName, PrefPtr portOptionName, char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       hostOptionName_(hostOptionName),
       portOptionName_(portOptionName)
 {
@@ -486,7 +485,7 @@ HttpProxyOptionHandler::HttpProxyOptionHandler(PrefPtr pref,
                                                const std::string& defaultValue,
                                                char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       proxyUserPref_(option::k2p(std::string(pref->k) + "-user")),
       proxyPasswdPref_(option::k2p(std::string(pref->k) + "-passwd"))
 {
@@ -529,7 +528,7 @@ LocalFilePathOptionHandler::LocalFilePathOptionHandler(
     bool acceptStdin, char shortName, bool mustExist,
     const std::string& possibleValuesString)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName),
+                            OptionHandler::ArgType::REQ_ARG, shortName),
       possibleValuesString_(possibleValuesString),
       acceptStdin_(acceptStdin),
       mustExist_(mustExist)
@@ -551,7 +550,7 @@ void LocalFilePathOptionHandler::parseArg(Option& option,
         throw DL_ABORT_EX(err);
       }
       if (f.isDir()) {
-        throw DL_ABORT_EX(fmt(MSG_NOT_FILE, optarg.c_str()));
+        throw DL_ABORT_EX(fmt(MSG_NOT_FILE, optarg));
       }
     }
     option.put(pref_, path);
@@ -575,7 +574,7 @@ PrioritizePieceOptionHandler::PrioritizePieceOptionHandler(
     PrefPtr pref, const char* description, const std::string& defaultValue,
     char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::REQ_ARG, shortName)
+                            OptionHandler::ArgType::REQ_ARG, shortName)
 {
 }
 
@@ -601,7 +600,7 @@ OptimizeConcurrentDownloadsOptionHandler::
                                              const std::string& defaultValue,
                                              char shortName)
     : AbstractOptionHandler(pref, description, defaultValue,
-                            OptionHandler::OPT_ARG, shortName)
+                            OptionHandler::ArgType::OPT_ARG, shortName)
 {
 }
 
@@ -654,20 +653,15 @@ OptimizeConcurrentDownloadsOptionHandler::createPossibleValuesString() const
 }
 
 DeprecatedOptionHandler::DeprecatedOptionHandler(
-    OptionHandler* depOptHandler, const OptionHandler* repOptHandler,
-    bool stillWork, std::string additionalMessage)
-    : depOptHandler_(depOptHandler),
+    std::unique_ptr<OptionHandler> depOptHandler,
+    const OptionHandler* repOptHandler, bool stillWork,
+    std::string additionalMessage)
+    : depOptHandler_(std::move(depOptHandler)),
       repOptHandler_(repOptHandler),
       stillWork_(stillWork),
       additionalMessage_(std::move(additionalMessage))
 {
-  depOptHandler_->addTag(TAG_DEPRECATED);
-}
-
-DeprecatedOptionHandler::~DeprecatedOptionHandler()
-{
-  delete depOptHandler_;
-  // We don't delete repOptHandler_.
+  depOptHandler_->addTag(HelpTag::TAG_DEPRECATED);
 }
 
 void DeprecatedOptionHandler::parse(Option& option,
@@ -676,18 +670,18 @@ void DeprecatedOptionHandler::parse(Option& option,
   if (repOptHandler_) {
     A2_LOG_WARN(fmt(_("--{} option is deprecated. Use --{} option instead. {}"),
                     depOptHandler_->getName(), repOptHandler_->getName(),
-                    additionalMessage_.c_str()));
+                    additionalMessage_));
     repOptHandler_->parse(option, arg);
   }
   else if (stillWork_) {
     A2_LOG_WARN(fmt(_("--{} option will be deprecated in the future release. "
                       "{}"),
-                    depOptHandler_->getName(), additionalMessage_.c_str()));
+                    depOptHandler_->getName(), additionalMessage_));
     depOptHandler_->parse(option, arg);
   }
   else {
     A2_LOG_WARN(fmt(_("--{} option is deprecated. {}"),
-                    depOptHandler_->getName(), additionalMessage_.c_str()));
+                    depOptHandler_->getName(), additionalMessage_));
   }
 }
 
@@ -696,12 +690,12 @@ std::string DeprecatedOptionHandler::createPossibleValuesString() const
   return depOptHandler_->createPossibleValuesString();
 }
 
-bool DeprecatedOptionHandler::hasTag(uint32_t tag) const
+bool DeprecatedOptionHandler::hasTag(HelpTag tag) const
 {
   return depOptHandler_->hasTag(tag);
 }
 
-void DeprecatedOptionHandler::addTag(uint32_t tag)
+void DeprecatedOptionHandler::addTag(HelpTag tag)
 {
   depOptHandler_->addTag(tag);
 }
@@ -738,7 +732,7 @@ PrefPtr DeprecatedOptionHandler::getPref() const
   return depOptHandler_->getPref();
 }
 
-OptionHandler::ARG_TYPE DeprecatedOptionHandler::getArgType() const
+OptionHandler::ArgType DeprecatedOptionHandler::getArgType() const
 {
   return depOptHandler_->getArgType();
 }

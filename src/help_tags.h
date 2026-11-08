@@ -39,7 +39,7 @@
 
 namespace aria2 {
 
-enum HelpTag {
+enum class HelpTag : uint32_t {
   TAG_BASIC,
   TAG_ADVANCED,
   TAG_HTTP,
@@ -59,12 +59,13 @@ enum HelpTag {
 
 #define STR_TAG_ALL "#all"
 
-// Returns tag name of the given |tag| ID.
-const char* strHelpTag(uint32_t tag);
+// Returns tag name of the given |tag|.  Returns "UNKNOWN" for tags
+// outside the enum range.
+const char* strHelpTag(HelpTag tag);
 
 // Returns the corresponding enum value of the given |tagName|.  If
-// there is no such tag, returns MAX_HELP_TAG.
-uint32_t idHelpTag(const char* tagName);
+// there is no such tag, returns HelpTag::MAX_HELP_TAG.
+HelpTag idHelpTag(const char* tagName);
 
 } // namespace aria2
 

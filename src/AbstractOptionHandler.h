@@ -50,7 +50,7 @@ protected:
 
   std::string defaultValue_;
 
-  OptionHandler::ARG_TYPE argType_;
+  OptionHandler::ArgType argType_;
 
   char shortName_;
 
@@ -59,16 +59,16 @@ protected:
 public:
   AbstractOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
                         const std::string& defaultValue = NO_DEFAULT_VALUE,
-                        ARG_TYPE argType = REQ_ARG, char shortName = 0);
+                        ArgType argType = ArgType::REQ_ARG, char shortName = 0);
 
   virtual ~AbstractOptionHandler();
 
   virtual void parse(Option& option,
                      const std::string& arg) const override;
 
-  virtual bool hasTag(uint32_t tag) const override;
+  virtual bool hasTag(HelpTag tag) const override;
 
-  virtual void addTag(uint32_t tag) override;
+  virtual void addTag(HelpTag tag) override;
 
   virtual std::string toTagString() const override;
 
@@ -88,7 +88,7 @@ public:
 
   virtual char getShortName() const override { return shortName_; }
 
-  virtual OptionHandler::ARG_TYPE getArgType() const override
+  virtual OptionHandler::ArgType getArgType() const override
   {
     return argType_;
   }

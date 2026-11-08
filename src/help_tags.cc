@@ -47,26 +47,25 @@ constexpr const char* HELP_TAG_NAMES[] = {
     "#checksum", "#experimental", "#deprecated", "#help"};
 } // namespace
 
-const char* strHelpTag(uint32_t tag)
+const char* strHelpTag(HelpTag tag)
 {
-  if (tag >= MAX_HELP_TAG) {
+  auto id = static_cast<uint32_t>(tag);
+  if (id >= static_cast<uint32_t>(HelpTag::MAX_HELP_TAG)) {
     return "UNKNOWN";
   }
-  else {
-    return HELP_TAG_NAMES[tag];
-  }
+  return HELP_TAG_NAMES[id];
 }
 
-uint32_t idHelpTag(const char* tagName)
+HelpTag idHelpTag(const char* tagName)
 {
   uint32_t id = 0;
   for (auto p : HELP_TAG_NAMES) {
     if (strcmp(p, tagName) == 0) {
-      return id;
+      return static_cast<HelpTag>(id);
     }
     ++id;
   }
-  return MAX_HELP_TAG;
+  return HelpTag::MAX_HELP_TAG;
 }
 
 } // namespace aria2

@@ -205,12 +205,10 @@ int MultiUrlRequestInfo::prepare()
       if (cookieFile.isFile() &&
           e_->getCookieStorage()->load(cookieFile.getPath(),
                                        Time().getTimeFromEpoch())) {
-        A2_LOG_INFO(
-            fmt("Loaded cookies from '{}'.", cookieFile.getPath().c_str()));
+        A2_LOG_INFO(fmt("Loaded cookies from '{}'.", cookieFile.getPath()));
       }
       else {
-        A2_LOG_ERROR(
-            fmt(MSG_LOADING_COOKIE_FAILED, cookieFile.getPath().c_str()));
+        A2_LOG_ERROR(fmt(MSG_LOADING_COOKIE_FAILED, cookieFile.getPath()));
       }
     }
 
@@ -219,8 +217,8 @@ int MultiUrlRequestInfo::prepare()
     if (!option_->getAsBool(PREF_NO_NETRC) && netrccf.isFile()) {
       mode_t mode = netrccf.mode();
       if (mode & (S_IRWXG | S_IRWXO)) {
-        A2_LOG_NOTICE(fmt(MSG_INCORRECT_NETRC_PERMISSION,
-                          option_->get(PREF_NETRC_PATH).c_str()));
+        A2_LOG_NOTICE(
+            fmt(MSG_INCORRECT_NETRC_PERMISSION, option_->get(PREF_NETRC_PATH)));
       }
       else {
         auto netrc = make_unique<Netrc>();
@@ -315,11 +313,10 @@ error_code::Value MultiUrlRequestInfo::getResult()
     const std::string& filename = option_->get(PREF_SAVE_SESSION);
     if (sessionSerializer.save(filename)) {
       A2_LOG_NOTICE(
-          fmt(_("Serialized session to '{}' successfully."), filename.c_str()));
+          fmt(_("Serialized session to '{}' successfully."), filename));
     }
     else {
-      A2_LOG_NOTICE(
-          fmt(_("Failed to serialize session to '{}'."), filename.c_str()));
+      A2_LOG_NOTICE(fmt(_("Failed to serialize session to '{}'."), filename));
     }
   }
   SingletonHolder<Notifier>::clear();

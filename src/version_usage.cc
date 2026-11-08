@@ -137,7 +137,7 @@ void showUsage(const std::string& keyword,
       write(out, *oparser->find(PREF_HELP));
     }
   }
-  if (keyword == strHelpTag(TAG_BASIC)) {
+  if (keyword == strHelpTag(HelpTag::TAG_BASIC)) {
     out->printf("URI, MAGNET, TORRENT_FILE:\n");
     out->printf(
         _(" You can specify multiple HTTP(S)/FTP URIs. Unless you specify -Z "

@@ -40,8 +40,8 @@ namespace global {
 
 Timer& wallclock()
 {
-  static auto t = new Timer();
-  return *t;
+  static Timer t;
+  return t;
 }
 
 } // namespace global

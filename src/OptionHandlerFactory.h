@@ -37,6 +37,7 @@
 
 #include "common.h"
 
+#include <memory>
 #include <vector>
 
 namespace aria2 {
@@ -45,7 +46,7 @@ class OptionHandler;
 
 class OptionHandlerFactory {
 public:
-  static std::vector<OptionHandler*> createOptionHandlers();
+  static std::vector<std::unique_ptr<OptionHandler>> createOptionHandlers();
 };
 
 } // namespace aria2

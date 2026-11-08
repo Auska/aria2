@@ -37,6 +37,7 @@
 
 #include "OptionHandler.h"
 
+#include <memory>
 #include <vector>
 
 #include "AbstractOptionHandler.h"
@@ -51,7 +52,7 @@ class BooleanOptionHandler : public AbstractOptionHandler {
 public:
   BooleanOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
                        const std::string& defaultValue = NO_DEFAULT_VALUE,
-                       OptionHandler::ARG_TYPE argType = OptionHandler::REQ_ARG,
+                       OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
                        char shortName = 0);
   virtual ~BooleanOptionHandler();
   virtual void parseArg(Option& option,
@@ -129,7 +130,7 @@ public:
   DefaultOptionHandler(PrefPtr pref, const char* description = NO_DESCRIPTION,
                        const std::string& defaultValue = NO_DEFAULT_VALUE,
                        const std::string& possibleValuesString = A2STR::NIL,
-                       OptionHandler::ARG_TYPE argType = OptionHandler::REQ_ARG,
+                       OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
                        char shortName = 0);
   virtual ~DefaultOptionHandler();
   virtual void parseArg(Option& option,
@@ -148,7 +149,7 @@ public:
       PrefPtr pref, const char* description, const std::string& defaultValue,
       const std::string& delim,
       const std::string& possibleValuesString = A2STR::NIL,
-      OptionHandler::ARG_TYPE argType = OptionHandler::REQ_ARG,
+      OptionHandler::ArgType argType = OptionHandler::ArgType::REQ_ARG,
       char shortName = 0);
   virtual ~CumulativeOptionHandler();
   virtual void parseArg(Option& option,
@@ -272,7 +273,7 @@ public:
 // option value using replacing option.
 class DeprecatedOptionHandler : public OptionHandler {
 private:
-  OptionHandler* depOptHandler_;
+  std::unique_ptr<OptionHandler> depOptHandler_;
   const OptionHandler* repOptHandler_;
   bool stillWork_;
   std::string additionalMessage_;
@@ -282,16 +283,16 @@ public:
   // new option. If there is no replacing option, specify nullptr.  If
   // there is no replacing option, but the option still lives, give
   // true to stillWork. Set additional message to additionalMessage.
-  DeprecatedOptionHandler(OptionHandler* depOptHandler,
+  DeprecatedOptionHandler(std::unique_ptr<OptionHandler> depOptHandler,
                           const OptionHandler* repOptHandler = nullptr,
                           bool stillWork = false,
                           std::string additionalMessage = "");
-  virtual ~DeprecatedOptionHandler();
+  virtual ~DeprecatedOptionHandler() = default;
   virtual void parse(Option& option,
                      const std::string& arg) const override;
   virtual std::string createPossibleValuesString() const override;
-  virtual bool hasTag(uint32_t tag) const override;
-  virtual void addTag(uint32_t tag) override;
+  virtual bool hasTag(HelpTag tag) const override;
+  virtual void addTag(HelpTag tag) override;
   virtual std::string toTagString() const override;
   virtual const char* getName() const override;
   virtual const char* getDescription() const override;
@@ -299,7 +300,7 @@ public:
   virtual bool isHidden() const override;
   virtual void hide() override;
   virtual PrefPtr getPref() const override;
-  virtual ARG_TYPE getArgType() const override;
+  virtual ArgType getArgType() const override;
   virtual char getShortName() const override;
   virtual bool getEraseAfterParse() const override;
   virtual void setEraseAfterParse(bool eraseAfterParse) override;

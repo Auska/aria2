@@ -57,15 +57,11 @@
 
 namespace aria2 {
 
-OptionParser::OptionParser()
-    : handlers_(option::countOption(), nullptr), shortOpts_(256)
+OptionParser::OptionParser() : handlers_(option::countOption()), shortOpts_(256)
 {
 }
 
-OptionParser::~OptionParser()
-{
-  std::for_each(handlers_.begin(), handlers_.end(), Deleter());
-}
+OptionParser::~OptionParser() = default;
 
 namespace {
 template <typename InputIterator>
@@ -94,19 +90,18 @@ void putOptions(struct option* longOpts, int* plopt, InputIterator first,
       (*longOpts).name = strdup((*first)->getName());
       if ((*longOpts).name == nullptr) {
         auto errNum = errno;
-        A2_LOG_ERROR(
-            fmt("strdup() failed: {}", util::safeStrerror(errNum).c_str()));
+        A2_LOG_ERROR(fmt("strdup() failed: {}", util::safeStrerror(errNum)));
         exit(EXIT_FAILURE);
       }
 #endif // !HAVE_OPTION_CONST_NAME
       switch ((*first)->getArgType()) {
-      case OptionHandler::REQ_ARG:
+      case OptionHandler::ArgType::REQ_ARG:
         (*longOpts).has_arg = required_argument;
         break;
-      case OptionHandler::OPT_ARG:
+      case OptionHandler::ArgType::OPT_ARG:
         (*longOpts).has_arg = optional_argument;
         break;
-      case OptionHandler::NO_ARG:
+      case OptionHandler::ArgType::NO_ARG:
         (*longOpts).has_arg = no_argument;
         break;
       default:
@@ -139,10 +134,10 @@ std::string createOptstring(InputIterator first, InputIterator last)
     if (*first && !(*first)->isHidden()) {
       if ((*first)->getShortName() != 0) {
         str += (*first)->getShortName();
-        if ((*first)->getArgType() == OptionHandler::REQ_ARG) {
+        if ((*first)->getArgType() == OptionHandler::ArgType::REQ_ARG) {
           str += ":";
         }
-        else if ((*first)->getArgType() == OptionHandler::OPT_ARG) {
+        else if ((*first)->getArgType() == OptionHandler::ArgType::OPT_ARG) {
           str += "::";
         }
       }
@@ -251,7 +246,7 @@ void OptionParser::parse(Option& option, std::istream& is) const
       handler->parse(option, std::string(nv.second.first, nv.second.second));
     }
     else {
-      A2_LOG_WARN(fmt("Unknown option: {}", line.c_str()));
+      A2_LOG_WARN(fmt("Unknown option: {}", line));
     }
   }
 }
@@ -265,26 +260,21 @@ void OptionParser::parse(Option& option, const KeyVals& options) const
       handler->parse(option, o.second);
     }
     else {
-      A2_LOG_WARN(fmt("Unknown option: {}", o.first.c_str()));
+      A2_LOG_WARN(fmt("Unknown option: {}", o.first));
     }
   }
 }
 
 void OptionParser::setOptionHandlers(
-    const std::vector<OptionHandler*>& handlers)
+    std::vector<std::unique_ptr<OptionHandler>> handlers)
 {
-  for (const auto& h : handlers) {
-    addOptionHandler(h);
-  }
-}
-
-void OptionParser::addOptionHandler(OptionHandler* handler)
-{
-  size_t optId = handler->getPref()->i;
-  assert(optId < handlers_.size());
-  handlers_[optId] = handler;
-  if (handler->getShortName()) {
-    shortOpts_[static_cast<unsigned char>(handler->getShortName())] = optId;
+  for (auto& h : handlers) {
+    size_t optId = h->getPref()->i;
+    assert(optId < handlers_.size());
+    if (h->getShortName()) {
+      shortOpts_[static_cast<unsigned char>(h->getShortName())] = optId;
+    }
+    handlers_[optId] = std::move(h);
   }
 }
 
@@ -297,12 +287,12 @@ void OptionParser::parseDefaultValues(Option& option) const
   }
 }
 
-std::vector<const OptionHandler*> OptionParser::findByTag(uint32_t tag) const
+std::vector<const OptionHandler*> OptionParser::findByTag(HelpTag tag) const
 {
   std::vector<const OptionHandler*> result;
   for (const auto& h : handlers_) {
     if (h && !h->isHidden() && h->hasTag(tag)) {
-      result.push_back(h);
+      result.push_back(h.get());
     }
   }
   return result;
@@ -317,7 +307,7 @@ OptionParser::findByNameSubstring(const std::string& substring) const
       size_t nameLen = strlen(h->getName());
       if (std::search(h->getName(), h->getName() + nameLen, substring.begin(),
                       substring.end()) != h->getName() + nameLen) {
-        result.push_back(h);
+        result.push_back(h.get());
       }
     }
   }
@@ -329,7 +319,7 @@ std::vector<const OptionHandler*> OptionParser::findAll() const
   std::vector<const OptionHandler*> result;
   for (const auto& h : handlers_) {
     if (h && !h->isHidden()) {
-      result.push_back(h);
+      result.push_back(h.get());
     }
   }
   return result;
@@ -343,11 +333,11 @@ const OptionHandler* OptionParser::find(PrefPtr pref) const
 const OptionHandler* OptionParser::findById(size_t id) const
 {
   if (id >= handlers_.size()) {
-    return handlers_[0];
+    return handlers_[0].get();
   }
-  const OptionHandler* h = handlers_[id];
+  const OptionHandler* h = handlers_[id].get();
   if (!h || h->isHidden()) {
-    return handlers_[0];
+    return handlers_[0].get();
   }
   else {
     return h;
