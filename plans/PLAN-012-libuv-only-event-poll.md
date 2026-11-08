@@ -1,5 +1,7 @@
 # 任务：事件轮询只保留 libuv，清理 epoll/poll/select 后端与 `--event-poll`
 
+> 状态：✅ 已完成（2026-11-08）
+
 ## 目标
 
 下载引擎的事件轮询从「epoll（默认）/poll/select/libuv 四选一」改为「只有 libuv」：
@@ -75,7 +77,7 @@ PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13])
    - `src/OptionHandlerFactory.cc:271-295` 整块删除。
    - `doc/manual-src/en/aria2c.rst:1223-1228` 删 `--event-poll` 条目；`doc/bash_completion/aria2c:34-36` 删 case 分支并从 `:69` 的候选词表中去掉 `--event-poll`；`doc/bash_completion/make_bash_completion.py:96` 删白名单项。
    - 提交：`PLAN-012 阶段1: 事件轮询只保留 libuv 并删除 --event-poll`
-2. [ ] **阶段 2：收尾**
+2. [x] **阶段 2：收尾**
    - 计划勾选、写实测门禁表与实际偏差；`MEMORY.md` 记一条（引擎由 epoll 改为 libuv、libuv 变必需依赖、`--event-poll` 已删）。
    - 提交：`PLAN-012: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
@@ -100,7 +102,7 @@ PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13])
 阶段 1：
 - `autoreconf -i && ./configure --enable-werror && make -j8 check` → 输出 `OK (911)`，0 error、0 C++ warning。
 - `git hash-object src/includes/aria2/aria2.h` → `132c72d9f055756769456c35ca7f8e7a879fbaa8`（ABI 未变）。
-- `git grep -n "epoll" -- src test` → 0 命中（`HAVE_EPOLL`/文件/注释全清）。
+- `git grep -n "epoll" -- src test` → 只剩 `EventPoll.h`/`LibuvEventPoll.h` 的 include guard（`HAVE_EPOLL`/文件/注释全清）。
 - 冒烟（证明 libuv 循环真在收 IO，不只是编译过）：`python3 -m http.server 18080` 起在 `/tmp/a2test` 下，`./src/aria2c --enable-rpc --rpc-listen-port=16800 -d /tmp/a2dl http://127.0.0.1:18080/f.bin` 下载成功，再用 `aria2c` RPC（`curl` `aria2.tellStatus`）确认 RPC 服务正常。
 - libuv 缺失路径：`PKG_CONFIG_LIBDIR=/nonexistent ./configure` → 报 `Package requirements (libuv >= 1.13) were not met` 并以非 0 退出（不是静默回退）。
 - `./configure --help | grep -E "libuv|epoll"` → 无输出。
@@ -110,6 +112,30 @@ PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13])
 
 阶段 2：
 - `git grep -n "event-poll" -- . ':!plans' ':!ChangeLog*' ':!NEWS'` → 0 命中；除计划文档外无遗留。
+
+## 实测门禁（2026-11-08，Debian / GCC 14 / libuv 1.50.0 / cppunit 1.15.1）
+
+| 检查 | 命令 | 结果 |
+|---|---|---|
+| 生成构建系统 | `autoreconf -i` | rc=0 |
+| 配置（警告门禁） | `./configure --enable-werror` | rc=0；`checking for libuv >= 1.13... yes`；摘要 `LibUV: yes (LIBS='-luv -lpthread -ldl -lrt ')`，`Epoll:` 行已无 |
+| 编译 + 用例 | `make -j8 check` | rc=0；`OK (911)`、`PASS aria2c`；C++ warning 0（唯一 1 条是 libtool `-version-info/-version-number is ignored for convenience libraries`，改动前既存，与本次无关） |
+| ABI 门禁 | `git hash-object src/includes/aria2/aria2.h` | `132c72d9f055756769456c35ca7f8e7a879fbaa8`（不变） |
+| 后端残留 | `git grep -n "epoll" -- src test` | 仅剩 include guard `D_EVENT_POLL_H` / `D_LIBUV_EVENT_POLL_H` |
+| 下载冒烟 | `python3 -m http.server 18080` + `aria2c -d /tmp/a2dl -o got.bin http://127.0.0.1:18080/f.bin` | 2,000,000 字节下载完成，`cmp` 与原文件一致 |
+| RPC 冒烟 | `aria2c --enable-rpc --rpc-listen-port=16800` + `curl ... aria2.getVersion` | 返回 `{"version":"1.37.0", ...}`，RPC 正常 |
+| 缺 libuv | `PKG_CONFIG_LIBDIR=/tmp/a2nolibuv ./configure` | rc=1，`configure: error: Package requirements (libuv >= 1.13) were not met` |
+| configure 开关 | `./configure --help \| grep -E "libuv\|epoll"` | 无输出 |
+| 选项已删 | `./src/aria2c --help=#all \| grep -c event-poll` | 0 |
+| 命令行传旧选项 | `./src/aria2c --event-poll=libuv http://127.0.0.1:1/x` | rc=28，`unrecognized option '--event-poll=libuv'` + Usage |
+| conf 兼容 | `event-poll=libuv` 写入 `/tmp/a2.conf` 后 `--conf-path=/tmp/a2.conf --dry-run` | 仅 `WARN Unknown option: event-poll=libuv`，随后正常 `Downloading 1 item(s)` |
+| 补全脚本自洽 | `python3 doc/bash_completion/make_bash_completion.py ./src/aria2c` 与 `doc/bash_completion/aria2c` 对比 | diff 为空（手工修改与重新生成结果一致） |
+
+## 实际偏差
+
+1. **原阶段 1（删后端）与原阶段 2（删 `--event-poll`）合并为一次提交** `e5db5962`。原因：三个后端一删，`OptionHandlerFactory` 里取值表的 `HAVE_EPOLL`/`HAVE_LIBUV` 条件全落空，默认值会退化成 `select`，单独提交会留下「选项自称默认 select、引擎却固定 libuv」的不一致中间态。
+2. 计划里的 `nm -u src/aria2c | grep epoll` 检查改为 `git grep epoll -- src test`：前者对 libuv 动态链接的场景本来就看不出后端归属，且 grep 无命中返回 1 会误判成失败。
+3. `build_test.sh` 组合数 9 → 7（删 `--disable-epoll`、`--disable-epoll --without-libcares` 两条）。
 
 ## 验收标准
 
@@ -131,3 +157,4 @@ PKG_CHECK_MODULES([LIBUV], [libuv >= 1.13])
 - 用户口径三连：先「只保留 libuv，清理多余内容」→ 明确「留 libuv 但不动 DNS/其他依赖」→ 两项子决策均取推荐项（完全删 `--event-poll`、libuv 硬依赖并删 epoll 开关）。
 - 上一轮已把 PLAN-012（CMake 迁移）产物与 5 个 src 警告修正全部删除/回退，工作区从 `167656ef` 干净起步，本计划重新占用 012 号。
 - 迁移期不做等价性对拍（旧后端已在本次删除），libuv 路径的正确性只由既有 911 用例覆盖；若冒烟暴露 libuv 缺陷，追加修复提交，不悄悄回填旧后端。
+- 执行偏差见「实际偏差」三节；合并提交 `e5db5962`，收尾提交为计划回写。
