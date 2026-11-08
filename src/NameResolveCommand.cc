@@ -95,10 +95,12 @@ bool NameResolveCommand::execute()
   else {
 #ifdef ENABLE_ASYNC_DNS
     if (e_->getOption()->getAsBool(PREF_ASYNC_DNS)) {
-      if (resolveHostname(res, hostname) == 0) {
+      auto rv = resolveHostname(hostname);
+      if (rv.first == 0) {
         e_->addCommand(std::unique_ptr<Command>(this));
         return false;
       }
+      res = std::move(rv.second);
     }
     else
 #endif // ENABLE_ASYNC_DNS
@@ -109,7 +111,7 @@ bool NameResolveCommand::execute()
         resolver.setFamily(AF_INET);
       }
       try {
-        resolver.resolve(res, hostname);
+        res = resolver.resolve(hostname);
       }
       catch (RecoverableException& e) {
         A2_LOG_ERROR_EX(EX_EXCEPTION_CAUGHT, e);
@@ -146,8 +148,8 @@ void NameResolveCommand::onSuccess(const std::vector<std::string>& addrs,
 
 #ifdef ENABLE_ASYNC_DNS
 
-int NameResolveCommand::resolveHostname(std::vector<std::string>& res,
-                                        const std::string& hostname)
+std::pair<int, std::vector<std::string>>
+NameResolveCommand::resolveHostname(const std::string& hostname)
 {
   if (!asyncNameResolverMan_->started()) {
     asyncNameResolverMan_->startAsync(hostname, e_, this);
@@ -157,25 +159,24 @@ int NameResolveCommand::resolveHostname(std::vector<std::string>& res,
   case -1:
     A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                     asyncNameResolverMan_->getLastError()));
-    return -1;
+    return {-1, {}};
   case 0:
-    return 0;
-  case 1:
-    asyncNameResolverMan_->getResolvedAddress(res);
+    return {0, {}};
+  case 1: {
+    auto res = asyncNameResolverMan_->getResolvedAddress();
     if (res.empty()) {
       A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                       "No address returned"));
-      return -1;
+      return {-1, {}};
     }
-    else {
-      A2_LOG_INFO(
-          fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
-      return 1;
-    }
+    A2_LOG_INFO(
+        fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
+    return {1, std::move(res)};
+  }
   }
 
   // Unreachable
-  return 0;
+  return {0, {}};
 }
 
 #endif // ENABLE_ASYNC_DNS

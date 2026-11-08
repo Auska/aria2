@@ -281,8 +281,9 @@ bool HttpResponse::supportsPersistentConnection() const
 
 // Digest header field is defined by
 // http://tools.ietf.org/html/rfc3230.
-void HttpResponse::getDigest(std::vector<Checksum>& result) const
+std::vector<Checksum> HttpResponse::getDigest() const
 {
+  std::vector<Checksum> result;
   auto p = httpHeader_->equalRange(HttpHeader::InterestingHeader::DIGEST);
   for (; p.first != p.second; ++p.first) {
     const std::string& s = (*p.first).second;
@@ -327,6 +328,7 @@ void HttpResponse::getDigest(std::vector<Checksum>& result) const
     i = j;
   }
   std::swap(temp, result);
+  return result;
 }
 
 } // namespace aria2

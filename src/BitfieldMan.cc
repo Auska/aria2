@@ -165,21 +165,23 @@ std::optional<size_t> BitfieldMan::getFirstMissingUnusedIndex() const
       ~array(bitfield_.data()) & ~array(useBitfield_.data()), blocks_);
 }
 
-size_t BitfieldMan::getFirstNMissingUnusedIndex(std::vector<size_t>& out,
-                                                size_t n) const
+std::vector<size_t> BitfieldMan::getFirstNMissingUnusedIndex(size_t n) const
 {
+  std::vector<size_t> out;
+  out.reserve(n);
   if (filterEnabled_) {
-    return bitfield::getFirstNSetBitIndex(std::back_inserter(out), n,
-                                          ~array(bitfield_.data()) &
-                                              ~array(useBitfield_.data()) &
-                                              array(filterBitfield_.data()),
-                                          blocks_);
+    bitfield::getFirstNSetBitIndex(std::back_inserter(out), n,
+                                   ~array(bitfield_.data()) &
+                                       ~array(useBitfield_.data()) &
+                                       array(filterBitfield_.data()),
+                                   blocks_);
   }
   else {
-    return bitfield::getFirstNSetBitIndex(
+    bitfield::getFirstNSetBitIndex(
         std::back_inserter(out), n,
         ~array(bitfield_.data()) & ~array(useBitfield_.data()), blocks_);
   }
+  return out;
 }
 
 std::optional<size_t> BitfieldMan::getFirstMissingIndex() const

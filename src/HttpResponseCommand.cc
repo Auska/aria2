@@ -205,8 +205,7 @@ bool HttpResponseCommand::executeInternal()
 
   if (!getPieceStorage()) {
     if (httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
-      std::vector<Checksum> checksums;
-      httpResponse->getDigest(checksums);
+      auto checksums = httpResponse->getDigest();
       for (const auto& checksum : checksums) {
         if (ctx->getHashType().empty()) {
           A2_LOG_DEBUG(fmt("Setting digest: type={}, digest={}",
@@ -277,8 +276,7 @@ bool HttpResponseCommand::executeInternal()
 
   if (!ctx->getHashType().empty() &&
       httpHeader->defined(HttpHeader::InterestingHeader::DIGEST)) {
-    std::vector<Checksum> checksums;
-    httpResponse->getDigest(checksums);
+    auto checksums = httpResponse->getDigest();
     for (const auto& checksum : checksums) {
       if (checkChecksum(ctx, checksum)) {
         break;

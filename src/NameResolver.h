@@ -50,10 +50,9 @@ public:
   NameResolver();
 
   /**
-   * Resolved addresses are pushed into addresses.
+   * Returns the resolved addresses.
    */
-  void resolve(std::vector<std::string>& resolvedAddresses,
-               const std::string& hostname);
+  std::vector<std::string> resolve(const std::string& hostname);
 
   // specify SOCK_STREAM or SOCK_DGRAM
   void setSocktype(int socktype);

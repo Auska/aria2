@@ -240,9 +240,8 @@ public:
   {
   }
 
-  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
-                                             cuid_t myCuid,
-                                             uint64_t lastHaveIndex) override
+  virtual std::pair<std::vector<size_t>, uint64_t>
+  getAdvertisedPieceIndexes(cuid_t myCuid, uint64_t lastHaveIndex) override
   {
     throw FATAL_EXCEPTION("Not Implemented!");
   }

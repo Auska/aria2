@@ -748,24 +748,21 @@ std::shared_ptr<Request> AbstractCommand::createProxyRequest() const
   return proxyRequest;
 }
 
-std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
-                                             const std::string& hostname,
-                                             uint16_t port)
+std::vector<std::string>
+AbstractCommand::resolveHostname(const std::string& hostname, uint16_t port)
 {
   if (util::isNumericHost(hostname)) {
-    addrs.push_back(hostname);
-    return hostname;
+    return {hostname};
   }
 
+  std::vector<std::string> addrs;
   e_->findAllCachedIPAddresses(std::back_inserter(addrs), hostname, port);
   if (!addrs.empty()) {
-    auto ipaddr = addrs.front();
     A2_LOG_INFO(fmt(MSG_DNS_CACHE_HIT, getCuid(), hostname,
                     strjoin(std::begin(addrs), std::end(addrs), ", ")));
-    return ipaddr;
+    return addrs;
   }
 
-  std::string ipaddr;
 #ifdef ENABLE_ASYNC_DNS
   if (getOption()->getAsBool(PREF_ASYNC_DNS)) {
     if (!asyncNameResolverMan_->started()) {
@@ -782,10 +779,10 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
                              asyncNameResolverMan_->getLastError()),
                          error_code::Value::NAME_RESOLVE_ERROR);
     case 0:
-      return A2STR::NIL;
+      return {};
 
     case 1:
-      asyncNameResolverMan_->getResolvedAddress(addrs);
+      addrs = asyncNameResolverMan_->getResolvedAddress();
       if (addrs.empty()) {
         throw DL_ABORT_EX2(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                                "No address returned"),
@@ -802,15 +799,14 @@ std::string AbstractCommand::resolveHostname(std::vector<std::string>& addrs,
     if (e_->getOption()->getAsBool(PREF_DISABLE_IPV6)) {
       res.setFamily(AF_INET);
     }
-    res.resolve(addrs, hostname);
+    addrs = res.resolve(hostname);
   }
   A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname,
                   strjoin(std::begin(addrs), std::end(addrs), ", ")));
   for (const auto& addr : addrs) {
     e_->cacheIPAddress(hostname, addr, port);
   }
-  ipaddr = e_->findCachedIPAddress(hostname, port);
-  return ipaddr;
+  return addrs;
 }
 
 void AbstractCommand::prepareForNextAction(

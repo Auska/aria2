@@ -112,12 +112,10 @@ public:
   // affected by filter
   std::optional<size_t> getFirstMissingUnusedIndex() const;
 
-  // Appends at most n missing unused index to out. This function
-  // doesn't delete existing elements in out.  Returns the number of
-  // appended elements.
+  // Returns at most n missing unused indexes.
   //
   // affected by filter
-  size_t getFirstNMissingUnusedIndex(std::vector<size_t>& out, size_t n) const;
+  std::vector<size_t> getFirstNMissingUnusedIndex(size_t n) const;
 
   // Stores first missing bit index to index. Returns true if such bit
   // index is found. Otherwise returns false.

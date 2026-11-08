@@ -47,9 +47,9 @@ namespace aria2 {
 
 NameResolver::NameResolver() : socktype_(0), family_(AF_UNSPEC) {}
 
-void NameResolver::resolve(std::vector<std::string>& resolvedAddresses,
-                           const std::string& hostname)
+std::vector<std::string> NameResolver::resolve(const std::string& hostname)
 {
+  std::vector<std::string> resolvedAddresses;
   struct addrinfo* res;
   int s;
   s = callGetaddrinfo(&res, hostname.c_str(), nullptr, family_, socktype_, 0,
@@ -65,6 +65,7 @@ void NameResolver::resolve(std::vector<std::string>& resolvedAddresses,
     auto endpoint = util::getNumericNameInfo(rp->ai_addr, rp->ai_addrlen);
     resolvedAddresses.push_back(endpoint.addr);
   }
+  return resolvedAddresses;
 }
 
 void NameResolver::setSocktype(int socktype) { socktype_ = socktype; }

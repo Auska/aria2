@@ -701,8 +701,9 @@ void DefaultPieceStorage::advertisePiece(cuid_t cuid, size_t index,
   haves_.emplace_back(nextHaveIndex_++, cuid, index, std::move(registeredTime));
 }
 
-uint64_t DefaultPieceStorage::getAdvertisedPieceIndexes(
-    std::vector<size_t>& indexes, cuid_t myCuid, uint64_t lastHaveIndex)
+std::pair<std::vector<size_t>, uint64_t>
+DefaultPieceStorage::getAdvertisedPieceIndexes(cuid_t myCuid,
+                                               uint64_t lastHaveIndex)
 {
   auto it =
       std::upper_bound(std::begin(haves_), std::end(haves_), lastHaveIndex,
@@ -711,14 +712,15 @@ uint64_t DefaultPieceStorage::getAdvertisedPieceIndexes(
                        });
 
   if (it == std::end(haves_)) {
-    return lastHaveIndex;
+    return {std::vector<size_t>{}, lastHaveIndex};
   }
 
+  auto indexes = std::vector<size_t>{};
   for (; it != std::end(haves_); ++it) {
     indexes.push_back((*it).index);
   }
 
-  return (*(std::end(haves_) - 1)).haveIndex;
+  return {std::move(indexes), (*(std::end(haves_) - 1)).haveIndex};
 }
 
 void DefaultPieceStorage::removeAdvertisedPiece(const Timer& expiry)

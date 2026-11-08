@@ -84,12 +84,12 @@ bool InitiateConnectionCommand::executeInternal()
     hostname = proxyRequest->getHost();
     port = proxyRequest->getPort();
   }
-  std::vector<std::string> addrs;
-  std::string ipaddr = resolveHostname(addrs, hostname, port);
-  if (ipaddr.empty()) {
+  auto addrs = resolveHostname(hostname, port);
+  if (addrs.empty()) {
     addCommandSelf();
     return false;
   }
+  std::string ipaddr = addrs.front();
   try {
     auto c = createNextCommand(hostname, ipaddr, port, addrs, proxyRequest);
     c->setStatus(Command::Status::ONESHOT_REALTIME);

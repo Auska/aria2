@@ -571,11 +571,10 @@ void RequestGroup::initPieceStorage()
         ps->setPieceSelector(make_unique<LongestSequencePieceSelector>());
       }
       if (option_->defined(PREF_BT_PRIORITIZE_PIECE)) {
-        std::vector<size_t> result;
-        util::parsePrioritizePieceRange(result,
-                                        option_->get(PREF_BT_PRIORITIZE_PIECE),
-                                        downloadContext_->getFileEntries(),
-                                        downloadContext_->getPieceLength());
+        auto result = util::parsePrioritizePieceRange(
+            option_->get(PREF_BT_PRIORITIZE_PIECE),
+            downloadContext_->getFileEntries(),
+            downloadContext_->getPieceLength());
         if (!result.empty()) {
           std::shuffle(std::begin(result), std::end(result),
                        *SimpleRandomizer::getInstance());

@@ -288,8 +288,8 @@ SegList<int> parseIntSegments(const std::string& src);
 // If SIZE is omitted, SIZE=defaultSize is used.
 //
 // sample: head=512K,tail=512K
-void parsePrioritizePieceRange(
-    std::vector<size_t>& result, const std::string& src,
+std::vector<size_t> parsePrioritizePieceRange(
+    const std::string& src,
     const std::vector<std::shared_ptr<FileEntry>>& fileEntries,
     size_t pieceLength, int64_t defaultSize = 1048576 /* 1MiB */);
 

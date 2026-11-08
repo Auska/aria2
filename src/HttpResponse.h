@@ -124,7 +124,7 @@ public:
   // strong algorithm first. Strength is defined in MessageDigest. If
   // several same digest algorithms are available, but they have
   // different value, they are all ignored.
-  void getDigest(std::vector<Checksum>& result) const;
+  std::vector<Checksum> getDigest() const;
 };
 
 } // namespace aria2

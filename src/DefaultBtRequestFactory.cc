@@ -165,12 +165,11 @@ DefaultBtRequestFactory::createRequestMessages(size_t max, bool endGame)
   }
   auto requests = std::vector<std::unique_ptr<BtRequestMessage>>{};
   size_t getnum = max - requests.size();
-  auto blockIndexes = std::vector<size_t>{};
-  blockIndexes.reserve(getnum);
   for (auto itr = std::begin(pieces_), eoi = std::end(pieces_);
        itr != eoi && getnum; ++itr) {
     auto& piece = *itr;
-    if (piece->getMissingUnusedBlockIndex(blockIndexes, getnum)) {
+    auto blockIndexes = piece->getMissingUnusedBlockIndex(getnum);
+    if (!blockIndexes.empty()) {
       getnum -= blockIndexes.size();
       for (auto i = std::begin(blockIndexes), eoi2 = std::end(blockIndexes);
            i != eoi2; ++i) {
@@ -182,7 +181,6 @@ DefaultBtRequestFactory::createRequestMessages(size_t max, bool endGame)
                 static_cast<unsigned long>(*i)));
         requests.push_back(messageFactory_->createRequestMessage(piece, *i));
       }
-      blockIndexes.clear();
     }
   }
   return requests;

@@ -416,22 +416,20 @@ void DefaultPieceStorageTest::testAdvertisePiece()
   std::vector<size_t> res, ans;
   uint64_t lastHaveIndex;
 
-  lastHaveIndex = ps.getAdvertisedPieceIndexes(res, 1, 0);
+  std::tie(res, lastHaveIndex) = ps.getAdvertisedPieceIndexes(1, 0);
   ans = std::vector<size_t>{100, 101, 102, 103, 104};
 
   CPPUNIT_ASSERT_EQUAL((uint64_t)5, lastHaveIndex);
   CPPUNIT_ASSERT(ans == res);
 
-  res.clear();
-  lastHaveIndex = ps.getAdvertisedPieceIndexes(res, 1, 3);
+  std::tie(res, lastHaveIndex) = ps.getAdvertisedPieceIndexes(1, 3);
   ans = std::vector<size_t>{103, 104};
 
   CPPUNIT_ASSERT_EQUAL((uint64_t)5, lastHaveIndex);
   CPPUNIT_ASSERT_EQUAL((size_t)2, res.size());
   CPPUNIT_ASSERT(ans == res);
 
-  res.clear();
-  lastHaveIndex = ps.getAdvertisedPieceIndexes(res, 1, 5);
+  std::tie(res, lastHaveIndex) = ps.getAdvertisedPieceIndexes(1, 5);
 
   CPPUNIT_ASSERT_EQUAL((uint64_t)5, lastHaveIndex);
   CPPUNIT_ASSERT_EQUAL((size_t)0, res.size());
@@ -440,8 +438,7 @@ void DefaultPieceStorageTest::testAdvertisePiece()
 
   ps.removeAdvertisedPiece(Timer(11_s));
 
-  res.clear();
-  lastHaveIndex = ps.getAdvertisedPieceIndexes(res, 1, 0);
+  std::tie(res, lastHaveIndex) = ps.getAdvertisedPieceIndexes(1, 0);
   ans = std::vector<size_t>{103, 104};
 
   CPPUNIT_ASSERT_EQUAL((uint64_t)5, lastHaveIndex);
@@ -450,8 +447,7 @@ void DefaultPieceStorageTest::testAdvertisePiece()
 
   ps.removeAdvertisedPiece(Timer(300_s));
 
-  res.clear();
-  lastHaveIndex = ps.getAdvertisedPieceIndexes(res, 1, 0);
+  std::tie(res, lastHaveIndex) = ps.getAdvertisedPieceIndexes(1, 0);
 
   CPPUNIT_ASSERT_EQUAL((uint64_t)0, lastHaveIndex);
   CPPUNIT_ASSERT_EQUAL((size_t)0, res.size());

@@ -65,11 +65,11 @@ DomainNode::DomainNode(std::string label, DomainNode* parent)
 {
 }
 
-void DomainNode::findCookie(std::vector<const Cookie*>& out,
-                            const std::string& requestHost,
-                            const std::string& requestPath, time_t now,
-                            bool secure)
+std::vector<const Cookie*>
+DomainNode::findCookie(const std::string& requestHost,
+                       const std::string& requestPath, time_t now, bool secure)
 {
+  std::vector<const Cookie*> out;
   if (cookies_) {
     for (auto& c : *cookies_) {
       if (c->match(requestHost, requestPath, now, secure)) {
@@ -78,6 +78,7 @@ void DomainNode::findCookie(std::vector<const Cookie*>& out,
       }
     }
   }
+  return out;
 }
 
 bool DomainNode::addCookie(std::unique_ptr<Cookie> cookie, time_t now)
@@ -408,7 +409,9 @@ CookieStorage::criteriaFind(const std::string& requestHost,
     if (nextNode->getInLru()) {
       updateLru(nextNode, now);
     }
-    nextNode->findCookie(res, requestHost, requestPath, now, secure);
+    for (auto c : nextNode->findCookie(requestHost, requestPath, now, secure)) {
+      res.push_back(c);
+    }
     node = nextNode;
   }
   auto divs = std::vector<CookiePathDivider>{};

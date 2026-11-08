@@ -222,6 +222,23 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 - `src/AbstractCommand.h:138` / `src/DHTEntryPointNameResolveCommand.h:84` / `src/NameResolveCommand.h:62` / `src/NameResolver.h:55` 的 `resolveHostname(std::vector<std::string>& addrs, ...)` → 返回 `std::vector<std::string>`（同时保留 `int` 状态码的用 `std::pair<int, std::vector<std::string>>` 或 `struct ResolveResult`）。
 - `src/BtLeecherStateChoke.h:88,90` / `src/BtSeederStateChoke.h:82` 是**就地重排**，不改。
 
+### 阶段 6 实测（2026-11-08）
+
+36 文件 +231/−233，提交 `PLAN-010 阶段6: 容器出参改为返回值`。8 组改动：
+
+- `src/AsyncNameResolverMan.h:66` → `std::vector<std::string> getResolvedAddress() const`。
+- `src/BitfieldMan.h:120` → `std::vector<size_t> getFirstNMissingUnusedIndex(size_t n) const`（原 `size_t` 返回值正是填充个数，长度已隐含在 `size()` 里）；`src/Piece.h:97` `getMissingUnusedBlockIndex` 同构。
+- `src/CookieStorage.h:59` `DomainNode::findCookie` → `std::vector<const Cookie*> findCookie(...)`。
+- `src/HttpResponse.h:127` → `std::vector<Checksum> getDigest() const`。
+- `src/PieceStorage.h:247` → `std::pair<std::vector<size_t>, uint64_t> getAdvertisedPieceIndexes(cuid_t, uint64_t)`（两个信息都要）；调用方 `src/DefaultBtInteractive.cc:267` 用结构化绑定。
+- `src/NameResolver.h:52` → `std::vector<std::string> resolve(const std::string& hostname)`。
+- `src/AbstractCommand.h:138` → `std::vector<std::string> resolveHostname(const std::string& hostname, uint16_t port)`；`src/DHTEntryPointNameResolveCommand.h` / `src/NameResolveCommand.h` 的 `int resolveHostname(std::vector<std::string>&, ...)` → `std::pair<int, std::vector<std::string>>`（保留 `0 = 未完成 / 1 = 成功 / -1 = 失败` 三态）。
+- `src/util.h:291` → `std::vector<size_t> parsePrioritizePieceRange(const std::string& src, ...)`。
+
+`src/BtLeecherStateChoke.h:88,90` / `src/BtSeederStateChoke.h:82` 3 处是就地重排的误命中，未改。
+
+过程坑：`src/DHTEntryPointNameResolveCommand.cc:126` 的 `res.resolve(addrs, hostname)` 与 `src/FtpNegotiationCommand.cc:727` 的 `resolveHostname(addrs, ...)` 是改签名后仍残留的旧调用，`make -C src` 才逐轮暴露。
+
 ### 阶段 7：巨型文件拆分 + 头文件前向声明化
 
 - `src/util.cc` 2181 行按职责拆 4 个 TU（实测函数边界，按行号）：
@@ -245,7 +262,7 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 3. [x] 阶段 3：`error_code::Value` → `enum class`（提交 `PLAN-010 阶段3: error_code::Value 改为 enum class`）
 4. [x] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
 5. [x] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
-6. [ ] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）
+6. [x] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）
 7. [ ] 阶段 7：`src/util.cc` 拆分 + `src/util.h` 前向声明化（提交 `PLAN-010 阶段7: 拆分 util 巨型文件并瘦身头文件`）
 8. [ ] 阶段 8：收尾勾选与实测记录（提交 `PLAN-010: 勾选全部阶段、标记计划完成并记录实测门禁结果`）
 

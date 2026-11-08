@@ -38,6 +38,7 @@
 #include "Command.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <memory>
 
@@ -59,8 +60,8 @@ private:
 #endif // ENABLE_ASYNC_DNS
 
 #ifdef ENABLE_ASYNC_DNS
-  int resolveHostname(std::vector<std::string>& res,
-                      const std::string& hostname);
+  std::pair<int, std::vector<std::string>>
+  resolveHostname(const std::string& hostname);
 #endif // ENABLE_ASYNC_DNS
 
   std::shared_ptr<UDPTrackerRequest> req_;

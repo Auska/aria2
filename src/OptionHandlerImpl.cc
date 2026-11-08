@@ -582,9 +582,8 @@ void PrioritizePieceOptionHandler::parseArg(Option& option,
 {
   // Parse optarg against empty FileEntry list to detect syntax
   // error.
-  std::vector<size_t> result;
   util::parsePrioritizePieceRange(
-      result, optarg, std::vector<std::shared_ptr<FileEntry>>(), 1024);
+      optarg, std::vector<std::shared_ptr<FileEntry>>(), 1024);
   option.put(pref_, optarg);
 }
 

@@ -56,11 +56,11 @@ class BufferedFile;
 class DomainNode {
 public:
   DomainNode(std::string label, DomainNode* parent);
-  // Stores the matching cookies in |out|. The |now| is used to update
-  // the last access time of this node.
-  void findCookie(std::vector<const Cookie*>& out,
-                  const std::string& requestHost,
-                  const std::string& requestPath, time_t now, bool secure);
+  // Returns the matching cookies. The |now| is used to update the
+  // last access time of this node.
+  std::vector<const Cookie*> findCookie(const std::string& requestHost,
+                                        const std::string& requestPath,
+                                        time_t now, bool secure);
   // Returns the number of cookies this node has.
   size_t countCookie() const;
   // Add |cookie| using update time |now|. Returns true if the

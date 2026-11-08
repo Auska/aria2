@@ -130,13 +130,13 @@ public:
     return segments_;
   }
 
-  // Resolves hostname.  The resolved addresses are stored in addrs
-  // and first element is returned.  If resolve is not finished,
-  // return empty string. In this case, call this function with same
-  // arguments until resolved address is returned.  Exception is
-  // thrown on error. port is used for retrieving cached addresses.
-  std::string resolveHostname(std::vector<std::string>& addrs,
-                              const std::string& hostname, uint16_t port);
+  // Resolves hostname. Returns the resolved addresses; the first
+  // element is the address to connect to. If resolve is not finished,
+  // returns an empty vector. In this case, call this function with same
+  // arguments until resolved address is returned. Exception is thrown
+  // on error. port is used for retrieving cached addresses.
+  std::vector<std::string> resolveHostname(const std::string& hostname,
+                                           uint16_t port);
 
   void tryReserved();
 

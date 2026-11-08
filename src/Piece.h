@@ -92,10 +92,9 @@ public:
 
   // Appends at most n missing unused block index to indexes. For all
   // i in retrieved indexes, call bitfield->setUseBit(i). This
-  // function just append index to indexes and it doesn't remove
-  // anything from it. Returns the number of indexes to retrieved.
-  size_t getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
-                                    size_t n) const;
+  // Returns up to |n| missing and unused block indexes, marking each
+  // returned index as used.
+  std::vector<size_t> getMissingUnusedBlockIndex(size_t n) const;
 
   std::optional<size_t> getFirstMissingBlockIndexWithoutLock() const;
   bool getAllMissingBlockIndexes(unsigned char* misbitfield,

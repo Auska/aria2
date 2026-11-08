@@ -96,8 +96,7 @@ bool DHTEntryPointNameResolveCommand::execute()
     if (e_->getOption()->getAsBool(PREF_ASYNC_DNS)) {
       while (!entryPoints_.empty()) {
         std::string hostname = entryPoints_.front().first;
-        std::vector<std::string> res;
-        int rv = resolveHostname(res, hostname);
+        auto [rv, res] = resolveHostname(hostname);
         if (rv == 0) {
           e_->addCommand(std::unique_ptr<Command>(this));
           return false;
@@ -123,8 +122,7 @@ bool DHTEntryPointNameResolveCommand::execute()
       while (!entryPoints_.empty()) {
         std::string hostname = entryPoints_.front().first;
         try {
-          std::vector<std::string> addrs;
-          res.resolve(addrs, hostname);
+          auto addrs = res.resolve(hostname);
 
           ++numSuccess_;
           std::pair<std::string, uint16_t> p(addrs.front(),
@@ -161,8 +159,8 @@ void DHTEntryPointNameResolveCommand::addPingTask(
 
 #ifdef ENABLE_ASYNC_DNS
 
-int DHTEntryPointNameResolveCommand::resolveHostname(
-    std::vector<std::string>& res, const std::string& hostname)
+std::pair<int, std::vector<std::string>>
+DHTEntryPointNameResolveCommand::resolveHostname(const std::string& hostname)
 {
   if (!asyncNameResolverMan_->started()) {
     asyncNameResolverMan_->startAsync(hostname, e_, this);
@@ -172,25 +170,24 @@ int DHTEntryPointNameResolveCommand::resolveHostname(
   case -1:
     A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                     asyncNameResolverMan_->getLastError()));
-    return -1;
+    return {-1, {}};
   case 0:
-    return 0;
-  case 1:
-    asyncNameResolverMan_->getResolvedAddress(res);
+    return {0, {}};
+  case 1: {
+    auto res = asyncNameResolverMan_->getResolvedAddress();
     if (res.empty()) {
       A2_LOG_INFO(fmt(MSG_NAME_RESOLUTION_FAILED, getCuid(), hostname,
                       "No address returned"));
-      return -1;
+      return {-1, {}};
     }
-    else {
-      A2_LOG_INFO(
-          fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
-      return 1;
-    }
+    A2_LOG_INFO(
+        fmt(MSG_NAME_RESOLUTION_COMPLETE, getCuid(), hostname, res.front()));
+    return {1, std::move(res)};
+  }
   }
 
   // Unreachable
-  return 0;
+  return {0, {}};
 }
 
 #endif // ENABLE_ASYNC_DNS

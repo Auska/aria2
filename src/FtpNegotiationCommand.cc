@@ -162,7 +162,8 @@ bool FtpNegotiationCommand::recvGreeting()
     return false;
   }
   if (status != 220) {
-    throw DL_ABORT_EX2(EX_CONNECTION_FAILED, error_code::Value::FTP_PROTOCOL_ERROR);
+    throw DL_ABORT_EX2(EX_CONNECTION_FAILED,
+                       error_code::Value::FTP_PROTOCOL_ERROR);
   }
   sequence_ = Seq::SEQ_SEND_USER;
 
@@ -723,11 +724,11 @@ bool FtpNegotiationCommand::preparePasvConnect()
 bool FtpNegotiationCommand::resolveProxy()
 {
   std::shared_ptr<Request> proxyReq = createProxyRequest();
-  std::vector<std::string> addrs;
-  proxyAddr_ = resolveHostname(addrs, proxyReq->getHost(), proxyReq->getPort());
-  if (proxyAddr_.empty()) {
+  auto addrs = resolveHostname(proxyReq->getHost(), proxyReq->getPort());
+  if (addrs.empty()) {
     return false;
   }
+  proxyAddr_ = addrs.front();
   A2_LOG_INFO(fmt(MSG_CONNECTING_TO_SERVER, getCuid(), proxyAddr_,
                   proxyReq->getPort()));
   dataSocket_ = std::make_shared<SocketCore>();

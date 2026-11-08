@@ -241,12 +241,11 @@ public:
                               Timer registerdTime) = 0;
 
   /**
-   * indexes is filled with piece index which is not advertised by the
-   * caller command and newer than lastHaveIndex.
+   * Returns the (piece indexes not advertised by the caller command and
+   * newer than lastHaveIndex, last have index).
    */
-  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
-                                             cuid_t myCuid,
-                                             uint64_t lastHaveIndex) = 0;
+  virtual std::pair<std::vector<size_t>, uint64_t>
+  getAdvertisedPieceIndexes(cuid_t myCuid, uint64_t lastHaveIndex) = 0;
 
   /**
    * Removes have entry if its registeredTime is at least as old as

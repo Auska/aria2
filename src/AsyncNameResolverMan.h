@@ -63,8 +63,8 @@ public:
   // Starts asynchronous name resolution.
   void startAsync(const std::string& hostname, DownloadEngine* e,
                   Command* command);
-  // Appends resolved addresses to |res|.
-  void getResolvedAddress(std::vector<std::string>& res) const;
+  // Returns resolved addresses.
+  std::vector<std::string> getResolvedAddress() const;
   // Adds resolvers to DownloadEngine to check event notification.
   void setNameResolverCheck(DownloadEngine* e, Command* command);
   // Removes resolvers from DownloadEngine.

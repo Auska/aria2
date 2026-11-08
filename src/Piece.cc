@@ -138,18 +138,13 @@ std::optional<size_t> Piece::getMissingUnusedBlockIndex() const
   return indexOpt;
 }
 
-size_t Piece::getMissingUnusedBlockIndex(std::vector<size_t>& indexes,
-                                         size_t n) const
+std::vector<size_t> Piece::getMissingUnusedBlockIndex(size_t n) const
 {
-  size_t num = bitfield_->getFirstNMissingUnusedIndex(indexes, n);
-  if (num) {
-    for (std::vector<size_t>::const_iterator i = indexes.end() - num,
-                                             eoi = indexes.end();
-         i != eoi; ++i) {
-      bitfield_->setUseBit(*i);
-    }
+  auto indexes = bitfield_->getFirstNMissingUnusedIndex(n);
+  for (auto index : indexes) {
+    bitfield_->setUseBit(index);
   }
-  return num;
+  return indexes;
 }
 
 std::optional<size_t> Piece::getFirstMissingBlockIndexWithoutLock() const

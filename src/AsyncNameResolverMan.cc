@@ -96,16 +96,16 @@ void AsyncNameResolverMan::startAsyncFamily(const std::string& hostname,
   setNameResolverCheck(numResolver_, e, command);
 }
 
-void AsyncNameResolverMan::getResolvedAddress(
-    std::vector<std::string>& res) const
+std::vector<std::string> AsyncNameResolverMan::getResolvedAddress() const
 {
+  std::vector<std::string> res;
   for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
     if (resolver->getStatus() == AsyncNameResolver::Status::SUCCESS) {
       auto& addrs = resolver->getResolvedAddresses();
       res.insert(std::end(res), std::begin(addrs), std::end(addrs));
     }
   }
-  return;
+  return res;
 }
 
 void AsyncNameResolverMan::setNameResolverCheck(DownloadEngine* e,

@@ -243,8 +243,8 @@ void BitfieldManTest::testFilter()
   // test offset=4, length=12
   btman.addFilter(4, 12);
   btman.enableFilter();
-  std::vector<size_t> out;
-  CPPUNIT_ASSERT_EQUAL((size_t)6, btman.getFirstNMissingUnusedIndex(out, 32));
+  auto out = btman.getFirstNMissingUnusedIndex(32);
+  CPPUNIT_ASSERT_EQUAL((size_t)6, out.size());
   const size_t ans[] = {2, 3, 4, 5, 6, 7};
   for (size_t i = 0; i < arraySize(ans); ++i) {
     CPPUNIT_ASSERT_EQUAL(ans[i], out[i]);
@@ -252,13 +252,13 @@ void BitfieldManTest::testFilter()
   CPPUNIT_ASSERT_EQUAL((int64_t)12ULL, btman.getFilteredTotalLength());
 
   // test offset=5, length=2
-  out.clear();
   btman.clearAllBit();
   btman.clearAllUseBit();
   btman.clearFilter();
   btman.addFilter(5, 2);
   btman.enableFilter();
-  CPPUNIT_ASSERT_EQUAL((size_t)2, btman.getFirstNMissingUnusedIndex(out, 32));
+  out = btman.getFirstNMissingUnusedIndex(32);
+  CPPUNIT_ASSERT_EQUAL((size_t)2, out.size());
   CPPUNIT_ASSERT_EQUAL((size_t)2, out[0]);
   CPPUNIT_ASSERT_EQUAL((size_t)3, out[1]);
   btman.setBit(2);
@@ -791,27 +791,24 @@ void BitfieldManTest::testGetFirstNMissingUnusedIndex()
   BitfieldMan bt(1_k, 10_k);
   bt.setUseBit(1);
   bt.setBit(5);
-  std::vector<size_t> out;
-  CPPUNIT_ASSERT_EQUAL((size_t)8, bt.getFirstNMissingUnusedIndex(out, 256));
+  auto out = bt.getFirstNMissingUnusedIndex(256);
   CPPUNIT_ASSERT_EQUAL((size_t)8, out.size());
   const size_t ans[] = {0, 2, 3, 4, 6, 7, 8, 9};
   for (size_t i = 0; i < out.size(); ++i) {
     CPPUNIT_ASSERT_EQUAL(ans[i], out[i]);
   }
-  out.clear();
-  CPPUNIT_ASSERT_EQUAL((size_t)3, bt.getFirstNMissingUnusedIndex(out, 3));
+  out = bt.getFirstNMissingUnusedIndex(3);
   CPPUNIT_ASSERT_EQUAL((size_t)3, out.size());
   for (size_t i = 0; i < out.size(); ++i) {
     CPPUNIT_ASSERT_EQUAL(ans[i], out[i]);
   }
-  CPPUNIT_ASSERT_EQUAL((size_t)0, bt.getFirstNMissingUnusedIndex(out, 0));
+  CPPUNIT_ASSERT_EQUAL((size_t)0, bt.getFirstNMissingUnusedIndex(0).size());
   bt.setAllBit();
-  CPPUNIT_ASSERT_EQUAL((size_t)0, bt.getFirstNMissingUnusedIndex(out, 10));
+  CPPUNIT_ASSERT_EQUAL((size_t)0, bt.getFirstNMissingUnusedIndex(10).size());
   bt.clearAllBit();
-  out.clear();
   bt.addFilter(9_k, 1_k);
   bt.enableFilter();
-  CPPUNIT_ASSERT_EQUAL((size_t)1, bt.getFirstNMissingUnusedIndex(out, 256));
+  out = bt.getFirstNMissingUnusedIndex(256);
   CPPUNIT_ASSERT_EQUAL((size_t)1, out.size());
   CPPUNIT_ASSERT_EQUAL((size_t)9, out[0]);
 }

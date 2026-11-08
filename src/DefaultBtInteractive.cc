@@ -263,10 +263,9 @@ void DefaultBtInteractive::decideChoking()
 
 void DefaultBtInteractive::checkHave()
 {
-  std::vector<size_t> haveIndexes;
-
-  lastHaveIndex_ = pieceStorage_->getAdvertisedPieceIndexes(haveIndexes, cuid_,
-                                                            lastHaveIndex_);
+  auto [haveIndexes, lastHaveIndex] =
+      pieceStorage_->getAdvertisedPieceIndexes(cuid_, lastHaveIndex_);
+  lastHaveIndex_ = lastHaveIndex;
 
   // Use bitfield message if it is equal to or less than the total
   // size of have messages.

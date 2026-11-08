@@ -239,9 +239,8 @@ public:
   virtual void advertisePiece(cuid_t cuid, size_t index,
                               Timer registeredTime) override;
 
-  virtual uint64_t getAdvertisedPieceIndexes(std::vector<size_t>& indexes,
-                                             cuid_t myCuid,
-                                             uint64_t lastHaveIndex) override;
+  virtual std::pair<std::vector<size_t>, uint64_t>
+  getAdvertisedPieceIndexes(cuid_t myCuid, uint64_t lastHaveIndex) override;
 
   virtual void removeAdvertisedPiece(const Timer& expiry) override;
 

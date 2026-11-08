@@ -618,8 +618,8 @@ void computeTailPieces(
 }
 } // namespace
 
-void parsePrioritizePieceRange(
-    std::vector<size_t>& result, const std::string& src,
+std::vector<size_t> parsePrioritizePieceRange(
+    const std::string& src,
     const std::vector<std::shared_ptr<FileEntry>>& fileEntries,
     size_t pieceLength, int64_t defaultSize)
 {
@@ -652,7 +652,7 @@ void parsePrioritizePieceRange(
   }
   std::ranges::sort(indexes.begin(), indexes.end());
   indexes.erase(std::unique(indexes.begin(), indexes.end()), indexes.end());
-  result.insert(result.end(), indexes.begin(), indexes.end());
+  return indexes;
 }
 
 // Converts ISO/IEC 8859-1 string to UTF-8 string.  If there is a
