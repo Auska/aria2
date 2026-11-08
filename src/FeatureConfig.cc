@@ -34,7 +34,6 @@
 /* copyright --> */
 #include "FeatureConfig.h"
 
-#include <sstream>
 #include <cstring>
 
 #ifdef HAVE_ZLIB
@@ -176,37 +175,44 @@ std::string usedLibs()
 
 std::string usedCompilerAndPlatform()
 {
-  std::stringstream rv;
+  std::string rv;
 #if defined(__clang_version__)
 
 #  ifdef __apple_build_version__
-  rv << "Apple LLVM ";
+  rv += "Apple LLVM ";
 #  else  // !__apple_build_version__
-  rv << "clang ";
+  rv += "clang ";
 #  endif // !__apple_build_version__
-  rv << __clang_version__;
+  rv += __clang_version__;
 
 #elif defined(__INTEL_COMPILER)
 
-  rv << "Intel ICC " << __VERSION__;
+  rv += "Intel ICC ";
+  rv += __VERSION__;
 
 #elif defined(__GNUG__)
 
-  rv << "gcc " << __VERSION__;
+  rv += "gcc ";
+  rv += __VERSION__;
 
 #else // !defined(__GNUG__)
 
-  rv << "Unknown compiler/platform";
+  rv += "Unknown compiler/platform";
 
 #endif // !defined(__GNUG__)
 
-  rv << "\n  built by  " << BUILD;
+  rv += "\n  built by  ";
+  rv += BUILD;
   if (strcmp(BUILD, TARGET)) {
-    rv << "\n  targeting " << TARGET;
+    rv += "\n  targeting ";
+    rv += TARGET;
   }
-  rv << "\n  on        " << __DATE__ << " " << __TIME__;
+  rv += "\n  on        ";
+  rv += __DATE__;
+  rv += " ";
+  rv += __TIME__;
 
-  return rv.str();
+  return rv;
 }
 
 std::string getOperatingSystemInfo()
@@ -217,10 +223,15 @@ std::string getOperatingSystemInfo()
     if (!strstr(name.version, name.sysname) ||
         !strstr(name.version, name.release) ||
         !strstr(name.version, name.machine)) {
-      std::stringstream ss;
-      ss << name.sysname << " " << name.release << " " << name.version << " "
-         << name.machine;
-      return ss.str();
+      std::string ss;
+      ss += name.sysname;
+      ss += " ";
+      ss += name.release;
+      ss += " ";
+      ss += name.version;
+      ss += " ";
+      ss += name.machine;
+      return ss;
     }
     return name.version;
   }

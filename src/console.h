@@ -43,7 +43,7 @@
 
 namespace aria2 {
 
-typedef std::shared_ptr<OutputFile> Console;
+using Console = std::shared_ptr<OutputFile>;
 
 namespace global {
 

@@ -61,43 +61,43 @@ const Color clear("0");
 
 std::string ColorizedStreamBuf::str(bool color) const
 {
-  std::stringstream rv;
+  std::string rv;
   for (const auto& e : elems) {
-    if (color || e.first != eColor) {
-      rv << e.second;
+    if (color || e.first != Part::Color) {
+      rv += e.second;
     }
   }
   if (color) {
-    rv << colors::clear.str();
+    rv += colors::clear.str();
   }
-  return rv.str();
+  return rv;
 }
 
 std::string ColorizedStreamBuf::str(bool color, size_t max) const
 {
-  std::stringstream rv;
+  std::string rv;
   for (const auto& e : elems) {
-    if (e.first == eColor) {
+    if (e.first == Part::Color) {
       if (color) {
-        rv << e.second;
+        rv += e.second;
       }
       continue;
     }
     auto size = e.second.size();
     if (size > max) {
-      rv.write(e.second.c_str(), max);
+      rv.append(e.second, 0, max);
       break;
     }
-    rv << e.second;
+    rv += e.second;
     max -= size;
     if (!max) {
       break;
     }
   }
   if (color) {
-    rv << colors::clear.str();
+    rv += colors::clear.str();
   }
-  return rv.str();
+  return rv;
 }
 
 } // namespace aria2

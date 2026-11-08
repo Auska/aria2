@@ -46,7 +46,7 @@
 namespace aria2 {
 
 template <typename HashFunc> struct HashFuncEntry {
-  typedef HashFunc HashFuncType;
+  using HashFuncType = HashFunc;
   std::string hashType;
   HashFunc hashFunc;
   HashFuncEntry(std::string hashType, const HashFunc& hashFunc)
@@ -73,11 +73,11 @@ const typename HashFuncEntry::HashFuncType&
 getHashFunc(HashFuncEntry* first, HashFuncEntry* last,
             const std::string& hashType)
 {
-  HashFuncEntry* e = std::find_if(
+  HashFuncEntry* e = std::ranges::find_if(
       first, last,
       FindHashFunc<typename HashFuncEntry::HashFuncType>(hashType));
   if (e == last) {
-    throw DL_ABORT_EX(fmt("Hash type {} is not supported.", hashType.c_str()));
+    throw DL_ABORT_EX(fmt("Hash type {} is not supported.", hashType));
   }
   return e->hashFunc;
 }

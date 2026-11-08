@@ -417,7 +417,7 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
    - `src/error_code.h` 未动（用户决策）。
    - `make check` 914 例全绿（本机增量构建），干净 worktree 门禁见提交记录。
 
-3. [ ] **阶段 3 — CLI 与输出（26 文件 / 4 044 行）**
+3. [x] **阶段 3 — CLI 与输出（26 文件 / 4 044 行）**
    - `src/ColorizedStream.h:80,82,83,84`：`typedef std::char_traits<char> traits_t;` →
      `using`；`enum part_t { eColor, eString }` → `enum class Part { Color, String }`
      （6 处）；`elem_t` / `elems_t` → `using`；`src/ColorizedStream.cc:64,78` 的
@@ -441,6 +441,32 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
    - 回归网：`test/TimeTest.cc`、`test/UriTest.cc`、`test/UriSplitTest.cc`、
      `test/FeatureConfigTest.cc`、`test/OptionHandlerTest.cc`。
    - 门禁通过后提交 `PLAN-006 阶段3: CLI 与输出层现代化`。
+
+   **实测（2026-11-08）**：实际改动 10 文件（`src/ColorizedStream.{h,cc}`、
+   `src/Logger.{h,cc}`、`src/LogFactory.{h,cc}`、`src/FeatureConfig.cc`、
+   `src/console.h`、`src/HashFuncEntry.h`、`src/uri.cc`）。
+   - `Logger::LEVEL` 改 `enum class`（**未加 `: uint8_t`**：实际引用只有 4 个文件
+     的 37 处，且 `level >= logLevel_` 的关系比较在 `enum class` 下照常成立，
+     加底层类型没有收益）；`src/LogFactory.h:117,134-147` 的 10 个 `A2_LOG_*` 宏体
+     同步改 `Logger::LEVEL::A2_*`。
+   - `src/ColorizedStream` 两个 `str()` 重载去掉 `std::stringstream`，
+     `rv.write(e.second.c_str(), max)` → `rv.append(e.second, 0, max)`；
+     include `<sstream>` → `<deque> <ostream> <string>`。
+   - `src/FeatureConfig.cc` 的 `usedCompilerAndPlatform()` 与
+     `getOperatingSystemInfo()` 改 `std::string` + `+=`（`strcmp`/`strstr` 仍走
+     C 语义，保留）；`#include <sstream>` 删除。
+   - `src/HashFuncEntry.h` 的 `std::find_if` → `std::ranges::find_if`，
+     `fmt(..., hashType.c_str())` → `fmt(..., hashType)`。
+   - `src/uri.cc:212` 的 `NPATH_*` 保持裸 `enum`（21 处两重嵌套 `switch`，加
+     `shortcut:` 注释说明）；`src/uri_split.h:45,59,63` 三个 `typedef` 未动（C 头）。
+   - `src/Logger.cc`、`src/main.cc`、`src/Platform.cc`、`src/MultiUrlRequestInfo.cc`
+     的 `OutputFile::printf` 全部保留（输出接口契约）。
+   - 干净 worktree `/tmp/aria2-m6-p3`（base `61201d68`）+ `autoreconf -i` +
+     `./configure --enable-werror`（`CXX = g++ -std=c++20`、
+     `WARNCXXFLAGS = -Wall -Werror -Wformat-security`）+ `make -j24 check`
+     → `# TOTAL: 1` / `# PASS: 1` / `FAIL 0` / `ERROR 0`、`test/aria2c.log`
+     `OK (914)`、`grep -c 'error:'` = 0、`git hash-object src/includes/aria2/aria2.h`
+     = `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
 
 4. [ ] **收尾**：勾选全部阶段、加状态行、补「实测门禁结果」与「实际偏差」，
    记录原始债务表与结束债务表对比；提交

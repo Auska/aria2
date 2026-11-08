@@ -37,8 +37,9 @@
 #define D_COLORIZED_STREAM_H
 
 #include <string>
-#include <sstream>
 #include <deque>
+#include <ostream>
+#include <string>
 
 #include "config.h"
 
@@ -77,20 +78,20 @@ extern const Color clear;
 
 } // namespace colors
 
-typedef std::char_traits<char> traits_t;
+using traits_t = std::char_traits<char>;
 class ColorizedStreamBuf : public std::basic_streambuf<char, traits_t> {
-  enum part_t { eColor, eString };
-  typedef std::pair<part_t, std::string> elem_t;
-  typedef std::deque<elem_t> elems_t;
+  enum class Part { Color, String };
+  using elem_t = std::pair<Part, std::string>;
+  using elems_t = std::deque<elem_t>;
   elems_t elems;
 
 public:
-  ColorizedStreamBuf() { elems.push_back(std::make_pair(eString, "")); }
+  ColorizedStreamBuf() { elems.push_back(std::make_pair(Part::String, "")); }
 
   void setColor(const colors::Color& color)
   {
-    elems.push_back(std::make_pair(eColor, color.str()));
-    elems.push_back(std::make_pair(eString, ""));
+    elems.push_back(std::make_pair(Part::Color, color.str()));
+    elems.push_back(std::make_pair(Part::String, ""));
   }
 
   traits_t::int_type overflow(traits_t::int_type c) override

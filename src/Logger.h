@@ -47,7 +47,7 @@ class OutputFile;
 
 class Logger {
 public:
-  enum LEVEL {
+  enum class LEVEL {
     A2_DEBUG = 1 << 0,
     A2_INFO = 1 << 1,
     A2_NOTICE = 1 << 2,

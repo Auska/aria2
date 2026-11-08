@@ -55,7 +55,6 @@ private:
 
   static void openLogger(const std::shared_ptr<Logger>& logger);
 
-
   LogFactory();
 
 public:
@@ -114,7 +113,7 @@ public:
 };
 
 #define A2_LOG_DEBUG_ENABLED                                                   \
-  aria2::LogFactory::getInstance()->levelEnabled(Logger::A2_DEBUG)
+  aria2::LogFactory::getInstance()->levelEnabled(Logger::LEVEL::A2_DEBUG)
 
 #define A2_LOG(level, msg)                                                     \
   {                                                                            \
@@ -131,20 +130,20 @@ public:
       logger->log(level, __FILE__, __LINE__, msg, ex);                         \
   }
 
-#define A2_LOG_DEBUG(msg) A2_LOG(Logger::A2_DEBUG, msg)
-#define A2_LOG_DEBUG_EX(msg, ex) A2_LOG_EX(Logger::A2_DEBUG, msg, ex)
+#define A2_LOG_DEBUG(msg) A2_LOG(Logger::LEVEL::A2_DEBUG, msg)
+#define A2_LOG_DEBUG_EX(msg, ex) A2_LOG_EX(Logger::LEVEL::A2_DEBUG, msg, ex)
 
-#define A2_LOG_INFO(msg) A2_LOG(Logger::A2_INFO, msg)
-#define A2_LOG_INFO_EX(msg, ex) A2_LOG_EX(Logger::A2_INFO, msg, ex)
+#define A2_LOG_INFO(msg) A2_LOG(Logger::LEVEL::A2_INFO, msg)
+#define A2_LOG_INFO_EX(msg, ex) A2_LOG_EX(Logger::LEVEL::A2_INFO, msg, ex)
 
-#define A2_LOG_NOTICE(msg) A2_LOG(Logger::A2_NOTICE, msg)
-#define A2_LOG_NOTICE_EX(msg, ex) A2_LOG_EX(Logger::A2_NOTICE, msg, ex)
+#define A2_LOG_NOTICE(msg) A2_LOG(Logger::LEVEL::A2_NOTICE, msg)
+#define A2_LOG_NOTICE_EX(msg, ex) A2_LOG_EX(Logger::LEVEL::A2_NOTICE, msg, ex)
 
-#define A2_LOG_WARN(msg) A2_LOG(Logger::A2_WARN, msg)
-#define A2_LOG_WARN_EX(msg, ex) A2_LOG_EX(Logger::A2_WARN, msg, ex)
+#define A2_LOG_WARN(msg) A2_LOG(Logger::LEVEL::A2_WARN, msg)
+#define A2_LOG_WARN_EX(msg, ex) A2_LOG_EX(Logger::LEVEL::A2_WARN, msg, ex)
 
-#define A2_LOG_ERROR(msg) A2_LOG(Logger::A2_ERROR, msg)
-#define A2_LOG_ERROR_EX(msg, ex) A2_LOG_EX(Logger::A2_ERROR, msg, ex)
+#define A2_LOG_ERROR(msg) A2_LOG(Logger::LEVEL::A2_ERROR, msg)
+#define A2_LOG_ERROR_EX(msg, ex) A2_LOG_EX(Logger::LEVEL::A2_ERROR, msg, ex)
 
 } // namespace aria2
 

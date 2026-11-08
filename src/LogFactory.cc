@@ -42,8 +42,8 @@ namespace aria2 {
 std::string LogFactory::filename_ = DEV_NULL;
 std::shared_ptr<Logger> LogFactory::logger_;
 bool LogFactory::consoleOutput_ = true;
-Logger::LEVEL LogFactory::logLevel_ = Logger::A2_DEBUG;
-Logger::LEVEL LogFactory::consoleLogLevel_ = Logger::A2_NOTICE;
+Logger::LEVEL LogFactory::logLevel_ = Logger::LEVEL::A2_DEBUG;
+Logger::LEVEL LogFactory::consoleLogLevel_ = Logger::LEVEL::A2_NOTICE;
 bool LogFactory::colorOutput_ = true;
 
 void LogFactory::openLogger(const std::shared_ptr<Logger>& logger)
@@ -58,7 +58,6 @@ void LogFactory::openLogger(const std::shared_ptr<Logger>& logger)
   logger->setConsoleOutput(consoleOutput_);
   logger->setColorOutput(colorOutput_);
 }
-
 
 void LogFactory::reconfigure()
 {
@@ -101,30 +100,27 @@ namespace {
 Logger::LEVEL toLogLevel(const std::string& level)
 {
   if (level == V_DEBUG) {
-    return Logger::A2_DEBUG;
+    return Logger::LEVEL::A2_DEBUG;
   }
   else if (level == V_INFO) {
-    return Logger::A2_INFO;
+    return Logger::LEVEL::A2_INFO;
   }
   else if (level == V_NOTICE) {
-    return Logger::A2_NOTICE;
+    return Logger::LEVEL::A2_NOTICE;
   }
   else if (level == V_WARN) {
-    return Logger::A2_WARN;
+    return Logger::LEVEL::A2_WARN;
   }
   else if (level == V_ERROR) {
-    return Logger::A2_ERROR;
+    return Logger::LEVEL::A2_ERROR;
   }
   else {
-    return Logger::A2_NOTICE;
+    return Logger::LEVEL::A2_NOTICE;
   }
 }
 } // namespace
 
-void LogFactory::setLogLevel(Logger::LEVEL level)
-{
-  logLevel_ = level;
-}
+void LogFactory::setLogLevel(Logger::LEVEL level) { logLevel_ = level; }
 
 void LogFactory::setLogLevel(const std::string& level)
 {

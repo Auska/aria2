@@ -209,8 +209,10 @@ std::string construct(const UriStruct& us)
 }
 
 namespace {
+// shortcut: plain enum keeps the `int state` switch below terse; scoping it
+// would touch 21 NPATH_* uses across two nested switches for no gain.
 enum { NPATH_START, NPATH_SLASH, NPATH_SDOT, NPATH_DDOT, NPATH_PATHCOMP };
-}
+} // namespace
 
 std::string normalizePath(std::string path)
 {

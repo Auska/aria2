@@ -51,8 +51,8 @@
 namespace aria2 {
 
 Logger::Logger()
-    : logLevel_(Logger::A2_DEBUG),
-      consoleLogLevel_(Logger::A2_NOTICE),
+    : logLevel_(Logger::LEVEL::A2_DEBUG),
+      consoleLogLevel_(Logger::LEVEL::A2_NOTICE),
       consoleOutput_(true),
       colorOutput_(global::cout()->supportsColor())
 {
@@ -102,15 +102,15 @@ namespace {
 const char* levelToString(Logger::LEVEL level)
 {
   switch (level) {
-  case Logger::A2_DEBUG:
+  case Logger::LEVEL::A2_DEBUG:
     return "DEBUG";
-  case Logger::A2_INFO:
+  case Logger::LEVEL::A2_INFO:
     return "INFO";
-  case Logger::A2_NOTICE:
+  case Logger::LEVEL::A2_NOTICE:
     return "NOTICE";
-  case Logger::A2_WARN:
+  case Logger::LEVEL::A2_WARN:
     return "WARN";
-  case Logger::A2_ERROR:
+  case Logger::LEVEL::A2_ERROR:
     return "ERROR";
   default:
     return "";
@@ -142,15 +142,15 @@ namespace {
 const char* levelColor(Logger::LEVEL level)
 {
   switch (level) {
-  case Logger::A2_DEBUG:
+  case Logger::LEVEL::A2_DEBUG:
     return "\033[1;37m";
-  case Logger::A2_INFO:
+  case Logger::LEVEL::A2_INFO:
     return "\033[1;36m";
-  case Logger::A2_NOTICE:
+  case Logger::LEVEL::A2_NOTICE:
     return "\033[1;32m";
-  case Logger::A2_WARN:
+  case Logger::LEVEL::A2_WARN:
     return "\033[1;33m";
-  case Logger::A2_ERROR:
+  case Logger::LEVEL::A2_ERROR:
     return "\033[1;31m";
   default:
     return "";
