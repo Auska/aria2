@@ -502,8 +502,8 @@ JsonParser::parseUpdate(std::span<const std::byte> dataIn)
       }
       else {
         currentState_ = JSON_NUMBER_EXP;
-        // Fall through
       }
+      // Fall through
     case JSON_NUMBER_EXP: {
       size_t j;
       for (j = i; j < size && in(data[j], '0', '9'); ++j) {

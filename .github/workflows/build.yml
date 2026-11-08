@@ -62,11 +62,11 @@ jobs:
     - name: Configure autotools (OpenSSL)
       if: matrix.crypto == 'openssl'
       run: |
-        ./configure --with-openssl $FEATURE_FLAGS
+        ./configure --with-openssl --enable-werror $FEATURE_FLAGS
     - name: Configure autotools (internal fallback)
       if: matrix.crypto == 'internal'
       run: |
-        ./configure --without-openssl $FEATURE_FLAGS
+        ./configure --without-openssl --enable-werror $FEATURE_FLAGS
     - name: Build aria2
       run: |
         make -j"$(nproc 2> /dev/null || sysctl -n hw.ncpu)" check

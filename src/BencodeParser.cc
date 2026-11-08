@@ -152,8 +152,8 @@ BencodeParser::parseUpdate(std::span<const std::byte> data)
       numConsumed_ = 0;
       runBeginCallback(StructElementType::DICT_KEY);
       currentState_ = BENCODE_STRING_LEN;
-      // Fall through
     }
+    // Fall through
     case BENCODE_STRING_LEN: {
       size_t j;
       for (j = i; j < size && in(d[j], '0', '9'); ++j) {

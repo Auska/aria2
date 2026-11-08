@@ -187,7 +187,16 @@ void visit(const String&) override;
 - 就地 `make -j8 -C src` + `make -j8 -C test` 均 rc=0。`clang-format -i` 后 `17 files changed, 62 insertions(+), 58 deletions(-)`。
 - 干净 worktree `/tmp/aria2-m11-p2`（base `67757636`）门禁：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (915)`、`error:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
 
-3. [ ] 阶段 3：`configure.ac` 加 `-Wextra`、CI 加 `--enable-werror` → 提交 `PLAN-011 阶段3: 打开 -Wextra 警告门禁`
+3. [x] 阶段 3：`configure.ac` 加 `-Wextra`、CI 加 `--enable-werror` → 提交 `PLAN-011 阶段3: 打开 -Wextra 警告门禁`
+
+### 阶段 3 实测（2026-11-08）
+
+- `configure.ac:534` 在 `-Wall` 与 `-Werror` 之间插入 `AX_CHECK_COMPILE_FLAG([-Wextra], [CXXFLAGS="$CXXFLAGS -Wextra"])`；`.github/workflows/build.yml:65,69` 两次 `./configure` 各加 `--enable-werror`。
+- 配置结果：`src/Makefile` 与 `test/Makefile` 均为 `WARNCXXFLAGS = -Wall -Wextra -Werror -Wformat-security`（`grep -c -- '-Wextra'` 各 2，含 `AM_CXXFLAGS` 行）。
+- **重要发现：`-fsyntax-only` 扫不到中端警告**。首次开 `-Werror` 后在 `src/JsonParser.cc:504` 报 `-Werror=implicit-fallthrough`——`-Wimplicit-fallthrough` 在 GIMPLE 上运行，`-fsyntax-only` 不产生。改用「真实编译 + 临时去掉 `-Werror`」（`sed -i 's/-Werror//' src/Makefile test/Makefile` + `make -k`）全量扫一遍，共暴露 **3 处**：`src/BencodeParser.cc:156`、`src/JsonParser.cc:504`、`src/LibsslTLSContext.cc:117`。三处都是**有意旁路**，但注释位置不对（注释与 `case` 标签之间隔着 `}` 或 `#endif`，GCC 不认）——只把注释移到闭括号/`#endif` 之后，不加 `[[fallthrough]]`，比原本更小。
+- 另外 `test/IndexedListTest.cc` 的 12 条 `-Wdeprecated-copy` 在 `-Werror` 下变成错误（原计划以为能留到阶段 5），所以在 `src/IndexedList.h:107` 补了一行 `IndexedListIterator& operator=(const IndexedListIterator&) = default;`（该类阶段 5 会被删除，这行随之消失）。
+- 干净 worktree `/tmp/aria2-m11-p3`（base `deec0c38`）全量重建（`-Werror` 生效）：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (915)`、`error:` 0、C++ `warning:` 0（唯一一条 `warning:` 是 `deps/wslay` 的 libtool `-version-info` 提示）、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。
+
 4. [ ] 阶段 4：移除 `array_fun.h` 表达式模板 + 62 个死 include → 提交 `PLAN-011 阶段4: 移除 array_fun 表达式模板`
 5. [ ] 阶段 5：`IndexedList` → `IndexedDeque`（或 `std::deque`）→ 提交 `PLAN-011 阶段5: 用标准容器替换自研 IndexedList`
 6. [ ] 阶段 6：头文件 `const char*` 形参 → `std::string_view` → 提交 `PLAN-011 阶段6: 头文件 const char* 形参改 string_view`

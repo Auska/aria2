@@ -65,6 +65,7 @@ struct IndexedListIterator {
 
   IndexedListIterator() = default;
   IndexedListIterator(const iterator& other) : p(other.p) {}
+  IndexedListIterator& operator=(const IndexedListIterator&) = default;
   IndexedListIterator(const SeqIteratorType& p) : p(p) {}
 
   reference operator*() const { return (*p).second; }

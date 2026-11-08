@@ -115,8 +115,8 @@ OpenSSLTLSContext::OpenSSLTLSContext(TLSSessionSide side, TLSVersion minVer)
 #ifdef TLS1_3_VERSION
   case TLSVersion::TLS13:
     ver_opts |= SSL_OP_NO_TLSv1_2;
-    // fall through
 #endif // TLS1_3_VERSION
+    // fall through
   case TLSVersion::TLS12:
     ver_opts |= SSL_OP_NO_TLSv1_1;
   // fall through
