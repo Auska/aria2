@@ -108,7 +108,7 @@ std::shared_ptr<GroupId> getGID(const std::shared_ptr<Option>& option)
   std::shared_ptr<GroupId> gid;
   if (option->defined(PREF_GID)) {
     a2_gid_t n;
-    if (GroupId::toNumericId(n, option->get(PREF_GID).c_str()) !=
+    if (GroupId::toNumericId(n, option->get(PREF_GID)) !=
         GroupId::Err::OK) {
       throw DL_ABORT_EX(fmt("{} is invalid for GID.", option->get(PREF_GID)));
     }

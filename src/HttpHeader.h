@@ -160,7 +160,7 @@ public:
 
   // Returns true if header field |name| contains |value|. This method
   // assumes the values of the header field is delimited by ','.
-  bool fieldContains(InterestingHeader hdKey, const char* value);
+  bool fieldContains(InterestingHeader hdKey, std::string_view value);
 
   // Returns true if the headers indicate that the remote endpoint
   // keeps connection open.
@@ -168,7 +168,7 @@ public:
 };
 
 std::optional<HttpHeader::InterestingHeader>
-idInterestingHeader(const char* hdName);
+idInterestingHeader(std::string_view hdName);
 
 } // namespace aria2
 

@@ -196,7 +196,7 @@ a2_gid_t str2Gid(const String* str)
     throw DL_ABORT_EX(fmt("Invalid GID {}", str->s()));
   }
   a2_gid_t n;
-  switch (GroupId::expandUnique(n, str->s().c_str())) {
+  switch (GroupId::expandUnique(n, str->s())) {
   case GroupId::Err::OK:
     break;
   case GroupId::Err::NOT_UNIQUE:

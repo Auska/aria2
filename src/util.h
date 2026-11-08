@@ -644,6 +644,17 @@ bool strieq(InputIterator first, InputIterator last, const char* b)
   return first == last && *b == '\0';
 }
 
+// 同上，但接受任意长度的 |b|。传入字面量时仍会优先匹配
+// 上面的 const char* 版本。
+template <typename InputIterator>
+bool strieq(InputIterator first, InputIterator last, std::string_view b)
+{
+  if (static_cast<size_t>(last - first) != b.size()) {
+    return false;
+  }
+  return std::equal(first, last, b.begin(), CaseCmp());
+}
+
 bool strieq(const std::string& a, const char* b);
 bool strieq(const std::string& a, const std::string& b);
 

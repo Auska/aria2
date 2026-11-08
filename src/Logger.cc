@@ -183,14 +183,14 @@ void writeHeaderConsole(Output& fp, Logger::LEVEL level, bool useColor)
 
 namespace {
 template <typename Output>
-void writeStackTrace(Output& fp, const char* stackTrace)
+void writeStackTrace(Output& fp, std::string_view stackTrace)
 {
   fp.write(stackTrace);
 }
 } // namespace
 
 void Logger::writeLog(Logger::LEVEL level, std::source_location location,
-                      const std::string& msg, const char* trace)
+                      const std::string& msg, std::string_view trace)
 {
   if (fileLogEnabled(level)) {
     writeHeader(*fpp_, level, location);
@@ -216,7 +216,7 @@ void Logger::log(LEVEL level, const std::string& msg,
 void Logger::log(LEVEL level, const std::string& msg, const Exception& ex,
                  std::source_location location)
 {
-  writeLog(level, location, msg, ex.stackTrace().c_str());
+  writeLog(level, location, msg, ex.stackTrace());
 }
 
 } // namespace aria2

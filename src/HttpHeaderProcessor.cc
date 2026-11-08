@@ -342,7 +342,7 @@ bool HttpHeaderProcessor::parse(std::span<const std::byte> data)
 
       if (c == ':') {
         util::lowercase(lastFieldName_);
-        lastFieldHdKey_ = idInterestingHeader(lastFieldName_.c_str());
+        lastFieldHdKey_ = idInterestingHeader(lastFieldName_);
         state_ = ParseState::PREV_FIELD_VALUE;
         break;
       }

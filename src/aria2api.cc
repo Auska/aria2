@@ -178,7 +178,7 @@ A2Gid hexToGid(std::string_view hex)
 {
   A2Gid gid;
   std::string hexCopy{hex};
-  if (GroupId::toNumericId(gid, hexCopy.c_str()) == GroupId::Err::OK) {
+  if (GroupId::toNumericId(gid, hexCopy) == GroupId::Err::OK) {
     return gid;
   }
   else {

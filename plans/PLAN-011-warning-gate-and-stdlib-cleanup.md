@@ -219,7 +219,35 @@ void visit(const String&) override;
   - 真正死掉的只有 `erase(iterator)`（`src/IndexedList.h:462`，只有 `test/IndexedListTest.cc` 的 `testErase` 在用）和 `insert(iterator, Key, Value)`（`:387`），合计约 25 行。
   - 自定义双向迭代器（`:59-130`）是活的：`getPaginationRange` 用 `std::advance`、`move()` 用 `std::rotate`。
 - 结论：**活代码占 96%**。「重写成 IndexedDeque」只会把 598 行变成约 570 行，净收益为负；`move()` 的 `OFFSET_MODE_CUR/SET/END` 与 `insert` 的索引维护又是 `aria2.changePosition` RPC 的用户可见语义，重写有回归风险。经用户确认，**阶段 5 取消**，`src/IndexedList.h` 与 `test/IndexedListTest.cc` 原样保留。
-6. [ ] 阶段 6：头文件 `const char*` 形参 → `std::string_view` → 提交 `PLAN-011 阶段6: 头文件 const char* 形参改 string_view`
+6. [x] 阶段 6：头文件 `const char*` 形参 → `std::string_view` → 提交 `PLAN-011 阶段6: 头文件 const char* 形参改 string_view`
+
+### 阶段 6 实测（2026-11-08）：只改有真实收益的 6 处
+
+计划写的「约 43 处」是按 grep 计数估的。按「是否真有调用方需要 `.c_str()`」逐个核对后，**只有 6 处形参真能省掉调用方的 `.c_str()`**，其余传的都是字面量（改与不改调用点零差别），或语义上不能改。按最小改动原则只做这 6 处：
+
+| 形参 | 文件 | 省掉的调用方 `.c_str()` |
+|---|---|---|
+| `GroupId::expandUnique(a2_gid_t&, std::string_view hex)` | `src/GroupId.h:59` / `src/GroupId.cc:71` | `src/RpcMethodImpl.cc:199` |
+| `GroupId::toNumericId(a2_gid_t&, std::string_view hex)` | `src/GroupId.h:60` / `src/GroupId.cc:105` | `src/aria2api.cc:181`、`src/download_helper.cc:111`、`test/GroupIdTest.cc:46,49` |
+| `Logger::writeLog(..., std::string_view trace)` | `src/Logger.h:73` / `src/Logger.cc:192` | `src/Logger.cc:219`（`ex.stackTrace()`） |
+| `HttpHeader::fieldContains(InterestingHeader, std::string_view value)` | `src/HttpHeader.h:163` / `src/HttpHeader.cc:196` | `src/HttpServerCommand.cc:215,217` 的字面量走 string_view |
+| `idInterestingHeader(std::string_view hdName)` | `src/HttpHeader.h:171` / `src/HttpHeader.cc:249` | `src/HttpHeaderProcessor.cc:345` |
+| `writeStackTrace(Output&, std::string_view)` | `src/Logger.cc:186` | 同上 |
+
+- `src/GroupId.cc` 两个函数原来的 `for (i = 0; hex[i]; ++i)` 改成 `for (auto c0 : hex)`，`i` 改为 `hex.size()`（`hexCharToUInt` 语义不变）。
+- `idInterestingHeader` 原来的 `util::strless(const char*, const char*)` 比较器换成 `[](const char* a, std::string_view b) { return a < b; }`，相等判断 `strcmp(*i, hdName) != 0` → `*i != hdName`。
+- `src/util.h` 新增一个重载 `template <typename InputIterator> bool strieq(InputIterator first, InputIterator last, std::string_view b)`（长度先行比较 + `std::equal(..., CaseCmp())`）。**不删**原来的 `const char* b` 版本：传字面量时精确匹配仍选它，两者共存不产生歧义（`const char*` → `string_view` 是用户定义转换，劣于精确匹配）。
+
+#### 明确不改（连同理由）
+
+- `src/OptionHandlerImpl.h`(16) + `src/AbstractOptionHandler.h` 的 `const char* description`：链路末端 `virtual const char* getDescription() const`（`src/OptionHandler.h:54`）被 `--help` 与 `aria2.getGlobalOption` 消费，`description_` 成员是 `const char*`；改成 `string_view` 需连带改整个虚函数族 + 15 个子类 + `src/help_tags.cc`，而 `string_view` 不保证 null 结尾、无法直接存 `const char*`。调用方全是字面量，零收益。
+- `src/ColorizedStream.h`(4) 的 `operator<<(ColorizedStream&, const char*)`：PLAN-008 阶段 4 已实测，把 `operator<<` 改成 `string_view` 会与 `std::ostream::operator<<(const std::string&)` 产生 `ISO C++ says that these are ambiguous`。
+- `src/MSEHandshake.h` 的 `decodeLength16(const char* buffer)` / `verifyPadLength(...)`：形参是**字节缓冲**不是字符串。
+- `src/prefs.h` 的 `Pref(const char* k, size_t)`：`k` 被存成成员 `const char* k;`，生命周期依赖调用方传静态字面量，改 `string_view` 会丢掉这个契约。
+- `src/bittorrent_helper.h`(3) 的 `const char* msgName`、`src/RequestGroupMan.h`(2) 的 `const char* status`、`src/help_tags.h` 的 `idHelpTag(const char*)`、`src/uri.h:79` 的 `parse(..., const char* base)`：调用方全是字面量；且 `uri::parse` 的 `base` 形参目前已无任何调用方传它。
+- `src/util.h` 的 `streq`/`startsWith`/`istartsWith`/`iendsWith`/`strless`/`makeString`：都是「扫到 `\0` 为止」的 C 串语义，`strip`/`stripIter`/`lstripIter`/`splitIterM` 的 `chars`/`delims` 同理（`strchr` 换 `find_first_of` 无行为差异但无调用方受益）。这类保留与 `error_code.h`、`ValueBase` 的选择一致：语义是 C 串就保持 C 串。
+
+- 干净 worktree `/tmp/aria2-m11-p6`（base `b9b7078a`）全量重建：`# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (911)`、`error:` 0、C++ `warning:` 0、无 `Failures !!!`、ABI `132c72d9f055756769456c35ca7f8e7a879fbaa8`。12 文件 +43/−29。
 7. [ ] 阶段 7：收尾（勾选、状态行、实测表、偏差）→ 提交 `PLAN-011: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
 ## 预计修改的文件

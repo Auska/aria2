@@ -39,6 +39,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 #include <memory>
 
 namespace aria2 {
@@ -56,8 +57,8 @@ public:
     NOT_FOUND = -2,
     INVALID = -3,
   };
-  static Err expandUnique(a2_gid_t& n, const char* hex);
-  static Err toNumericId(a2_gid_t& n, const char* hex);
+  static Err expandUnique(a2_gid_t& n, std::string_view hex);
+  static Err toNumericId(a2_gid_t& n, std::string_view hex);
   static std::string toHex(a2_gid_t n);
   static std::string toAbbrevHex(a2_gid_t n);
 

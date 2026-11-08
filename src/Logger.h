@@ -40,6 +40,7 @@
 #include <string>
 #include <memory>
 #include <source_location>
+#include <string_view>
 
 namespace aria2 {
 
@@ -70,7 +71,7 @@ private:
   Logger& operator=(const Logger&);
 
   void writeLog(Logger::LEVEL level, std::source_location location,
-                const std::string& msg, const char* trace);
+                const std::string& msg, std::string_view trace);
 
   // Returns true if message with log level |level| will be outputted
   // to file.

@@ -68,18 +68,18 @@ std::shared_ptr<GroupId> GroupId::import(a2_gid_t n)
 
 void GroupId::clear() { set_.clear(); }
 
-GroupId::Err GroupId::expandUnique(a2_gid_t& n, const char* hex)
+GroupId::Err GroupId::expandUnique(a2_gid_t& n, std::string_view hex)
 {
   a2_gid_t p = 0;
-  size_t i;
-  for (i = 0; hex[i]; ++i) {
-    unsigned int c = util::hexCharToUInt(hex[i]);
+  for (auto c0 : hex) {
+    unsigned int c = util::hexCharToUInt(c0);
     if (c == 255) {
       return Err::INVALID;
     }
     p <<= 4;
     p |= c;
   }
+  size_t i = hex.size();
   if (i == 0 || i > sizeof(a2_gid_t) * 2) {
     return Err::INVALID;
   }
@@ -104,18 +104,18 @@ GroupId::Err GroupId::expandUnique(a2_gid_t& n, const char* hex)
   }
 }
 
-GroupId::Err GroupId::toNumericId(a2_gid_t& n, const char* hex)
+GroupId::Err GroupId::toNumericId(a2_gid_t& n, std::string_view hex)
 {
   a2_gid_t p = 0;
-  size_t i;
-  for (i = 0; hex[i]; ++i) {
-    unsigned int c = util::hexCharToUInt(hex[i]);
+  for (auto c0 : hex) {
+    unsigned int c = util::hexCharToUInt(c0);
     if (c == 255) {
       return Err::INVALID;
     }
     p <<= 4;
     p |= c;
   }
+  size_t i = hex.size();
   if (p == 0 || i != sizeof(a2_gid_t) * 2) {
     return Err::INVALID;
   }

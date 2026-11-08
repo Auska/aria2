@@ -43,10 +43,10 @@ void GroupIdTest::testToNumericId()
   std::string hex;
   hex = std::string(16, '0');
   CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
-                       GroupId::toNumericId(gid, hex.c_str()));
+                       GroupId::toNumericId(gid, hex));
 
   hex = std::string(16, 'f');
-  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::toNumericId(gid, hex.c_str()));
+  CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::toNumericId(gid, hex));
   CPPUNIT_ASSERT_EQUAL((a2_gid_t)UINT64_MAX, gid);
 
   CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK, GroupId::toNumericId(gid, "1234567890abcdef"));
@@ -54,7 +54,7 @@ void GroupIdTest::testToNumericId()
 
   hex = std::string(15, 'f');
   CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
-                       GroupId::toNumericId(gid, hex.c_str()));
+                       GroupId::toNumericId(gid, hex));
 
   CPPUNIT_ASSERT_EQUAL(GroupId::Err::INVALID,
                        GroupId::toNumericId(gid, ""));

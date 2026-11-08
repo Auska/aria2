@@ -194,7 +194,7 @@ void HttpHeader::setReasonPhrase(std::string_view reasonPhrase)
   reasonPhrase_ = reasonPhrase;
 }
 
-bool HttpHeader::fieldContains(InterestingHeader hdKey, const char* value)
+bool HttpHeader::fieldContains(InterestingHeader hdKey, std::string_view value)
 {
   auto range = equalRange(hdKey);
   for (auto i = range.first; i != range.second; ++i) {
@@ -248,12 +248,12 @@ constexpr const char* INTERESTING_HEADER_NAMES[] = {
 } // namespace
 
 std::optional<HttpHeader::InterestingHeader>
-idInterestingHeader(const char* hdName)
+idInterestingHeader(std::string_view hdName)
 {
-  auto i = std::lower_bound(std::begin(INTERESTING_HEADER_NAMES),
-                            std::end(INTERESTING_HEADER_NAMES), hdName,
-                            util::strless);
-  if (i == std::end(INTERESTING_HEADER_NAMES) || strcmp(*i, hdName) != 0) {
+  auto i = std::lower_bound(
+      std::begin(INTERESTING_HEADER_NAMES), std::end(INTERESTING_HEADER_NAMES),
+      hdName, [](const char* a, std::string_view b) { return a < b; });
+  if (i == std::end(INTERESTING_HEADER_NAMES) || *i != hdName) {
     return std::nullopt;
   }
   return static_cast<HttpHeader::InterestingHeader>(
