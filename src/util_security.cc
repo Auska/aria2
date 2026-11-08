@@ -35,6 +35,8 @@
 
 #include "util_security.h"
 
+#include <ranges>
+
 #include "FatalException.h"
 #include "util.h"
 
@@ -92,8 +94,8 @@ bool compare(std::span<const std::byte> a, std::span<const std::byte> b)
     return false;
   }
   unsigned char rv = 0;
-  for (size_t i = 0; i < a.size(); ++i) {
-    rv |= static_cast<unsigned char>(a[i]) ^ static_cast<unsigned char>(b[i]);
+  for (auto [x, y] : std::views::zip(a, b)) {
+    rv |= static_cast<unsigned char>(x) ^ static_cast<unsigned char>(y);
   }
   return compare(rv, 0);
 }

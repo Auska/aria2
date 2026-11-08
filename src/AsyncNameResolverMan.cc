@@ -35,6 +35,7 @@
 #include "AsyncNameResolverMan.h"
 
 #include <cassert>
+#include <span>
 
 #include "AsyncNameResolver.h"
 #include "DownloadEngine.h"
@@ -57,8 +58,8 @@ AsyncNameResolverMan::~AsyncNameResolverMan() { assert(!resolverCheck_); }
 
 bool AsyncNameResolverMan::started() const
 {
-  for (size_t i = 0; i < numResolver_; ++i) {
-    if (asyncNameResolver_[i]) {
+  for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
+    if (resolver) {
       return true;
     }
   }
@@ -95,10 +96,9 @@ void AsyncNameResolverMan::startAsyncFamily(const std::string& hostname,
 void AsyncNameResolverMan::getResolvedAddress(
     std::vector<std::string>& res) const
 {
-  for (size_t i = 0; i < numResolver_; ++i) {
-    if (asyncNameResolver_[i]->getStatus() ==
-        AsyncNameResolver::Status::SUCCESS) {
-      auto& addrs = asyncNameResolver_[i]->getResolvedAddresses();
+  for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
+    if (resolver->getStatus() == AsyncNameResolver::Status::SUCCESS) {
+      auto& addrs = resolver->getResolvedAddresses();
       res.insert(std::end(res), std::begin(addrs), std::end(addrs));
     }
   }
@@ -146,11 +146,11 @@ int AsyncNameResolverMan::getStatus() const
   size_t success = 0;
   size_t error = 0;
   bool ipv4Success = false;
-  for (size_t i = 0; i < numResolver_; ++i) {
-    switch (asyncNameResolver_[i]->getStatus()) {
+  for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
+    switch (resolver->getStatus()) {
     case AsyncNameResolver::Status::SUCCESS:
       ++success;
-      if (asyncNameResolver_[i]->getFamily() == AF_INET) {
+      if (resolver->getFamily() == AF_INET) {
         ipv4Success = true;
       }
       break;
@@ -179,11 +179,10 @@ int AsyncNameResolverMan::getStatus() const
 
 const std::string& AsyncNameResolverMan::getLastError() const
 {
-  for (size_t i = 0; i < numResolver_; ++i) {
-    if (asyncNameResolver_[i]->getStatus() ==
-        AsyncNameResolver::Status::ERROR) {
+  for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
+    if (resolver->getStatus() == AsyncNameResolver::Status::ERROR) {
       // TODO This is not last error chronologically.
-      return asyncNameResolver_[i]->getError();
+      return resolver->getError();
     }
   }
   return A2STR::NIL;
@@ -193,8 +192,8 @@ void AsyncNameResolverMan::reset(DownloadEngine* e, Command* command)
 {
   disableNameResolverCheck(e, command);
   assert(resolverCheck_ == 0);
-  for (size_t i = 0; i < numResolver_; ++i) {
-    asyncNameResolver_[i].reset();
+  for (auto& resolver : std::span{asyncNameResolver_, numResolver_}) {
+    resolver.reset();
   }
   numResolver_ = 0;
 }

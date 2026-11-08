@@ -115,9 +115,9 @@ void EpollEventPoll::poll(const struct timeval& tv)
     ;
 
   if (res > 0) {
-    for (int i = 0; i < res; ++i) {
-      KSocketEntry* p = reinterpret_cast<KSocketEntry*>(epEvents_[i].data.ptr);
-      p->processEvents(epEvents_[i].events);
+    for (auto& event : std::span{epEvents_.get(), static_cast<size_t>(res)}) {
+      auto* p = reinterpret_cast<KSocketEntry*>(event.data.ptr);
+      p->processEvents(event.events);
     }
   }
   else if (res == -1) {

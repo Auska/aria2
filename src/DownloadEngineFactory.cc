@@ -35,6 +35,7 @@
 #include "DownloadEngineFactory.h"
 
 #include <algorithm>
+#include <span>
 
 #include "Option.h"
 #include "RequestGroup.h"
@@ -179,9 +180,9 @@ std::unique_ptr<DownloadEngine> DownloadEngineFactory::newDownloadEngine(
     }
     static int families[] = {AF_INET, AF_INET6};
     size_t familiesLength = op->getAsBool(PREF_DISABLE_IPV6) ? 1 : 2;
-    for (size_t i = 0; i < familiesLength; ++i) {
-      auto httpListenCommand = make_unique<HttpListenCommand>(
-          e->newCUID(), e.get(), families[i], secure);
+    for (auto family : std::span{families, familiesLength}) {
+      auto httpListenCommand =
+          make_unique<HttpListenCommand>(e->newCUID(), e.get(), family, secure);
       if (httpListenCommand->bindPort(op->getAsInt(PREF_RPC_LISTEN_PORT))) {
         e->addCommand(std::move(httpListenCommand));
         ok = true;

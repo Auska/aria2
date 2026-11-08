@@ -35,6 +35,7 @@
 #include "BtSetup.h"
 
 #include <cstring>
+#include <span>
 
 #include "RequestGroup.h"
 #include "DownloadEngine.h"
@@ -186,9 +187,8 @@ void BtSetup::setup(std::vector<std::unique_ptr<Command>>& commands,
     static int families[] = {AF_INET, AF_INET6};
     size_t familiesLength =
         e->getOption()->getAsBool(PREF_DISABLE_IPV6) ? 1 : 2;
-    for (size_t i = 0; i < familiesLength; ++i) {
-      auto command =
-          make_unique<PeerListenCommand>(e->newCUID(), e, families[i]);
+    for (auto family : std::span{families, familiesLength}) {
+      auto command = make_unique<PeerListenCommand>(e->newCUID(), e, family);
       std::optional<uint16_t> port;
       if (btReg->getTcpPort()) {
         SegList<int> sgl;

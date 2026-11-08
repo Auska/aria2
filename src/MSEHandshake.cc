@@ -38,6 +38,7 @@
 #include <string_view>
 
 #include <array>
+#include <ranges>
 #include <cstring>
 #include <cassert>
 
@@ -262,8 +263,9 @@ void MSEHandshake::createReq23Hash(unsigned char* md,
   message_digest::digest(yh, sizeof(yh), sha1_.get(),
                          std::as_bytes(std::span{y}));
 
-  for (size_t i = 0; i < 20; ++i) {
-    md[i] = xh[i] ^ yh[i];
+  for (auto [out, lhs, rhs] :
+       std::views::zip(std::span{md, sizeof(xh)}, xh, yh)) {
+    out = lhs ^ rhs;
   }
 }
 

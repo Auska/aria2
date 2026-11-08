@@ -37,6 +37,8 @@
 
 #include <cstring>
 
+#include <ranges>
+
 #include "util.h"
 #include "a2functional.h"
 #include "bittorrent_helper.h"
@@ -65,11 +67,11 @@ bool DHTNode::operator!=(const DHTNode& node) const { return !(*this == node); }
 
 bool DHTNode::operator<(const DHTNode& node) const
 {
-  for (size_t i = 0; i < DHT_ID_LENGTH; ++i) {
-    if (id_[i] > node.id_[i]) {
+  for (auto [lhs, rhs] : std::views::zip(id_, node.id_)) {
+    if (lhs > rhs) {
       return false;
     }
-    else if (id_[i] < node.id_[i]) {
+    else if (lhs < rhs) {
       return true;
     }
   }

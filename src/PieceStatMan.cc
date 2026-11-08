@@ -36,6 +36,7 @@
 
 #include <limits>
 #include <algorithm>
+#include <ranges>
 
 #include "SimpleRandomizer.h"
 #include "bitfield.h"
@@ -45,8 +46,8 @@ namespace aria2 {
 PieceStatMan::PieceStatMan(size_t pieceNum, bool randomShuffle)
     : order_(pieceNum), counts_(pieceNum)
 {
-  for (size_t i = 0; i < pieceNum; ++i) {
-    order_[i] = i;
+  for (auto [i, slot] : std::views::enumerate(order_)) {
+    slot = static_cast<size_t>(i);
   }
   // we need some randomness in ordering.
   if (randomShuffle) {

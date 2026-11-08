@@ -100,7 +100,7 @@ const char* strBtExtension(ExtensionMessageRegistry::InterestingExtension key)
 std::optional<ExtensionMessageRegistry::InterestingExtension>
 keyBtExtension(const char* name)
 {
-  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+  for (auto i = 0u; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     if (strcmp(EXTENSION_NAMES[i], name) == 0) {
       return static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
     }

@@ -119,7 +119,7 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 
 1. [x] **阶段 1**：A 组缺陷（A1 拷贝控制 + static_assert、A2 `gmtime_r`、A3 `localtime_r`、A4 `readAll()`）→ 门禁 → 提交 `PLAN-009 阶段1: 修复 WrDiskCacheEntry 所有权与非线程安全时间函数`
 2. [x] **阶段 2**：B1 39 处 cast + B2 15 find/18 sort + B5 2 个透明比较器 → 门禁 → 提交 `PLAN-009 阶段2: C 风格转换与 find/sort 改用 static_cast 与 std::ranges`
-3. [ ] **阶段 3**：B3 34 处索引循环 → `views::enumerate`（+ `zip`）→ 门禁 → 提交 `PLAN-009 阶段3: 索引 for 循环改用 std::views::enumerate`
+3. [x] **阶段 3**：B3 索引循环 → `views::enumerate`（+ `zip`）→ 门禁 → 提交 `PLAN-009 阶段3: 索引 for 循环改用 std::views::enumerate`
 4. [ ] **阶段 4**：B4 265 处声明 + 257 处定义加 `noexcept` → 门禁 → 提交 `PLAN-009 阶段4: 析构函数标注 noexcept`
 5. [ ] **阶段 5**：文档收尾 → 提交 `PLAN-009: 勾选全部阶段、标记计划完成并记录实测门禁结果`
 
@@ -141,9 +141,27 @@ PLAN-003~008 已完成语法层、协议层、引擎层、配置层、输出层�
 - **B5**：`src/ValueBase.h:251-254` `ValueType` 加 `std::less<>`，`Dict::get/operator[]/containsKey/removeKey/popValue` 形参 → `std::string_view`；`src/DefaultPeerStorage.h:75 badPeers_` 加 `std::less<>`，`PeerStorage::isBadPeer`/`DefaultPeerStorage::isBadPeer` → `std::string_view`（`test/MockPeerStorage.h:79` 同步）。
   - 坑：`dict_.erase(std::string_view)` **GCC 14 libstdc++ 未实现 C++23 透明 erase**（`no matching function for call to erase(std::string_view&)`）→ `removeKey` 改成 `find` + `erase(iterator)`。
 - 门禁：干净 worktree `/tmp/aria2-m9-p2`（base `52774b20`）+ `git apply /tmp/p9-stage2.patch`（1024 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0 + `make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`error:` 0、ABI 哈希不变。
-- 提交 `cb2b02c6`（35 文件 +177/−133）。
+- 提交 `93dfe3c6`（35 文件 +177/−133）。
 - 专项验证：`git grep -cE '\((int|size_t|uint64_t|int64_t|float|double|char|unsigned char|unsigned long|ssize_t)\)[A-Za-z_(]' -- 'src/*.cc' 'src/*.h'` → 0 命中；`git grep -nE 'std::(find|find_if|sort|stable_sort)\(' -- src` → 0 命中。
 - 教训：本地 `make check` 前必须 `touch test/*.cc test/*.h`，否则改了 `test/MockPeerStorage.h` 这类公共测试头后本地绿、干净 worktree 报 `marked 'override', but does not override`。
+
+### 阶段 3 实测（2026-11-08）
+
+- 实际改动 **12 文件 +61/−52**，全部循环都变成 view 表达，消掉下标的循环共 **13 处**：
+  - `src/AsyncNameResolverMan.cc`（7 处，`std::span{asyncNameResolver_, numResolver_}` 后 range-for；其中 5 处去掉 `[i]`，2 处 `setNameResolverCheck(i,…)`/`disableNameResolverCheck(i,…)` 把 `i` 传给 `size_t` 形参的**保留**）
+  - `src/BtSetup.cc`、`src/DownloadEngineFactory.cc`（`std::span{families, familiesLength}` + `for (auto family : …)`）
+  - `src/EpollEventPoll.cc`（`std::span{epEvents_.get(), static_cast<size_t>(res)}`）
+  - `src/DHTNode.cc`（`std::views::zip(id_, node.id_)` 结构化绑定）
+  - `src/BitfieldMan.cc:562`（`std::views::zip(bitfield_, filterBitfield_)`）
+  - `src/XORCloser.h:60`（`std::views::zip(key_, key1, key2)`）
+  - `src/util_security.cc:93`（`std::views::zip(a, b)`）
+  - `src/MSEHandshake.cc:265` → `std::views::zip(std::span{md, sizeof(xh)}, xh, yh)`
+  - `src/PieceStatMan.cc:47` → `for (auto [i, slot] : std::views::enumerate(order_)) slot = static_cast<size_t>(i);`
+  - `src/ExtensionMessageRegistry.cc:103`、`src/HandshakeExtensionMessage.cc:69,89,105` → 纯计数循环改 `for (auto i = 0u; …)`（`MAX_EXTENSION` 是 `size_t` 常量，`0u` 让比较无符号一致）。
+- **实测与计划偏差**：原计划 34 处，实际只换 13 处。剩下 32 处索引循环全部属于「上界不是容器长度」或「`i` 作位掩码/多容器偏移/裸指针数组下标」，包进 span 反而更长，按 ponytail 保留并说明：`src/BitfieldMan.cc:143,428,582,642,656,708`、`src/DefaultBtRequestFactory.cc:205`、`src/DefaultPieceStorage.cc:211,760`、`src/DownloadEngine.cc:122`、`src/DHTRoutingTableDeserializer.cc:162`、`src/LibsslTLSSession.cc:261`、`src/LpdReceiveMessageCommand.cc:72`、`src/RarestPieceSelector.cc:58`、`src/Request.cc:127`、`src/SimpleRandomizer.cc:95`、`src/SocketCore.cc:702`、`src/UTMetadataDataExtensionMessage.cc:104`、`src/base32.h:63`、`src/bignum.h:102,145`、`src/bitfield.h:117,139,155,173`、`src/bittorrent_helper.cc:107,668`、`src/download_helper.cc:96,374`、`src/prefs.cc:56`、`src/AsyncNameResolverMan.cc:111,129`。
+- 坑：`std::views::zip` 的实参必须是 range，**裸指针 `unsigned char* md` 不是**（`error: no match for call to '(const std::ranges::views::_Zip) (unsigned char*&, unsigned char [20], unsigned char [20])'`）→ 包成 `std::span{md, sizeof(xh)}`。
+- 门禁：干净 worktree `/tmp/aria2-m9-p3`（base `93dfe3c6`）+ `git apply /tmp/p9-stage3.patch`（383 行）+ `autoreconf -i` rc=0 + `./configure --enable-werror` rc=0 + `make -j8 check` rc=0 → `# TOTAL: 1`/`# PASS: 1`/`FAIL 0`/`ERROR 0`、`OK (914)`、`error:` 0、`Failures !!!` 0、ABI 哈希 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+- 专项验证：`git grep -nE 'for \(size_t i = 0; i <' -- 'src/*.cc' 'src/*.h' | wc -l` → 32（保留项，均在上表）。
 
 ## 预计修改的文件
 

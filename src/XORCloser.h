@@ -40,6 +40,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <span>
+#include <ranges>
 
 namespace aria2 {
 
@@ -57,9 +58,9 @@ public:
   {
     assert(key_.size() == key1.size());
     assert(key_.size() == key2.size());
-    for (size_t i = 0; i < key_.size(); ++i) {
-      unsigned char c1 = key_[i] ^ key1[i];
-      unsigned char c2 = key_[i] ^ key2[i];
+    for (auto [k, k1, k2] : std::views::zip(key_, key1, key2)) {
+      unsigned char c1 = k ^ k1;
+      unsigned char c2 = k ^ k2;
 
       if (c1 < c2) {
         return true;

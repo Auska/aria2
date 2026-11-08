@@ -36,6 +36,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <ranges>
 
 #include "array_fun.h"
 #include "bitfield.h"
@@ -560,8 +561,8 @@ bool BitfieldMan::unsetBit(size_t index)
 bool BitfieldMan::isFilteredAllBitSet() const
 {
   if (filterEnabled_) {
-    for (size_t i = 0; i < bitfieldLength_; ++i) {
-      if ((bitfield_[i] & filterBitfield_[i]) != filterBitfield_[i]) {
+    for (auto [bit, filter] : std::views::zip(bitfield_, filterBitfield_)) {
+      if ((bit & filter) != filter) {
         return false;
       }
     }

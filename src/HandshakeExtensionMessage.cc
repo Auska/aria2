@@ -66,7 +66,7 @@ std::string HandshakeExtensionMessage::getPayload()
     dict.put("p", Integer::g(tcpPort_));
   }
   auto extDict = Dict::g();
-  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+  for (auto i = 0u; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
     int id = extreg_.getExtensionMessageID(key);
     if (id) {
@@ -83,10 +83,9 @@ std::string HandshakeExtensionMessage::getPayload()
 std::string HandshakeExtensionMessage::toString() const
 {
   std::string s(fmt("{} client={}, tcpPort={}, metadataSize={}",
-                    getExtensionName(),
-                    util::percentEncode(clientVersion_), tcpPort_,
-                    static_cast<unsigned long>(metadataSize_)));
-  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+                    getExtensionName(), util::percentEncode(clientVersion_),
+                    tcpPort_, static_cast<unsigned long>(metadataSize_)));
+  for (auto i = 0u; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
     int id = extreg_.getExtensionMessageID(key);
     if (id) {
@@ -102,7 +101,7 @@ void HandshakeExtensionMessage::doReceivedAction()
     peer_->setPort(tcpPort_);
     peer_->setIncomingPeer(false);
   }
-  for (size_t i = 0; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
+  for (auto i = 0u; i < ExtensionMessageRegistry::MAX_EXTENSION; ++i) {
     auto key = static_cast<ExtensionMessageRegistry::InterestingExtension>(i);
     int id = extreg_.getExtensionMessageID(key);
     if (id) {
@@ -111,7 +110,8 @@ void HandshakeExtensionMessage::doReceivedAction()
   }
   auto attrs = bittorrent::getTorrentAttrs(dctx_);
   if (attrs->metadata.empty()) {
-    if (!peer_->getExtensionMessageID(ExtensionMessageRegistry::InterestingExtension::UT_METADATA)) {
+    if (!peer_->getExtensionMessageID(
+            ExtensionMessageRegistry::InterestingExtension::UT_METADATA)) {
       // TODO In metadataGetMode, if peer don't support metadata
       // transfer, should we drop connection? There is a possibility
       // that peer can still tell us peers using PEX.
@@ -174,8 +174,9 @@ HandshakeExtensionMessage::create(std::span<const std::byte> data)
     throw DL_ABORT_EX(fmt(MSG_TOO_SMALL_PAYLOAD_SIZE, EXTENSION_NAME,
                           static_cast<unsigned long>(length)));
   }
-  A2_LOG_DEBUG(fmt("Creating HandshakeExtensionMessage from {}",
-                   util::percentEncode(std::as_bytes(std::span{dataPtr, length}))));
+  A2_LOG_DEBUG(
+      fmt("Creating HandshakeExtensionMessage from {}",
+          util::percentEncode(std::as_bytes(std::span{dataPtr, length}))));
   auto decoded =
       bencode2::decode(std::as_bytes(std::span{dataPtr + 1, length - 1}));
   const Dict* dict = downcast<Dict>(decoded);
@@ -204,8 +205,8 @@ HandshakeExtensionMessage::create(std::span<const std::byte> data)
 
         auto key = keyBtExtension(elem.first.c_str());
         if (!key) {
-          A2_LOG_DEBUG(fmt("Unsupported BitTorrent extension {}={}",
-                           elem.first, extId->i()));
+          A2_LOG_DEBUG(fmt("Unsupported BitTorrent extension {}={}", elem.first,
+                           extId->i()));
         }
         else {
           msg->setExtension(*key, extId->i());
@@ -219,8 +220,7 @@ HandshakeExtensionMessage::create(std::span<const std::byte> data)
     auto size = metadataSize->i();
 
     if (size < 0) {
-      throw DL_ABORT_EX(
-          fmt("Negative metadataSize {} was received", size));
+      throw DL_ABORT_EX(fmt("Negative metadataSize {} was received", size));
     }
 
     // Only accept metadata up to 8MiB in size.  Be aware that broken
