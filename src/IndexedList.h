@@ -502,10 +502,10 @@ public:
   }
 
   // Moves element with |key| to the specified position. If |how| is
-  // OFFSET_MODE_CUR, the element is moved to the position |offset|
-  // relative to the current position. If |how| is OFFSET_MODE_SET,
+  // OffsetMode::OFFSET_MODE_CUR, the element is moved to the position |offset|
+  // relative to the current position. If |how| is OffsetMode::OFFSET_MODE_SET,
   // the element is moved to the position |offset|. If |how| is
-  // OFFSET_MODE_END, the element is moved to the position |offset|
+  // OffsetMode::OFFSET_MODE_END, the element is moved to the position |offset|
   // relative to the end of the list.  This function returns the
   // position the element is moved to if it succeeds, or -1 if no
   // element with |key| is found or |how| is invalid.  Complexity:
@@ -525,7 +525,7 @@ public:
     ssize_t xp = std::distance(std::begin(seq_), x);
     ssize_t size = index_.size();
     ssize_t dest;
-    if (how == OFFSET_MODE_CUR) {
+    if (how == OffsetMode::OFFSET_MODE_CUR) {
       if (offset > 0) {
         dest = std::min(xp + offset, static_cast<ssize_t>(size - 1));
       }
@@ -534,10 +534,10 @@ public:
       }
     }
     else {
-      if (how == OFFSET_MODE_END) {
+      if (how == OffsetMode::OFFSET_MODE_END) {
         dest = std::min(size - 1 + offset, size - 1);
       }
-      else if (how == OFFSET_MODE_SET) {
+      else if (how == OffsetMode::OFFSET_MODE_SET) {
         dest = std::min(offset, size - 1);
       }
       else {

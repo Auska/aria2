@@ -486,7 +486,7 @@ void DefaultPieceStorage::completePiece(const std::shared_ptr<Piece>& piece)
         util::executeHookByOptName(group, option_,
                                    PREF_ON_BT_DOWNLOAD_COMPLETE);
         SingletonHolder<Notifier>::instance()->notifyDownloadEvent(
-            EVENT_ON_BT_DOWNLOAD_COMPLETE, group);
+            DownloadEvent::EVENT_ON_BT_DOWNLOAD_COMPLETE, group);
 
         group->enableSeedOnly();
       }

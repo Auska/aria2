@@ -154,7 +154,7 @@ int sessionFinal(Session* session)
 int run(Session* session, RUN_MODE mode)
 {
   auto& e = session->context->reqinfo->getDownloadEngine();
-  return e->run(mode == RUN_ONCE);
+  return e->run(mode == RUN_MODE::RUN_ONCE);
 }
 
 int shutdown(Session* session, bool force)
@@ -174,10 +174,11 @@ int shutdown(Session* session, bool force)
 
 std::string gidToHex(A2Gid gid) { return GroupId::toHex(gid); }
 
-A2Gid hexToGid(const std::string& hex)
+A2Gid hexToGid(std::string_view hex)
 {
   A2Gid gid;
-  if (GroupId::toNumericId(gid, hex.c_str()) == GroupId::Err::OK) {
+  std::string hexCopy{hex};
+  if (GroupId::toNumericId(gid, hexCopy.c_str()) == GroupId::Err::OK) {
     return gid;
   }
   else {
@@ -288,7 +289,7 @@ int addUri(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
   return 0;
 }
 
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
+int addTorrent(Session* session, A2Gid* gid, std::string_view torrentFile,
                const std::vector<std::string>& webSeedUris,
                const KeyVals& options, int position)
 {
@@ -300,8 +301,9 @@ int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
     apiGatherRequestOption(requestOption.get(), options,
                            OptionParser::getInstance());
     requestOption->put(PREF_TORRENT_FILE, torrentFile);
+    std::string torrentFileCopy{torrentFile};
     createRequestGroupForBitTorrent(result, requestOption, webSeedUris,
-                                    torrentFile);
+                                    torrentFileCopy);
   }
   catch (RecoverableException& e) {
     A2_LOG_INFO_EX(EX_EXCEPTION_CAUGHT, e);
@@ -319,7 +321,7 @@ int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
 #endif // !ENABLE_BITTORRENT
 }
 
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
+int addTorrent(Session* session, A2Gid* gid, std::string_view torrentFile,
                const KeyVals& options, int position)
 {
   return addTorrent(session, gid, torrentFile, std::vector<std::string>(),
@@ -425,7 +427,7 @@ int changeOption(Session* session, A2Gid gid, const KeyVals& options)
   }
 }
 
-const std::string& getGlobalOption(Session* session, const std::string& name)
+const std::string& getGlobalOption(Session* session, std::string_view name)
 {
   auto& e = session->context->reqinfo->getDownloadEngine();
   PrefPtr pref = option::k2p(name);
@@ -513,9 +515,9 @@ template <typename OutputIterator>
 void createUriEntry(OutputIterator out, const std::shared_ptr<FileEntry>& file)
 {
   createUriEntry(out, file->getSpentUris().begin(), file->getSpentUris().end(),
-                 URI_USED);
+                 UriStatus::URI_USED);
   createUriEntry(out, file->getRemainingUris().begin(),
-                 file->getRemainingUris().end(), URI_WAITING);
+                 file->getRemainingUris().end(), UriStatus::URI_WAITING);
 }
 } // namespace
 
@@ -593,7 +595,7 @@ void pushRequestOption(OutputIterator out,
 
 namespace {
 const std::string& getRequestOption(const std::shared_ptr<Option>& option,
-                                    const std::string& name)
+                                    std::string_view name)
 {
   PrefPtr pref = option::k2p(name);
   if (OptionParser::getInstance()->find(pref)) {
@@ -625,14 +627,14 @@ struct RequestGroupDH : public DownloadHandle {
   virtual DownloadStatus getStatus() override
   {
     if (group->getState() == RequestGroup::State::ACTIVE) {
-      return DOWNLOAD_ACTIVE;
+      return DownloadStatus::DOWNLOAD_ACTIVE;
     }
     else {
       if (group->isPauseRequested()) {
-        return DOWNLOAD_PAUSED;
+        return DownloadStatus::DOWNLOAD_PAUSED;
       }
       else {
-        return DOWNLOAD_WAITING;
+        return DownloadStatus::DOWNLOAD_WAITING;
       }
     }
   }
@@ -728,11 +730,11 @@ struct RequestGroupDH : public DownloadHandle {
 #endif // ENABLE_BITTORRENT
     {
       res.creationDate = 0;
-      res.mode = BT_FILE_MODE_NONE;
+      res.mode = BtFileMode::BT_FILE_MODE_NONE;
     }
     return res;
   }
-  virtual const std::string& getOption(const std::string& name) override
+  virtual const std::string& getOption(std::string_view name) override
   {
     return getRequestOption(group->getOption(), name);
   }
@@ -755,9 +757,9 @@ struct DownloadResultDH : public DownloadHandle {
     case error_code::FINISHED:
       return DOWNLOAD_COMPLETE;
     case error_code::REMOVED:
-      return DOWNLOAD_REMOVED;
+      return DownloadStatus::DOWNLOAD_REMOVED;
     default:
-      return DOWNLOAD_ERROR;
+      return DownloadStatus::DOWNLOAD_ERROR;
     }
   }
   virtual int64_t getTotalLength() override { return dr->totalLength; }
@@ -795,7 +797,7 @@ struct DownloadResultDH : public DownloadHandle {
     return createFileData(dr->fileEntries[index - 1], index, &bf);
   }
   virtual BtMetaInfoData getBtMetaInfo() override { return BtMetaInfoData(); }
-  virtual const std::string& getOption(const std::string& name) override
+  virtual const std::string& getOption(std::string_view name) override
   {
     return getRequestOption(dr->option, name);
   }

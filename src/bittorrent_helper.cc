@@ -218,7 +218,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
     int64_t length = 0;
     int64_t offset = 0;
     // multi-file mode
-    torrent->mode = BT_FILE_MODE_MULTI;
+    torrent->mode = BtFileMode::BT_FILE_MODE_MULTI;
     for (auto& f : *filesList) {
       const Dict* fileDict = downcast<Dict>(f);
       if (!fileDict) {
@@ -301,7 +301,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
   }
   else {
     // single-file mode;
-    torrent->mode = BT_FILE_MODE_SINGLE;
+    torrent->mode = BtFileMode::BT_FILE_MODE_SINGLE;
     const Integer* lengthData = downcast<Integer>(infoDict->get(C_LENGTH));
     if (!lengthData) {
       throw DL_ABORT_EX2(fmt(MSG_MISSING_BT_INFO, C_LENGTH),
@@ -341,7 +341,7 @@ void extractFileEntries(const std::shared_ptr<DownloadContext>& ctx,
     fileEntries.push_back(fileEntry);
   }
   ctx->setFileEntries(fileEntries.begin(), fileEntries.end());
-  if (torrent->mode == BT_FILE_MODE_MULTI) {
+  if (torrent->mode == BtFileMode::BT_FILE_MODE_MULTI) {
     ctx->setBasePath(
         util::applyDir(option->get(PREF_DIR), util::escapePath(utf8Name)));
   }
@@ -1096,9 +1096,9 @@ void adjustAnnounceUri(TorrentAttribute* attrs,
 const char* getModeString(BtFileMode mode)
 {
   switch (mode) {
-  case BT_FILE_MODE_SINGLE:
+  case BtFileMode::BT_FILE_MODE_SINGLE:
     return "single";
-  case BT_FILE_MODE_MULTI:
+  case BtFileMode::BT_FILE_MODE_MULTI:
     return "multi";
   default:
     return "";

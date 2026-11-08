@@ -37,7 +37,7 @@
 namespace aria2 {
 
 TorrentAttribute::TorrentAttribute()
-    : mode(BT_FILE_MODE_NONE),
+    : mode(BtFileMode::BT_FILE_MODE_NONE),
       metadataSize(0),
       privateTorrent(false),
       creationDate(0)

@@ -638,7 +638,7 @@ void gatherBitTorrentMetadata(Dict* btDict, TorrentAttribute* torrentAttrs)
   if (torrentAttrs->creationDate) {
     btDict->put(KEY_CREATION_DATE, Integer::g(torrentAttrs->creationDate));
   }
-  if (torrentAttrs->mode) {
+  if (torrentAttrs->mode != BtFileMode::BT_FILE_MODE_NONE) {
     btDict->put(KEY_MODE, bittorrent::getModeString(torrentAttrs->mode));
   }
   auto destAnnounceList = List::g();
@@ -1178,13 +1178,13 @@ ChangePositionRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
   const std::string& howStr = howParam->s();
   OffsetMode how;
   if (howStr == "POS_SET") {
-    how = OFFSET_MODE_SET;
+    how = OffsetMode::OFFSET_MODE_SET;
   }
   else if (howStr == "POS_CUR") {
-    how = OFFSET_MODE_CUR;
+    how = OffsetMode::OFFSET_MODE_CUR;
   }
   else if (howStr == "POS_END") {
-    how = OFFSET_MODE_END;
+    how = OffsetMode::OFFSET_MODE_END;
   }
   else {
     throw DL_ABORT_EX("Illegal argument.");

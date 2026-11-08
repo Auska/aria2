@@ -35,8 +35,9 @@
 #include "prefs.h"
 
 #include <cassert>
-#include <vector>
+#include <functional>
 #include <map>
+#include <vector>
 
 namespace aria2 {
 
@@ -73,7 +74,7 @@ public:
     assert(id < count_);
     return i2p_[id];
   }
-  PrefPtr k2p(const std::string& k) const
+  PrefPtr k2p(std::string_view k) const
   {
     auto i = k2p_.find(k);
     if (i == k2p_.end()) {
@@ -85,7 +86,7 @@ public:
 private:
   size_t count_;
   std::vector<PrefPtr> i2p_;
-  std::map<std::string, PrefPtr> k2p_;
+  std::map<std::string, PrefPtr, std::less<>> k2p_;
 };
 
 PrefFactory* getPrefFactory()
@@ -105,7 +106,7 @@ size_t countOption() { return getPrefFactory()->getCount(); }
 
 PrefPtr i2p(size_t id) { return getPrefFactory()->i2p(id); }
 
-PrefPtr k2p(const std::string& key) { return getPrefFactory()->k2p(key); }
+PrefPtr k2p(std::string_view key) { return getPrefFactory()->k2p(key); }
 
 void deletePrefResource() { delete getPrefFactory(); }
 

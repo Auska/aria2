@@ -81,7 +81,7 @@ void BtCheckIntegrityEntry::onDownloadFinished(
     util::executeHookByOptName(group, option.get(),
                                PREF_ON_BT_DOWNLOAD_COMPLETE);
     SingletonHolder<Notifier>::instance()->notifyDownloadEvent(
-        EVENT_ON_BT_DOWNLOAD_COMPLETE, group);
+        DownloadEvent::EVENT_ON_BT_DOWNLOAD_COMPLETE, group);
   }
   // TODO Currently,when all the checksums
   // are valid, then aria2 goes to seeding mode. Sometimes it is better

@@ -228,9 +228,9 @@ void RpcMethodTest::testAddUri()
     auto res = m.execute(std::move(req), e_.get());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
-                         GroupId::toNumericId(
-                             gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(
+        GroupId::Err::OK,
+        GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
     CPPUNIT_ASSERT_EQUAL(std::string("/sink"),
                          findReservedGroup(e_->getRequestGroupMan().get(), gid)
                              ->getOption()
@@ -346,9 +346,9 @@ void RpcMethodTest::testAddTorrent()
                        .exists());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
-                         GroupId::toNumericId(
-                             gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(
+        GroupId::Err::OK,
+        GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
 
     auto group = findReservedGroup(e_->getRequestGroupMan().get(), gid);
     CPPUNIT_ASSERT(group);
@@ -377,9 +377,9 @@ void RpcMethodTest::testAddTorrent()
     auto res = m.execute(std::move(req), e_.get());
     CPPUNIT_ASSERT_EQUAL(0, res.code);
     a2_gid_t gid;
-    CPPUNIT_ASSERT_EQUAL(GroupId::Err::OK,
-                         GroupId::toNumericId(
-                             gid, downcast<String>(res.param)->s().c_str()));
+    CPPUNIT_ASSERT_EQUAL(
+        GroupId::Err::OK,
+        GroupId::toNumericId(gid, downcast<String>(res.param)->s().c_str()));
     CPPUNIT_ASSERT_EQUAL(dir + "/aria2-0.8.2.tar.bz2",
                          findReservedGroup(e_->getRequestGroupMan().get(), gid)
                              ->getFirstFilePath());
@@ -431,7 +431,6 @@ void RpcMethodTest::testAddTorrent_withPosition()
 }
 
 #endif // ENABLE_BITTORRENT
-
 
 void RpcMethodTest::testGetOption()
 {
@@ -824,7 +823,8 @@ void RpcMethodTest::testGatherStoppedDownload_bt()
   auto d = std::make_shared<DownloadResult>();
   d->gid = GroupId::create();
   d->infoHash = "2089b05ecca3d829cee5497d2703803b52216d19";
-  d->attrs = std::vector<std::shared_ptr<ContextAttribute>>(static_cast<size_t>(ContextAttributeType::MAX));
+  d->attrs = std::vector<std::shared_ptr<ContextAttribute>>(
+      static_cast<size_t>(ContextAttributeType::MAX));
 
   auto torrentAttr = std::make_shared<TorrentAttribute>();
   torrentAttr->creationDate = 1000000007;
@@ -928,7 +928,7 @@ void RpcMethodTest::testGatherBitTorrentMetadata()
   auto modBtAttrs = bittorrent::getTorrentAttrs(dctx);
   modBtAttrs->comment.clear();
   modBtAttrs->creationDate = 0;
-  modBtAttrs->mode = BT_FILE_MODE_NONE;
+  modBtAttrs->mode = BtFileMode::BT_FILE_MODE_NONE;
   modBtAttrs->metadata.clear();
   btDict = Dict::g();
   gatherBitTorrentMetadata(btDict.get(), modBtAttrs);

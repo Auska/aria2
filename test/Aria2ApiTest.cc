@@ -96,21 +96,21 @@ void Aria2ApiTest::testRemovePause()
 
   DownloadHandle* hd = getDownloadHandle(session_, gid);
   CPPUNIT_ASSERT(hd);
-  CPPUNIT_ASSERT_EQUAL(DOWNLOAD_WAITING, hd->getStatus());
+  CPPUNIT_ASSERT_EQUAL(DownloadStatus::DOWNLOAD_WAITING, hd->getStatus());
   deleteDownloadHandle(hd);
 
   CPPUNIT_ASSERT_EQUAL(-1, pauseDownload(session_, (A2Gid)0));
   CPPUNIT_ASSERT_EQUAL(0, pauseDownload(session_, gid));
   hd = getDownloadHandle(session_, gid);
   CPPUNIT_ASSERT(hd);
-  CPPUNIT_ASSERT_EQUAL(DOWNLOAD_PAUSED, hd->getStatus());
+  CPPUNIT_ASSERT_EQUAL(DownloadStatus::DOWNLOAD_PAUSED, hd->getStatus());
   deleteDownloadHandle(hd);
 
   CPPUNIT_ASSERT_EQUAL(-1, unpauseDownload(session_, (A2Gid)0));
   CPPUNIT_ASSERT_EQUAL(0, unpauseDownload(session_, gid));
   hd = getDownloadHandle(session_, gid);
   CPPUNIT_ASSERT(hd);
-  CPPUNIT_ASSERT_EQUAL(DOWNLOAD_WAITING, hd->getStatus());
+  CPPUNIT_ASSERT_EQUAL(DownloadStatus::DOWNLOAD_WAITING, hd->getStatus());
   deleteDownloadHandle(hd);
 
   CPPUNIT_ASSERT_EQUAL(-1, removeDownload(session_, (A2Gid)0));
@@ -129,16 +129,16 @@ void Aria2ApiTest::testChangePosition()
   for (int i = 0; i < N; ++i) {
     CPPUNIT_ASSERT_EQUAL(0, addUri(session_, &gids[i], uris, options));
   }
-  CPPUNIT_ASSERT_EQUAL(-1,
-                       changePosition(session_, (A2Gid)0, -2, OFFSET_MODE_CUR));
-  CPPUNIT_ASSERT_EQUAL(2,
-                       changePosition(session_, gids[4], -2, OFFSET_MODE_CUR));
+  CPPUNIT_ASSERT_EQUAL(
+      -1, changePosition(session_, (A2Gid)0, -2, OffsetMode::OFFSET_MODE_CUR));
+  CPPUNIT_ASSERT_EQUAL(
+      2, changePosition(session_, gids[4], -2, OffsetMode::OFFSET_MODE_CUR));
 
-  CPPUNIT_ASSERT_EQUAL(5,
-                       changePosition(session_, gids[4], 5, OFFSET_MODE_SET));
+  CPPUNIT_ASSERT_EQUAL(
+      5, changePosition(session_, gids[4], 5, OffsetMode::OFFSET_MODE_SET));
 
-  CPPUNIT_ASSERT_EQUAL(7,
-                       changePosition(session_, gids[4], -2, OFFSET_MODE_END));
+  CPPUNIT_ASSERT_EQUAL(
+      7, changePosition(session_, gids[4], -2, OffsetMode::OFFSET_MODE_END));
 }
 
 void Aria2ApiTest::testChangeOption()
@@ -213,7 +213,7 @@ void Aria2ApiTest::testDownloadResultDH()
   gman->addDownloadResult(dr2);
 
   DownloadHandle* hd = getDownloadHandle(session_, dr1->gid->getNumericId());
-  CPPUNIT_ASSERT_EQUAL(DOWNLOAD_ERROR, hd->getStatus());
+  CPPUNIT_ASSERT_EQUAL(DownloadStatus::DOWNLOAD_ERROR, hd->getStatus());
   CPPUNIT_ASSERT_EQUAL((int)error_code::TIME_OUT, hd->getErrorCode());
   CPPUNIT_ASSERT_EQUAL(std::string("mydownload"), hd->getOption(PREF_DIR->k));
   // Don't return hidden option

@@ -97,17 +97,17 @@ namespace {
 const std::string& getMethodName(DownloadEvent event)
 {
   switch (event) {
-  case EVENT_ON_DOWNLOAD_START:
+  case DownloadEvent::EVENT_ON_DOWNLOAD_START:
     return ON_DOWNLOAD_START;
-  case EVENT_ON_DOWNLOAD_PAUSE:
+  case DownloadEvent::EVENT_ON_DOWNLOAD_PAUSE:
     return ON_DOWNLOAD_PAUSE;
-  case EVENT_ON_DOWNLOAD_STOP:
+  case DownloadEvent::EVENT_ON_DOWNLOAD_STOP:
     return ON_DOWNLOAD_STOP;
-  case EVENT_ON_DOWNLOAD_COMPLETE:
+  case DownloadEvent::EVENT_ON_DOWNLOAD_COMPLETE:
     return ON_DOWNLOAD_COMPLETE;
-  case EVENT_ON_DOWNLOAD_ERROR:
+  case DownloadEvent::EVENT_ON_DOWNLOAD_ERROR:
     return ON_DOWNLOAD_ERROR;
-  case EVENT_ON_BT_DOWNLOAD_COMPLETE:
+  case DownloadEvent::EVENT_ON_BT_DOWNLOAD_COMPLETE:
     return ON_BT_DOWNLOAD_COMPLETE;
   default:
     // Not reachable

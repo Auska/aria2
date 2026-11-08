@@ -40,6 +40,7 @@
 #include <sys/types.h>
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 // Libaria2: The aim of this library is provide same functionality
@@ -88,21 +89,21 @@ int libraryDeinit();
  *
  * The type of GID, persistent identifier of each download.
  */
-typedef uint64_t A2Gid;
+using A2Gid = uint64_t;
 
 /**
  * @typedef
  *
  * The type of Key/Value pairs.
  */
-typedef std::vector<std::pair<std::string, std::string>> KeyVals;
+using KeyVals = std::vector<std::pair<std::string, std::string>>;
 
 /**
  * @enum
  *
  * Download event constants
  */
-enum DownloadEvent {
+enum class DownloadEvent {
   /**
    * Indicating download has started.
    */
@@ -142,8 +143,8 @@ enum DownloadEvent {
  * At the moment, the return value is ignored, but the implementation
  * of this callback should return 0 for compatibility.
  */
-typedef int (*DownloadEventCallback)(Session* session, DownloadEvent event,
-                                     A2Gid gid, void* userData);
+using DownloadEventCallback = int (*)(Session* session, DownloadEvent event,
+                                      A2Gid gid, void* userData);
 
 /**
  * @struct
@@ -222,7 +223,7 @@ int sessionFinal(Session* session);
  *
  * Execution mode for :func:`run()`
  */
-enum RUN_MODE {
+enum class RUN_MODE {
   /**
    * :func:`run()` returns when no downloads are left.
    */
@@ -264,7 +265,7 @@ std::string gidToHex(A2Gid gid);
  *
  * Returns GID converted from the textual representation |hex|.
  */
-A2Gid hexToGid(const std::string& hex);
+A2Gid hexToGid(std::string_view hex);
 
 /**
  * @function
@@ -316,7 +317,7 @@ int addUri(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
  * This function returns 0 if it succeeds, or negative error code.
  *
  */
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
+int addTorrent(Session* session, A2Gid* gid, std::string_view torrentFile,
                const std::vector<std::string>& webSeedUris,
                const KeyVals& options, int position = -1);
 
@@ -326,7 +327,7 @@ int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
  * Same as :func:`addTorrent()` with an empty vector as the
  * |webSeedUris|.
  */
-int addTorrent(Session* session, A2Gid* gid, const std::string& torrentFile,
+int addTorrent(Session* session, A2Gid* gid, std::string_view torrentFile,
                const KeyVals& options, int position = -1);
 
 /**
@@ -415,7 +416,7 @@ int changeOption(Session* session, A2Gid gid, const KeyVals& options);
  * Returns global option denoted by the |name|. If such option is not
  * available, returns empty string.
  */
-const std::string& getGlobalOption(Session* session, const std::string& name);
+const std::string& getGlobalOption(Session* session, std::string_view name);
 
 /**
  * @function
@@ -499,7 +500,7 @@ GlobalStat getGlobalStat(Session* session);
  *
  * Constants how to re-position a download.
  */
-enum OffsetMode {
+enum class OffsetMode {
   /**
    * Moves the download to a position relative to the beginning of the
    * queue.
@@ -559,7 +560,7 @@ int shutdown(Session* session, bool force = false);
  *
  * The status of URI.
  */
-enum UriStatus {
+enum class UriStatus {
   /**
    * Indicating the URI has been used.
    */
@@ -634,7 +635,7 @@ struct FileData {
  *
  * BitTorrent file mode
  */
-enum BtFileMode {
+enum class BtFileMode {
   /**
    * Indicating no mode. This value is used when file mode is not
    * available.
@@ -688,7 +689,7 @@ struct BtMetaInfoData {
  *
  * The status of download item.
  */
-enum DownloadStatus {
+enum class DownloadStatus {
   /**
    * Indicating currently downloading/seeding.
    */
@@ -834,7 +835,7 @@ public:
    * :c:macro:`DOWNLOAD_ACTIVE`, :c:macro:`DOWNLOAD_PAUSED` or
    * :c:macro:`DOWNLOAD_WAITING` will return empty string.
    */
-  virtual const std::string& getOption(const std::string& name) = 0;
+  virtual const std::string& getOption(std::string_view name) = 0;
   /**
    * Returns options for this download. Note that this function does
    * not return options which have no default value and have not been

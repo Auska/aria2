@@ -277,13 +277,13 @@ void executeStopHook(const std::shared_ptr<RequestGroup>& group,
   }
 
   if (result == error_code::FINISHED) {
-    notifyDownloadEvent(EVENT_ON_DOWNLOAD_COMPLETE, group);
+    notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_COMPLETE, group);
   }
   else if (result != error_code::IN_PROGRESS && result != error_code::REMOVED) {
-    notifyDownloadEvent(EVENT_ON_DOWNLOAD_ERROR, group);
+    notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_ERROR, group);
   }
   else {
-    notifyDownloadEvent(EVENT_ON_DOWNLOAD_STOP, group);
+    notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_STOP, group);
   }
 }
 
@@ -450,7 +450,7 @@ public:
         else {
           util::executeHookByOptName(group, e_->getOption(),
                                      PREF_ON_DOWNLOAD_PAUSE);
-          notifyDownloadEvent(EVENT_ON_DOWNLOAD_PAUSE, group);
+          notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_PAUSE, group);
         }
         // TODO Should we have to prepend spend uris to remaining uris
         // in case PREF_REUSE_URI is disabled?
@@ -581,7 +581,7 @@ void RequestGroupMan::fillRequestGroupFromReserver(DownloadEngine* e)
 
     util::executeHookByOptName(groupToAdd, e->getOption(),
                                PREF_ON_DOWNLOAD_START);
-    notifyDownloadEvent(EVENT_ON_DOWNLOAD_START, groupToAdd);
+    notifyDownloadEvent(DownloadEvent::EVENT_ON_DOWNLOAD_START, groupToAdd);
   }
   if (!pending.empty()) {
     reservedGroups_.insert(reservedGroups_.begin(), RequestGroupKeyFunc(),

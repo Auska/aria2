@@ -37,6 +37,7 @@
 
 #include "common.h"
 #include <string>
+#include <string_view>
 
 namespace aria2 {
 
@@ -60,7 +61,7 @@ PrefPtr i2p(size_t id);
 
 // Returns Pref whose keyword is k. If no such Pref is found, returns
 // special null Pref whose ID is 0.
-PrefPtr k2p(const std::string& k);
+PrefPtr k2p(std::string_view k);
 
 // Deletes resources allocated for preferences. Call this function at
 // the end of the program only once.

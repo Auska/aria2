@@ -231,7 +231,8 @@ void BittorrentHelperTest::testGetFileModeMulti()
   std::shared_ptr<DownloadContext> dctx(new DownloadContext());
   load(A2_TEST_DIR "/test.torrent", dctx, option_);
 
-  CPPUNIT_ASSERT_EQUAL(BT_FILE_MODE_MULTI, getTorrentAttrs(dctx)->mode);
+  CPPUNIT_ASSERT_EQUAL(BtFileMode::BT_FILE_MODE_MULTI,
+                       getTorrentAttrs(dctx)->mode);
 }
 
 void BittorrentHelperTest::testGetFileModeSingle()
@@ -239,7 +240,8 @@ void BittorrentHelperTest::testGetFileModeSingle()
   std::shared_ptr<DownloadContext> dctx(new DownloadContext());
   load(A2_TEST_DIR "/single.torrent", dctx, option_);
 
-  CPPUNIT_ASSERT_EQUAL(BT_FILE_MODE_SINGLE, getTorrentAttrs(dctx)->mode);
+  CPPUNIT_ASSERT_EQUAL(BtFileMode::BT_FILE_MODE_SINGLE,
+                       getTorrentAttrs(dctx)->mode);
 }
 
 void BittorrentHelperTest::testGetNameMulti()
@@ -947,7 +949,8 @@ void BittorrentHelperTest::testPackcompact()
                        util::toHex(std::as_bytes(std::span{compact, 18})));
 
   CPPUNIT_ASSERT_EQUAL((size_t)6, packcompact(compact, "192.168.0.1", 6881));
-  CPPUNIT_ASSERT_EQUAL(std::string("c0a800011ae1"), util::toHex(std::as_bytes(std::span{compact, 6})));
+  CPPUNIT_ASSERT_EQUAL(std::string("c0a800011ae1"),
+                       util::toHex(std::as_bytes(std::span{compact, 6})));
 
   CPPUNIT_ASSERT_EQUAL((size_t)0, packcompact(compact, "badaddr", 6881));
 }
