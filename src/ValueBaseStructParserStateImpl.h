@@ -46,8 +46,8 @@ public:
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
 
-  virtual void endElement(ValueBaseStructParserStateMachine* psm,
-                          StructElementType elementType) override
+  virtual void endElement(ValueBaseStructParserStateMachine*,
+                          StructElementType) override
   {
   }
 };
@@ -59,8 +59,8 @@ public:
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
 
-  virtual void endElement(ValueBaseStructParserStateMachine* psm,
-                          StructElementType elementType) override
+  virtual void endElement(ValueBaseStructParserStateMachine*,
+                          StructElementType) override
   {
   }
 };
@@ -69,8 +69,8 @@ class DictKeyValueBaseStructParserState : public ValueBaseStructParserState {
 public:
   virtual ~DictKeyValueBaseStructParserState() noexcept = default;
 
-  virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            StructElementType elementType) override
+  virtual void beginElement(ValueBaseStructParserStateMachine*,
+                            StructElementType) override
   {
   }
 
@@ -94,8 +94,8 @@ public:
   virtual void beginElement(ValueBaseStructParserStateMachine* psm,
                             StructElementType elementType) override;
 
-  virtual void endElement(ValueBaseStructParserStateMachine* psm,
-                          StructElementType elementType) override
+  virtual void endElement(ValueBaseStructParserStateMachine*,
+                          StructElementType) override
   {
   }
 };
@@ -113,8 +113,8 @@ class StringValueBaseStructParserState : public ValueBaseStructParserState {
 public:
   virtual ~StringValueBaseStructParserState() noexcept = default;
 
-  virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            StructElementType elementType) override
+  virtual void beginElement(ValueBaseStructParserStateMachine*,
+                            StructElementType) override
   {
   }
 
@@ -126,8 +126,8 @@ class NumberValueBaseStructParserState : public ValueBaseStructParserState {
 public:
   virtual ~NumberValueBaseStructParserState() noexcept = default;
 
-  virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            StructElementType elementType) override
+  virtual void beginElement(ValueBaseStructParserStateMachine*,
+                            StructElementType) override
   {
   }
 
@@ -139,8 +139,8 @@ class BoolValueBaseStructParserState : public ValueBaseStructParserState {
 public:
   virtual ~BoolValueBaseStructParserState() noexcept = default;
 
-  virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            StructElementType elementType) override
+  virtual void beginElement(ValueBaseStructParserStateMachine*,
+                            StructElementType) override
   {
   }
 
@@ -152,8 +152,8 @@ class NullValueBaseStructParserState : public ValueBaseStructParserState {
 public:
   virtual ~NullValueBaseStructParserState() noexcept = default;
 
-  virtual void beginElement(ValueBaseStructParserStateMachine* psm,
-                            StructElementType elementType) override
+  virtual void beginElement(ValueBaseStructParserStateMachine*,
+                            StructElementType) override
   {
   }
 

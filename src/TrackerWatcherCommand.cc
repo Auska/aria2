@@ -81,10 +81,7 @@ bool HTTPAnnRequest::stopped() const { return rg_->getNumCommand() == 0; }
 
 bool HTTPAnnRequest::success() const { return rg_->downloadFinished(); }
 
-void HTTPAnnRequest::stop(DownloadEngine* e)
-{
-  rg_->setForceHaltRequested(true);
-}
+void HTTPAnnRequest::stop(DownloadEngine*) { rg_->setForceHaltRequested(true); }
 
 bool HTTPAnnRequest::issue(DownloadEngine* e)
 {
@@ -151,7 +148,7 @@ bool UDPAnnRequest::success() const
          req_->error == UDPTrackerError::Success;
 }
 
-void UDPAnnRequest::stop(DownloadEngine* e)
+void UDPAnnRequest::stop(DownloadEngine*)
 {
   if (req_) {
     req_->user_data = nullptr;

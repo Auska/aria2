@@ -50,10 +50,7 @@ public:
 
   virtual ~ValueBaseDiskWriter() noexcept = default;
 
-  virtual void initAndOpenFile(int64_t totalLength = 0) override
-  {
-    parser_.reset();
-  }
+  virtual void initAndOpenFile(int64_t = 0) override { parser_.reset(); }
 
   virtual void openFile(int64_t totalLength = 0) override
   {
@@ -69,17 +66,13 @@ public:
 
   virtual int64_t size() override { return 0; }
 
-  virtual void writeData(std::span<const std::byte> data,
-                         int64_t offset) override
+  virtual void writeData(std::span<const std::byte> data, int64_t) override
   {
     // Return value is ignored here but handled in finalize()
     parser_.parseUpdate(data);
   }
 
-  virtual size_t readData(std::span<std::byte> data, int64_t offset) override
-  {
-    return 0;
-  }
+  virtual size_t readData(std::span<std::byte>, int64_t) override { return 0; }
 
   // Returns 0 on success, or a negative error code on failure.
   int finalize()

@@ -41,8 +41,7 @@ public:
   class MockDHTTaskFactory2 : public MockDHTTaskFactory {
   public:
     virtual std::shared_ptr<DHTTask>
-    createPingTask(const std::shared_ptr<DHTNode>& remoteNode,
-                   int numRetry) override
+    createPingTask(const std::shared_ptr<DHTNode>& remoteNode, int) override
     {
       return std::shared_ptr<DHTTask>(new MockDHTTask(remoteNode));
     }

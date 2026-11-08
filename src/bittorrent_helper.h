@@ -306,9 +306,9 @@ void extractPeer(const ValueBase* peerData, int family, OutputIterator dest)
       }
     }
 
-    virtual void visit(const Integer& v) override {}
-    virtual void visit(const Bool& v) override {}
-    virtual void visit(const Null& v) override {}
+    virtual void visit(const Integer&) override {}
+    virtual void visit(const Bool&) override {}
+    virtual void visit(const Null&) override {}
 
     virtual void visit(const List& peerData) override
     {
@@ -329,7 +329,7 @@ void extractPeer(const ValueBase* peerData, int family, OutputIterator dest)
       }
     }
 
-    virtual void visit(const Dict& v) override {}
+    virtual void visit(const Dict&) override {}
   };
   if (peerData) {
     PeerListValueBaseVisitor visitor(dest, family);

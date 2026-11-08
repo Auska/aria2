@@ -93,7 +93,7 @@ std::string BtExtendedMessage::toString() const
 
 std::unique_ptr<BtExtendedMessage>
 BtExtendedMessage::create(ExtensionMessageFactory* factory,
-                          const std::shared_ptr<Peer>& peer,
+                          const std::shared_ptr<Peer>&,
                           std::span<const std::byte> data)
 {
   bittorrent::assertPayloadLengthGreater(1, data.size(), NAME);

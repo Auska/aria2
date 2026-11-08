@@ -67,8 +67,8 @@ std::shared_ptr<UDPTrackerRequest> createAnnounce(const std::string& remoteAddr,
 } // namespace
 
 namespace {
-ssize_t createErrorReply(unsigned char* data, size_t len,
-                         uint32_t transactionId, const std::string& errorString)
+ssize_t createErrorReply(unsigned char* data, size_t, uint32_t transactionId,
+                         const std::string& errorString)
 {
   bittorrent::setIntParam(data, to_underlying(UDPTrackerAction::Error));
   bittorrent::setIntParam(data + 4, transactionId);
@@ -78,8 +78,8 @@ ssize_t createErrorReply(unsigned char* data, size_t len,
 } // namespace
 
 namespace {
-ssize_t createConnectReply(unsigned char* data, size_t len,
-                           uint64_t connectionId, uint32_t transactionId)
+ssize_t createConnectReply(unsigned char* data, size_t, uint64_t connectionId,
+                           uint32_t transactionId)
 {
   bittorrent::setIntParam(data, to_underlying(UDPTrackerAction::Connect));
   bittorrent::setIntParam(data + 4, transactionId);
@@ -89,8 +89,8 @@ ssize_t createConnectReply(unsigned char* data, size_t len,
 } // namespace
 
 namespace {
-ssize_t createAnnounceReply(unsigned char* data, size_t len,
-                            uint32_t transactionId, int numPeers = 0)
+ssize_t createAnnounceReply(unsigned char* data, size_t, uint32_t transactionId,
+                            int numPeers = 0)
 {
   bittorrent::setIntParam(data, to_underlying(UDPTrackerAction::Announce));
   bittorrent::setIntParam(data + 4, transactionId);
@@ -146,8 +146,7 @@ void UDPTrackerClientTest::testCreateUDPTrackerAnnounce()
   CPPUNIT_ASSERT_EQUAL(req->left, (int64_t)bittorrent::getLLIntParam(data, 64));
   CPPUNIT_ASSERT_EQUAL(req->uploaded,
                        (int64_t)bittorrent::getLLIntParam(data, 72));
-  CPPUNIT_ASSERT_EQUAL((int)req->event,
-                       (int)bittorrent::getIntParam(data, 80));
+  CPPUNIT_ASSERT_EQUAL((int)req->event, (int)bittorrent::getIntParam(data, 80));
   CPPUNIT_ASSERT_EQUAL(req->ip, bittorrent::getIntParam(data, 84));
   CPPUNIT_ASSERT_EQUAL(req->key, bittorrent::getIntParam(data, 88));
   CPPUNIT_ASSERT_EQUAL(req->numWant,
@@ -199,11 +198,12 @@ void UDPTrackerClientTest::testConnectFollowedByAnnounce()
 
   uint64_t connectionId = 12345;
   rv = createConnectReply(data, sizeof(data), connectionId, transactionId);
-  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                       now);
+  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr,
+                       req1->remotePort, now);
   CPPUNIT_ASSERT_EQUAL(0, (int)rv);
   if (rv == 0) {
-    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Connect, (int)recvReq->action);
+    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Connect,
+                         (int)recvReq->action);
   }
   // Now 2 requests get back to pending
   CPPUNIT_ASSERT_EQUAL((size_t)2, tr.getPendingRequests().size());
@@ -242,22 +242,24 @@ void UDPTrackerClientTest::testConnectFollowedByAnnounce()
 
   // Reply for req2
   rv = createAnnounceReply(data, sizeof(data), transactionId2);
-  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req2->remoteAddr, req2->remotePort,
-                       now);
+  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req2->remoteAddr,
+                       req2->remotePort, now);
   CPPUNIT_ASSERT_EQUAL(0, (int)rv);
   if (rv == 0) {
-    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Announce, (int)recvReq->action);
+    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Announce,
+                         (int)recvReq->action);
   }
   CPPUNIT_ASSERT_EQUAL((int)UDPTrackerState::Complete, (int)req2->state);
   CPPUNIT_ASSERT_EQUAL((int)UDPTrackerError::Success, (int)req2->error);
 
   // Reply for req1
   rv = createAnnounceReply(data, sizeof(data), transactionId1, 2);
-  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                       now);
+  rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr,
+                       req1->remotePort, now);
   CPPUNIT_ASSERT_EQUAL(0, (int)rv);
   if (rv == 0) {
-    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Announce, (int)recvReq->action);
+    CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Announce,
+                         (int)recvReq->action);
   }
   CPPUNIT_ASSERT_EQUAL((int)UDPTrackerState::Complete, (int)req1->state);
   CPPUNIT_ASSERT_EQUAL((int)UDPTrackerError::Success, (int)req1->error);
@@ -338,11 +340,12 @@ void UDPTrackerClientTest::testRequestFailure()
     tr.requestSent(now);
 
     rv = createErrorReply(data, sizeof(data), transactionId, "error");
-    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                         now);
+    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv),
+                         req1->remoteAddr, req1->remotePort, now);
     CPPUNIT_ASSERT_EQUAL((ssize_t)0, rv);
     if (rv == 0) {
-      CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Connect, (int)recvReq->action);
+      CPPUNIT_ASSERT_EQUAL((int32_t)UDPTrackerAction::Connect,
+                           (int)recvReq->action);
     }
     CPPUNIT_ASSERT_EQUAL((int)UDPTrackerState::Complete, (int)req1->state);
     CPPUNIT_ASSERT_EQUAL((int)UDPTrackerError::Tracker, (int)req1->error);
@@ -366,8 +369,8 @@ void UDPTrackerClientTest::testRequestFailure()
 
     uint64_t connectionId = 12345;
     rv = createConnectReply(data, sizeof(data), connectionId, transactionId);
-    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                         now);
+    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv),
+                         req1->remoteAddr, req1->remotePort, now);
     CPPUNIT_ASSERT_EQUAL(0, (int)rv);
 
     rv = tr.createRequest(asBytes(data), remoteAddr, remotePort, now);
@@ -377,8 +380,8 @@ void UDPTrackerClientTest::testRequestFailure()
     tr.requestSent(now);
 
     rv = createErrorReply(data, sizeof(data), transactionId, "announce error");
-    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                         now);
+    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv),
+                         req1->remoteAddr, req1->remotePort, now);
     CPPUNIT_ASSERT_EQUAL((int)UDPTrackerState::Complete, (int)req1->state);
     CPPUNIT_ASSERT_EQUAL((int)UDPTrackerError::Tracker, (int)req1->error);
     CPPUNIT_ASSERT(tr.getConnectRequests().empty());
@@ -446,8 +449,8 @@ void UDPTrackerClientTest::testTimeout()
 
     uint64_t connectionId = 12345;
     rv = createConnectReply(data, sizeof(data), connectionId, transactionId);
-    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv), req1->remoteAddr, req1->remotePort,
-                         now);
+    rv = tr.receiveReply(recvReq, asBytes(data).subspan(0, rv),
+                         req1->remoteAddr, req1->remotePort, now);
     CPPUNIT_ASSERT_EQUAL(0, (int)rv);
 
     rv = tr.createRequest(asBytes(data), remoteAddr, remotePort, now);

@@ -125,7 +125,7 @@ protected:
   virtual void getNodesFromMessage(std::vector<std::shared_ptr<DHTNode>>& nodes,
                                    const ResponseMessage* message) = 0;
 
-  virtual void onReceivedInternal(const ResponseMessage* message) {}
+  virtual void onReceivedInternal(const ResponseMessage*) {}
 
   virtual bool needsAdditionalOutgoingMessage() { return true; }
 

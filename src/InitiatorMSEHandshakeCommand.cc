@@ -215,7 +215,7 @@ void InitiatorMSEHandshakeCommand::tryNewPeer()
   }
 }
 
-bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t wait)
+bool InitiatorMSEHandshakeCommand::prepareForNextPeer(time_t)
 {
   if (sequence_ == Seq::SEND_KEY) {
     // We don't try legacy handshake when connection did not

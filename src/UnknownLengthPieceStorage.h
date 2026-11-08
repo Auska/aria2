@@ -190,7 +190,7 @@ public:
 
   virtual const unsigned char* getBitfield() override;
 
-  virtual void setBitfield(std::span<const unsigned char> bitfield) override {}
+  virtual void setBitfield(std::span<const unsigned char>) override {}
 
   virtual size_t getBitfieldLength() override;
 
@@ -200,32 +200,29 @@ public:
 
   virtual void enterEndGame() override {}
 
-  virtual void setEndGamePieceNum(size_t num) override {}
+  virtual void setEndGamePieceNum(size_t) override {}
 
   virtual std::shared_ptr<DiskAdaptor> getDiskAdaptor() override;
 
   virtual WrDiskCache* getWrDiskCache() override { return nullptr; }
 
-  virtual void flushWrDiskCacheEntry(bool releaseEntries) override {}
+  virtual void flushWrDiskCacheEntry(bool) override {}
 
   virtual int32_t getPieceLength(size_t index) override;
 
-  virtual void advertisePiece(cuid_t cuid, size_t index,
-                              Timer registeredTime) override
-  {
-  }
+  virtual void advertisePiece(cuid_t, size_t, Timer) override {}
 
   /**
    * indexes is filled with piece index which is not advertised by the
    * caller command and newer than lastHaveIndex.
    */
   virtual std::pair<std::vector<size_t>, uint64_t>
-  getAdvertisedPieceIndexes(cuid_t myCuid, uint64_t lastHaveIndex) override
+  getAdvertisedPieceIndexes(cuid_t, uint64_t) override
   {
     throw FATAL_EXCEPTION("Not Implemented!");
   }
 
-  virtual void removeAdvertisedPiece(const Timer& expiry) override {}
+  virtual void removeAdvertisedPiece(const Timer&) override {}
 
   /**
    * Sets all bits in bitfield to 1.
@@ -241,7 +238,7 @@ public:
    * class.
    */
   virtual void
-  addInFlightPiece(const std::vector<std::shared_ptr<Piece>>& pieces) override
+  addInFlightPiece(const std::vector<std::shared_ptr<Piece>>&) override
   {
   }
 
@@ -250,24 +247,18 @@ public:
   virtual void
   getInFlightPieces(std::vector<std::shared_ptr<Piece>>& pieces) override;
 
-  virtual void addPieceStats(size_t index) override {}
+  virtual void addPieceStats(size_t) override {}
 
-  virtual void addPieceStats(std::span<const unsigned char> bitfield) override
+  virtual void addPieceStats(std::span<const unsigned char>) override {}
+
+  virtual void subtractPieceStats(std::span<const unsigned char>) override {}
+
+  virtual void updatePieceStats(std::span<const unsigned char>,
+                                std::span<const unsigned char>) override
   {
   }
 
-  virtual void
-  subtractPieceStats(std::span<const unsigned char> bitfield) override
-  {
-  }
-
-  virtual void
-  updatePieceStats(std::span<const unsigned char> newBitfield,
-                   std::span<const unsigned char> oldBitfield) override
-  {
-  }
-
-  virtual size_t getNextUsedIndex(size_t index) override { return 0; }
+  virtual size_t getNextUsedIndex(size_t) override { return 0; }
 
   void setDiskWriterFactory(
       const std::shared_ptr<DiskWriterFactory>& diskWriterFactory);

@@ -46,51 +46,43 @@ public:
 
 #ifdef ENABLE_BITTORRENT
 
-  virtual bool hasMissingPiece(const std::shared_ptr<Peer>& peer) override
+  virtual bool hasMissingPiece(const std::shared_ptr<Peer>&) override
   {
     return false;
   }
 
-  virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>& pieces,
-                               size_t minMissingBlocks,
-                               const std::shared_ptr<Peer>& peer,
-                               cuid_t cuid) override
+  virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>&, size_t,
+                               const std::shared_ptr<Peer>&, cuid_t) override
   {
   }
 
-  virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>& pieces,
-                               size_t minMissingBlocks,
-                               const std::shared_ptr<Peer>& peer,
-                               const std::vector<size_t>& excludedIndexes,
-                               cuid_t cuid) override
+  virtual void getMissingPiece(std::vector<std::shared_ptr<Piece>>&, size_t,
+                               const std::shared_ptr<Peer>&,
+                               const std::vector<size_t>&, cuid_t) override
   {
   }
 
-  virtual void getMissingFastPiece(std::vector<std::shared_ptr<Piece>>& pieces,
-                                   size_t minMissingBlocks,
-                                   const std::shared_ptr<Peer>& peer,
-                                   cuid_t cuid) override
+  virtual void getMissingFastPiece(std::vector<std::shared_ptr<Piece>>&, size_t,
+                                   const std::shared_ptr<Peer>&,
+                                   cuid_t) override
   {
   }
 
-  virtual void getMissingFastPiece(std::vector<std::shared_ptr<Piece>>& pieces,
-                                   size_t minMissingBlocks,
-                                   const std::shared_ptr<Peer>& peer,
-                                   const std::vector<size_t>& excludedIndexes,
-                                   cuid_t cuid) override
+  virtual void getMissingFastPiece(std::vector<std::shared_ptr<Piece>>&, size_t,
+                                   const std::shared_ptr<Peer>&,
+                                   const std::vector<size_t>&, cuid_t) override
   {
   }
 
-  virtual std::shared_ptr<Piece>
-  getMissingPiece(const std::shared_ptr<Peer>& peer, cuid_t cuid) override
+  virtual std::shared_ptr<Piece> getMissingPiece(const std::shared_ptr<Peer>&,
+                                                 cuid_t) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
 
-  virtual std::shared_ptr<Piece>
-  getMissingPiece(const std::shared_ptr<Peer>& peer,
-                  const std::vector<size_t>& excludedIndexes,
-                  cuid_t cuid) override
+  virtual std::shared_ptr<Piece> getMissingPiece(const std::shared_ptr<Peer>&,
+                                                 const std::vector<size_t>&,
+                                                 cuid_t) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
@@ -100,38 +92,32 @@ public:
   virtual bool hasMissingUnusedPiece() override { return false; }
 
   virtual std::shared_ptr<Piece>
-  getMissingPiece(size_t minSplitSize,
-                  std::span<const unsigned char> ignoreBitfield,
-                  cuid_t cuid) override
+  getMissingPiece(size_t, std::span<const unsigned char>, cuid_t) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
 
-  virtual std::shared_ptr<Piece> getMissingPiece(size_t index,
-                                                 cuid_t cuid) override
+  virtual std::shared_ptr<Piece> getMissingPiece(size_t, cuid_t) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
 
-  virtual bool isPieceUsed(size_t index) override { return false; }
+  virtual bool isPieceUsed(size_t) override { return false; }
 
-  virtual void markPieceMissing(size_t index) override {}
+  virtual void markPieceMissing(size_t) override {}
 
   virtual void markPiecesDone(int64_t) override {}
 
-  virtual std::shared_ptr<Piece> getPiece(size_t index) override
+  virtual std::shared_ptr<Piece> getPiece(size_t) override
   {
     return std::shared_ptr<Piece>(new Piece());
   }
 
-  virtual void completePiece(const std::shared_ptr<Piece>& piece) override {}
+  virtual void completePiece(const std::shared_ptr<Piece>&) override {}
 
-  virtual void cancelPiece(const std::shared_ptr<Piece>& piece,
-                           cuid_t cuid) override
-  {
-  }
+  virtual void cancelPiece(const std::shared_ptr<Piece>&, cuid_t) override {}
 
-  virtual bool hasPiece(size_t index) override { return false; }
+  virtual bool hasPiece(size_t) override { return false; }
 
   virtual int64_t getTotalLength() override { return totalLength; }
 
@@ -210,7 +196,7 @@ public:
 
   virtual bool isEndGame() override { return endGame; }
 
-  virtual void setEndGamePieceNum(size_t num) override {}
+  virtual void setEndGamePieceNum(size_t) override {}
 
   virtual void enterEndGame() override { this->endGame = true; }
 
@@ -221,7 +207,7 @@ public:
 
   virtual WrDiskCache* getWrDiskCache() override { return 0; }
 
-  virtual void flushWrDiskCacheEntry(bool releaseEntries) override {}
+  virtual void flushWrDiskCacheEntry(bool) override {}
 
   void setDiskAdaptor(const std::shared_ptr<DiskAdaptor>& adaptor)
   {
@@ -235,18 +221,15 @@ public:
 
   void addPieceLengthList(int32_t length) { pieceLengthList.push_back(length); }
 
-  virtual void advertisePiece(cuid_t cuid, size_t index,
-                              Timer registeredTime) override
-  {
-  }
+  virtual void advertisePiece(cuid_t, size_t, Timer) override {}
 
   virtual std::pair<std::vector<size_t>, uint64_t>
-  getAdvertisedPieceIndexes(cuid_t myCuid, uint64_t lastHaveIndex) override
+  getAdvertisedPieceIndexes(cuid_t, uint64_t) override
   {
     throw FATAL_EXCEPTION("Not Implemented!");
   }
 
-  virtual void removeAdvertisedPiece(const Timer& expiry) override {}
+  virtual void removeAdvertisedPiece(const Timer&) override {}
 
   virtual void markAllPiecesDone() override {}
 
@@ -264,24 +247,18 @@ public:
     pieces.insert(pieces.end(), inFlightPieces.begin(), inFlightPieces.end());
   }
 
-  virtual void addPieceStats(size_t index) override {}
+  virtual void addPieceStats(size_t) override {}
 
-  virtual void addPieceStats(std::span<const unsigned char> bitfield) override
+  virtual void addPieceStats(std::span<const unsigned char>) override {}
+
+  virtual void subtractPieceStats(std::span<const unsigned char>) override {}
+
+  virtual void updatePieceStats(std::span<const unsigned char>,
+                                std::span<const unsigned char>) override
   {
   }
 
-  virtual void
-  subtractPieceStats(std::span<const unsigned char> bitfield) override
-  {
-  }
-
-  virtual void
-  updatePieceStats(std::span<const unsigned char> newBitfield,
-                   std::span<const unsigned char> oldBitfield) override
-  {
-  }
-
-  virtual size_t getNextUsedIndex(size_t index) override { return 0; }
+  virtual size_t getNextUsedIndex(size_t) override { return 0; }
 
   virtual void onDownloadIncomplete() override {}
 };

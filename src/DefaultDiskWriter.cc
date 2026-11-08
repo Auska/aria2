@@ -43,6 +43,6 @@ DefaultDiskWriter::DefaultDiskWriter(const std::string& filename)
 
 DefaultDiskWriter::~DefaultDiskWriter() noexcept = default;
 
-void DefaultDiskWriter::initAndOpenFile(int64_t totalLength) { createFile(); }
+void DefaultDiskWriter::initAndOpenFile(int64_t) { createFile(); }
 
 } // namespace aria2

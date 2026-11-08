@@ -65,13 +65,13 @@ void DHTPingTask::addMessage()
 
 void DHTPingTask::startup() { addMessage(); }
 
-void DHTPingTask::onReceived(const DHTPingReplyMessage* message)
+void DHTPingTask::onReceived(const DHTPingReplyMessage*)
 {
   pingSuccessful_ = true;
   setFinished(true);
 }
 
-void DHTPingTask::onTimeout(const std::shared_ptr<DHTNode>& node)
+void DHTPingTask::onTimeout(const std::shared_ptr<DHTNode>&)
 {
   ++numRetry_;
   if (numRetry_ >= numMaxRetry_) {

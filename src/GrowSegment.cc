@@ -54,7 +54,7 @@ void GrowSegment::updateWrittenLength(int64_t bytes)
 
 std::string GrowSegment::getDigest() { return A2STR::NIL; }
 
-void GrowSegment::clear(WrDiskCache* diskCache)
+void GrowSegment::clear(WrDiskCache*)
 {
   writtenLength_ = 0;
   // cache won't be used in this object.

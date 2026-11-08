@@ -65,24 +65,21 @@ public:
 
   virtual void validate() override {}
 
-  virtual void onAbortOutstandingRequestEvent(
-      const BtAbortOutstandingRequestEvent& event) override
+  virtual void
+  onAbortOutstandingRequestEvent(const BtAbortOutstandingRequestEvent&) override
   {
   }
 
-  virtual void onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event)
-      override
+  virtual void
+  onCancelSendingPieceEvent(const BtCancelSendingPieceEvent&) override
   {
   }
 
-  virtual void onChokingEvent(const BtChokingEvent& event) override {}
+  virtual void onChokingEvent(const BtChokingEvent&) override {}
 
   virtual void onQueued() override {}
 
-  virtual std::string toString() const override
-  {
-    return "MockBtMessage";
-  }
+  virtual std::string toString() const override { return "MockBtMessage"; }
 };
 
 template <typename T> class WrapBtMessage : public MockBtMessage {

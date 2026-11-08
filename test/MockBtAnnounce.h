@@ -24,8 +24,7 @@ public:
   virtual std::string getAnnounceUrl() override { return announceUrl; }
 
   virtual std::shared_ptr<UDPTrackerRequest>
-  createUDPTrackerRequest(std::string_view remoteAddr, uint16_t remotePort,
-                          uint16_t localPort) override
+  createUDPTrackerRequest(std::string_view, uint16_t, uint16_t) override
   {
     return nullptr;
   }
@@ -42,13 +41,10 @@ public:
 
   virtual void resetAnnounce() override {}
 
-  virtual void
-  processAnnounceResponse(std::span<const std::byte> trackerResponse) override
-  {
-  }
+  virtual void processAnnounceResponse(std::span<const std::byte>) override {}
 
-  virtual void processUDPTrackerResponse(
-      const std::shared_ptr<UDPTrackerRequest>& req) override
+  virtual void
+  processUDPTrackerResponse(const std::shared_ptr<UDPTrackerRequest>&) override
   {
   }
 
@@ -56,9 +52,9 @@ public:
 
   virtual void shuffleAnnounce() override {}
 
-  virtual void overrideMinInterval(std::chrono::seconds interval) override {}
+  virtual void overrideMinInterval(std::chrono::seconds) override {}
 
-  virtual void setTcpPort(uint16_t port) override {}
+  virtual void setTcpPort(uint16_t) override {}
 
   void setPeerId(const std::string& peerId) { this->peerId = peerId; }
 };

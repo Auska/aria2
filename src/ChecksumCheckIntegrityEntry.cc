@@ -70,7 +70,7 @@ void ChecksumCheckIntegrityEntry::initValidator()
 }
 
 void ChecksumCheckIntegrityEntry::onDownloadFinished(
-    std::vector<std::unique_ptr<Command>>& commands, DownloadEngine* e)
+    std::vector<std::unique_ptr<Command>>&, DownloadEngine*)
 {
 }
 

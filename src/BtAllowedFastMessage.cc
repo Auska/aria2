@@ -56,8 +56,8 @@ BtAllowedFastMessage::create(std::span<const std::byte> data)
 void BtAllowedFastMessage::doReceivedAction()
 {
   if (!getPeer()->isFastExtensionEnabled()) {
-    throw DL_ABORT_EX(fmt("{} received while fast extension is disabled",
-                          toString()));
+    throw DL_ABORT_EX(
+        fmt("{} received while fast extension is disabled", toString()));
   }
   if (isMetadataGetMode()) {
     return;
@@ -71,7 +71,7 @@ struct ThisProgressUpdate : public ProgressUpdate {
       : peer(std::move(peer)), index(index)
   {
   }
-  virtual void update(size_t length, bool complete) override
+  virtual void update(size_t, bool complete) override
   {
     if (complete) {
       peer->addAmAllowedIndex(index);

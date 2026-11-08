@@ -52,10 +52,7 @@ public:
     return messageType_;
   }
 
-  virtual std::string toString() const override
-  {
-    return "MockDHTMessage";
-  }
+  virtual std::string toString() const override { return "MockDHTMessage"; }
 };
 
 class MockDHTQueryMessage : public DHTQueryMessage {
@@ -91,15 +88,9 @@ public:
     return messageType_;
   }
 
-  virtual std::string toString() const override
-  {
-    return "MockDHTMessage";
-  }
+  virtual std::string toString() const override { return "MockDHTMessage"; }
 
-  virtual std::unique_ptr<Dict> getArgument() override
-  {
-    return Dict::g();
-  }
+  virtual std::unique_ptr<Dict> getArgument() override { return Dict::g(); }
 };
 
 class MockDHTResponseMessage : public DHTResponseMessage {
@@ -135,17 +126,11 @@ public:
     return messageType_;
   }
 
-  virtual std::string toString() const override
-  {
-    return "MockDHTMessage";
-  }
+  virtual std::string toString() const override { return "MockDHTMessage"; }
 
-  virtual std::unique_ptr<Dict> getResponse() override
-  {
-    return Dict::g();
-  }
+  virtual std::unique_ptr<Dict> getResponse() override { return Dict::g(); }
 
-  virtual void accept(DHTMessageCallback* callback) override {}
+  virtual void accept(DHTMessageCallback*) override {}
 };
 
 } // namespace aria2

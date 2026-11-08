@@ -10,14 +10,12 @@ public:
   virtual ~MockDHTTaskFactory() {}
 
   virtual std::shared_ptr<DHTTask>
-  createPingTask(const std::shared_ptr<DHTNode>& remoteNode,
-                 int numRetry = 0) override
+  createPingTask(const std::shared_ptr<DHTNode>&, int = 0) override
   {
     return nullptr;
   }
 
-  virtual std::shared_ptr<DHTTask>
-  createNodeLookupTask(const DHTID& targetID) override
+  virtual std::shared_ptr<DHTTask> createNodeLookupTask(const DHTID&) override
   {
     return nullptr;
   }
@@ -27,22 +25,21 @@ public:
     return nullptr;
   }
 
-  virtual std::shared_ptr<DHTTask> createPeerLookupTask(
-      const std::shared_ptr<DownloadContext>& ctx, uint16_t tcpPort,
-      const std::shared_ptr<PeerStorage>& peerStorage) override
+  virtual std::shared_ptr<DHTTask>
+  createPeerLookupTask(const std::shared_ptr<DownloadContext>&, uint16_t,
+                       const std::shared_ptr<PeerStorage>&) override
+  {
+    return nullptr;
+  }
+
+  virtual std::shared_ptr<DHTTask> createPeerAnnounceTask(const DHTID&) override
   {
     return nullptr;
   }
 
   virtual std::shared_ptr<DHTTask>
-  createPeerAnnounceTask(const DHTID& infoHash) override
-  {
-    return nullptr;
-  }
-
-  virtual std::shared_ptr<DHTTask>
-  createReplaceNodeTask(const std::shared_ptr<DHTBucket>& bucket,
-                        const std::shared_ptr<DHTNode>& newNode) override
+  createReplaceNodeTask(const std::shared_ptr<DHTBucket>&,
+                        const std::shared_ptr<DHTNode>&) override
   {
     return nullptr;
   }

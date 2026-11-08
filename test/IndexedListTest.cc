@@ -256,7 +256,7 @@ namespace {
 struct KeyFunc {
   int n;
   KeyFunc(int n) : n(n) {}
-  int operator()(const std::shared_ptr<std::string>& x) { return n++; }
+  int operator()(const std::shared_ptr<std::string>&) { return n++; }
 };
 } // namespace
 

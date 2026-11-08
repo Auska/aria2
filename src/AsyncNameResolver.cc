@@ -46,7 +46,7 @@
 
 namespace aria2 {
 
-void callback(void* arg, int status, int timeouts, ares_addrinfo* result)
+void callback(void* arg, int status, int, ares_addrinfo* result)
 {
   AsyncNameResolver* resolverPtr = reinterpret_cast<AsyncNameResolver*>(arg);
   if (status != ARES_SUCCESS) {

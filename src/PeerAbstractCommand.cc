@@ -114,7 +114,7 @@ bool PeerAbstractCommand::execute()
 }
 
 // TODO this method removed when PeerBalancerCommand is implemented
-bool PeerAbstractCommand::prepareForNextPeer(time_t wait) { return true; }
+bool PeerAbstractCommand::prepareForNextPeer(time_t) { return true; }
 
 void PeerAbstractCommand::disableReadCheckSocket()
 {

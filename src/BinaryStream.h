@@ -53,12 +53,12 @@ public:
 
   // Truncates a file to given length. The default implementation does
   // nothing.
-  virtual void truncate(int64_t length) {}
+  virtual void truncate(int64_t) {}
 
   // Allocates given length bytes of disk space from given offset. The
   // default implementation does nothing. If sparse is true, the
   // implementation may create sparse file (with holes).
-  virtual void allocate(int64_t offset, int64_t length, bool sparse) {}
+  virtual void allocate(int64_t, int64_t, bool) {}
 };
 
 } // namespace aria2

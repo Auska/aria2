@@ -16,26 +16,22 @@ public:
 
   virtual ~MockBtMessageDispatcher() {}
 
-  virtual void
-  addMessageToQueue(std::unique_ptr<BtMessage> btMessage) override
+  virtual void addMessageToQueue(std::unique_ptr<BtMessage> btMessage) override
   {
     messageQueue.push_back(std::move(btMessage));
   }
 
   virtual void sendMessages() override {}
 
-  virtual void doCancelSendingPieceAction(size_t index, int32_t begin,
-                                          int32_t length) override
+  virtual void doCancelSendingPieceAction(size_t, int32_t, int32_t) override {}
+
+  virtual void
+  doCancelSendingPieceAction(const std::shared_ptr<Piece>&) override
   {
   }
 
   virtual void
-  doCancelSendingPieceAction(const std::shared_ptr<Piece>& piece) override
-  {
-  }
-
-  virtual void doAbortOutstandingRequestAction(
-      const std::shared_ptr<Piece>& piece) override
+  doAbortOutstandingRequestAction(const std::shared_ptr<Piece>&) override
   {
   }
 
@@ -47,34 +43,21 @@ public:
 
   virtual bool isSendingInProgress() override { return false; }
 
-  virtual size_t countMessageInQueue() override
-  {
-    return messageQueue.size();
-  }
+  virtual size_t countMessageInQueue() override { return messageQueue.size(); }
 
   virtual size_t countOutstandingRequest() override { return 0; }
 
-  virtual bool isOutstandingRequest(size_t index,
-                                    size_t blockIndex) override
-  {
-    return false;
-  }
+  virtual bool isOutstandingRequest(size_t, size_t) override { return false; }
 
-  virtual const RequestSlot*
-  getOutstandingRequest(size_t index, int32_t begin,
-                        int32_t length) override
+  virtual const RequestSlot* getOutstandingRequest(size_t, int32_t,
+                                                   int32_t) override
   {
     return nullptr;
   }
 
-  virtual void removeOutstandingRequest(const RequestSlot* slot) override
-  {
-  }
+  virtual void removeOutstandingRequest(const RequestSlot*) override {}
 
-  virtual void
-  addOutstandingRequest(std::unique_ptr<RequestSlot> slot) override
-  {
-  }
+  virtual void addOutstandingRequest(std::unique_ptr<RequestSlot>) override {}
 
   virtual size_t countOutstandingUpload() override { return 0; }
 };

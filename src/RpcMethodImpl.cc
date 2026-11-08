@@ -414,7 +414,7 @@ void pauseRequestGroups(InputIterator first, InputIterator last, bool reserved,
 } // namespace
 
 namespace {
-std::unique_ptr<ValueBase> pauseAllDownloads(const RpcRequest& req,
+std::unique_ptr<ValueBase> pauseAllDownloads(const RpcRequest&,
                                              DownloadEngine* e, bool forcePause)
 {
   auto& groups = e->getRequestGroupMan()->getRequestGroups();
@@ -457,7 +457,7 @@ std::unique_ptr<ValueBase> UnpauseRpcMethod::process(const RpcRequest& req,
   return createGIDResponse(gid);
 }
 
-std::unique_ptr<ValueBase> UnpauseAllRpcMethod::process(const RpcRequest& req,
+std::unique_ptr<ValueBase> UnpauseAllRpcMethod::process(const RpcRequest&,
                                                         DownloadEngine* e)
 {
   auto& groups = e->getRequestGroupMan()->getReservedGroups();
@@ -1023,13 +1023,13 @@ TellStoppedRpcMethod::getItems(DownloadEngine* e) const
 
 void TellStoppedRpcMethod::createEntry(
     Dict* entryDict, const std::shared_ptr<DownloadResult>& item,
-    DownloadEngine* e, const std::vector<std::string>& keys) const
+    DownloadEngine*, const std::vector<std::string>& keys) const
 {
   gatherStoppedDownload(entryDict, item, keys);
 }
 
 std::unique_ptr<ValueBase>
-PurgeDownloadResultRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
+PurgeDownloadResultRpcMethod::process(const RpcRequest&, DownloadEngine* e)
 {
   e->getRequestGroupMan()->purgeDownloadResult();
   return createOKResponse();
@@ -1096,8 +1096,8 @@ ChangeGlobalOptionRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
   return createOKResponse();
 }
 
-std::unique_ptr<ValueBase> GetVersionRpcMethod::process(const RpcRequest& req,
-                                                        DownloadEngine* e)
+std::unique_ptr<ValueBase> GetVersionRpcMethod::process(const RpcRequest&,
+                                                        DownloadEngine*)
 {
   auto result = Dict::g();
   result->put(KEY_VERSION, PACKAGE_VERSION);
@@ -1149,8 +1149,8 @@ std::unique_ptr<ValueBase> GetOptionRpcMethod::process(const RpcRequest& req,
   return std::move(result);
 }
 
-std::unique_ptr<ValueBase>
-GetGlobalOptionRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
+std::unique_ptr<ValueBase> GetGlobalOptionRpcMethod::process(const RpcRequest&,
+                                                             DownloadEngine* e)
 {
   auto result = Dict::g();
   for (size_t i = 0, len = e->getOption()->getTable().size(); i < len; ++i) {
@@ -1194,8 +1194,8 @@ ChangePositionRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
   return Integer::g(destPos);
 }
 
-std::unique_ptr<ValueBase>
-GetSessionInfoRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
+std::unique_ptr<ValueBase> GetSessionInfoRpcMethod::process(const RpcRequest&,
+                                                            DownloadEngine* e)
 {
   auto result = Dict::g();
   result->put(KEY_SESSION_ID, util::toHex(e->getSessionId()));
@@ -1297,8 +1297,8 @@ std::unique_ptr<ValueBase> ChangeUriRpcMethod::process(const RpcRequest& req,
 }
 
 namespace {
-std::unique_ptr<ValueBase> goingShutdown(const RpcRequest& req,
-                                         DownloadEngine* e, bool forceHalt)
+std::unique_ptr<ValueBase> goingShutdown(const RpcRequest&, DownloadEngine* e,
+                                         bool forceHalt)
 {
   // Schedule shutdown after 3seconds to give time to client to
   // receive RPC response.
@@ -1321,8 +1321,8 @@ ForceShutdownRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
   return goingShutdown(req, e, true);
 }
 
-std::unique_ptr<ValueBase>
-GetGlobalStatRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
+std::unique_ptr<ValueBase> GetGlobalStatRpcMethod::process(const RpcRequest&,
+                                                           DownloadEngine* e)
 {
   auto& rgman = e->getRequestGroupMan();
   auto ts = rgman->calculateStat();
@@ -1336,7 +1336,7 @@ GetGlobalStatRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
   return std::move(res);
 }
 
-std::unique_ptr<ValueBase> SaveSessionRpcMethod::process(const RpcRequest& req,
+std::unique_ptr<ValueBase> SaveSessionRpcMethod::process(const RpcRequest&,
                                                          DownloadEngine* e)
 {
   const std::string& filename = e->getOption()->get(PREF_SAVE_SESSION);
@@ -1352,7 +1352,7 @@ std::unique_ptr<ValueBase> SaveSessionRpcMethod::process(const RpcRequest& req,
 }
 
 std::unique_ptr<ValueBase>
-SystemListMethodsRpcMethod::process(const RpcRequest& req, DownloadEngine* e)
+SystemListMethodsRpcMethod::process(const RpcRequest&, DownloadEngine*)
 {
   auto list = List::g();
   for (auto& s : allMethodNames()) {
@@ -1371,8 +1371,7 @@ RpcResponse SystemListMethodsRpcMethod::execute(RpcRequest req,
 }
 
 std::unique_ptr<ValueBase>
-SystemListNotificationsRpcMethod::process(const RpcRequest& req,
-                                          DownloadEngine* e)
+SystemListNotificationsRpcMethod::process(const RpcRequest&, DownloadEngine*)
 {
   auto list = List::g();
   for (auto& s : allNotificationsNames()) {
@@ -1391,7 +1390,7 @@ RpcResponse SystemListNotificationsRpcMethod::execute(RpcRequest req,
 }
 
 std::unique_ptr<ValueBase> NoSuchMethodRpcMethod::process(const RpcRequest& req,
-                                                          DownloadEngine* e)
+                                                          DownloadEngine*)
 {
   throw DL_ABORT_EX(fmt("No such method: {}", req.methodName));
 }

@@ -495,8 +495,7 @@ void SocketCore::setMulticastLoop(unsigned char loop)
   setSockOpt(IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop));
 }
 
-void SocketCore::joinMulticastGroup(const std::string& multicastAddr,
-                                    uint16_t multicastPort,
+void SocketCore::joinMulticastGroup(const std::string& multicastAddr, uint16_t,
                                     const std::string& localAddr)
 {
   in_addr multiAddr;

@@ -56,17 +56,14 @@ OutputStream& encode(OutputStream& out, const ValueBase* vlb)
       encodeString(string.s());
     }
 
-    virtual void visit(const Integer& integer) override
-    {
-      out_ << integer.i();
-    }
+    virtual void visit(const Integer& integer) override { out_ << integer.i(); }
 
     virtual void visit(const Bool& boolValue) override
     {
       out_ << (boolValue.val() ? "true" : "false");
     }
 
-    virtual void visit(const Null& nullValue) override { out_ << "null"; }
+    virtual void visit(const Null&) override { out_ << "null"; }
 
     virtual void visit(const List& list) override
     {

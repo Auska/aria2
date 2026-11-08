@@ -67,11 +67,11 @@ void array_funTest::testArrayLength()
 }
 
 namespace {
-void arrayPtrCast(struct array_funTest::X* x) {}
+void arrayPtrCast(struct array_funTest::X*) {}
 } // namespace
 
 namespace {
-void arrayPtrConstCast(const struct array_funTest::X* x) {}
+void arrayPtrConstCast(const struct array_funTest::X*) {}
 } // namespace
 
 namespace {

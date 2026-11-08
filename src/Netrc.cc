@@ -94,10 +94,7 @@ DefaultAuthenticator::DefaultAuthenticator(std::string login,
 
 DefaultAuthenticator::~DefaultAuthenticator() noexcept = default;
 
-bool DefaultAuthenticator::match(const std::string& hostname) const
-{
-  return true;
-}
+bool DefaultAuthenticator::match(const std::string&) const { return true; }
 
 Netrc::Netrc() {}
 

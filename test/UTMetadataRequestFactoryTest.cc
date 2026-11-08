@@ -29,10 +29,9 @@ public:
   public:
     std::deque<size_t> missingIndexes;
 
-    virtual std::shared_ptr<Piece>
-    getMissingPiece(const std::shared_ptr<Peer>& peer,
-                    const std::vector<size_t>& exlucdedIndexes,
-                    cuid_t cuid) override
+    virtual std::shared_ptr<Piece> getMissingPiece(const std::shared_ptr<Peer>&,
+                                                   const std::vector<size_t>&,
+                                                   cuid_t) override
     {
       if (missingIndexes.empty()) {
         return nullptr;

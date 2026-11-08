@@ -59,7 +59,7 @@ namespace rpc {
 
 namespace {
 ssize_t sendCallback(wslay_event_context_ptr wsctx, const uint8_t* data,
-                     size_t len, int flags, void* userData)
+                     size_t len, int, void* userData)
 {
   WebSocketSession* session = reinterpret_cast<WebSocketSession*>(userData);
   const std::shared_ptr<SocketCore>& socket = session->getSocket();
@@ -86,7 +86,7 @@ ssize_t sendCallback(wslay_event_context_ptr wsctx, const uint8_t* data,
 
 namespace {
 ssize_t recvCallback(wslay_event_context_ptr wsctx, uint8_t* buf, size_t len,
-                     int flags, void* userData)
+                     int, void* userData)
 {
   WebSocketSession* session = reinterpret_cast<WebSocketSession*>(userData);
   const std::shared_ptr<SocketCore>& socket = session->getSocket();
@@ -137,7 +137,7 @@ void addResponse(WebSocketSession* wsSession,
 
 namespace {
 void onFrameRecvStartCallback(
-    wslay_event_context_ptr wsctx,
+    wslay_event_context_ptr,
     const struct wslay_event_on_frame_recv_start_arg* arg, void* userData)
 {
   WebSocketSession* wsSession = reinterpret_cast<WebSocketSession*>(userData);
@@ -147,7 +147,7 @@ void onFrameRecvStartCallback(
 
 namespace {
 void onFrameRecvChunkCallback(
-    wslay_event_context_ptr wsctx,
+    wslay_event_context_ptr,
     const struct wslay_event_on_frame_recv_chunk_arg* arg, void* userData)
 {
   WebSocketSession* wsSession = reinterpret_cast<WebSocketSession*>(userData);
@@ -161,7 +161,7 @@ void onFrameRecvChunkCallback(
 } // namespace
 
 namespace {
-void onMsgRecvCallback(wslay_event_context_ptr wsctx,
+void onMsgRecvCallback(wslay_event_context_ptr,
                        const struct wslay_event_on_msg_recv_arg* arg,
                        void* userData)
 {

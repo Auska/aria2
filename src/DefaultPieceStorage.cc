@@ -702,8 +702,7 @@ void DefaultPieceStorage::advertisePiece(cuid_t cuid, size_t index,
 }
 
 std::pair<std::vector<size_t>, uint64_t>
-DefaultPieceStorage::getAdvertisedPieceIndexes(cuid_t myCuid,
-                                               uint64_t lastHaveIndex)
+DefaultPieceStorage::getAdvertisedPieceIndexes(cuid_t, uint64_t lastHaveIndex)
 {
   auto it =
       std::upper_bound(std::begin(haves_), std::end(haves_), lastHaveIndex,

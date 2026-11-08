@@ -84,7 +84,7 @@ public:
   virtual void enableMmap() {}
 
   // Drops cache in range [offset, offset + len)
-  virtual void dropCache(int64_t len, int64_t offset) {}
+  virtual void dropCache(int64_t, int64_t) {}
 
   // Force physical write of data from OS buffer cache.
   virtual void flushOSBuffers() {}

@@ -99,7 +99,7 @@ size_t getText(std::string& buf, const unsigned char* data, size_t length,
 } // namespace
 
 namespace {
-size_t ignoreText(std::string& buf, const unsigned char* data, size_t length,
+size_t ignoreText(std::string&, const unsigned char* data, size_t length,
                   size_t off)
 {
   size_t j = off;

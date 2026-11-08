@@ -378,7 +378,7 @@ bool PeerInteractionCommand::executeInternal()
 }
 
 // TODO this method removed when PeerBalancerCommand is implemented
-bool PeerInteractionCommand::prepareForNextPeer(time_t wait)
+bool PeerInteractionCommand::prepareForNextPeer(time_t)
 {
   if (peerStorage_->isPeerAvailable() && btRuntime_->lessThanEqMinPeers()) {
     cuid_t ncuid = getDownloadEngine()->newCUID();

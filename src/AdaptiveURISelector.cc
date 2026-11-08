@@ -74,9 +74,9 @@ AdaptiveURISelector::AdaptiveURISelector(
 
 AdaptiveURISelector::~AdaptiveURISelector() noexcept = default;
 
-std::string AdaptiveURISelector::select(
-    FileEntry* fileEntry,
-    const std::vector<std::pair<size_t, std::string>>& usedHosts)
+std::string
+AdaptiveURISelector::select(FileEntry* fileEntry,
+                            const std::vector<std::pair<size_t, std::string>>&)
 {
   A2_LOG_DEBUG(
       fmt("AdaptiveURISelector: called {}", requestGroup_->getNumConnection()));

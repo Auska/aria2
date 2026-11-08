@@ -95,7 +95,7 @@ public:
     }
 
     virtual void
-    onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event) override
+    onCancelSendingPieceEvent(const BtCancelSendingPieceEvent&) override
     {
       if (evcheck) {
         evcheck->doCancelActionCalled = true;

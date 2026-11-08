@@ -75,7 +75,7 @@ FtpInitiateConnectionCommand::~FtpInitiateConnectionCommand() noexcept =
 
 std::unique_ptr<Command> FtpInitiateConnectionCommand::createNextCommandProxied(
     const std::string& hostname, const std::string& addr, uint16_t port,
-    const std::vector<std::string>& resolvedAddresses,
+    const std::vector<std::string>&,
     const std::shared_ptr<Request>& proxyRequest)
 {
   std::string options;

@@ -23,11 +23,10 @@ public:
 
   virtual int64_t getWrittenLength() const override { return 0; }
 
-  virtual void updateWrittenLength(int64_t bytes) override {}
+  virtual void updateWrittenLength(int64_t) override {}
 
   // `begin' is a offset inside this segment.
-  virtual bool updateHash(int64_t begin,
-                          std::span<const std::byte> data) override
+  virtual bool updateHash(int64_t, std::span<const std::byte>) override
   {
     return false;
   }
@@ -36,7 +35,7 @@ public:
 
   virtual std::string getDigest() override { return A2STR::NIL; }
 
-  virtual void clear(WrDiskCache* diskCache) override {}
+  virtual void clear(WrDiskCache*) override {}
 
   virtual std::shared_ptr<Piece> getPiece() const override
   {

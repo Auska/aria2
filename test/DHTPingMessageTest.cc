@@ -38,7 +38,7 @@ public:
   public:
     virtual std::unique_ptr<DHTPingReplyMessage>
     createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                           const DHTID& remoteNodeID,
+                           const DHTID&,
                            const std::string& transactionID) override
     {
       DHTID id;
@@ -54,7 +54,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DHTPingMessageTest);
 void DHTPingMessageTest::testGetBencodedMessage()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   DHTPingMessage msg(localNode_, remoteNode_, transactionID);
@@ -77,7 +78,8 @@ void DHTPingMessageTest::testGetBencodedMessage()
 void DHTPingMessageTest::testDoReceivedAction()
 {
   unsigned char tid[DHT_TRANSACTION_ID_LENGTH];
-  util::generateRandomData(std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
+  util::generateRandomData(
+      std::as_writable_bytes(std::span{tid, DHT_TRANSACTION_ID_LENGTH}));
   std::string transactionID(&tid[0], &tid[DHT_TRANSACTION_ID_LENGTH]);
 
   MockDHTMessageDispatcher dispatcher;

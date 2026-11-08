@@ -48,8 +48,8 @@ public:
 
   virtual void init() override {}
 
-  virtual ssize_t transform(const std::shared_ptr<BinaryStream>& out,
-                            const std::shared_ptr<Segment>& segment,
+  virtual ssize_t transform(const std::shared_ptr<BinaryStream>&,
+                            const std::shared_ptr<Segment>&,
                             std::span<const std::byte> inbuf) override
   {
     bytesProcessed_ = inbuf.size();
@@ -64,13 +64,9 @@ public:
 
   static const std::string NAME;
 
-  virtual size_t getBytesProcessed() const override
-  {
-    return bytesProcessed_;
-  }
+  virtual size_t getBytesProcessed() const override { return bytesProcessed_; }
 
-  virtual bool
-  installDelegate(const std::unique_ptr<StreamFilter> filter) override
+  virtual bool installDelegate(const std::unique_ptr<StreamFilter>) override
   {
     return false;
   }

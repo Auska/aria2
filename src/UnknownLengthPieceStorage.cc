@@ -74,52 +74,48 @@ void UnknownLengthPieceStorage::initStorage()
 
 #ifdef ENABLE_BITTORRENT
 
-bool UnknownLengthPieceStorage::hasMissingPiece(
-    const std::shared_ptr<Peer>& peer)
+bool UnknownLengthPieceStorage::hasMissingPiece(const std::shared_ptr<Peer>&)
 {
   abort();
 }
 
 void UnknownLengthPieceStorage::getMissingPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer, cuid_t cuid)
+    std::vector<std::shared_ptr<Piece>>&, size_t, const std::shared_ptr<Peer>&,
+    cuid_t)
 {
   abort();
 }
 
 void UnknownLengthPieceStorage::getMissingPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
+    std::vector<std::shared_ptr<Piece>>&, size_t, const std::shared_ptr<Peer>&,
+    const std::vector<size_t>&, cuid_t)
 {
   abort();
 }
 
 void UnknownLengthPieceStorage::getMissingFastPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer, cuid_t cuid)
+    std::vector<std::shared_ptr<Piece>>&, size_t, const std::shared_ptr<Peer>&,
+    cuid_t)
 {
   abort();
 }
 
 void UnknownLengthPieceStorage::getMissingFastPiece(
-    std::vector<std::shared_ptr<Piece>>& pieces, size_t minMissingBlocks,
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
+    std::vector<std::shared_ptr<Piece>>&, size_t, const std::shared_ptr<Peer>&,
+    const std::vector<size_t>&, cuid_t)
 {
   abort();
 }
 
 std::shared_ptr<Piece>
-UnknownLengthPieceStorage::getMissingPiece(const std::shared_ptr<Peer>& peer,
-                                           cuid_t cuid)
+UnknownLengthPieceStorage::getMissingPiece(const std::shared_ptr<Peer>&, cuid_t)
 {
   abort();
 }
 
-std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
-    const std::shared_ptr<Peer>& peer,
-    const std::vector<size_t>& excludedIndexes, cuid_t cuid)
+std::shared_ptr<Piece>
+UnknownLengthPieceStorage::getMissingPiece(const std::shared_ptr<Peer>&,
+                                           const std::vector<size_t>&, cuid_t)
 {
   abort();
 }
@@ -128,8 +124,7 @@ std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
 bool UnknownLengthPieceStorage::hasMissingUnusedPiece() { abort(); }
 
 std::shared_ptr<Piece> UnknownLengthPieceStorage::getMissingPiece(
-    size_t minSplitSize, std::span<const unsigned char> ignoreBitfield,
-    cuid_t cuid)
+    size_t, std::span<const unsigned char>, cuid_t)
 {
   if (downloadFinished_) {
     return nullptr;
@@ -183,7 +178,7 @@ void UnknownLengthPieceStorage::completePiece(
 }
 
 void UnknownLengthPieceStorage::cancelPiece(const std::shared_ptr<Piece>& piece,
-                                            cuid_t cuid)
+                                            cuid_t)
 {
   if (*piece_ == *piece) {
     piece_.reset();
@@ -224,7 +219,7 @@ std::shared_ptr<DiskAdaptor> UnknownLengthPieceStorage::getDiskAdaptor()
   return diskAdaptor_;
 }
 
-int32_t UnknownLengthPieceStorage::getPieceLength(size_t index)
+int32_t UnknownLengthPieceStorage::getPieceLength(size_t)
 {
   // TODO Basically, PieceStorage::getPieceLength() is only used by
   // BitTorrent, and it does not use UnknownLengthPieceStorage.
@@ -252,20 +247,20 @@ void UnknownLengthPieceStorage::markAllPiecesDone()
   downloadFinished_ = true;
 }
 
-void UnknownLengthPieceStorage::markPiecesDone(int64_t length)
+void UnknownLengthPieceStorage::markPiecesDone(int64_t)
 {
   // TODO not implemented yet
   abort();
 }
 
-void UnknownLengthPieceStorage::markPieceMissing(size_t index)
+void UnknownLengthPieceStorage::markPieceMissing(size_t)
 {
   // TODO not implemented yet
   abort();
 }
 
 void UnknownLengthPieceStorage::getInFlightPieces(
-    std::vector<std::shared_ptr<Piece>>& pieces)
+    std::vector<std::shared_ptr<Piece>>&)
 {
 }
 

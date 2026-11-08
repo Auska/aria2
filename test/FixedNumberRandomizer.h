@@ -15,10 +15,7 @@ public:
 
   virtual ~FixedNumberRandomizer() {}
 
-  virtual long int getRandomNumber(long int to) override
-  {
-    return fixedNumber;
-  }
+  virtual long int getRandomNumber(long int) override { return fixedNumber; }
 
   void setFixedNumber(int32_t num) { this->fixedNumber = num; }
 

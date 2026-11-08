@@ -39,7 +39,7 @@ public:
   }
 
   virtual std::shared_ptr<Peer>
-  addAndCheckoutPeer(const std::shared_ptr<Peer>& peer, cuid_t cuid) override
+  addAndCheckoutPeer(const std::shared_ptr<Peer>& peer, cuid_t) override
   {
     unusedPeers.push_back(peer);
     return nullptr;
@@ -74,16 +74,16 @@ public:
 
   virtual const PeerSet& getUsedPeers() override { return usedPeers; }
 
-  virtual bool isBadPeer(std::string_view ipaddr) override { return false; }
+  virtual bool isBadPeer(std::string_view) override { return false; }
 
-  virtual void addBadPeer(const std::string& ipaddr) override {}
+  virtual void addBadPeer(const std::string&) override {}
 
-  virtual std::shared_ptr<Peer> checkoutPeer(cuid_t cuid) override
+  virtual std::shared_ptr<Peer> checkoutPeer(cuid_t) override
   {
     return nullptr;
   }
 
-  virtual void returnPeer(const std::shared_ptr<Peer>& peer) override {}
+  virtual void returnPeer(const std::shared_ptr<Peer>&) override {}
 
   virtual bool chokeRoundIntervalElapsed() override { return false; }
 

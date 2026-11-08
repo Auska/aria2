@@ -134,9 +134,9 @@ void extractUrlList(TorrentAttribute* torrent, std::vector<std::string>& uris,
       torrent_->urlList.push_back(utf8Uri);
     }
 
-    virtual void visit(const Integer& v) override {}
-    virtual void visit(const Bool& v) override {}
-    virtual void visit(const Null& v) override {}
+    virtual void visit(const Integer&) override {}
+    virtual void visit(const Bool&) override {}
+    virtual void visit(const Null&) override {}
 
     virtual void visit(const List& v) override
     {
@@ -149,7 +149,7 @@ void extractUrlList(TorrentAttribute* torrent, std::vector<std::string>& uris,
         }
       }
     }
-    virtual void visit(const Dict& v) override {}
+    virtual void visit(const Dict&) override {}
   };
 
   if (v) {

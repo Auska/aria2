@@ -95,7 +95,7 @@ void showTorrentFile(const std::string& uri)
 #ifdef ENABLE_BITTORRENT
 namespace {
 void showFiles(const std::vector<std::string>& uris,
-               const std::shared_ptr<Option>& op)
+               const std::shared_ptr<Option>&)
 {
   ProtocolDetector dt;
   for (const auto& uri : uris) {

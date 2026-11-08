@@ -98,7 +98,7 @@ std::shared_ptr<DHTTask> DHTTaskFactoryImpl::createPeerLookupTask(
 }
 
 std::shared_ptr<DHTTask>
-DHTTaskFactoryImpl::createPeerAnnounceTask(const DHTID& infoHash)
+DHTTaskFactoryImpl::createPeerAnnounceTask(const DHTID&)
 {
   // TODO
   return nullptr;

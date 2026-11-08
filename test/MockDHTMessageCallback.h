@@ -11,20 +11,15 @@ public:
 
   virtual ~MockDHTMessageCallback() {}
 
-  virtual void visit(const DHTAnnouncePeerReplyMessage* message) override
-  {
-  }
+  virtual void visit(const DHTAnnouncePeerReplyMessage*) override {}
 
-  virtual void visit(const DHTFindNodeReplyMessage* message) override {}
+  virtual void visit(const DHTFindNodeReplyMessage*) override {}
 
-  virtual void visit(const DHTGetPeersReplyMessage* message) override {}
+  virtual void visit(const DHTGetPeersReplyMessage*) override {}
 
-  virtual void visit(const DHTPingReplyMessage* message) override {}
+  virtual void visit(const DHTPingReplyMessage*) override {}
 
-  virtual void
-  onTimeout(const std::shared_ptr<DHTNode>& remoteNode) override
-  {
-  }
+  virtual void onTimeout(const std::shared_ptr<DHTNode>&) override {}
 };
 
 } // namespace aria2

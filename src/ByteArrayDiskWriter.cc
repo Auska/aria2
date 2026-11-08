@@ -48,13 +48,13 @@ ByteArrayDiskWriter::~ByteArrayDiskWriter() noexcept = default;
 
 void ByteArrayDiskWriter::clear() { buf_.str(A2STR::NIL); }
 
-void ByteArrayDiskWriter::initAndOpenFile(int64_t totalLength) { clear(); }
+void ByteArrayDiskWriter::initAndOpenFile(int64_t) { clear(); }
 
-void ByteArrayDiskWriter::openFile(int64_t totalLength) {}
+void ByteArrayDiskWriter::openFile(int64_t) {}
 
 void ByteArrayDiskWriter::closeFile() {}
 
-void ByteArrayDiskWriter::openExistingFile(int64_t totalLength) { openFile(); }
+void ByteArrayDiskWriter::openExistingFile(int64_t) { openFile(); }
 
 void ByteArrayDiskWriter::writeData(std::span<const std::byte> data,
                                     int64_t offset)

@@ -132,7 +132,7 @@ public:
   // Closes at most |numClose| files if possible. This method is used to
   // ensure that global number of open file stays under certain limit.
   // Returns the number of closed files.
-  virtual size_t tryCloseFile(size_t numClose) { return 0; }
+  virtual size_t tryCloseFile(size_t) { return 0; }
 
   void
   setOpenedFileCounter(std::shared_ptr<OpenedFileCounter> openedFileCounter)

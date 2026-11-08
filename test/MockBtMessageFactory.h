@@ -33,46 +33,43 @@ public:
   virtual ~MockBtMessageFactory() {}
 
   virtual std::unique_ptr<BtMessage>
-  createBtMessage(std::span<const std::byte> msg) override
+  createBtMessage(std::span<const std::byte>) override
   {
     return nullptr;
   };
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(std::span<const std::byte> msg) override
+  createHandshakeMessage(std::span<const std::byte>) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<BtHandshakeMessage>
-  createHandshakeMessage(std::span<const unsigned char> infoHash,
-                         std::span<const unsigned char> peerId) override
+  createHandshakeMessage(std::span<const unsigned char>,
+                         std::span<const unsigned char>) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<BtRequestMessage>
-  createRequestMessage(const std::shared_ptr<Piece>& piece,
-                       size_t blockIndex) override
+  createRequestMessage(const std::shared_ptr<Piece>&, size_t) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtCancelMessage>
-  createCancelMessage(size_t index, int32_t begin,
-                      int32_t length) override
+  virtual std::unique_ptr<BtCancelMessage> createCancelMessage(size_t, int32_t,
+                                                               int32_t) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtPieceMessage>
-  createPieceMessage(size_t index, int32_t begin, int32_t length) override
+  virtual std::unique_ptr<BtPieceMessage> createPieceMessage(size_t, int32_t,
+                                                             int32_t) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtHaveMessage>
-  createHaveMessage(size_t index) override
+  virtual std::unique_ptr<BtHaveMessage> createHaveMessage(size_t) override
   {
     return nullptr;
   }
@@ -82,8 +79,7 @@ public:
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtUnchokeMessage>
-  createUnchokeMessage() override
+  virtual std::unique_ptr<BtUnchokeMessage> createUnchokeMessage() override
   {
     return nullptr;
   }
@@ -100,51 +96,45 @@ public:
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtBitfieldMessage>
-  createBitfieldMessage() override
+  virtual std::unique_ptr<BtBitfieldMessage> createBitfieldMessage() override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtKeepAliveMessage>
-  createKeepAliveMessage() override
+  virtual std::unique_ptr<BtKeepAliveMessage> createKeepAliveMessage() override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtHaveAllMessage>
-  createHaveAllMessage() override
+  virtual std::unique_ptr<BtHaveAllMessage> createHaveAllMessage() override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtHaveNoneMessage>
-  createHaveNoneMessage() override
+  virtual std::unique_ptr<BtHaveNoneMessage> createHaveNoneMessage() override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtRejectMessage>
-  createRejectMessage(size_t index, int32_t begin,
-                      int32_t length) override
+  virtual std::unique_ptr<BtRejectMessage> createRejectMessage(size_t, int32_t,
+                                                               int32_t) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<BtAllowedFastMessage>
-  createAllowedFastMessage(size_t index) override
+  createAllowedFastMessage(size_t) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtPortMessage>
-  createPortMessage(uint16_t port) override
+  virtual std::unique_ptr<BtPortMessage> createPortMessage(uint16_t) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<BtExtendedMessage> createBtExtendedMessage(
-      std::unique_ptr<ExtensionMessage> extmsg) override
+  virtual std::unique_ptr<BtExtendedMessage>
+  createBtExtendedMessage(std::unique_ptr<ExtensionMessage>) override
   {
     return nullptr;
   }

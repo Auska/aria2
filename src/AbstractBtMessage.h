@@ -112,17 +112,17 @@ public:
 
   virtual void onQueued() override {}
 
-  virtual void onAbortOutstandingRequestEvent(
-      const BtAbortOutstandingRequestEvent& event) override
+  virtual void
+  onAbortOutstandingRequestEvent(const BtAbortOutstandingRequestEvent&) override
   {
   }
 
   virtual void
-  onCancelSendingPieceEvent(const BtCancelSendingPieceEvent& event) override
+  onCancelSendingPieceEvent(const BtCancelSendingPieceEvent&) override
   {
   }
 
-  virtual void onChokingEvent(const BtChokingEvent& event) override {}
+  virtual void onChokingEvent(const BtChokingEvent&) override {}
 
   void setBtMessageValidator(std::unique_ptr<BtMessageValidator> validator);
 

@@ -65,7 +65,7 @@ void StreamCheckIntegrityEntry::onDownloadIncomplete(
 }
 
 void StreamCheckIntegrityEntry::onDownloadFinished(
-    std::vector<std::unique_ptr<Command>>& commands, DownloadEngine* e)
+    std::vector<std::unique_ptr<Command>>&, DownloadEngine*)
 {
 }
 

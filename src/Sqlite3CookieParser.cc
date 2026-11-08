@@ -97,7 +97,7 @@ bool parseTime(int64_t& time, const std::string& s)
 } // namespace
 
 namespace {
-int cookieRowMapper(void* data, int columns, char** values, char** names)
+int cookieRowMapper(void* data, int columns, char** values, char**)
 {
   if (columns != 7 || !values[0] || !values[1] || !values[4]) {
     return 0;

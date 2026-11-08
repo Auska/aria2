@@ -188,7 +188,7 @@ struct PieceSendUpdate : public ProgressUpdate {
       : dctx(dctx), peer(std::move(peer)), headerLength(headerLength)
   {
   }
-  virtual void update(size_t length, bool complete) override
+  virtual void update(size_t length, bool) override
   {
     if (headerLength > 0) {
       size_t m = std::min(headerLength, length);
@@ -299,7 +299,7 @@ void BtPieceMessage::onWrongPiece(const std::shared_ptr<Piece>& piece)
   getBtRequestFactory()->removeTargetPiece(piece);
 }
 
-void BtPieceMessage::onChokingEvent(const BtChokingEvent& event)
+void BtPieceMessage::onChokingEvent(const BtChokingEvent&)
 {
   if (!isInvalidate() && !getPeer()->isInAmAllowedIndexSet(index_)) {
     A2_LOG_DEBUG(fmt(MSG_REJECT_PIECE_CHOKED, getCuid(),

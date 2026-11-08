@@ -43,7 +43,7 @@ class NullStatCalc : public StatCalc {
 public:
   virtual ~NullStatCalc() noexcept = default;
 
-  virtual void calculateStat(const DownloadEngine* e) override {}
+  virtual void calculateStat(const DownloadEngine*) override {}
 };
 
 } // namespace aria2

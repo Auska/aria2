@@ -83,7 +83,7 @@ std::unique_ptr<HttpRequest>
 createHttpRequest(const std::shared_ptr<Request>& req,
                   const std::shared_ptr<FileEntry>& fileEntry,
                   const std::shared_ptr<Segment>& segment,
-                  const std::shared_ptr<Option>& option, const RequestGroup* rg,
+                  const std::shared_ptr<Option>& option, const RequestGroup*,
                   const DownloadEngine* e,
                   const std::shared_ptr<Request>& proxyRequest,
                   int64_t endOffset = 0)

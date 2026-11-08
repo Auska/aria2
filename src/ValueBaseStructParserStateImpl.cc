@@ -42,8 +42,7 @@
 namespace aria2 {
 
 void ValueValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType elementType)
 {
   switch (elementType) {
   case StructElementType::DICT:
@@ -73,8 +72,7 @@ void ValueValueBaseStructParserState::beginElement(
 }
 
 void DictValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType elementType)
 {
   switch (elementType) {
   case StructElementType::DICT_KEY:
@@ -91,22 +89,19 @@ void DictValueBaseStructParserState::beginElement(
 }
 
 void DictKeyValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->setCurrentFrameName(psm->getCharacters());
 }
 
 void DictDataValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->popDictFrame();
 }
 
 void ArrayValueBaseStructParserState::beginElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType elementType)
 {
   assert(elementType == StructElementType::ARRAY_DATA);
   psm->pushFrame();
@@ -114,37 +109,32 @@ void ArrayValueBaseStructParserState::beginElement(
 }
 
 void ArrayDataValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->popArrayFrame();
 }
 
 void StringValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->setCurrentFrameValue(String::g(psm->getCharacters()));
 }
 
 void NumberValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   // TODO Ignore frac and exp
   psm->setCurrentFrameValue(Integer::g(psm->getNumber().number));
 }
 
 void BoolValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->setCurrentFrameValue(psm->getBool() ? Bool::gTrue() : Bool::gFalse());
 }
 
 void NullValueBaseStructParserState::endElement(
-    ValueBaseStructParserStateMachine* psm,
-                                StructElementType elementType)
+    ValueBaseStructParserStateMachine* psm, StructElementType)
 {
   psm->setCurrentFrameValue(Null::g());
 }

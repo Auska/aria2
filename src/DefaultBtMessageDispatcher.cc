@@ -141,7 +141,7 @@ void DefaultBtMessageDispatcher::doCancelSendingPieceAction(size_t index,
 // Cancel sending piece message to peer.
 // TODO Is this method really necessary?
 void DefaultBtMessageDispatcher::doCancelSendingPieceAction(
-    const std::shared_ptr<Piece>& piece)
+    const std::shared_ptr<Piece>&)
 {
 }
 

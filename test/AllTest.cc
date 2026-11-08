@@ -13,7 +13,7 @@
 #include "LogFactory.h"
 #include "prefs.h"
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
   aria2::global::initConsole(false);
   aria2::Platform platform;

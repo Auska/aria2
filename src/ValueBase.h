@@ -320,12 +320,12 @@ private:
 class EmptyDowncastValueBaseVisitor : public ValueBaseVisitor {
 public:
   EmptyDowncastValueBaseVisitor() {}
-  virtual void visit(const String& v) override {}
-  virtual void visit(const Integer& v) override {}
-  virtual void visit(const Bool& v) override {}
-  virtual void visit(const Null& v) override {}
-  virtual void visit(const List& v) override {}
-  virtual void visit(const Dict& v) override {}
+  virtual void visit(const String&) override {}
+  virtual void visit(const Integer&) override {}
+  virtual void visit(const Bool&) override {}
+  virtual void visit(const Null&) override {}
+  virtual void visit(const List&) override {}
+  virtual void visit(const Dict&) override {}
 };
 
 template <typename T>

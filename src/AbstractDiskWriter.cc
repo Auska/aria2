@@ -137,7 +137,7 @@ int openFileWithFlags(const std::string& filename, int flags,
 }
 } // namespace
 
-void AbstractDiskWriter::openExistingFile(int64_t totalLength)
+void AbstractDiskWriter::openExistingFile(int64_t)
 {
   int flags = O_BINARY;
   if (readOnly_) {

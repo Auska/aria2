@@ -42,9 +42,9 @@ InorderURISelector::InorderURISelector() {}
 
 InorderURISelector::~InorderURISelector() noexcept = default;
 
-std::string InorderURISelector::select(
-    FileEntry* fileEntry,
-    const std::vector<std::pair<size_t, std::string>>& usedHosts)
+std::string
+InorderURISelector::select(FileEntry* fileEntry,
+                           const std::vector<std::pair<size_t, std::string>>&)
 {
   std::deque<std::string>& uris = fileEntry->getRemainingUris();
   if (uris.empty()) {

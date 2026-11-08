@@ -48,8 +48,7 @@ public:
   AnonDiskWriterFactory() = default;
   virtual ~AnonDiskWriterFactory() noexcept = default;
 
-  virtual std::unique_ptr<DiskWriter>
-  newDiskWriter(const std::string& filename) override
+  virtual std::unique_ptr<DiskWriter> newDiskWriter(const std::string&) override
   {
     return make_unique<DiskWriterType>();
   }

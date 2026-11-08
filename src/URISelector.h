@@ -53,8 +53,8 @@ public:
   select(FileEntry* fileEntry,
          const std::vector<std::pair<size_t, std::string>>& usedHosts) = 0;
 
-  virtual void tuneDownloadCommand(const std::deque<std::string>& uris,
-                                   DownloadCommand* command) {};
+  virtual void tuneDownloadCommand(const std::deque<std::string>&,
+                                   DownloadCommand*) {};
 
   virtual void resetCounters() { return; };
 };

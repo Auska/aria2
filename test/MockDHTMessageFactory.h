@@ -24,14 +24,13 @@ public:
   MockDHTMessageFactory() {}
 
   virtual std::unique_ptr<DHTQueryMessage>
-  createQueryMessage(const Dict* dict, const std::string& ipaddr,
-                     uint16_t port) override
+  createQueryMessage(const Dict*, const std::string&, uint16_t) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTResponseMessage>
-  createResponseMessage(const std::string& messageType, const Dict* dict,
+  createResponseMessage(const std::string&, const Dict* dict,
                         const std::string& ipaddr, uint16_t port) override
   {
     auto remoteNode = std::make_shared<DHTNode>();
@@ -43,72 +42,68 @@ public:
   }
 
   virtual std::unique_ptr<DHTPingMessage>
-  createPingMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                    const std::string& transactionID = "") override
+  createPingMessage(const std::shared_ptr<DHTNode>&,
+                    const std::string& = "") override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTPingReplyMessage>
-  createPingReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                         const DHTID& remoteNodeID,
-                         const std::string& transactionID) override
+  createPingReplyMessage(const std::shared_ptr<DHTNode>&, const DHTID&,
+                         const std::string&) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTFindNodeMessage>
-  createFindNodeMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const DHTID& targetNodeID,
-                        const std::string& transactionID = "") override
+  createFindNodeMessage(const std::shared_ptr<DHTNode>&, const DHTID&,
+                        const std::string& = "") override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<DHTFindNodeReplyMessage> createFindNodeReplyMessage(
-      const std::shared_ptr<DHTNode>& remoteNode,
-      std::vector<std::shared_ptr<DHTNode>> closestKNodes,
-      const std::string& transactionID) override
+  virtual std::unique_ptr<DHTFindNodeReplyMessage>
+  createFindNodeReplyMessage(const std::shared_ptr<DHTNode>&,
+                             std::vector<std::shared_ptr<DHTNode>>,
+                             const std::string&) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTGetPeersMessage>
-  createGetPeersMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                        const DHTID& infoHash,
-                        const std::string& transactionID) override
+  createGetPeersMessage(const std::shared_ptr<DHTNode>&, const DHTID&,
+                        const std::string&) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<DHTGetPeersReplyMessage> createGetPeersReplyMessage(
-      const std::shared_ptr<DHTNode>& remoteNode,
-      std::vector<std::shared_ptr<DHTNode>> closestKNodes,
-      std::vector<std::shared_ptr<Peer>> peers, const std::string& token,
-      const std::string& transactionID) override
+  virtual std::unique_ptr<DHTGetPeersReplyMessage>
+  createGetPeersReplyMessage(const std::shared_ptr<DHTNode>&,
+                             std::vector<std::shared_ptr<DHTNode>>,
+                             std::vector<std::shared_ptr<Peer>>,
+                             const std::string&, const std::string&) override
   {
     return nullptr;
   }
 
-  virtual std::unique_ptr<DHTAnnouncePeerMessage> createAnnouncePeerMessage(
-      const std::shared_ptr<DHTNode>& remoteNode, const DHTID& infoHash,
-      uint16_t tcpPort, const std::string& token,
-      const std::string& transactionID = "") override
+  virtual std::unique_ptr<DHTAnnouncePeerMessage>
+  createAnnouncePeerMessage(const std::shared_ptr<DHTNode>&, const DHTID&,
+                            uint16_t, const std::string&,
+                            const std::string& = "") override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTAnnouncePeerReplyMessage>
-  createAnnouncePeerReplyMessage(const std::shared_ptr<DHTNode>& remoteNode,
-                                 const std::string& transactionID)
-      override
+  createAnnouncePeerReplyMessage(const std::shared_ptr<DHTNode>&,
+                                 const std::string&) override
   {
     return nullptr;
   }
 
   virtual std::unique_ptr<DHTUnknownMessage>
-  createUnknownMessage(std::span<const unsigned char> data,
-                       const std::string& ipaddr, uint16_t port) override
+  createUnknownMessage(std::span<const unsigned char>, const std::string&,
+                       uint16_t) override
   {
     return nullptr;
   }

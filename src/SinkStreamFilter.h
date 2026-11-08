@@ -64,13 +64,9 @@ public:
 
   static const std::string NAME;
 
-  virtual size_t getBytesProcessed() const override
-  {
-    return bytesProcessed_;
-  }
+  virtual size_t getBytesProcessed() const override { return bytesProcessed_; }
 
-  virtual bool
-  installDelegate(const std::unique_ptr<StreamFilter> filter) override
+  virtual bool installDelegate(const std::unique_ptr<StreamFilter>) override
   {
     return false;
   }

@@ -95,8 +95,8 @@ std::string encode(const ValueBase* vlb)
       out_ += 'e';
     }
 
-    virtual void visit(const Bool& v) override {}
-    virtual void visit(const Null& v) override {}
+    virtual void visit(const Bool&) override {}
+    virtual void visit(const Null&) override {}
 
     virtual void visit(const List& list) override
     {
