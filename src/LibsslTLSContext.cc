@@ -35,7 +35,6 @@
 #include "LibsslTLSContext.h"
 
 #include <cassert>
-#include <sstream>
 
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
@@ -195,10 +194,7 @@ bool OpenSSLTLSContext::addCredentialFile(const std::string& certfile,
 }
 bool OpenSSLTLSContext::addP12CredentialFile(const std::string& p12file)
 {
-  std::ostringstream ss;
-  BufferedFile(p12file.c_str(), BufferedFile::READ).transfer(ss);
-
-  auto data = ss.str();
+  auto data = BufferedFile(p12file.c_str(), BufferedFile::READ).readAll();
   void* ptr = const_cast<char*>(data.c_str());
   size_t len = data.length();
   bio_t bio(BIO_new_mem_buf(ptr, len));

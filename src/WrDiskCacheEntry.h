@@ -69,6 +69,10 @@ public:
   using DataCellSet = std::set<DataCell*, DerefLess<DataCell*>>;
 
   WrDiskCacheEntry(const std::shared_ptr<DiskAdaptor>& diskAdaptor);
+  // DataCell ownership stays with this object (see deleteDataCells()), so a
+  // copy would free the same cells twice.
+  WrDiskCacheEntry(const WrDiskCacheEntry&) = delete;
+  WrDiskCacheEntry& operator=(const WrDiskCacheEntry&) = delete;
   ~WrDiskCacheEntry();
 
   // Flushes the cached data to the disk and deletes them.

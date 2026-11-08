@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <span>
+#include <type_traits>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -38,6 +39,10 @@ public:
   void testClear();
 };
 
+// Owns raw DataCell pointers, so copying would double free them.
+static_assert(!std::is_copy_constructible_v<WrDiskCacheEntry>);
+static_assert(!std::is_copy_assignable_v<WrDiskCacheEntry>);
+
 CPPUNIT_TEST_SUITE_REGISTRATION(WrDiskCacheEntryTest);
 
 void WrDiskCacheEntryTest::testWriteToDisk()
@@ -68,7 +73,8 @@ void WrDiskCacheEntryTest::testAppend()
   CPPUNIT_ASSERT_EQUAL((size_t)6, cell->len);
   CPPUNIT_ASSERT_EQUAL((size_t)6, e.getSize());
 
-  CPPUNIT_ASSERT_EQUAL((size_t)0, e.append(7, std::as_bytes(std::span{"FOO", 3})));
+  CPPUNIT_ASSERT_EQUAL((size_t)0,
+                       e.append(7, std::as_bytes(std::span{"FOO", 3})));
 }
 
 void WrDiskCacheEntryTest::testClear()

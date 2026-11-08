@@ -242,18 +242,15 @@ void printProgressSummary(const RequestGroupList& groups, size_t cols,
                           const SizeFormatter& sizeFormatter)
 {
   const char SEP_CHAR = '=';
-  time_t now;
-  time(&now);
   // shortcut: formatDownloadResult* take std::ostream&, so keep the sink.
   std::stringstream o;
   o << " *** Download Progress Summary";
   {
     time_t now;
-    struct tm* staticNowtmPtr;
+    struct tm nowtm;
     char buf[26];
-    if (time(&now) != (time_t)-1 &&
-        (staticNowtmPtr = localtime(&now)) != nullptr &&
-        asctime_r(staticNowtmPtr, buf) != nullptr) {
+    if (time(&now) != (time_t)-1 && localtime_r(&now, &nowtm) != nullptr &&
+        asctime_r(&nowtm, buf) != nullptr) {
       char* lfptr = strchr(buf, '\n');
       if (lfptr) {
         *lfptr = '\0';

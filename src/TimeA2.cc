@@ -69,8 +69,9 @@ std::string Time::toHTTPDate() const
 {
   char buf[32];
   time_t t = getTimeFromEpoch();
-  struct tm* tms = gmtime(&t); // returned struct is statically allocated.
-  size_t r = strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", tms);
+  struct tm tms;
+  gmtime_r(&t, &tms);
+  size_t r = strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tms);
   return std::string(&buf[0], &buf[r]);
 }
 
