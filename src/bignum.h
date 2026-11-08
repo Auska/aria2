@@ -26,8 +26,8 @@ namespace bignum {
 template <size_t dim> class ulong {
 
 public:
-  typedef char char_t;
-  typedef std::make_unsigned<char_t>::type uchar_t;
+  using char_t = char;
+  using uchar_t = std::make_unsigned<char_t>::type;
 
 private:
   std::unique_ptr<uchar_t[]> buf_;

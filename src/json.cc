@@ -95,6 +95,9 @@ std::string jsonEscape(const std::string& s)
 // Serializes JSON object or array.
 std::string encode(const ValueBase* json)
 {
+  // shortcut: encode() writes through the shared std::ostream& overload, so a
+  // stream is the natural sink; switch to std::string if that overload gains
+  // a string-based counterpart.
   std::ostringstream out;
   return encode(out, json).str();
 }

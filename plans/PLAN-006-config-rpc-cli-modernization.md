@@ -364,7 +364,7 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
    - 全部改动文件过 `clang-format`（仓库有 `.clang-format`，`ColumnLimit: 80`）。
    - 债务复核（P1 21 文件，剥注释）：`typedef 0`、`enum 0`、裸 `new 0`。
 
-2. [ ] **阶段 2 — RPC（20 文件 / 2 827 行）**
+2. [x] **阶段 2 — RPC（20 文件 / 2 827 行）**
    - `src/RpcResponse.h:50 authorization_t` → `enum class authorization_t`
      （9 处加 `RpcResponse::`）；`src/RpcMethod.cc:93,96`、`src/RpcMethodImpl.cc:1367,1387`、
      `src/rpc_helper.cc:55`、`test/RpcResponseTest.cc:26,46` 同步。
@@ -384,6 +384,38 @@ cfg79 的错误处理已经比较统一（`OptionHandlerException` / `UnknownOpt
    - 回归网：`test/RpcMethodTest.cc`、`test/RpcResponseTest.cc`、`test/JsonTest.cc`、
      `test/ValueBaseJsonParserTest.cc`、`test/FeatureConfigTest.cc`、`test/Aria2ApiTest.cc`。
    - 门禁通过后提交 `PLAN-006 阶段2: RPC 层现代化`。
+
+   **实测（2026-11-08）**
+
+   - `src/RpcResponse.h:50`：`enum authorization_t { NOTAUTHORIZED, AUTHORIZED }` →
+     `enum class Authorization { NOTAUTHORIZED, AUTHORIZED }`（去掉 `_t` 后缀，仓库里
+     `_t` 只用于 C 兼容名）；成员 `authorized`、构造形参、`not_authorized()` 与
+     `src/RpcMethod.cc:93,96`、`src/RpcMethodImpl.cc:1367,1387`、`src/rpc_helper.cc:55`、
+     `src/RpcResponse.cc:50`、`test/RpcResponseTest.cc:26,46` 同步为
+     `RpcResponse::Authorization::X`。
+   - `src/FeatureConfig.h:47 FeatureType` → `enum class FeatureType`，常量去 `FEATURE_`
+     前缀（`ASYNC_DNS` … `MAX_FEATURE`）；**`strSupportedFeature` 形参直接改成
+     `FeatureType`**（原计划说保持 `int`，实测唯一需要整数的只有两处
+     `for (int i = 0; i < MAX_FEATURE; ++i)` 计数循环，改成
+     `static_cast<int>(FeatureType::MAX_FEATURE)` 边界 + `static_cast<FeatureType>(i)`
+     更直白）；`switch` 的 `case (FeatureType::X):`、`src/RpcMethodImpl.cc:1102`、
+     `test/FeatureConfigTest.cc:39,45` 同步。
+   - `src/bignum.h:29,30` 两个 `typedef` → `using`（`USE_INTERNAL_BIGNUM` 未定义，
+     本机不编译，人工核对：`char_t`/`uchar_t` 只在 `src/InternalDHKeyExchange.*` 用）。
+   - `src/RpcMethodImpl.h:336` `typedef ... ItemListType;` → `using`。
+   - `.c_str()`：`src/RpcMethodImpl.cc` 22 处 `fmt(..., x.c_str())` → `fmt(..., x)`
+     （其中 12 处是 `GroupId::toHex(gid)` 临时 `std::string`，`fmt` 支持
+     `std::string` 实参）；`src/RpcMethodImpl.h:111`、`src/rpc_helper.cc:82` 同步。
+     保留 2 处：`src/RpcMethodImpl.cc:201` 的 `GroupId::expandUnique(n, str->s().c_str())`
+     与 `:562` 的 `entryDict->put(KEY_GID, GroupId::toHex(...).c_str())` —— 前者收
+     `const char*`，后者会命中 `put(std::string, String::ValueType)` 重载歧义。
+   - `src/json.cc:98`、`src/RpcResponse.cc:101,148` 的 `std::ostringstream` /
+     `std::stringstream` **保留**：`encodeJsonAll` / `encodeJsonBatchAll` 是
+     `template <typename OutputStream>`，与 `HAVE_ZLIB` 下的 `GZipEncoder` 共用同一个
+     `operator<<` 接口（`GZipEncoder` 没有 `str()` 之外的 string 能力），换成
+     `std::string` 需要为两条分支写两套实现。已在三处加 `shortcut:` 注释。
+   - `src/error_code.h` 未动（用户决策）。
+   - `make check` 914 例全绿（本机增量构建），干净 worktree 门禁见提交记录。
 
 3. [ ] **阶段 3 — CLI 与输出（26 文件 / 4 044 行）**
    - `src/ColorizedStream.h:80,82,83,84`：`typedef std::char_traits<char> traits_t;` →

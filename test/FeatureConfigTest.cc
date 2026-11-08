@@ -36,13 +36,13 @@ void FeatureConfigTest::testGetDefaultPort()
 
 void FeatureConfigTest::testStrSupportedFeature()
 {
-  const char* https = strSupportedFeature(FEATURE_HTTPS);
+  const char* https = strSupportedFeature(FeatureType::HTTPS);
 #ifdef ENABLE_SSL
   CPPUNIT_ASSERT(https);
 #else
   CPPUNIT_ASSERT(!https);
 #endif // ENABLE_SSL
-  CPPUNIT_ASSERT(!strSupportedFeature(MAX_FEATURE));
+  CPPUNIT_ASSERT(!strSupportedFeature(FeatureType::MAX_FEATURE));
 }
 
 void FeatureConfigTest::testFeatureSummary()

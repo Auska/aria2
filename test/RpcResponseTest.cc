@@ -23,7 +23,7 @@ void RpcResponseTest::testToJson()
   {
     auto param = List::g();
     param->append(Integer::g(1));
-    RpcResponse res(0, RpcResponse::AUTHORIZED, std::move(param),
+    RpcResponse res(0, RpcResponse::Authorization::AUTHORIZED, std::move(param),
                     String::g("9"));
     results.push_back(std::move(res));
     std::string s = toJson(results.back(), "", false);
@@ -43,7 +43,8 @@ void RpcResponseTest::testToJson()
     auto param = Dict::g();
     param->put("code", Integer::g(1));
     param->put("message", "HELLO ERROR");
-    RpcResponse res(1, RpcResponse::AUTHORIZED, std::move(param), Null::g());
+    RpcResponse res(1, RpcResponse::Authorization::AUTHORIZED, std::move(param),
+                    Null::g());
     results.push_back(std::move(res));
     std::string s = toJson(results.back(), "", false);
     CPPUNIT_ASSERT_EQUAL(std::string("{\"id\":null,"
@@ -90,7 +91,6 @@ void RpcResponseTest::testToJson()
                          s);
   }
 }
-
 
 } // namespace rpc
 

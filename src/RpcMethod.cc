@@ -90,10 +90,10 @@ void RpcMethod::authorize(RpcRequest& req, DownloadEngine* e)
 
 RpcResponse RpcMethod::execute(RpcRequest req, DownloadEngine* e)
 {
-  auto authorized = RpcResponse::NOTAUTHORIZED;
+  auto authorized = RpcResponse::Authorization::NOTAUTHORIZED;
   try {
     authorize(req, e);
-    authorized = RpcResponse::AUTHORIZED;
+    authorized = RpcResponse::Authorization::AUTHORIZED;
     auto r = process(req, e);
     return RpcResponse(0, authorized, std::move(r), std::move(req.id));
   }

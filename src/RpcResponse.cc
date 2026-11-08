@@ -47,7 +47,7 @@ namespace aria2 {
 
 namespace rpc {
 
-RpcResponse::RpcResponse(int code, RpcResponse::authorization_t authorized,
+RpcResponse::RpcResponse(int code, RpcResponse::Authorization authorized,
                          std::unique_ptr<ValueBase> param,
                          std::unique_ptr<ValueBase> id)
     : param{std::move(param)},
@@ -98,6 +98,8 @@ std::string toJson(const RpcResponse& res, const std::string& callback,
 #endif // !HAVE_ZLIB
   }
   else {
+    // shortcut: encodeJsonAll is shared with the GZipEncoder branch below, so
+    // the sink stays a stream; revisit if both branches move to std::string.
     std::stringstream o;
     return encodeJsonAll(o, res.code, res.param.get(), res.id.get(), callback)
         .str();
@@ -145,6 +147,7 @@ std::string toJsonBatch(const std::vector<RpcResponse>& results,
 #endif // !HAVE_ZLIB
   }
   else {
+    // shortcut: see toJson() above.
     std::stringstream o;
     return encodeJsonBatchAll(o, results, callback).str();
   }

@@ -44,13 +44,13 @@ namespace aria2 {
 // Returns default port for the given |protocol|.
 uint16_t getDefaultPort(const std::string& protocol);
 
-enum FeatureType {
-  FEATURE_ASYNC_DNS,
-  FEATURE_BITTORRENT,
-  FEATURE_FF3_COOKIE,
-  FEATURE_GZIP,
-  FEATURE_HTTPS,
-  FEATURE_MESSAGE_DIGEST,
+enum class FeatureType {
+  ASYNC_DNS,
+  BITTORRENT,
+  FF3_COOKIE,
+  GZIP,
+  HTTPS,
+  MESSAGE_DIGEST,
   MAX_FEATURE
 };
 
@@ -59,7 +59,7 @@ std::string featureSummary();
 
 // Returns the string representation of the given |feature| if it is
 // available in the build. If it is not available, returns NULL.
-const char* strSupportedFeature(int feature);
+const char* strSupportedFeature(FeatureType feature);
 
 // Returns summary string of 3rd party libraries directly used by
 // aria2.

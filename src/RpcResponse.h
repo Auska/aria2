@@ -47,21 +47,21 @@ namespace aria2 {
 namespace rpc {
 
 struct RpcResponse {
-  enum authorization_t { NOTAUTHORIZED, AUTHORIZED };
+  enum class Authorization { NOTAUTHORIZED, AUTHORIZED };
 
   // 0 for success, non-zero for error
   std::unique_ptr<ValueBase> param;
   std::unique_ptr<ValueBase> id;
   int code;
-  authorization_t authorized;
+  Authorization authorized;
 
-  RpcResponse(int code, authorization_t authorized,
+  RpcResponse(int code, Authorization authorized,
               std::unique_ptr<ValueBase> param, std::unique_ptr<ValueBase> id);
 };
 
 inline bool not_authorized(const rpc::RpcResponse& res)
 {
-  return res.authorized != rpc::RpcResponse::AUTHORIZED;
+  return res.authorized != rpc::RpcResponse::Authorization::AUTHORIZED;
 }
 
 template <typename InputIterator>

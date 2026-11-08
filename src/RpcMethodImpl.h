@@ -108,7 +108,7 @@ const Integer* checkRequiredInteger(const RpcRequest& req, size_t index,
   std::string error;
   if (!validator(param, &error)) {
     throw DL_ABORT_EX(fmt("The integer parameter at {} has invalid value: {}",
-                          static_cast<unsigned long>(index), error.c_str()));
+                          static_cast<unsigned long>(index), error));
   }
   return param;
 }
@@ -333,7 +333,7 @@ private:
   }
 
 protected:
-  typedef IndexedList<a2_gid_t, std::shared_ptr<T>> ItemListType;
+  using ItemListType = IndexedList<a2_gid_t, std::shared_ptr<T>>;
 
   virtual std::unique_ptr<ValueBase> process(const RpcRequest& req,
                                              DownloadEngine* e) override
@@ -370,13 +370,12 @@ protected:
 
 class TellWaitingRpcMethod : public AbstractPaginationRpcMethod<RequestGroup> {
 protected:
-  virtual const RequestGroupList&
-  getItems(DownloadEngine* e) const override;
+  virtual const RequestGroupList& getItems(DownloadEngine* e) const override;
 
-  virtual void
-  createEntry(Dict* entryDict, const std::shared_ptr<RequestGroup>& item,
-              DownloadEngine* e,
-              const std::vector<std::string>& keys) const override;
+  virtual void createEntry(Dict* entryDict,
+                           const std::shared_ptr<RequestGroup>& item,
+                           DownloadEngine* e,
+                           const std::vector<std::string>& keys) const override;
 
 public:
   static const char* getMethodName() { return "aria2.tellWaiting"; }
@@ -385,13 +384,12 @@ public:
 class TellStoppedRpcMethod
     : public AbstractPaginationRpcMethod<DownloadResult> {
 protected:
-  virtual const DownloadResultList&
-  getItems(DownloadEngine* e) const override;
+  virtual const DownloadResultList& getItems(DownloadEngine* e) const override;
 
-  virtual void
-  createEntry(Dict* entryDict, const std::shared_ptr<DownloadResult>& item,
-              DownloadEngine* e,
-              const std::vector<std::string>& keys) const override;
+  virtual void createEntry(Dict* entryDict,
+                           const std::shared_ptr<DownloadResult>& item,
+                           DownloadEngine* e,
+                           const std::vector<std::string>& keys) const override;
 
 public:
   static const char* getMethodName() { return "aria2.tellStopped"; }

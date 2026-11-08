@@ -75,13 +75,16 @@ uint16_t getDefaultPort(const std::string& protocol)
 std::string featureSummary()
 {
   std::string s;
+  auto max = static_cast<int>(FeatureType::MAX_FEATURE);
   int first;
-  for (first = 0; first < MAX_FEATURE && !strSupportedFeature(first); ++first)
+  for (first = 0;
+       first < max && !strSupportedFeature(static_cast<FeatureType>(first));
+       ++first)
     ;
-  if (first < MAX_FEATURE) {
-    s += strSupportedFeature(first);
-    for (int i = first + 1; i < MAX_FEATURE; ++i) {
-      const char* name = strSupportedFeature(i);
+  if (first < max) {
+    s += strSupportedFeature(static_cast<FeatureType>(first));
+    for (int i = first + 1; i < max; ++i) {
+      const char* name = strSupportedFeature(static_cast<FeatureType>(i));
       if (name) {
         s += ", ";
         s += name;
@@ -91,10 +94,10 @@ std::string featureSummary()
   return s;
 }
 
-const char* strSupportedFeature(int feature)
+const char* strSupportedFeature(FeatureType feature)
 {
   switch (feature) {
-  case (FEATURE_ASYNC_DNS):
+  case (FeatureType::ASYNC_DNS):
 #ifdef ENABLE_ASYNC_DNS
     return "Async DNS";
 #else  // !ENABLE_ASYNC_DNS
@@ -102,7 +105,7 @@ const char* strSupportedFeature(int feature)
 #endif // !ENABLE_ASYNC_DNS
     break;
 
-  case (FEATURE_BITTORRENT):
+  case (FeatureType::BITTORRENT):
 #ifdef ENABLE_BITTORRENT
     return "BitTorrent";
 #else  // !ENABLE_BITTORRENT
@@ -110,7 +113,7 @@ const char* strSupportedFeature(int feature)
 #endif // !ENABLE_BITTORRENT
     break;
 
-  case (FEATURE_FF3_COOKIE):
+  case (FeatureType::FF3_COOKIE):
 #ifdef HAVE_SQLITE3
     return "Firefox3 Cookie";
 #else  // !HAVE_SQLITE3
@@ -118,7 +121,7 @@ const char* strSupportedFeature(int feature)
 #endif // !HAVE_SQLITE3
     break;
 
-  case (FEATURE_GZIP):
+  case (FeatureType::GZIP):
 #ifdef HAVE_ZLIB
     return "GZip";
 #else  // !HAVE_ZLIB
@@ -126,7 +129,7 @@ const char* strSupportedFeature(int feature)
 #endif // !HAVE_ZLIB
     break;
 
-  case (FEATURE_HTTPS):
+  case (FeatureType::HTTPS):
 #ifdef ENABLE_SSL
     return "HTTPS";
 #else  // !ENABLE_SSL
@@ -134,7 +137,7 @@ const char* strSupportedFeature(int feature)
 #endif // !ENABLE_SSL
     break;
 
-  case (FEATURE_MESSAGE_DIGEST):
+  case (FeatureType::MESSAGE_DIGEST):
     return "Message Digest";
     break;
 
@@ -224,6 +227,5 @@ std::string getOperatingSystemInfo()
 #endif // HAVE_SYS_UTSNAME_H
   return "Unknown system";
 }
-
 
 } // namespace aria2

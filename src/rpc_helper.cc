@@ -52,8 +52,8 @@ RpcResponse createJsonRpcErrorResponse(int code, const std::string& msg,
   auto params = Dict::g();
   params->put("code", Integer::g(code));
   params->put("message", msg);
-  return rpc::RpcResponse{code, rpc::RpcResponse::AUTHORIZED, std::move(params),
-                          std::move(id)};
+  return rpc::RpcResponse{code, rpc::RpcResponse::Authorization::AUTHORIZED,
+                          std::move(params), std::move(id)};
 }
 
 RpcResponse processJsonRpcRequest(Dict* jsondict, DownloadEngine* e)
@@ -79,7 +79,7 @@ RpcResponse processJsonRpcRequest(Dict* jsondict, DownloadEngine* e)
     // TODO No support for Named params
     return createJsonRpcErrorResponse(-32602, "Invalid params.", std::move(id));
   }
-  A2_LOG_INFO(fmt("Executing RPC method {}", methodName->s().c_str()));
+  A2_LOG_INFO(fmt("Executing RPC method {}", methodName->s()));
   RpcRequest req = {methodName->s(), std::move(params), std::move(id), true};
   return getMethod(methodName->s())->execute(std::move(req), e);
 }
