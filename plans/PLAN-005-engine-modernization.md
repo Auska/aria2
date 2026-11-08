@@ -1,4 +1,5 @@
 # 任务：引擎层与基础层剩余文件现代化（全量口径）
+> 状态：✅ 已完成（2026-11-08）
 
 ## 目标
 
@@ -387,7 +388,7 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    裸指针契约，等整族 span 化时一并改）。
 
    门禁通过后提交。
-5. [ ] **收尾**：勾选与实际一致；标题下加
+5. [x] **收尾**：勾选与实际一致；标题下加
    `> 状态：✅ 已完成（YYYY-MM-DD）`（或 `⚠️ 部分完成` / `❌ 已中止`
    并在文末补「实际偏差」）；「已确认决策」状态列写实际结果；
    记录每阶段实测门禁结果；提交回写；清掉 todo 残留。
@@ -550,6 +551,68 @@ top 命中 `util.h` 100、`fmt.h` 89、`DlAbortEx.h` 59、`a2functional.h` 58、
    `filterBitfield_` 的 up（未启用→`addFilter`）与 down（启用→`clearFilter`）
    两条路径、首轮与稳态都在「风险与权衡」核对。
 4. **未确认决策**：无；用户 4 个选择全部已写入「已确认决策」并附备注约束。
+
+## 实测门禁结果
+
+| 阶段 | 提交 | 干净 worktree | make check | aria2c.log | ABI 哈希 |
+|------|------|---------------|------------|------------|----------|
+| 1 A-基础底座 | `0f0825ac` | `/tmp/aria2-m5-p1` | rc=0，`TOTAL 1 / PASS 1` | `OK (914)` | 不变 |
+| 2 B-IO 与事件 | `7585b6ed` | `/tmp/aria2-m5-p2` | rc=0，`TOTAL 1 / PASS 1` | `OK (914)` | 不变 |
+| 3 C-Peer/Piece/RequestGroup | `dd1aa82e` | `/tmp/aria2-m5-p3` | rc=0，`TOTAL 1 / PASS 1` | `OK (914)` | 不变 |
+| 4 D-命令/引擎/编排 | `f6c5db0a` | `/tmp/aria2-m5-p4` | rc=0，`TOTAL 1 / PASS 1` | `OK (914)` | 不变 |
+
+每次门禁均在 `autoreconf -i` + `./configure --enable-werror`
+（`CXX = g++ -std=c++20`、`WARNCXXFLAGS = -Wall -Werror -Wformat-security`）
+后全量重编译，`grep -c 'error:'` 均为 0，`git hash-object
+src/includes/aria2/aria2.h` 均为 `2216641161b15acb3c3ddf2600dc19e3decd59d5`。
+
+## 实际偏差
+
+1. **`typedef` 清零口径**：415 文件相对基线 `typedef 43` 全部清零，
+   但 `src/util.cc:1112,1131,1136` 三个 `typedef enum {...} name;` 与
+   `src/BencodeParser.cc:49`、`src/JsonParser.cc:49` 的匿名单枚举保留为
+   `enum { ... }`（去掉了 `typedef` 类型名），理由：三者在文件内用 `int`
+   变量承载状态（`switch`/位运算/`std::stack<int>`），`enum class` 化要改
+   ~250 处引用且零收益 —— 已加 `shortcut:` 注释。
+2. **非 scoped enum**：13 个计划内枚举全部 `enum class` 化（B 1 / C 8 / D 4）。
+   另有 3 个不在 13 个清单内的文件内状态机保留：`src/ChunkedDecodingStreamFilter.cc:50`
+   的 `PREV_CHUNK_*` 匿名枚举、`src/WrDiskCacheEntry.h:97` 的
+   `CACHE_ERR_SUCCESS/ERROR` 匿名枚举（`getError()` 返回 `int` 且被 3 个
+   `src/*.cc` 与 `test/WrDiskCacheEntryTest.cc` 消费）。
+3. **`std::stringstream`**：415 文件从 15 处降到 11 处。清掉的是
+   `src/TrackerWatcherCommand.cc:109`（D 簇，改 `std::string`）、
+   `src/Exception.cc:102`（D 簇，`stackTrace()` 改 `std::string` +
+   `std::to_string`）、`src/OptionHandlerImpl.cc:444`（A 簇，改 `strjoin`）、
+   `src/bencode2.cc`（A 簇，`BencodeValueBaseVisitor::out_` 改 `std::string`）。
+   保留的 11 处：`src/ByteArrayDiskWriter.h:47`、`src/UriListParser.cc:73`、
+   `src/option_processing.cc:182,228`、`src/RpcMethodImpl.cc:1488`、
+   `src/download_helper.cc:217`、`src/LibsslTLSContext.cc:200`（已改
+   `std::ostringstream`，仍是流）、`src/ConsoleStatCalc.cc:246`、
+   `src/RequestGroupMan.cc:806,827,838` —— 均因接口收
+   `std::istream&`/`std::ostream&`，已加 `shortcut:` 注释。
+4. **ptr+len 残余**：`src/StreamPieceSelector.h:58` 与
+   `src/UnknownLengthPieceStorage.h:120` 的 `(const unsigned char*, size_t)`
+   保留 —— `BitfieldMan::getSparseMissingUnusedIndex` 等与 `src/bitfield.h`
+   整族仍是裸指针契约（PLAN-003 偏差①的延伸），整族 span 化属独立专项。
+   `src/ValueBase.h` 的 `String(const unsigned char*, size_t)`、
+   `src/message_digest_helper.h:62 digest(unsigned char*, size_t, ...)`、
+   `src/bitfield.h:100,145`、`src/prefs.cc:43` 同为有意的裸指针契约。
+5. **裸 `new`**：`src/BitfieldMan.cc` 的 9 `new[]` + 7 `delete[]` 已 vector 化
+   （专项达成）；保留的 4 处：`src/prefs.cc:65,94,110`（`PrefPtr` 是
+   `const Pref*`）、`src/Piece.cc:349`（`DataCellSet` 是
+   `std::set<DataCell*>`、`test/TestUtil.h` 返回裸指针）、
+   `src/LibuvEventPoll.cc`（libuv 回调 delete，本机 `HAVE_LIBUV` 未定义）。
+6. **Peer/Piece 链 span 化范围**：`updateHash` 链（`Segment`/`GrowSegment`/
+   `PiecedSegment`/`Piece` + 测试 `MockSegment`）已 span 化；
+   `WrDiskCacheEntry::append` + `Piece::appendWrCache` 在阶段 3 完成；
+   `src/SocketRecvBuffer::getBuffer()` 与 `src/bittorrent_helper` 的线上格式
+   函数按 PLAN-004 决定保持不变。
+7. **`a2_sockopt_t` C cast**：`src/SocketCore.cc` 5 处保留 C cast ——
+   `src/a2netcompat.h:40` 是 `#define a2_sockopt_t void*`，宏替换后
+   `static_cast` 语法不成立。
+8. 阶段 1 中途 `git worktree add` 因残留注册报
+   `fatal: '/tmp/aria2-m5-p1' is a missing but already registered worktree`，
+   改为先 `git worktree prune`。
 
 ## 备注
 
