@@ -55,7 +55,7 @@ SocketBuffer::ByteArrayBufEntry::ByteArrayBufEntry(
 
 SocketBuffer::ByteArrayBufEntry::~ByteArrayBufEntry() noexcept = default;
 
-ssize_t
+size_t
 SocketBuffer::ByteArrayBufEntry::send(const std::shared_ptr<SocketCore>& socket,
                                       size_t offset)
 {
@@ -84,7 +84,7 @@ SocketBuffer::StringBufEntry::StringBufEntry(
 {
 }
 
-ssize_t
+size_t
 SocketBuffer::StringBufEntry::send(const std::shared_ptr<SocketCore>& socket,
                                    size_t offset)
 {
@@ -129,7 +129,7 @@ void SocketBuffer::pushStr(std::string data,
   }
 }
 
-ssize_t SocketBuffer::send()
+size_t SocketBuffer::send()
 {
   a2iovec iov[A2_IOV_MAX];
   size_t totalslen = 0;
@@ -137,7 +137,8 @@ ssize_t SocketBuffer::send()
     size_t num;
     size_t bufqlen = bufq_.size();
     ssize_t amount = 24_k;
-    ssize_t firstlen = bufq_.front()->getLength() - offset_;
+    ssize_t firstlen =
+        static_cast<ssize_t>(bufq_.front()->getLength() - offset_);
     amount -= firstlen;
     iov[0].A2IOVEC_BASE = reinterpret_cast<char*>(
         const_cast<unsigned char*>(bufq_.front()->getData() + offset_));
@@ -158,7 +159,7 @@ ssize_t SocketBuffer::send()
           reinterpret_cast<char*>(const_cast<unsigned char*>((*i)->getData()));
       iov[num].A2IOVEC_LEN = len;
     }
-    ssize_t slen = socket_->writeVector(iov, num);
+    size_t slen = socket_->writeVector(iov, num);
     if (slen == 0 && !socket_->wantRead() && !socket_->wantWrite()) {
       throw DL_ABORT_EX(fmt(EX_SOCKET_SEND, "Connection closed."));
     }
@@ -166,7 +167,7 @@ ssize_t SocketBuffer::send()
     //                   num, amount, bufq_.size(), slen));
     totalslen += slen;
 
-    if (firstlen > slen) {
+    if (firstlen > static_cast<ssize_t>(slen)) {
       offset_ += slen;
       bufq_.front()->progressUpdate(slen, false);
       if (socket_->wantRead() || socket_->wantWrite()) {
@@ -175,14 +176,14 @@ ssize_t SocketBuffer::send()
       continue;
     }
 
-    slen -= firstlen;
-    bufq_.front()->progressUpdate(firstlen, true);
+    slen -= static_cast<size_t>(firstlen);
+    bufq_.front()->progressUpdate(static_cast<size_t>(firstlen), true);
     bufq_.pop_front();
     offset_ = 0;
 
     for (size_t i = 1; i < num; ++i) {
       auto& buf = bufq_.front();
-      ssize_t len = buf->getLength();
+      size_t len = buf->getLength();
       if (len > slen) {
         offset_ = slen;
         bufq_.front()->progressUpdate(slen, false);

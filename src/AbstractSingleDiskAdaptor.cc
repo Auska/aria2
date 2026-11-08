@@ -76,14 +76,14 @@ void AbstractSingleDiskAdaptor::writeData(std::span<const std::byte> data,
   diskWriter_->writeData(data, offset);
 }
 
-ssize_t AbstractSingleDiskAdaptor::readData(std::span<std::byte> data,
-                                            int64_t offset)
+size_t AbstractSingleDiskAdaptor::readData(std::span<std::byte> data,
+                                           int64_t offset)
 {
   return diskWriter_->readData(data, offset);
 }
 
-ssize_t AbstractSingleDiskAdaptor::readDataDropCache(std::span<std::byte> data,
-                                                     int64_t offset)
+size_t AbstractSingleDiskAdaptor::readDataDropCache(std::span<std::byte> data,
+                                                    int64_t offset)
 {
   auto rv = readData(data, offset);
 

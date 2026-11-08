@@ -64,10 +64,10 @@ public:
   virtual void writeData(std::span<const std::byte> data,
                          int64_t offset) override;
 
-  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) override;
+  virtual size_t readData(std::span<std::byte> data, int64_t offset) override;
 
-  virtual ssize_t readDataDropCache(std::span<std::byte> data,
-                                    int64_t offset) override;
+  virtual size_t readDataDropCache(std::span<std::byte> data,
+                                   int64_t offset) override;
 
   virtual void writeCache(const WrDiskCacheEntry* entry) override;
 

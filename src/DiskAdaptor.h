@@ -110,8 +110,8 @@ public:
   virtual size_t utime(const Time& actime, const Time& modtime) = 0;
 
   // Just like readData(), but drop cache after read.
-  virtual ssize_t readDataDropCache(std::span<std::byte> data,
-                                    int64_t offset) = 0;
+  virtual size_t readDataDropCache(std::span<std::byte> data,
+                                   int64_t offset) = 0;
 
   // Writes cached data to the underlying disk.
   virtual void writeCache(const WrDiskCacheEntry* entry) = 0;

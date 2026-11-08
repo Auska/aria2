@@ -678,7 +678,7 @@ bool SocketCore::isReadable(time_t timeout)
 #endif // !HAVE_POLL
 }
 
-ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
+size_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
 {
   ssize_t ret = 0;
   wantRead_ = false;
@@ -712,7 +712,7 @@ ssize_t SocketCore::writeVector(a2iovec* iov, size_t iovcnt)
   return ret;
 }
 
-ssize_t SocketCore::writeData(std::span<const std::byte> data)
+size_t SocketCore::writeData(std::span<const std::byte> data)
 {
   ssize_t ret = 0;
   wantRead_ = false;
@@ -754,7 +754,7 @@ ssize_t SocketCore::writeData(std::span<const std::byte> data)
   return ret;
 }
 
-ssize_t SocketCore::readData(std::span<std::byte> data)
+size_t SocketCore::readData(std::span<std::byte> data)
 {
   ssize_t ret = 0;
   wantRead_ = false;
@@ -925,8 +925,8 @@ bool SocketCore::tlsHandshake(TLSContext* tlsctx, const std::string& hostname)
 
 #endif // ENABLE_SSL
 
-ssize_t SocketCore::writeData(std::span<const std::byte> data,
-                              const std::string& host, uint16_t port)
+size_t SocketCore::writeData(std::span<const std::byte> data,
+                             const std::string& host, uint16_t port)
 {
   wantRead_ = false;
   wantWrite_ = false;
@@ -965,7 +965,7 @@ ssize_t SocketCore::writeData(std::span<const std::byte> data,
   return r;
 }
 
-ssize_t SocketCore::readDataFrom(std::span<std::byte> data, Endpoint& sender)
+size_t SocketCore::readDataFrom(std::span<std::byte> data, Endpoint& sender)
 {
   wantRead_ = false;
   wantWrite_ = false;

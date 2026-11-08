@@ -107,7 +107,7 @@ private:
 
   void openIfNot(DiskWriterEntry* entry, void (DiskWriterEntry::*f)());
 
-  ssize_t readData(std::span<std::byte> data, int64_t offset, bool dropCache);
+  size_t readData(std::span<std::byte> data, int64_t offset, bool dropCache);
 
   static const int DEFAULT_MAX_OPEN_FILES = 100;
 
@@ -126,10 +126,10 @@ public:
   virtual void writeData(std::span<const std::byte> data,
                          int64_t offset) override;
 
-  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) override;
+  virtual size_t readData(std::span<std::byte> data, int64_t offset) override;
 
-  virtual ssize_t readDataDropCache(std::span<std::byte> data,
-                                    int64_t offset) override;
+  virtual size_t readDataDropCache(std::span<std::byte> data,
+                                   int64_t offset) override;
 
   virtual void writeCache(const WrDiskCacheEntry* entry) override;
 

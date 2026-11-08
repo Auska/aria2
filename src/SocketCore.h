@@ -251,16 +251,16 @@ public:
    * This method sets wantRead_ and wantWrite_ to false before do anything else.
    * @param data data to write
    */
-  ssize_t writeData(std::span<const std::byte> data);
-  ssize_t writeData(const std::string& msg)
+  size_t writeData(std::span<const std::byte> data);
+  size_t writeData(const std::string& msg)
   {
     return writeData(std::as_bytes(std::span{msg}));
   }
 
-  ssize_t writeData(std::span<const std::byte> data, const std::string& host,
-                    uint16_t port);
+  size_t writeData(std::span<const std::byte> data, const std::string& host,
+                   uint16_t port);
 
-  ssize_t writeVector(a2iovec* iov, size_t iovcnt);
+  size_t writeVector(a2iovec* iov, size_t iovcnt);
 
   /**
    * Reads up to data.size() bytes from this socket into data.
@@ -273,10 +273,10 @@ public:
    * @param data holder to store data.
    * @return the number of bytes read, always <= data.size().
    */
-  ssize_t readData(std::span<std::byte> data);
+  size_t readData(std::span<std::byte> data);
 
   // sender.addr will be numerihost assigned.
-  ssize_t readDataFrom(std::span<std::byte> data, Endpoint& sender);
+  size_t readDataFrom(std::span<std::byte> data, Endpoint& sender);
 
 #ifdef ENABLE_SSL
   // Performs TLS server side handshake. If handshake is completed,

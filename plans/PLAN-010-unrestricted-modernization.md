@@ -174,6 +174,16 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 
 调用点 56 处（`src/MultiDiskAdaptor.cc` 8、`src/SocketCore.cc` 6、`src/AbstractSingleDiskAdaptor.cc` 6、`src/PeerConnection.cc` 4 等）：多数只做 `ret > 0` / `ret == 0` 判断，`size_t` 语义等价；**必须逐处检查有没有 `ret < 0` / `ret == -1` 的判断**（有的话说明该函数属错误码族，不能进本阶段）。
 
+### 阶段 4 实测（2026-11-08）
+
+- 只改「负数从不外泄」的族，共 16 文件 +59/−58：
+  - `src/BinaryStream.h:52` `readData` 纯虚 + 5 个实现：`src/AbstractDiskWriter.{h,cc}`、`src/AbstractSingleDiskAdaptor.{h,cc}`（`readData` + `readDataDropCache`）、`src/ByteArrayDiskWriter.{h,cc}`、`src/MultiDiskAdaptor.{h,cc}`（3 个重载）、`src/ValueBaseDiskWriter.h`、`src/DiskAdaptor.h` 纯虚。`readDataInternal` 保持 `ssize_t`（内部判 `<0` 后抛异常）。
+  - `src/SocketCore.{h,cc}` 6 个：`writeData`(3 重载含 `const std::string&` 便捷版)、`writeVector`、`readData`、`readDataFrom`。
+  - `src/SocketBuffer.{h,cc}`：`BufEntry::send` 纯虚 + 2 个实现 + `SocketBuffer::send()`。内部 `firstlen`/`slen`/`len` 的符号混用改成 `size_t firstlen` 不可行（`amount` 是 `ssize_t` 且要判 `> 0`），最终用 `static_cast<ssize_t>`/`static_cast<size_t>` 显式桥接 3 处。
+- 顺带清掉的 2 处冗余 `static_cast`：`src/LpdMessageDispatcher.cc:92` 的 `== static_cast<ssize_t>(request_.size())` → `== request_.size()`（`-Werror=sign-compare` 拦住后才发现的）。
+- **未改**（属错误码族，留给阶段 5）：`src/TLSSession.h:89 readData`、`src/LibsslTLSSession.h:60`、`src/AbstractDiskWriter.h:56 readDataInternal`、`src/BencodeParser`/`JsonParser` 的 `parseUpdate/parseFinal`、`src/DHTConnection.h:51 sendMessage`/`receiveMessage`（返回 `ssize_t` 且被上层与 0 比较，但内部实为 socket 转发，本阶段**未动**——保留原因：`src/DHTConnectionImpl.cc:96` 用 `length == 0` 判空包，改 `size_t` 语义等价但需一并复核 `src/LpdMessageReceiver.cc:85`、`test/LpdMessageDispatcherTest.cc:66`，风险大于收益，记入下述残余）。
+- 门禁：`# TOTAL: 1` / `# PASS: 1`、`OK (914)`、`error:` 0、ABI 哈希保持 `132c72d9...`。
+
 ### 阶段 5：parse 链 `ssize_t` → `std::expected`
 
 - `src/BencodeParser.h:67,73`：
@@ -220,7 +230,7 @@ nohup make -j8 check > /tmp/p10-pN-check.log 2>&1 &
 1. [x] 阶段 1：删除 6 个 `.c` shim 与对应 configure/Makefile 条件（提交 `PLAN-010 阶段1: 删除未编译的 C 移植 shim`）
 2. [x] 阶段 2：公开 ABI 头现代化（提交 `PLAN-010 阶段2: 公开 ABI 头现代化`，随后记录新哈希）
 3. [x] 阶段 3：`error_code::Value` → `enum class`（提交 `PLAN-010 阶段3: error_code::Value 改为 enum class`）
-4. [ ] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
+4. [x] 阶段 4：`ssize_t` → `size_t`（throw-on-error 族）（提交 `PLAN-010 阶段4: throw-on-error 族返回值改 size_t`）
 5. [ ] 阶段 5：parse 链 `ssize_t` → `std::expected`（提交 `PLAN-010 阶段5: parse 链改用 std::expected`）
 6. [ ] 阶段 6：出参数组 → 返回值（提交 `PLAN-010 阶段6: 容器出参改为返回值`）
 7. [ ] 阶段 7：`src/util.cc` 拆分 + `src/util.h` 前向声明化（提交 `PLAN-010 阶段7: 拆分 util 巨型文件并瘦身头文件`）

@@ -60,8 +60,8 @@ private:
     {
     }
     virtual ~BufEntry() noexcept = default;
-    virtual ssize_t send(const std::shared_ptr<SocketCore>& socket,
-                         size_t offset) = 0;
+    virtual size_t send(const std::shared_ptr<SocketCore>& socket,
+                        size_t offset) = 0;
     virtual bool final(size_t offset) const = 0;
     virtual size_t getLength() const = 0;
     virtual const unsigned char* getData() const = 0;
@@ -81,8 +81,8 @@ private:
     ByteArrayBufEntry(std::vector<unsigned char> bytes,
                       std::unique_ptr<ProgressUpdate> progressUpdate);
     virtual ~ByteArrayBufEntry() noexcept;
-    virtual ssize_t send(const std::shared_ptr<SocketCore>& socket,
-                         size_t offset) override;
+    virtual size_t send(const std::shared_ptr<SocketCore>& socket,
+                        size_t offset) override;
     virtual bool final(size_t offset) const override;
     virtual size_t getLength() const override;
     virtual const unsigned char* getData() const override;
@@ -95,8 +95,8 @@ private:
   public:
     StringBufEntry(std::string s,
                    std::unique_ptr<ProgressUpdate> progressUpdate);
-    virtual ssize_t send(const std::shared_ptr<SocketCore>& socket,
-                         size_t offset) override;
+    virtual size_t send(const std::shared_ptr<SocketCore>& socket,
+                        size_t offset) override;
     virtual bool final(size_t offset) const override;
     virtual size_t getLength() const override;
     virtual const unsigned char* getData() const override;
@@ -138,7 +138,7 @@ public:
                std::unique_ptr<ProgressUpdate> progressUpdate = nullptr);
 
   // Sends data in queue.  Returns the number of bytes sent.
-  ssize_t send();
+  size_t send();
 
   // Returns true if queue is empty.
   bool sendBufferIsEmpty() const;

@@ -76,12 +76,12 @@ void ByteArrayDiskWriter::writeData(std::span<const std::byte> data,
   buf_.write(reinterpret_cast<const char*>(data.data()), data.size());
 }
 
-ssize_t ByteArrayDiskWriter::readData(std::span<std::byte> data, int64_t offset)
+size_t ByteArrayDiskWriter::readData(std::span<std::byte> data, int64_t offset)
 {
   buf_.seekg(offset, std::ios::beg);
   buf_.read(reinterpret_cast<char*>(data.data()), data.size());
   buf_.clear();
-  return buf_.gcount();
+  return static_cast<size_t>(buf_.gcount());
 }
 
 int64_t ByteArrayDiskWriter::size()

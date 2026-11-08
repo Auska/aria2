@@ -49,7 +49,7 @@ public:
 
   virtual void writeData(std::span<const std::byte> data, int64_t offset) = 0;
 
-  virtual ssize_t readData(std::span<std::byte> data, int64_t offset) = 0;
+  virtual size_t readData(std::span<std::byte> data, int64_t offset) = 0;
 
   // Truncates a file to given length. The default implementation does
   // nothing.

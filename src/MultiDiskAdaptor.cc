@@ -358,19 +358,19 @@ void MultiDiskAdaptor::writeData(std::span<const std::byte> data,
   }
 }
 
-ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset)
+size_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset)
 {
   return readData(data, offset, false);
 }
 
-ssize_t MultiDiskAdaptor::readDataDropCache(std::span<std::byte> data,
-                                            int64_t offset)
+size_t MultiDiskAdaptor::readDataDropCache(std::span<std::byte> data,
+                                           int64_t offset)
 {
   return readData(data, offset, true);
 }
 
-ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
-                                   bool dropCache)
+size_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
+                                  bool dropCache)
 {
   auto first = findFirstDiskWriterEntry(diskWriterEntries_, offset);
   ssize_t rem = data.size();
@@ -389,7 +389,7 @@ ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
           data.subspan(len - rem, static_cast<size_t>(readLength)), fileOffset);
 
       if (nread == 0) {
-        return totalReadLength;
+        return static_cast<size_t>(totalReadLength);
       }
 
       totalReadLength += nread;
@@ -408,7 +408,7 @@ ssize_t MultiDiskAdaptor::readData(std::span<std::byte> data, int64_t offset,
       break;
     }
   }
-  return totalReadLength;
+  return static_cast<size_t>(totalReadLength);
 }
 
 void MultiDiskAdaptor::writeCache(const WrDiskCacheEntry* entry)

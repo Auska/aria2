@@ -303,7 +303,7 @@ void AbstractDiskWriter::writeData(std::span<const std::byte> data,
   }
 }
 
-ssize_t AbstractDiskWriter::readData(std::span<std::byte> data, int64_t offset)
+size_t AbstractDiskWriter::readData(std::span<std::byte> data, int64_t offset)
 {
   ssize_t ret;
   if ((ret = readDataInternal(data, offset)) < 0) {
