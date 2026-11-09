@@ -1,6 +1,9 @@
 name: build
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
 
 jobs:
   build-static:
@@ -11,7 +14,7 @@ jobs:
         # arm64 可直接加入 matrix：runner 自带 binfmt/qemu，无需额外 setup
     steps:
     - uses: actions/checkout@v7
-    - name: Build static aria2c in Alpine
+    - name: Build static aria2c in Alpine (deps from Alpine packages)
       run: |
         docker run --rm \
           -v "$PWD:/src:ro" \
@@ -24,4 +27,25 @@ jobs:
       with:
         name: aria2-linux-${{ matrix.arch }}-${{ github.sha }}
         path: output/aria2-linux-*
+        if-no-files-found: error
+
+  build-all:
+    # 全依赖源码编译（-O2 -flto，无测试/调试），手动触发
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+    - name: Build static aria2c in Alpine (all deps from source, -O2 -flto)
+      run: |
+        docker run --rm \
+          -v "$PWD:/src:ro" \
+          -v "$PWD/output:/output" \
+          -e ARCH=amd64 \
+          -e SUFFIX="-all-${GITHUB_SHA::7}" \
+          alpine:3.22 /src/docker/build-all.sh
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: aria2-linux-amd64-all-${{ github.sha }}
+        path: output/aria2-linux-*all*
         if-no-files-found: error
