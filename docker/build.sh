@@ -34,9 +34,12 @@ CURL_DL="curl -fsSLO --retry 10 --retry-delay 5 --connect-timeout 10"
 # 1. System packages
 # ---------------------------------------------------------------------------
 apk add --no-cache \
+    autoconf \
+    automake \
     build-base \
     cmake \
     curl \
+    libtool \
     linux-headers \
     ninja \
     pkgconf \
