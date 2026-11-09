@@ -1,73 +1,31 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+    tags: ['*']
+  pull_request:
 
 jobs:
-  build:
+  build-static:
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        os: [ubuntu-24.04]
-        compiler: [gcc, clang]
-        crypto: [openssl, internal]
-        bittorrent: [with-bt, without-bt]
-
-    runs-on: ${{ matrix.os }}
-
+        arch: [amd64]
+        # arm64 可直接加入 matrix：runner 自带 binfmt/qemu，无需额外 setup
     steps:
     - uses: actions/checkout@v7
-    - name: Linux setup
+    - name: Build static aria2c in Alpine
       run: |
-        sudo apt-get update
-        sudo apt-get install \
-          g++-14 \
-          clang-18 \
-          autoconf \
-          automake \
-          autotools-dev \
-          libtool \
-          pkg-config \
-          libssl-dev \
-          libc-ares-dev \
-          libuv1-dev \
-          zlib1g-dev \
-          libsqlite3-dev \
-          libcppunit-dev
-    - name: Setup clang
-      if: matrix.compiler == 'clang'
-      run: |
-        echo 'CC=clang-18' >> $GITHUB_ENV
-        echo 'CXX=clang++-18' >> $GITHUB_ENV
-    - name: Setup gcc
-      if: matrix.compiler == 'gcc'
-      run: |
-        echo 'CC=gcc-14' >> $GITHUB_ENV
-        echo 'CXX=g++-14' >> $GITHUB_ENV
-    - name: Libtool
-      run: |
-        autoreconf -i
-    - name: Setup compiler flags
-      run: |
-        asanflags="-fsanitize=address,undefined -fno-sanitize-recover=undefined"
-
-        CPPFLAGS="$asanflags -g3"
-        LDFLAGS="$asanflags"
-
-        echo 'CPPFLAGS='"$CPPFLAGS" >> $GITHUB_ENV
-        echo 'LDFLAGS='"$LDFLAGS" >> $GITHUB_ENV
-    - name: Disable BitTorrent
-      if: matrix.bittorrent == 'without-bt'
-      run: |
-        FEATURE_FLAGS="$FEATURE_FLAGS --disable-bittorrent"
-
-        echo 'FEATURE_FLAGS='"$FEATURE_FLAGS" >> $GITHUB_ENV
-    - name: Configure autotools (OpenSSL)
-      if: matrix.crypto == 'openssl'
-      run: |
-        ./configure --with-openssl --enable-werror $FEATURE_FLAGS
-    - name: Configure autotools (internal fallback)
-      if: matrix.crypto == 'internal'
-      run: |
-        ./configure --without-openssl --enable-werror $FEATURE_FLAGS
-    - name: Build aria2
-      run: |
-        make -j"$(nproc 2> /dev/null || sysctl -n hw.ncpu)" check
+        docker run --rm \
+          -v "$PWD:/src:ro" \
+          -v "$PWD/output:/output" \
+          -e ARCH=${{ matrix.arch }} \
+          -e SUFFIX="-${GITHUB_SHA::7}" \
+          alpine:3.22 /src/docker/build.sh
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: aria2-linux-${{ matrix.arch }}-${{ github.sha }}
+        path: output/aria2-linux-*
+        if-no-files-found: error
