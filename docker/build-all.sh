@@ -195,7 +195,8 @@ autoreconf -i
     CXXFLAGS="${BASE_FLAGS}" \
     LDFLAGS="-static -flto"
 
-# Build the binary only: `make all` also descends into test/ (cppunit).
+# Build deps (wslay) then src only: skipping doc/ and the cppunit test/ dir.
+make -j"${NPROC}" -C deps
 make -j"${NPROC}" -C src
 
 # ---------------------------------------------------------------------------
