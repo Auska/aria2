@@ -78,13 +78,20 @@ cmake -B build \
 cmake --build build -j"$(nproc)"
 cmake --install build
 
+# c-ares only installs man pages and headers to /usr/local; the aria2
+# autotools build below only needs the static lib via pkg-config.
+
 # ---------------------------------------------------------------------------
 # 3. Build aria2 (source tree is mounted at /src)
 # ---------------------------------------------------------------------------
 echo "Building aria2"
 
-mkdir /build/aria2 && cd /build/aria2
-/src/configure \
+# Copy to a writable dir: autoreconf needs to write into the source tree.
+cp -r /src /build/aria2
+cd /build/aria2
+
+autoreconf -i
+./configure \
     ${CONFIGURE_OPTS} \
     ARIA2_STATIC=yes \
     --enable-werror \
