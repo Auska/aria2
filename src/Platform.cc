@@ -66,7 +66,6 @@ bool Platform::initialized_ = false;
 
 #ifdef HAVE_OPENSSL
 #  if OPENSSL_VERSION_NUMBER >= 0x30000000L
-OSSL_PROVIDER* Platform::legacy_provider_ = nullptr;
 OSSL_PROVIDER* Platform::default_provider_ = nullptr;
 #  endif // OPENSSL_VERSION_NUMBER >= 0x30000000L
 #endif   // HAVE_OPENSSL
@@ -83,12 +82,10 @@ bool Platform::setUp()
   initialized_ = true;
 #ifdef HAVE_OPENSSL
 #  if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  // RC4 is in the legacy provider.
-  legacy_provider_ = OSSL_PROVIDER_load(nullptr, "legacy");
-  if (!legacy_provider_) {
-    throw DL_ABORT_EX("OSSL_PROVIDER_load 'legacy' failed.");
-  }
-
+  // Only the default provider is loaded explicitly. The legacy provider
+  // (RC4/MD4) is not needed: ARC4 is implemented locally in
+  // ARC4Encryptor.cc and no EVP_md4 usage remains, and the provider is a
+  // dlopen'd module absent in fully-static builds.
   default_provider_ = OSSL_PROVIDER_load(nullptr, "default");
   if (!default_provider_) {
     throw DL_ABORT_EX("OSSL_PROVIDER_load 'default' failed.");
@@ -129,10 +126,6 @@ bool Platform::tearDown()
 #  if OPENSSL_VERSION_NUMBER >= 0x30000000L
   if (default_provider_) {
     OSSL_PROVIDER_unload(default_provider_);
-  }
-
-  if (legacy_provider_) {
-    OSSL_PROVIDER_unload(legacy_provider_);
   }
 #  endif // OPENSSL_VERSION_NUMBER >= 0x30000000L
 #endif   // HAVE_OPENSSL

@@ -52,7 +52,6 @@ private:
 
 #ifdef HAVE_OPENSSL
 #  if OPENSSL_VERSION_NUMBER >= 0x30000000L
-  static OSSL_PROVIDER* legacy_provider_;
   static OSSL_PROVIDER* default_provider_;
 #  endif // OPENSSL_VERSION_NUMBER >= 0x30000000L
 #endif   // HAVE_OPENSSL
